@@ -18,7 +18,7 @@ Improvements to the Cloudflare Pages pipeline in [`.github/workflows/ci.yml`](..
 
 ## Pipeline efficiency
 
-- **Add a `flutter test` step** to the `frontend` job once tests exist, so the deploy only runs after tests pass.
+- **Measure the regression-test pipeline.** The `frontend` job now runs `flutter test` before the web build, and the Android APK build and its Java setup have been removed. Record the next GitHub Actions run's duration before claiming a speed improvement; the local changes have not run on GitHub yet. See the [sprint log](sprint-log.md) for the decision and existing baseline.
 - **Cache more aggressively if builds slow down.** Flutter and pub caching is already on; measure build times before optimizing further, since the DevOps rubric rewards measured improvement.
 
 ## Platform risks
