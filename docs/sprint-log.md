@@ -2,6 +2,8 @@
 
 Running record of Lagaw's sprints: plans, standup notes, and retrospectives, required by the [course instructions](official-instructions.md). Scope, provider, and infrastructure changes are recorded here with their reasoning.
 
+The October 20 backfill uses commit history, GitHub PRs, issues, and Actions runs. Earlier entries preserve what was known at the time; the reconstructed milestones and follow-ups below record later outcomes. Process updates reflect earlier entries and the team's explicit confirmations.
+
 ## Sprint 1 — Foundation and walking skeleton
 
 Goal: a thin, deployed version of the whole stack, end to end, even if it does almost nothing.
@@ -9,6 +11,7 @@ Goal: a thin, deployed version of the whole stack, end to end, even if it does a
 ### Standup and activity notes
 
 - **October 13, 2026** — Supabase account, organization, and project created. Credentials handed to Andrew (backend/database).
+- **October 14, 2026** — Initial repository foundation merged through [PR #1](https://github.com/relax-mode/lagaw/pull/1) (repo setup and environment example), [PR #2](https://github.com/relax-mode/lagaw/pull/2) (approved pitch), [PR #3](https://github.com/relax-mode/lagaw/pull/3) (README and branch strategy), [PR #4](https://github.com/relax-mode/lagaw/pull/4) (CI project guards), and [PR #5](https://github.com/relax-mode/lagaw/pull/5) (AGENTS.md, tooling setup, official instructions). These PRs merged October 13 UTC, October 14 in Singapore.
 - **October 14, 2026, 3:00 PM** — Team onboarding: taught the team the workflow — looking at issues, creating branches and commits, opening pull requests, merging, and closing issues.
 - **October 14, 2026, 3:30 PM** — DeepSeek API key created (label `Kyle/Cygray`) on Kyle's personal DeepSeek platform account. Purpose: testing ahead of the first consultation without spending additional credits, since the personal account already has credits. Key sent to Jeff. The key itself is shared out of band and never committed to the repository.
 - **October 14, 2026** — Provider decision recorded: structured extraction moved from Google Gemini to DeepSeek-V4.1-Flash via the official DeepSeek API (called from the backend with `httpx` against `https://api.deepseek.com`; the draft plan to use the OpenAI Python SDK was dropped when the integration landed). Model ID, configuration, and fallback behavior are documented in [the pitch](pitch.md).
@@ -27,19 +30,61 @@ Goal: a thin, deployed version of the whole stack, end to end, even if it does a
 
 - **October 15, 2026** — Local CORS data-response check verified by the developer: `GET /locations?limit=1` with origin `http://localhost:3000` returned HTTP 200, `access-control-allow-origin: http://localhost:3000`, `vary: Origin`, and one database-backed location (Arima Restaurant) under `items`, with `limit=1` and `offset=0`. Together with the successful allowed/rejected preflight checks, this verifies the local backend's configured CORS behavior and database read. Browser testing, PR review/CI, and deployment verification remain pending.
 
-### Open follow-ups
+### Reconstructed merge and deployment milestones
 
-- Confirm the first pipeline-triggered Cloudflare Pages deployment from pull request #18 (preview) and then from `main` (production). Cloudflare account, `lagaw` Pages project, `wrangler` dev dependency, the `deploy-web` job, and the GitHub Actions secrets are all in place.
-- Verify `https://lagaw.pages.dev` against the deployed API in a browser after the first backend deploy from `main` (the `CORS_ALLOWED_ORIGINS` variable is set; add preview origins only if needed).
-- Write the deploy and rollback runbook with the Wrangler commands.
-- Confirm the deployed frontend shows deployed database data (acceptance criteria of issue #11), once pull requests #18 and #20 are merged. The `lagaw-api` Cloud Run service was made publicly invokable on October 15, 2026 (a deliberate decision, since the browser app calls it without Google credentials); unauthenticated `GET /locations` returns production data, CORS allows only the approved origin, and write methods return 405.
-- Set the `API_BASE_URL` GitHub variable to the service URL (done) so the web build calls the deployed API.
-- DeepSeek key is not yet in Secret Manager; add it when the extraction endpoint is exposed.
+- **October 14, 2026** — Merged [PR #14](https://github.com/relax-mode/lagaw/pull/14), adding DeepSeek backend tests; its PR title records that tests were created and run. Its [GitHub Actions run](https://github.com/relax-mode/lagaw/actions/runs/38576659432) succeeded after a preceding failed run [38561342303](https://github.com/relax-mode/lagaw/actions/runs/38561342303).
+- **October 14, 2026** — Merged [PR #15](https://github.com/relax-mode/lagaw/pull/15), the PostgreSQL schema and initial migration (S1-01). The PR reports successful migration to a separate Supabase test project and passing transactional schema smoke tests; [merge CI](https://github.com/relax-mode/lagaw/actions/runs/38586698637) succeeded.
+- **October 15, 2026** — Merged [PR #16](https://github.com/relax-mode/lagaw/pull/16), seeding 10 researched Bacolod locations and adding the database-backed API. Its PR reports 18 backend tests and Ruff passing, and a live test-Supabase API response with all 10 locations. [Merge CI](https://github.com/relax-mode/lagaw/actions/runs/38600355017) succeeded.
+- **October 15, 2026** — Merged [PR #17](https://github.com/relax-mode/lagaw/pull/17), the Flutter shell and locations integration, including Android/Web shells, swipe, directory and itinerary UI, `GET /locations`, loading/error/offline states, and widget/unit tests. It closes [issue #8](https://github.com/relax-mode/lagaw/issues/8) and [issue #9](https://github.com/relax-mode/lagaw/issues/9); [merge CI](https://github.com/relax-mode/lagaw/actions/runs/38684130202) succeeded.
+- **October 15, 2026** — Merged the Cloudflare Pages hosting and Wrangler plan through [PR #13](https://github.com/relax-mode/lagaw/pull/13), documenting the earlier hosting decision before the deploy workflow landed.
+- **October 15, 2026** — Merged [PR #18](https://github.com/relax-mode/lagaw/pull/18) for Cloudflare Pages deployment. Its later [main CI run](https://github.com/relax-mode/lagaw/actions/runs/38695601921) completed the “Deploy to Cloudflare Pages” step successfully.
+- **October 15, 2026** — Merged [PR #19](https://github.com/relax-mode/lagaw/pull/19), configurable FastAPI CORS. The PR reports 27 backend tests and Ruff passing, allowed-origin preflight HTTP 200, rejected-origin preflight HTTP 400, and a database-backed `/locations` GET; [merge CI](https://github.com/relax-mode/lagaw/actions/runs/38693131676) succeeded.
+- **October 15, 2026** — Merged [PR #20](https://github.com/relax-mode/lagaw/pull/20), the Cloud Run deploy workflow. Its [main Lagaw CI](https://github.com/relax-mode/lagaw/actions/runs/38696232688), [Database CI](https://github.com/relax-mode/lagaw/actions/runs/38696232714), and [Deploy Backend](https://github.com/relax-mode/lagaw/actions/runs/38696232682) runs succeeded. Deploy Backend completed its smoke test at 07:04 UTC (15:04 Singapore time); this verifies deployment workflow behavior, not browser acceptance.
+- **October 14, 2026** — [`docs/evidence/deepseek-smoke.json`](evidence/deepseek-smoke.json) records a live DeepSeek smoke call passed (`live_call: true`, model `deepseek-flash`, timestamp 08:41 UTC). This conflicts with the pitch's current statement that credentials and backend connectivity still need confirmation; reconcile the pitch with this recorded evidence.
 
-### Sprint plan
+> Date note: GitHub timestamps are UTC. Reconstructed PR activity uses Asia/Singapore dates; for example, PR #16 merged at 16:42 UTC on October 14 (October 15 at 00:42 Singapore time). Some older pre-existing entries may retain their original UTC dates.
 
-Pending: fill in at sprint planning from the pitch backlog, with owners.
+### Sprint 1 plan
+
+The S1 issue plan assigned [schema (#6)](https://github.com/relax-mode/lagaw/issues/6) and [sample locations/API (#7)](https://github.com/relax-mode/lagaw/issues/7) to Andro; [Flutter shell (#8)](https://github.com/relax-mode/lagaw/issues/8) and [API integration (#9)](https://github.com/relax-mode/lagaw/issues/9) to Roel; [LLM connectivity (#10)](https://github.com/relax-mode/lagaw/issues/10) to Jayperson; and [walking-skeleton deployment (#11)](https://github.com/relax-mode/lagaw/issues/11) to CyGray. Issues #6–11 are closed. No dated consultation or retrospective record was found in the reviewed sources.
+
+## Sprint 2 — Trip management and CI foundations
+
+### Plan and activity
+
+- **October 19, 2026** — Week 2 issue/backlog preparation was completed and the team was updated, as confirmed by Kyle on October 20. Sprint 2 implementation remains tracked by the open issues: [#22](https://github.com/relax-mode/lagaw/issues/22) database relationships, [#23](https://github.com/relax-mode/lagaw/issues/23) trip create/list/retrieve API, [#24](https://github.com/relax-mode/lagaw/issues/24) update/delete API, and [#29](https://github.com/relax-mode/lagaw/issues/29) Trip CRUD with backend database integration tests are assigned to Andro. [#27](https://github.com/relax-mode/lagaw/issues/27) trip creation/editing UI and [#28](https://github.com/relax-mode/lagaw/issues/28) trip list/detail/delete UI are assigned to Roel. [#25](https://github.com/relax-mode/lagaw/issues/25) sprint log updates, [#30](https://github.com/relax-mode/lagaw/issues/30) staging/secrets, and [#31](https://github.com/relax-mode/lagaw/issues/31) API tests/CI quality gates are assigned to CyGray.
+- **October 20, 2026** — Backfilled this log for [issue #25](https://github.com/relax-mode/lagaw/issues/25) from commits, merged PRs, open issue assignments, and successful Actions/deployment steps. Kept unrecorded browser acceptance, completed consultations, and retrospectives pending. Initially prepared the work on `test/regression-ci` from the latest `origin/main` without commits, as requested. Kyle subsequently authorized commits, branch pushes, and separate PRs for the regression/CI changes and sprint-log update; merge review is the next step.
+- **October 20, 2026** — Submitted the regression/CI implementation for [issue #21](https://github.com/relax-mode/lagaw/issues/21) in [PR #35](https://github.com/relax-mode/lagaw/pull/35): extended backend tests for unsafe database configuration, DeepSeek provider failures, truncated output and unexpected schema fields; added Flutter API regressions for pagination, empty/malformed responses, transport failure, and retry. The PR adds `flutter test` to CI before the web build; backend regression discovery already runs in the backend job. Both run on PRs, `main` pushes, and manual dispatch. Tests use mocks and dummy configuration. Local verification: **29 backend tests and 11 Flutter tests pass**, Ruff and Flutter analysis pass, Python compilation and diff whitespace checks pass. The installed Dart 3.12.2 could not resolve the project's `^3.13.5` requirement, so Flutter checks used an isolated Flutter 3.47.7 / Dart 3.13.5 SDK without changing the project requirement or installed SDK. The [PR Actions run](https://github.com/relax-mode/lagaw/actions/runs/39426238886) successfully executed backend and Flutter regressions plus lint/analysis; the separate [Database CI run](https://github.com/relax-mode/lagaw/actions/runs/39426238955) also passed. PR review and merge remain pending. The issue remains open until the PR is merged. Test commands and scope are included in `docs/regression-tests.md` in that PR.
+- **October 20, 2026** — At the user's request, removed the Android APK build and unused Java setup from CI to reduce pipeline duration. The existing [successful main run](https://github.com/relax-mode/lagaw/actions/runs/38696232688/job/116293330372) spent **148 seconds** on the APK step (07:04:38–07:07:06 UTC). The edited pipeline keeps Flutter tests, analysis, and the web build. Its new total duration has not been measured on GitHub.
+
+### Standup and retrospective
+
+- **October 19, 2026** — The team was informed that Week 2 backlog preparation was complete (confirmed by Kyle on October 20).
+- **October 20, 2026** — Next advisor consultation confirmed for **Thursday, October 22, 2026, at 3:30 PM in CSL 1** (Asia/Singapore).
+
+Consultation outcomes and the Sprint 2 retrospective remain pending; record them after the meeting.
+
+## Sprint 3 — Recommendations and itinerary integration
+
+### Staged backlog
+
+- Open [#26](https://github.com/relax-mode/lagaw/issues/26): trip-itinerary location association API (no assignee recorded).
+- Open [#32](https://github.com/relax-mode/lagaw/issues/32): recommendation data contract and evaluation fixtures, and [#33](https://github.com/relax-mode/lagaw/issues/33): offline content-based baseline (both assigned to Jayperson).
+- Open [#34](https://github.com/relax-mode/lagaw/issues/34): integrate itinerary locations into Flutter trip details (assigned to Roel).
+- These issues define a staged backlog; no implementation or sprint planning meeting is recorded here.
+
+## Open follow-ups
+
+- Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.
+- Write and verify the deploy and rollback runbook with Wrangler commands.
+- Confirm the deployed frontend shows deployed database data (issue #11 acceptance criterion). Issue #11 is closed, and backend plus frontend deployment workflows succeeded, but the log does not record browser acceptance evidence.
+- Add the DeepSeek key to Secret Manager when the extraction endpoint is exposed; the existing log says it is not yet there.
+- Sprint issues and owners are summarized in the Sprint 2 and Sprint 3 sections above; open issue status is authoritative for implementation progress.
+
+### Planning evidence
+
+Sprint 1, Sprint 2, and staged Sprint 3 plans are recorded above with GitHub issue assignees. Kyle confirmed Week 2 backlog preparation and team notification on October 19 and the next advisor consultation on October 22 at 3:30 PM in CSL 1. Formal sprint boundaries and prioritization discussion have not been recorded.
 
 ### Retrospective
 
-Pending: first consultation.
+Pending: no consultation or retrospective notes were found in the reviewed GitHub issues, PRs, or commit history. Record the team's actual retrospective and consultation outcomes when available.
