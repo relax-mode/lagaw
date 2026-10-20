@@ -1,10 +1,11 @@
 # Lagaw database
 
-This implements issue **[S1-01] Implement Lagaw PostgreSQL schema and initial migration**.
-The field list follows [the approved pitch](pitch.md#3-database-schema-sketch).
-The migration is `supabase/migrations/20261014114320_initial_lagaw_schema.sql`.
-Sample locations and the database-backed FastAPI endpoint belong to **S1-02**
-and are not implemented here.
+This covers the original **S1-01 PostgreSQL schema** and **issue #22 trip and
+itinerary relationship verification**. The field list follows
+[the approved pitch](pitch.md#3-database-schema-sketch). The original migration is
+`supabase/migrations/20261014114320_initial_lagaw_schema.sql`.
+Sample destinations and the existing FastAPI endpoint are documented in
+[the locations API guide](locations-api.md).
 
 ## Tables and relationships
 
@@ -83,8 +84,19 @@ Supabase Auth accounts, or an `auth.users` synchronization trigger.
 
 ## Verify on a hosted test project (no local Docker required)
 
-The team's test project is `vnpkyvtbupnquvirzlzp`. The initial migration has been
-applied there using the Supabase CLI. To set up another empty hosted test project,
+The team confirmed these Supabase **project IDs** on October 20, 2026:
+
+| Environment | Project ID |
+| --- | --- |
+| Test/development | `vnpkyvtbupnquvirzlzp` |
+| Production | `zjnuqqtbapbpudsjbpif` |
+
+Implement and test in development before production. CLI linkage and backend
+environment variables select their targets independently; linking the CLI does
+not change `DATABASE_URL`, `SUPABASE_URL`, or the matching backend API key.
+
+The initial migration has been applied to development using the Supabase CLI.
+To set up another empty hosted test project,
 run these commands in PowerShell from the repository root:
 
 ```powershell
@@ -150,6 +162,10 @@ ignored.
 Supabase-compatible test roles, applies migrations in timestamp order, and runs
 the smoke test. It uses only a disposable CI database and needs
 no hosted Supabase secrets. Any failed SQL statement fails the job.
+After the SQL smoke test, it installs the backend dependencies and runs
+`python backend/verify_trip_relationships.py --ci` against that same disposable
+database. A relationship verification failure also fails the job. The ordinary
+backend regression suite remains offline.
 
 For an equivalent fresh vanilla PostgreSQL database, configure the usual `PG*`
 connection variables privately and run:
@@ -162,6 +178,62 @@ This runner applies DDL; use it only on a fresh disposable database.
 Do not use `--bootstrap-roles` on Supabase, where these roles already exist.
 For an existing local Supabase stack, use `db reset --local` and the smoke-test
 command above instead of reapplying initial DDL.
+
+## SQLAlchemy trip relationships (issue #22)
+
+`backend/app/models.py` maps the existing `users`, `trips`, `itinerary_items`, and
+`locations` tables. `back_populates` connects `User.trips` with `Trip.user`,
+`Trip.itinerary_items` with `ItineraryItem.trip`, and `Location.itinerary_items`
+with `ItineraryItem.location`. PostgreSQL continues enforcing the constraints
+installed by the migrations. Do not create or replace tables with `create_all()`.
+
+Deleting a trip deletes its itinerary items, through both the mapped cascade and
+the existing PostgreSQL `ON DELETE CASCADE`. Its user and destinations remain.
+The location mapping preserves PostgreSQL's restriction on deleting referenced
+destinations.
+
+The required columns, non-null foreign keys, and trip cascade already exist in
+the Sprint 1 migration. No new schema migration is required for issue #22, and no
+existing migration was changed. The issue mentions Alembic, but this repository
+uses Supabase SQL migrations; Alembic has not been introduced as another migration
+owner. If a later schema gap is identified, resolve that tooling mismatch before
+adding a migration. ORM mappings alone do not establish a migration baseline.
+
+For development, privately configure `DATABASE_URL` from the development
+project's **Connect → Session pooler → URI** panel. Replace the password
+placeholder with the database password, URL-encode reserved password characters,
+and use the `postgresql+psycopg://` driver prefix. The hostname and pooled username
+must come from that project's copied URI. Keep the complete value private.
+
+`backend/app/db_session.py` loads this configuration only when requested, using
+environment variables ahead of `.env`. Hosted connections require SSL. The
+locations endpoint still uses its existing Supabase Data API configuration;
+adding the ORM verifier does not switch that endpoint to a different database
+client or require a new production database secret.
+
+Run from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe backend/verify_trip_relationships.py
+```
+
+The verifier permits the known development project and refuses production. It
+creates a temporary user and trip with two itinerary items linked to the existing
+San Sebastian Cathedral and The Negros Museum UUIDs. It reloads the relationships,
+checks invalid and missing foreign keys, exercises the trip deletion cascade,
+preserves the user and destinations, and rolls back its fixture transaction even
+on failure. A fresh session checks that the fixtures did not persist.
+
+The explicit `--ci` mode permits only a loopback `lagaw_test` database. Database CI
+supplies its disposable connection string and `sslmode=disable`; disabling SSL is
+accepted only for loopback connections. No real hosted credentials are needed in
+CI. Do not use the fresh-database migration runner on an existing hosted project.
+
+[Development evidence](evidence/trip-relationships-dev.md) records the five PASS
+lines reported by the developer on October 20, 2026, and the successful local
+`GET /locations` response listing all ten seeded destinations on October 21.
+GitHub CI, reviewed merge, and production verification remain pending. These
+development results are not a claim that production was checked.
 
 ## Deploy after review
 

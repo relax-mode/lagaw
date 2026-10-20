@@ -47,3 +47,9 @@ jobs:
           sudo apt-get install --yes postgresql-client
       - name: Apply migrations and verify database behavior
         run: python scripts/check_database.py --bootstrap-roles
+      - name: Install backend dependencies
+        run: python -m pip install -r backend/requirements.txt
+      - name: Verify SQLAlchemy trip relationships
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:local_ci_only@localhost:5432/lagaw_test?sslmode=disable
+        run: python backend/verify_trip_relationships.py --ci
