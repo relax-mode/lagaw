@@ -1,4 +1,4 @@
-# Issue #22: development relationship verification
+# Issue #22: database relationship verification
 
 - Date: October 20, 2026 (Asia/Manila).
 - Environment: test/development Supabase project `vnpkyvtbupnquvirzlzp`.
@@ -53,12 +53,49 @@ The supplied response contained all ten seeded destinations:
 This confirms the existing locations endpoint still returns the Sprint 1
 destinations after the relationship verification changes.
 
-## Remaining completion evidence
+## Deployment and production verification — October 21, 2026
+
+The developer reported all four checks passed, a teammate approved the PR, and
+supplied [merged implementation PR #37](https://github.com/relax-mode/lagaw/pull/37).
+Their screenshot of the latest `main` **Deploy Backend** run shows the
+**Deploy - Cloud Run** job succeeded. **Deploy to Cloud Run** completed in 38
+seconds and **Smoke test** completed in 1 second with:
+
+```text
+smoke test ok: 1 location
+```
+
+The screenshot was inspected during this session. The developer supplied the
+[successful deployment job](https://github.com/relax-mode/lagaw/actions/runs/39455881955/job/118742502234)
+as the linked record of that run.
+
+After deployment, the developer ran the complete
+`supabase/tests/schema_smoke.sql` transaction in the SQL Editor of production
+project `zjnuqqtbapbpudsjbpif`. They reported:
+
+```text
+Success. No rows returned
+```
+
+The existing SQL smoke test verifies database joins, rejected foreign keys,
+trip-to-itinerary deletion cascades, and preservation of related location data.
+Its fixtures are rolled back. This production result is developer-reported;
+the development-only ORM verifier was not run against production.
+
+## Completion evidence links
 
 No schema changes were needed: the Sprint 1 migration already defines the
 required columns and foreign keys. No existing migration was edited or replayed.
 
-This is development evidence. GitHub CI, reviewed merge, and production
-verification are still pending. Link
-this file and the eventual PR/CI/deployment evidence to
+The development, deployment smoke, and production database checks have passed
+as recorded above. Completion records:
+
+- [Merged implementation PR #37](https://github.com/relax-mode/lagaw/pull/37):
+  the developer reported approved review and all four checks passing.
+- [Deploy Backend run](https://github.com/relax-mode/lagaw/actions/runs/39455881955):
+  the inspected screenshot shows the deployment and locations smoke test passed.
+- Production SQL smoke test: the developer-reported result above.
+
+Publish this post-deployment documentation update through a reviewed PR, then
+link the final verification record to
 [issue #22](https://github.com/relax-mode/lagaw/issues/22) before closing it.
