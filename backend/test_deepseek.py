@@ -31,12 +31,23 @@ class FailureTests(unittest.TestCase):
             extract_preferences("")
 
     def test_provider_failures_are_sanitized(self):
+        status_codes = {
+            400: "provider_rejected_request", 401: "authentication_failed",
+            402: "insufficient_balance", 403: "access_denied", 404: "model_unavailable",
+            429: "rate_limited", 500: "provider_unavailable",
+        }
         cases = [
-            (httpx.HTTPStatusError("private provider detail", request=httpx.Request("POST", "https://api.deepseek.com/chat/completions"), response=httpx.Response(429)),
-             "rate_limited"),
+            (httpx.HTTPStatusError(
+                "private provider detail",
+                request=httpx.Request("POST", "https://api.deepseek.com/chat/completions"),
+                response=httpx.Response(status),
+            ), expected)
+            for status, expected in status_codes.items()
+        ]
+        cases.extend([
             (httpx.ReadTimeout("private provider detail"), "provider_timeout"),
             (httpx.ConnectError("private provider detail"), "network_error"),
-        ]
+        ])
         for failure, expected in cases:
             with self.subTest(expected=expected), patch("app.deepseek.httpx.Client") as factory:
                 client = factory.return_value.__enter__.return_value
@@ -77,6 +88,27 @@ class FailureTests(unittest.TestCase):
             with self.subTest(payload=payload), patch("app.deepseek.httpx.Client") as factory:
                 client = factory.return_value.__enter__.return_value
                 client.post.return_value.json.return_value = payload
+                with self.assertRaisesRegex(DeepSeekFailure, "^invalid_provider_output$"):
+                    extract_preferences("coffee")
+
+    def test_truncated_and_malformed_outputs_are_rejected(self):
+        valid = {
+            "budget_level": "low", "tags": ["cafe"],
+            "duration": "afternoon", "pace": "slow",
+        }
+        valid_json = json.dumps(valid)
+        choices = (
+            {"finish_reason": "length", "message": {"content": valid_json}},
+            {"finish_reason": "content_filter", "message": {"content": valid_json}},
+            {"finish_reason": "stop", "message": {"content": "not-json"}},
+            {"finish_reason": "stop", "message": {
+                "content": json.dumps({**valid, "extra": True}),
+            }},
+        )
+        for choice in choices:
+            with self.subTest(choice=choice), patch("app.deepseek.httpx.Client") as factory:
+                client = factory.return_value.__enter__.return_value
+                client.post.return_value.json.return_value = {"choices": [choice]}
                 with self.assertRaisesRegex(DeepSeekFailure, "^invalid_provider_output$"):
                     extract_preferences("coffee")
 

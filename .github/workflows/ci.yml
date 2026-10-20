@@ -56,7 +56,7 @@ jobs:
         if: steps.project.outputs.exists == 'true'
         run: python -m compileall -q app
 
-      - name: Test backend failure handling (offline)
+      - name: Test backend regressions (offline)
         if: steps.project.outputs.exists == 'true'
         run: python -m unittest -v
 
@@ -92,16 +92,13 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Set up Java
-        if: steps.project.outputs.exists == 'true'
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
       - name: Install dependencies
         if: steps.project.outputs.exists == 'true'
         run: flutter pub get
+
+      - name: Test Flutter regressions
+        if: steps.project.outputs.exists == 'true'
+        run: flutter test
 
       - name: Analyze Dart code
         if: steps.project.outputs.exists == 'true'
@@ -112,10 +109,6 @@ jobs:
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: flutter build web --release ${API_BASE_URL:+--dart-define=API_BASE_URL=$API_BASE_URL}
-
-      - name: Build Android APK
-        if: steps.project.outputs.exists == 'true'
-        run: flutter build apk --debug
 
       - name: Upload web build
         if: steps.project.outputs.exists == 'true'

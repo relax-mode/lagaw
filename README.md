@@ -50,6 +50,9 @@ Connect Flutter Web to FastAPI locally and on Cloudflare Pages:
 
 Provider decision and follow-up work: [docs/sprint-log.md](docs/sprint-log.md)
 
+Backend and Flutter regression checks, CI behavior, and test isolation:
+[testing guide](docs/regression-tests.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.
