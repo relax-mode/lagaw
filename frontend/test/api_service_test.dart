@@ -51,7 +51,9 @@ void main() {
     test('fetchLocations returns list on HTTP 200', () async {
       final mockClient = MockClient((request) async {
         expect(request.url.path, endsWith('/locations'));
-        expect(request.url.queryParameters['limit'], '50');
+        expect(request.url.queryParameters['limit'], '25');
+        expect(request.url.queryParameters['offset'], '5');
+        expect(request.headers['Accept'], 'application/json');
 
         final payload = {
           'items': [
@@ -64,7 +66,7 @@ void main() {
               'estimated_cost_min': 120,
               'estimated_cost_max': 300,
               'typical_visit_duration': 60,
-            }
+            },
           ],
           'limit': 50,
           'offset': 0,
@@ -73,7 +75,8 @@ void main() {
       });
 
       final service = ApiService(client: mockClient);
-      final locations = await service.fetchLocations();
+      addTearDown(service.dispose);
+      final locations = await service.fetchLocations(limit: 25, offset: 5);
 
       expect(locations.length, 1);
       expect(locations.first.name, 'Manokan Country');
@@ -86,11 +89,92 @@ void main() {
       });
 
       final service = ApiService(client: mockClient);
+      addTearDown(service.dispose);
 
-      expect(
-        () => service.fetchLocations(),
-        throwsA(isA<Exception>()),
+      await expectLater(service.fetchLocations(), throwsA(isA<Exception>()));
+    });
+
+    test('fetchLocations rejects an empty HTTP 200 body', () async {
+      final service = ApiService(
+        client: MockClient((request) async => http.Response('', 200)),
       );
+      addTearDown(service.dispose);
+
+      await expectLater(
+        service.fetchLocations(),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('fetchLocations rejects malformed JSON in an HTTP 200 body', () async {
+      final service = ApiService(
+        client: MockClient((request) async => http.Response('{broken', 200)),
+      );
+      addTearDown(service.dispose);
+
+      await expectLater(
+        service.fetchLocations(),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('fetchLocations rejects malformed page and row shapes', () async {
+      for (final body in ['{"items":"not a list"}', '["not an object"]']) {
+        final service = ApiService(
+          client: MockClient((request) async => http.Response(body, 200)),
+        );
+        addTearDown(service.dispose);
+
+        await expectLater(service.fetchLocations(), throwsA(isA<TypeError>()));
+      }
+    });
+
+    test('fetchLocations propagates transport failures', () async {
+      final service = ApiService(
+        client: MockClient((request) async {
+          throw http.ClientException('offline');
+        }),
+      );
+      addTearDown(service.dispose);
+
+      await expectLater(
+        service.fetchLocations(),
+        throwsA(isA<http.ClientException>()),
+      );
+    });
+
+    test(
+      'fetchLocations treats an empty items page as an empty result',
+      () async {
+        final service = ApiService(
+          client: MockClient(
+            (request) async => http.Response(
+              jsonEncode({'items': [], 'limit': 50, 'offset': 0}),
+              200,
+            ),
+          ),
+        );
+        addTearDown(service.dispose);
+
+        expect(await service.fetchLocations(), isEmpty);
+      },
+    );
+
+    test('fetchLocations can be called again after a server error', () async {
+      var calls = 0;
+      final service = ApiService(
+        client: MockClient((request) async {
+          calls++;
+          return calls == 1
+              ? http.Response('unavailable', 503)
+              : http.Response(jsonEncode({'items': []}), 200);
+        }),
+      );
+      addTearDown(service.dispose);
+
+      await expectLater(service.fetchLocations(), throwsA(isA<Exception>()));
+      expect(await service.fetchLocations(), isEmpty);
+      expect(calls, 2);
     });
   });
 }

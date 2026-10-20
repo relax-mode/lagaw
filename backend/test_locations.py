@@ -10,7 +10,10 @@ from unittest.mock import Mock, patch
 import httpx
 from fastapi.testclient import TestClient
 
-from app.main import app
+# app.main constructs its module-level app during import. Scope the dotenv guard
+# to import time so the test module doesn't leave global state patched.
+with patch.dict(os.environ, {}, clear=True), patch("dotenv.load_dotenv"):
+    from app.main import app
 
 HTTP_CLIENT = httpx.Client
 ROOT = Path(__file__).resolve().parents[1]
@@ -124,6 +127,17 @@ class LocationsTests(unittest.TestCase):
         for field in ("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"):
             with self.subTest(field=field), patch.dict(os.environ, {field: ""}):
                 self.assert_safe_failure(self.client.get("/locations"))
+        self.assertEqual(self.requests, [])
+
+    def test_unsafe_database_urls_are_rejected_before_client_creation(self):
+        for url in (
+            "http://example.supabase.co", "https://user:secret@example.supabase.co",
+            "https://example.supabase.co/rest/v1", "https://example.supabase.co?x=1",
+        ):
+            with self.subTest(url=url), patch.dict(os.environ, {"SUPABASE_URL": url}), \
+                    patch("app.database.httpx.Client") as client_factory:
+                self.assert_safe_failure(self.client.get("/locations"))
+                client_factory.assert_not_called()
         self.assertEqual(self.requests, [])
 
     def test_legacy_server_key_is_supported(self):

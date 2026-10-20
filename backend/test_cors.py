@@ -6,8 +6,11 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from app.database import DatabaseUnavailable, get_database
-from app.main import create_app
+# Importing app.main creates its module-level app; scope the dotenv guard to
+# import time and keep the rest of the suite's environment untouched.
+with patch.dict(os.environ, {}, clear=True), patch("dotenv.load_dotenv"):
+    from app.database import DatabaseUnavailable, get_database
+    from app.main import create_app
 
 LOCAL_ORIGIN = "http://localhost:3000"
 WEB_ORIGIN = "https://lagaw-test.pages.dev"
