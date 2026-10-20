@@ -229,11 +229,18 @@ supplies its disposable connection string and `sslmode=disable`; disabling SSL i
 accepted only for loopback connections. No real hosted credentials are needed in
 CI. Do not use the fresh-database migration runner on an existing hosted project.
 
-[Development evidence](evidence/trip-relationships-dev.md) records the five PASS
+[Verification evidence](evidence/trip-relationships-dev.md) records the five PASS
 lines reported by the developer on October 20, 2026, and the successful local
 `GET /locations` response listing all ten seeded destinations on October 21.
-GitHub CI, reviewed merge, and production verification remain pending. These
-development results are not a claim that production was checked.
+The developer subsequently supplied [merged PR #37](https://github.com/relax-mode/lagaw/pull/37)
+and reported all four checks passing and an approved review. Their October 21
+[deployment job](https://github.com/relax-mode/lagaw/actions/runs/39455881955/job/118742502234)
+screenshot shows a successful Cloud Run
+deployment and `smoke test ok: 1 location`. After deployment, they reported the
+full transactional SQL smoke test returned `Success. No rows returned` in
+production project `zjnuqqtbapbpudsjbpif`. The development-only ORM verifier still
+refuses production. Link the merged PR, successful Actions run, and verification
+record to issue #22 before closing it; record updates go through a reviewed PR.
 
 ## Deploy after review
 
