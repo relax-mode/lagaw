@@ -53,6 +53,9 @@ Provider decision and follow-up work: [docs/sprint-log.md](docs/sprint-log.md)
 Backend and Flutter regression checks, CI behavior, and test isolation:
 [testing guide](docs/regression-tests.md).
 
+Trip create/list/retrieve API, controlled demo-user setup, and development-first
+verification: [trip API guide](docs/trips-api.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.

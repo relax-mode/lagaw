@@ -7,11 +7,14 @@ from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Query, Request
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import DatabaseUnavailable, LocationDatabase, get_database
 from app.schemas import LocationsPage
+from app.trips import router as trips_router
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -21,6 +24,16 @@ async def database_unavailable(request: Request, exc: DatabaseUnavailable) -> JS
         status_code=503,
         content={"detail": "Locations are temporarily unavailable. Please try again later."},
     )
+
+
+async def validation_error(request: Request, exc: RequestValidationError):
+    if request.url.path.startswith("/api/v1/trips"):
+        # Omit submitted values and validator context, including tokens and NaN.
+        return JSONResponse(status_code=422, content={"detail": [
+            {"loc": error["loc"], "msg": error["msg"], "type": error["type"]}
+            for error in exc.errors()
+        ]})
+    return await request_validation_exception_handler(request, exc)
 
 
 def list_locations(
@@ -73,6 +86,8 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type"],
     )
     application.add_exception_handler(DatabaseUnavailable, database_unavailable)
+    application.add_exception_handler(RequestValidationError, validation_error)
+    application.include_router(trips_router)
     application.add_api_route(
         "/locations", list_locations, methods=["GET"], response_model=LocationsPage,
         tags=["locations"], responses={
