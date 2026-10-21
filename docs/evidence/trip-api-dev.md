@@ -3,7 +3,7 @@
 - Implementation prepared: October 21, 2026 (Asia/Manila).
 - Scope: POST/list/retrieve API and controlled demo-user context only.
 - Development target: `vnpkyvtbupnquvirzlzp`.
-- Production target for later reviewed deployment: `zjnuqqtbapbpudsjbpif`.
+- Production target, verified after development: `zjnuqqtbapbpudsjbpif`.
 - Procedure: [trip API guide](../trips-api.md).
 
 The developer reported all 56 backend tests passing in 1.493 seconds and Ruff
@@ -14,7 +14,7 @@ verification. Live development results are recorded below as reported.
 The developer reported `Success. No rows returned` after running the documented
 development fixture SQL: two synthetic demo profiles and the other-owner trip
 `23000000-0000-4000-8000-000000000004`. This establishes fixture setup only;
-trip API requests and persistence verification remain pending.
+the subsequent API and persistence results are recorded below.
 
 | Check | Status |
 | --- | --- |
@@ -29,14 +29,115 @@ trip API requests and persistence verification remain pending.
 | Malformed trip UUID rejected | Offline backend check passed; Swagger blocked the live malformed UUID before sending a request |
 | Missing/invalid bearer token returns 401 | Offline checks passed; live missing-token response matched the expected rejection message (HTTP status not supplied); live incorrect-token check not run |
 | Saved trip survives page refresh and backend restart | Passed: developer reported HTTP 200 with matching details after browser refresh, reauthorization, and backend restarts |
-| Reviewed, merged PR and passing GitHub CI | Pending |
-| Deployed API acceptance checks | Pending |
-| Saved trip survives a subsequent deployment | Pending |
+| Reviewed, merged PR and passing GitHub CI | Passed as reported: teammate reviewed and merged PR #39; developer confirmed all required [PR checks](https://github.com/relax-mode/lagaw/pull/39/checks) passed on October 22 |
+| Production demo-context configuration | Developer reported green/ready Cloud Run revision after adding demo user ID and token secret version 1 |
+| Independent production PostgreSQL persistence | Passed: developer confirmed the production SQL query returned the created trip |
+| Deployed API acceptance checks | Developer reported POST 201, list/retrieve 200, negative-budget 422, missing-trip 404, and missing-token 401 |
+| Saved trip survives a subsequent deployment | Passed: developer supplied HTTP 200 with identical saved details after serving revision changed from 00005-r75 to 00006-8vk |
 | Evidence linked to issue #23 | Pending |
 
-Add actual safe outputs and links as each check completes. Include trip IDs and
-synthetic trip details only; never record tokens, authorization headers, backend
-keys, connection strings, or environment-file contents.
+All results below are developer-reported; the agent could not independently
+access the private GitHub pages or deployed host. Functional verification is
+complete as reported. Publishing this evidence through a reviewed documentation
+PR and linking it to issue #23 remain pending. This record contains synthetic
+trip details only; credentials and authorization headers are excluded.
+
+## Reviewed merge and production setup — October 21, 2026
+
+The developer subsequently confirmed receiving Google Cloud access from the
+DevOps teammate, generating a separate production demo token privately in
+PowerShell, and creating Secret Manager secret `TRIP_DEMO_TOKEN` in project
+`relax-mode-lagaw`. The developer holds the generated token; its value is not
+recorded. The developer also confirmed saving the secret-level Secret Manager
+Secret Accessor grant for runtime identity
+`lagaw-api@relax-mode-lagaw.iam.gserviceaccount.com`. The completed Cloud Run
+mapping and deployed verification are recorded below.
+
+The developer supplied [PR #39](https://github.com/relax-mode/lagaw/pull/39),
+reported teammate review, and confirmed merging it to `main`. They subsequently
+reported every job passed in the resulting
+[Deploy Backend job](https://github.com/relax-mode/lagaw/actions/runs/39573957458/job/119134734364).
+These GitHub pages could not be fetched from this session; review, merge, and
+deployment success are developer-reported. On October 22, the developer also
+confirmed all required [PR #39 checks](https://github.com/relax-mode/lagaw/pull/39/checks)
+passed.
+
+After the successful development checks and reported deployment, the developer
+ran the guided synthetic profile insert in production project
+`zjnuqqtbapbpudsjbpif` and reported the returned UUID
+`23000000-0000-4000-8000-000000000001`. This provisions the dedicated production
+demo profile. Production backend settings, API requests, and persistence across
+a subsequent hosted deployment were then verified as recorded below. No schema
+migration was added or applied.
+
+## Production Cloud Run configuration — October 21, 2026
+
+The developer supplied the public Swagger URL
+`https://lagaw-api-663710289405.asia-southeast1.run.app/docs` and confirmed
+authorization with the separate production demo token. The browsing tool could
+not access this host; live results below are developer-reported.
+
+### Production create
+
+The developer supplied HTTP **201** from the public `POST /api/v1/trips` with
+this safe response:
+
+```json
+{
+  "title": "Production API verification",
+  "start_date": "2026-11-01",
+  "end_date": "2026-11-01",
+  "budget_min": "100",
+  "budget_max": "500.5",
+  "transportation_mode": "walking",
+  "group_type": "solo",
+  "preferred_tags": ["heritage", "cafe"],
+  "id": "9c45ad80-3762-4203-95ac-a97128fd68a2",
+  "user_id": "23000000-0000-4000-8000-000000000001",
+  "status": "draft",
+  "estimated_total_cost": null
+}
+```
+
+### Production list and retrieve
+
+The developer supplied HTTP **200** from the public
+`GET /api/v1/trips?limit=10&offset=0`, containing exactly one item: production
+trip `9c45ad80-3762-4203-95ac-a97128fd68a2`, with the same saved details,
+`limit: 10`, and `offset: 0`. Development trip
+`7c51b2e1-5111-408f-802a-981ce2da9761` was absent.
+
+The developer then supplied HTTP **200** from public
+`GET /api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2`, with every field
+matching the recorded production create response. The developer subsequently
+confirmed that the targeted SQL query in production Supabase project
+`zjnuqqtbapbpudsjbpif` returned this same trip, independently confirming that
+the deployed API saved it in production PostgreSQL. Persistence across a
+subsequent hosted deployment is recorded in the final section.
+
+### Production error handling
+
+The developer supplied these results from the public Swagger page:
+
+- Negative `budget_min: "-1.00"`: HTTP **422**, location `body.budget_min`,
+  message `Input should be greater than or equal to 0`, type
+  `greater_than_equal`.
+- GET unused UUID `23000000-0000-4000-8000-000000000099`: HTTP **404**,
+  `{"detail": "Trip not found."}`.
+- After Swagger logout, GET the trip list without a bearer token: HTTP **401**,
+  `{"detail": "A valid trip demo bearer token is required."}`.
+
+These establish deployed representative validation, missing-resource, and
+unauthenticated-access responses without recording credentials.
+
+The developer reported adding `TRIP_DEMO_USER_ID` with synthetic profile UUID
+`23000000-0000-4000-8000-000000000001` and referencing Secret Manager secret
+`TRIP_DEMO_TOKEN`, version `1`, as the same-named environment variable in
+`lagaw-api`. After reviewing the configuration and redeploying, the developer
+reported a green check for the new Cloud Run revision. The runtime secret-access
+grant was confirmed earlier. No token value is recorded. The public service URL
+and API results appear above; the serving revision change and persistence check
+appear in the final section.
 
 ## Development create — October 21, 2026
 
@@ -71,7 +172,7 @@ Date header was `Wed, 21 Oct 2026 08:11:41 GMT`. Safe response body:
 The response carries the configured demo owner, generated trip UUID, database
 draft status, and submitted details. Decimal strings may omit trailing zeroes
 without changing their monetary values. Listing, retrieval, independent SQL
-confirmation, and restart/deployment persistence checks remain pending.
+confirmation, and persistence results are recorded in this document.
 
 ## Development list and token rotation — October 21, 2026
 
@@ -96,8 +197,8 @@ FastAPI restart, the developer supplied HTTP **200** from
 The response matched the recorded create response: same UUID, configured demo
 owner, title, dates, budgets, transportation, group, tags, draft status, and null
 estimated total cost. This records successful retrieval and persistence across
-the reported local backend restart. Browser-refresh and redeployment persistence
-checks remain separate and pending.
+the reported local backend restart. Browser-refresh and hosted redeployment
+results are recorded separately below.
 
 ## Development missing and inaccessible trips — October 21, 2026
 
@@ -125,8 +226,9 @@ The developer supplied HTTP **422** with these safe validation errors:
 | Client-supplied other-owner `user_id` | `body.user_id` | Extra inputs are not permitted | `extra_forbidden` |
 
 The reported responses omitted submitted values and validator context, as
-intended. Independent confirmation that invalid requests inserted no rows is
-pending.
+intended. The development SQL check recorded above returned only the two
+expected trips after these requests, confirming no additional trip rows for
+either synthetic demo user.
 
 The developer attempted `not-a-uuid` in Swagger's `trip_id` input. Swagger
 displayed `Value must be a Guid` and prevented submission. This is client-side
@@ -153,4 +255,23 @@ reauthorization, the developer supplied HTTP **200** for saved trip
 `7c51b2e1-5111-408f-802a-981ce2da9761`. All fields matched the create response,
 including the demo owner and exact monetary values. Together with the SQL query,
 this establishes the recorded development persistence checks across refresh and
-local restarts. Persistence across a hosted redeployment remains pending.
+local restarts. Hosted redeployment verification is recorded separately below.
+
+## Production redeployment — October 21, 2026
+
+Before triggering the existing Deploy Backend workflow on `main`, the developer
+identified `lagaw-api-00005-r75` as serving 100% of traffic. They then reported
+the [subsequent deployment job](https://github.com/relax-mode/lagaw/actions/runs/39582693468/job/119163910998)
+passed and identified `lagaw-api-00006-8vk` as the new serving revision. These
+outcomes are developer-reported. The production trip was created before this
+redeployment. After the revision change, the developer supplied HTTP **200**
+from the public GET endpoint for original trip
+`9c45ad80-3762-4203-95ac-a97128fd68a2`. Every field matched the recorded
+production create response: title, dates, exact monetary values, transportation,
+group, tags, configured demo owner, draft status, and null estimated total cost.
+This establishes developer-reported persistence across the hosted redeployment.
+Successful authenticated retrieval also confirms the demo-user/token settings
+were retained by that deployment. The developer subsequently confirmed all
+required PR #39 checks passed on October 22. Publication of this post-deployment
+evidence through a reviewed documentation PR and linkage to issue #23 remain
+pending.
