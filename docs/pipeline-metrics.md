@@ -8,14 +8,14 @@ Optimization: enable the existing `setup-python` pip cache in the PostgreSQL CI 
 
 | Measurement | Baseline | After optimization |
 | --- | --- | --- |
-| PR run | [#39729412274](https://github.com/relax-mode/lagaw/actions/runs/39729412274) | Pending this branch's GitHub Actions run |
-| Database job duration | 41 seconds (05:41:01–05:41:42 UTC) | Pending |
-| Install backend dependencies step | 8 seconds (05:41:29–05:41:37 UTC) | Pending |
-| Pip cache | Not configured for Database CI | Pending |
+| PR run | [#39729412274](https://github.com/relax-mode/lagaw/actions/runs/39729412274) | [#39732744012](https://github.com/relax-mode/lagaw/actions/runs/39732744012) |
+| Database job duration | 41 seconds (05:41:01–05:41:42 UTC) | 32 seconds (06:14:45–06:15:17 UTC) |
+| Install backend dependencies step | 8 seconds (05:41:29–05:41:37 UTC) | 6 seconds (06:15:08–06:15:14 UTC) |
+| Pip cache | Not configured for Database CI | 37 MB restored successfully (cache hit) |
 
-Baseline evidence: the PR run's job details report a successful database check. The job spent 16 seconds initializing its PostgreSQL service, 8 seconds installing the PostgreSQL client, and 8 seconds installing Python dependencies. The optimization is limited to the repeated Python dependency download; it does not claim to reduce database startup time.
+The job completed 9 seconds faster (22%) on the measured PR run, and its dependency installation step took 2 seconds less. This is one before/after pair, so later runs should confirm the result. Baseline evidence: the PR run's job details report a successful database check. The job spent 16 seconds initializing its PostgreSQL service, 8 seconds installing the PostgreSQL client, and 8 seconds installing Python dependencies. The optimization is limited to the repeated Python dependency download; it does not claim to reduce database startup time.
 
-After the new PR run completes, record the job URL, job duration, dependency-install duration, and whether the pip cache was restored. Add the measured delta and actual result here before claiming improvement.
+The updated CI run's database job passed the migrations and SQLAlchemy relationship checks. Its pip cache was restored from the shared `setup-python` key used by the backend job.
 
 ## Other measured pipeline changes
 

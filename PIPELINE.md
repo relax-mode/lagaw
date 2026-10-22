@@ -29,7 +29,7 @@ Both deployment jobs depend on all three checks, so a failed check prevents the 
 
 Same-repository pull requests publish a Cloudflare Pages preview after all checks pass. Fork pull requests run checks but do not receive deploy credentials. Production Pages deploys run after checks on `main`. Both Pages deployments use the web artifact built by the frontend job and perform an HTTP smoke check. The backend production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
 
-Main branch protection will require one approving review and the three CI checks above. Deploy jobs are not required checks because they only run after a merge to `main`.
+Main branch protection now requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deploy jobs are not required checks because they only run after a merge to `main`.
 
 ## Environment boundaries
 

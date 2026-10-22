@@ -228,8 +228,17 @@ jobs:
             if ! files=$(git diff --name-only "$range" 2>/dev/null); then
               echo "::warning::Could not compute the changed files; deploying anyway."
             else
-              changed=$(echo "$files" | rg -E '^(frontend/|package(-lock)?\.json$|\.github/workflows/ci\.yml$)' | rg -v '^frontend/test/' || true)
-              [ -n "$changed" ] || skip "no frontend or deploy-config changes (docs-only and test-only changes do not deploy)."
+              deploy_web=false
+              while IFS= read -r path; do
+                case "$path" in
+                  frontend/test/*) ;;
+                  frontend/*|package.json|package-lock.json) deploy_web=true ;;
+                  .github/workflows/ci.yml)
+                    [ "$EVENT_NAME" = "push" ] && deploy_web=true
+                    ;;
+                esac
+              done <<< "$files"
+              [ "$deploy_web" = true ] || skip "no frontend or deploy-config changes (docs-only and test-only changes do not deploy)."
             fi
           fi
 
@@ -263,7 +272,7 @@ jobs:
         run: |
           set -eo pipefail
           npx wrangler pages deploy frontend/build/web             --project-name lagaw             --branch "$DEPLOY_BRANCH"             --commit-hash "$GITHUB_SHA"             --commit-dirty=true | tee deploy.log
-          url=$(rg -o 'https://[A-Za-z0-9.-]+\.pages\.dev' deploy.log | tail -1 || true)
+          url=$(python -c 'import pathlib, re, sys; matches = re.findall(r"https://[A-Za-z0-9.-]+\.pages\.dev", pathlib.Path(sys.argv[1]).read_text()); print(matches[-1] if matches else "")' deploy.log)
           [ -n "$url" ] || { echo "::error::Could not determine the Cloudflare Pages deployment URL."; exit 1; }
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "### Cloudflare Pages deployment ($DEPLOY_BRANCH)" >> "$GITHUB_STEP_SUMMARY"
