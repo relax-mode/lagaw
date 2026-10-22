@@ -12,7 +12,8 @@ permissions:
 
 jobs:
   database:
-    name: PostgreSQL migrations and smoke tests
+    # Must match the required status check protecting main.
+    name: Database - PostgreSQL migrations and smoke tests
     runs-on: ubuntu-latest
     services:
       postgres:
