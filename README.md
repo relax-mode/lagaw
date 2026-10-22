@@ -56,6 +56,9 @@ Backend and Flutter regression checks, CI behavior, and test isolation:
 Trip create/list/retrieve API, controlled demo-user setup, and development-first
 verification: [trip API guide](docs/trips-api.md).
 
+Trip partial updates, deletion, and development-first cascade verification:
+[trip update/delete guide](docs/trip-mutations-api.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.

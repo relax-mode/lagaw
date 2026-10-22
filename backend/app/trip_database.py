@@ -1,4 +1,4 @@
-"""Persist and read owner-scoped trips through Supabase's PostgreSQL Data API."""
+"""Trip CRUD through Supabase's PostgreSQL Data API, always scoped by owner."""
 
 from uuid import UUID
 
@@ -6,10 +6,14 @@ import httpx
 from pydantic import TypeAdapter
 
 from app.database import DatabaseUnavailable
-from app.trip_schemas import TripCreate, TripResponse
+from app.trip_schemas import TripCreate, TripResponse, TripUpdate
 
 TRIP_COLUMNS = ",".join(TripResponse.model_fields)
 TRIP_LIST = TypeAdapter(list[TripResponse])
+
+
+class TripUpdateConflict(Exception):
+    """A database check rejected an update, including a concurrent range change."""
 
 
 class TripDatabase:
@@ -71,5 +75,54 @@ class TripDatabase:
             )
             rows = self.read_rows(response, user_id, 1, trip_id)
             return rows[0] if rows else None
+        except (httpx.HTTPError, ValueError):
+            raise DatabaseUnavailable from None
+
+    def update_trip(
+        self, user_id: UUID, trip_id: UUID, payload: TripUpdate,
+    ) -> TripResponse | None:
+        try:
+            response = self.client.patch(
+                "trips",
+                params={
+                    "select": TRIP_COLUMNS,
+                    "user_id": f"eq.{user_id}",
+                    "id": f"eq.{trip_id}",
+                },
+                headers={"Prefer": "return=representation", "Content-Profile": "public"},
+                json=payload.model_dump(mode="json", exclude_unset=True),
+            )
+            # PostgreSQL checks protect the final row even if another caller edits
+            # its dates/budgets between our read and write. A failed statement is atomic.
+            if response.status_code == 400:
+                error = response.json()
+                if isinstance(error, dict) and error.get("code") == "23514":
+                    raise TripUpdateConflict
+            rows = self.read_rows(response, user_id, 1, trip_id)
+            if response.status_code != 200:
+                raise ValueError
+            return rows[0] if rows else None
+        except (httpx.HTTPError, ValueError):
+            raise DatabaseUnavailable from None
+
+    def delete_trip(self, user_id: UUID, trip_id: UUID) -> bool:
+        try:
+            response = self.client.delete(
+                "trips",
+                params={
+                    "select": "id,user_id",
+                    "user_id": f"eq.{user_id}",
+                    "id": f"eq.{trip_id}",
+                },
+                headers={"Prefer": "return=representation", "Content-Profile": "public"},
+            )
+            response.raise_for_status()
+            rows = response.json()
+            if response.status_code != 200 or not isinstance(rows, list) or (
+                rows and rows != [{"id": str(trip_id), "user_id": str(user_id)}]
+            ):
+                raise ValueError
+            # The existing trip_id FK cascades deletion in this same DB transaction.
+            return bool(rows)
         except (httpx.HTTPError, ValueError):
             raise DatabaseUnavailable from None

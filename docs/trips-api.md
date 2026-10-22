@@ -5,6 +5,9 @@ Scope: `POST /api/v1/trips`, `GET /api/v1/trips`, and
 itinerary generation, Flutter integration, and expanded CRUD/integration testing
 belong to their separate issues.
 
+Issue #24 adds PATCH and DELETE using the same demo context; see the
+[update/delete guide](trip-mutations-api.md) for their contracts and verification.
+
 FastAPI uses the existing server-only Supabase Data API connection to read/write
 PostgreSQL, just as `/locations` does. It does not use in-memory storage, the
 seed JSON, or SQLAlchemy table creation. The existing migrations already provide
@@ -21,14 +24,15 @@ the private root `.env`:
 - `TRIP_DEMO_TOKEN`: random, private ASCII bearer token of at least 32 characters,
   with no whitespace. Use different tokens for development and production.
 
-Missing/invalid settings disable all three trip routes with 503. All enabled
+Missing/invalid settings disable all trip routes with 503. All enabled
 routes require `Authorization: Bearer <demo token>`; missing/incorrect credentials
 return 401 with `WWW-Authenticate: Bearer`. `/docs` exposes an **Authorize** control
 for `TripDemoToken`. Paste only the token into that control.
 
 Every accepted caller acts as the **same dedicated demo user**. This is a shared
 demo context, not per-person login. Use synthetic trip data only; possession of
-the token grants create/read access to that demo user's trips. Do not configure
+the token grants full CRUD access to that demo user's trips, including permanent
+deletion through issue #24. Do not configure
 it to an actual user's profile. Never embed the token in Flutter, a public web
 bundle, URLs, screenshots, evidence, or commits. Replace the `get_trip_user`
 dependency with authenticated identity when the team implements authentication.
