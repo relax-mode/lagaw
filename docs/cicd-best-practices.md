@@ -12,14 +12,14 @@ Improvements to the Cloudflare Pages pipeline in [`.github/workflows/ci.yml`](..
 ## Reliability
 
 - **Pin the Flutter version.** `channel: stable` lets a new Flutter release change or break the build with no change in this repository. Pin `flutter-version` in `ci.yml`.
-- **Add a post-deploy smoke test.** After `wrangler pages deploy`, `curl -fsS` the deployed URL and fail the job on a bad response. The course lists smoke tests against the deployed environment as part of the pipeline.
-- **Define a rollback path.** Cloudflare keeps every deployment. Add a `workflow_dispatch` input that takes a git ref so a known-good commit can be redeployed, and document it in the deploy and rollback runbook.
+- **Keep smoke checks representative.** The pipeline now checks the deployed Pages URL and the backend `/locations` endpoint. These checks verify HTTP availability; they do not verify browser CORS or database writes. Add those checks after staging is isolated.
+- **Keep the rollback procedure current.** Cloud Run revision rollback and Cloudflare Pages promotion steps are documented in [`PIPELINE.md`](../PIPELINE.md). Rehearse both before Demo Day.
 - **Do not rely on the path filter to recover from failures.** If a deploy fails, or secrets are added later, nothing redeploys until the frontend changes again. Use the manual `workflow_dispatch` run in that case.
 
 ## Pipeline efficiency
 
-- **Measure the regression-test pipeline.** The `frontend` job now runs `flutter test` before the web build, and the Android APK build and its Java setup have been removed. The [first PR workflow run](https://github.com/relax-mode/lagaw/actions/runs/39426238886) passed backend and Flutter tests, analysis, the web build, and preview deployment. Compare equivalent runs before claiming a speed improvement; see [PR #36](https://github.com/relax-mode/lagaw/pull/36) for the sprint-log decision and existing baseline.
-- **Cache more aggressively if builds slow down.** Flutter and pub caching is already on; measure build times before optimizing further, since the DevOps rubric rewards measured improvement.
+- **Record comparable measurements.** The [pipeline metrics log](pipeline-metrics.md) records the PostgreSQL job baseline and the pip-cache result after this workflow change. Keep future optimizations tied to actual run IDs and timings.
+- **Cache more aggressively if builds slow down.** Flutter, pub, Docker, and pip caches are enabled. Measure later build time before adding more caching complexity.
 
 ## Platform risks
 
