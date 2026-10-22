@@ -1,4 +1,4 @@
-"""Issue #23 HTTP contract checks; no hosted databases or real secrets are used."""
+"""Trip CRUD HTTP checks; no hosted databases or real secrets are used."""
 
 import json
 import os
@@ -245,6 +245,232 @@ class TripApiTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers["access-control-allow-origin"], "http://localhost:3000")
+
+    def test_patch_changes_only_supplied_fields_and_scopes_write(self):
+        updated = {**ROW, "title": "Updated afternoon"}
+        self.reply.side_effect = [
+            httpx.Response(200, json=[ROW]), httpx.Response(200, json=[updated]),
+        ]
+        response = self.client.patch(f"{BASE}/{TRIP_ID}", json={"title": " Updated afternoon "})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), updated)
+        read, write = self.requests
+        self.assertEqual(read.method, "GET")
+        self.assertEqual(write.method, "PATCH")
+        for request in (read, write):
+            self.assertEqual(request.url.path, "/rest/v1/trips")
+            self.assertEqual(request.url.params["user_id"], f"eq.{OWNER}")
+            self.assertEqual(request.url.params["id"], f"eq.{TRIP_ID}")
+        self.assertEqual(json.loads(write.content), {"title": "Updated afternoon"})
+        self.assertEqual(write.headers["Prefer"], "return=representation")
+        self.assertEqual(write.headers["Content-Profile"], "public")
+        self.assertNotIn(TOKEN, str(write.headers))
+
+    def test_patch_supports_all_editable_fields(self):
+        changes = {
+            "title": "Two days in Bacolod", "start_date": "2026-11-02",
+            "end_date": "2026-11-03", "budget_min": "0", "budget_max": "900.25",
+            "transportation_mode": "taxi", "group_type": "friends",
+            "preferred_tags": ["food", "heritage"],
+        }
+        self.reply.side_effect = [
+            httpx.Response(200, json=[ROW]),
+            httpx.Response(200, json=[{**ROW, **changes}]),
+        ]
+        response = self.client.patch(f"{BASE}/{TRIP_ID}", json=changes)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {**ROW, **changes})
+        self.assertEqual(json.loads(self.requests[-1].content), changes)
+
+    def test_patch_can_clear_optional_labels_and_tags(self):
+        changes = {"transportation_mode": None, "group_type": None, "preferred_tags": []}
+        self.reply.side_effect = [
+            httpx.Response(200, json=[ROW]),
+            httpx.Response(200, json=[{**ROW, **changes}]),
+        ]
+        response = self.client.patch(f"{BASE}/{TRIP_ID}", json=changes)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {**ROW, **changes})
+        self.assertEqual(json.loads(self.requests[-1].content), changes)
+
+    def test_patch_validates_ranges_against_unchanged_saved_values(self):
+        for changes in (
+            {"start_date": "2026-11-02"}, {"end_date": "2026-10-31"},
+            {"budget_min": "500.51"}, {"budget_max": "99.99"},
+            {"start_date": "2026-11-03", "end_date": "2026-11-02"},
+            {"budget_min": "600", "budget_max": "500"},
+        ):
+            with self.subTest(changes=changes):
+                self.requests.clear()
+                response = self.client.patch(f"{BASE}/{TRIP_ID}", json=changes)
+                self.assertEqual(response.status_code, 422)
+                self.assertEqual([request.method for request in self.requests], ["GET"])
+                self.assertTrue(all(
+                    "input" not in error and "ctx" not in error
+                    for error in response.json()["detail"]
+                ))
+
+    def test_patch_rejects_empty_invalid_null_and_server_owned_fields(self):
+        changes = [
+            {}, {"title": " "}, {"title": 123}, {"title": "x" * 201},
+            {"start_date": "2026-02-30"}, {"end_date": 1793491200},
+            {"start_date": "2026-11-01T00:00:00"},
+            {"budget_min": -1}, {"budget_max": "NaN"}, {"budget_min": True},
+            {"budget_max": "Infinity"}, {"budget_max": "500.501"},
+            {"budget_max": "10000000000"},
+            {"transportation_mode": " "}, {"group_type": "x" * 51},
+            {"preferred_tags": "cafe"}, {"preferred_tags": [""]},
+            {"preferred_tags": ["food"] * 31},
+            {"id": TRIP_ID}, {"user_id": OTHER}, {"status": "archived"},
+            {"estimated_total_cost": "100"},
+            *({field: None} for field in (
+                "title", "start_date", "end_date", "budget_min", "budget_max", "preferred_tags",
+            )),
+        ]
+        for change in changes:
+            with self.subTest(change=change):
+                response = self.client.patch(f"{BASE}/{TRIP_ID}", json=change)
+                self.assertEqual(response.status_code, 422)
+        for content in ("[]", "null", "broken json", '{"budget_min": NaN}'):
+            with self.subTest(content=content):
+                response = self.client.patch(
+                    f"{BASE}/{TRIP_ID}", content=content,
+                    headers={"Content-Type": "application/json"},
+                )
+                self.assertEqual(response.status_code, 422)
+        self.assertEqual(self.requests, [])
+
+    def test_mutations_hide_missing_and_other_owner_trips(self):
+        self.reply.return_value = httpx.Response(200, json=[])
+        for owner in (OWNER, OTHER):
+            with self.subTest(owner=owner), patch.dict(os.environ, {"TRIP_DEMO_USER_ID": owner}):
+                for method in ("PATCH", "DELETE"):
+                    self.requests.clear()
+                    response = self.client.request(
+                        method, f"{BASE}/{TRIP_ID}",
+                        **({"json": {"title": "Update"}} if method == "PATCH" else {}),
+                    )
+                    self.assertEqual(response.status_code, 404)
+                    self.assertEqual(response.json(), {"detail": "Trip not found."})
+                    self.assertEqual(len(self.requests), 1)
+                    self.assertEqual(self.requests[0].url.params["user_id"], f"eq.{owner}")
+
+    def test_patch_handles_trip_deleted_between_read_and_write(self):
+        self.reply.side_effect = [
+            httpx.Response(200, json=[ROW]), httpx.Response(200, json=[]),
+        ]
+        response = self.client.patch(f"{BASE}/{TRIP_ID}", json={"title": "Update"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_database_constraint_conflict_is_safe(self):
+        self.reply.side_effect = [
+            httpx.Response(200, json=[ROW]),
+            httpx.Response(400, json={"code": "23514", "details": "private provider details"}),
+        ]
+        response = self.client.patch(f"{BASE}/{TRIP_ID}", json={"budget_min": "200"})
+        self.assertEqual(response.status_code, 409)
+        self.assertNotIn("private provider details", response.text)
+
+    def test_delete_is_owner_scoped_and_returns_no_body(self):
+        self.reply.return_value = httpx.Response(200, json=[{"id": TRIP_ID, "user_id": OWNER}])
+        response = self.client.delete(f"{BASE}/{TRIP_ID}")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.content, b"")
+        request, = self.requests
+        self.assertEqual(request.method, "DELETE")
+        self.assertEqual(request.url.path, "/rest/v1/trips")
+        self.assertEqual(request.url.params["id"], f"eq.{TRIP_ID}")
+        self.assertEqual(request.url.params["user_id"], f"eq.{OWNER}")
+        self.assertEqual(request.url.params["select"], "id,user_id")
+        self.assertEqual(request.headers["Prefer"], "return=representation")
+        self.assertEqual(request.headers["Content-Profile"], "public")
+
+    def test_mutations_require_authentication_and_demo_configuration(self):
+        for method in ("PATCH", "DELETE"):
+            kwargs = {"json": {"title": "Update"}} if method == "PATCH" else {}
+            for header in ("", "Bearer wrong", "Basic wrong"):
+                with self.subTest(method=method, header=header):
+                    response = self.client.request(
+                        method, f"{BASE}/{TRIP_ID}", headers={"Authorization": header}, **kwargs,
+                    )
+                    self.assertEqual(response.status_code, 401)
+                    self.assertEqual(response.headers["WWW-Authenticate"], "Bearer")
+            with patch.dict(os.environ, {"TRIP_DEMO_TOKEN": ""}):
+                response = self.client.request(method, f"{BASE}/{TRIP_ID}", **kwargs)
+                self.assertEqual(response.status_code, 503)
+            response = self.client.request(method, f"{BASE}/not-a-uuid", **kwargs)
+            self.assertEqual(response.status_code, 422)
+        self.assertEqual(self.requests, [])
+
+    def test_mutation_provider_and_network_errors_are_safe(self):
+        for method in ("PATCH", "DELETE"):
+            kwargs = {"json": {"title": "Update"}} if method == "PATCH" else {}
+            failures = [httpx.Response(status, text="private provider details")
+                        for status in (400, 401, 403, 409, 429, 500, 503)]
+            failures.extend([
+                httpx.ConnectError("private provider details"),
+                httpx.ReadTimeout("private provider details"),
+            ])
+            for failure in failures:
+                with self.subTest(method=method, failure=type(failure)):
+                    self.reply.side_effect = (
+                        [httpx.Response(200, json=[ROW]), failure] if method == "PATCH"
+                        else [failure]
+                    )
+                    self.assert_safe_unavailable(self.client.request(
+                        method, f"{BASE}/{TRIP_ID}", **kwargs,
+                    ))
+
+    def test_mutation_malformed_or_cross_owner_responses_are_safe(self):
+        for method in ("PATCH", "DELETE"):
+            kwargs = {"json": {"title": "Update"}} if method == "PATCH" else {}
+            invalid = [
+                {"error": "private provider details"}, [{"id": TRIP_ID}],
+                [{**ROW, "user_id": OTHER}], [ROW, ROW],
+                [{**ROW, "id": OTHER}],
+            ]
+            for body in invalid:
+                with self.subTest(method=method, body=body):
+                    failure = httpx.Response(200, json=body)
+                    self.reply.side_effect = (
+                        [httpx.Response(200, json=[ROW]), failure] if method == "PATCH"
+                        else [failure]
+                    )
+                    self.assert_safe_unavailable(self.client.request(
+                        method, f"{BASE}/{TRIP_ID}", **kwargs,
+                    ))
+
+    def test_crud_sequence_preserves_fields_rejects_invalid_edits_and_removes_trip(self):
+        # Stateful transport checks API behavior, not real PostgreSQL persistence/cascades.
+        saved = []
+
+        def database(request):
+            if request.method == "POST":
+                saved.append({**ROW, **json.loads(request.content)})
+                return httpx.Response(201, json=saved)
+            if request.method == "PATCH":
+                saved[0].update(json.loads(request.content))
+                return httpx.Response(200, json=saved)
+            if request.method == "DELETE":
+                deleted = [{"id": row["id"], "user_id": row["user_id"]} for row in saved]
+                saved.clear()
+                return httpx.Response(200, json=deleted)
+            return httpx.Response(200, json=saved)
+
+        self.reply.side_effect = database
+        self.assertEqual(self.client.post(BASE, json=PAYLOAD).status_code, 201)
+        response = self.client.patch(f"{BASE}/{TRIP_ID}", json={"title": "Updated"})
+        self.assertEqual(response.status_code, 200)
+        expected = {**ROW, "title": "Updated"}
+        self.assertEqual(response.json(), expected)
+        invalid = self.client.patch(f"{BASE}/{TRIP_ID}", json={"budget_min": "999"})
+        self.assertEqual(invalid.status_code, 422)
+        self.assertEqual(self.client.get(f"{BASE}/{TRIP_ID}").json(), expected)
+        self.assertEqual(self.client.get(BASE).json()["items"], [expected])
+        self.assertEqual(self.client.delete(f"{BASE}/{TRIP_ID}").status_code, 204)
+        self.assertEqual(self.client.get(BASE).json()["items"], [])
+        self.assertEqual(self.client.get(f"{BASE}/{TRIP_ID}").status_code, 404)
+        self.assertEqual(self.client.delete(f"{BASE}/{TRIP_ID}").status_code, 404)
 
 
 if __name__ == "__main__":
