@@ -32,10 +32,13 @@ for `TripDemoToken`. Paste only the token into that control.
 Every accepted caller acts as the **same dedicated demo user**. This is a shared
 demo context, not per-person login. Use synthetic trip data only; possession of
 the token grants full CRUD access to that demo user's trips, including permanent
-deletion through issue #24. Do not configure
-it to an actual user's profile. Never embed the token in Flutter, a public web
-bundle, URLs, screenshots, evidence, or commits. Replace the `get_trip_user`
-dependency with authenticated identity when the team implements authentication.
+deletion through issue #24. Do not configure it to an actual user's profile.
+The current deployed Flutter Web build compiles the production token through
+`--dart-define=TRIP_DEMO_TOKEN` from the `TRIP_DEMO_TOKEN` GitHub Actions secret,
+so anyone can read it from the public bundle. Treat that token as exposed, keep
+it scoped to the synthetic demo profile, and replace this build-time embedding
+with authenticated identity or a server-side proxy before any real-user
+deployment.
 
 The owner is always supplied by the server. POST rejects `user_id`, `id`,
 `status`, and other undeclared fields. Listing filters by the configured owner;
@@ -200,12 +203,13 @@ teammate's review before merging to `main`.
 
 Coordinate production demo-profile and backend configuration with the deployment
 owner after development verification. Production needs its own synthetic profile,
-`TRIP_DEMO_USER_ID`, and private `TRIP_DEMO_TOKEN` (held in the hosting secret
-store). The current deploy workflow does not provision these settings; ensure
-they are configured and retained by the deployment setup. They are backend-only.
-Until configured, the deployed trip routes intentionally return 503. Existing
-`/locations` behavior is unaffected. No production fixtures, credentials,
-deployment settings, or workflow changes were applied by this implementation.
+`TRIP_DEMO_USER_ID`, and private `TRIP_DEMO_TOKEN` in Cloud Run's Secret Manager
+settings. The deployed Flutter Web build also receives the same token at build
+time from the `TRIP_DEMO_TOKEN` GitHub Actions secret; CI passes it with
+`--dart-define` and the Pages deploy gate skips when the secret is missing.
+Because that token is readable in the public bundle, rotate it if abused and
+replace this with authenticated identity or a server-side proxy before real-user
+use. Existing `/locations` behavior is unaffected.
 
 After reviewed merge and deployment, repeat create/list/retrieve, ownership,
 validation, and unauthorized-request checks against the deployed API. Read the
