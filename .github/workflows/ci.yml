@@ -170,34 +170,29 @@ jobs:
           path: frontend/build/web
           if-no-files-found: error
 
-  # Reuses the production web build from the frontend job. Staging has its own
-  # build so its bundle points to the staging API.
+  # Production Pages publishing is a manual operation on main.
   deploy-web:
     name: Deploy - Cloudflare Pages
     needs: [backend, database, frontend]
     if: >-
       needs.frontend.outputs.exists == 'true' &&
-      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'))
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     concurrency:
-      group: deploy-web-${{ github.head_ref || github.ref_name }}
+      group: deploy-web-production
       cancel-in-progress: false
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # Every check skips with a visible reason instead of failing, so CI stays
       # green until there is something real to serve.
       - name: Decide whether to deploy
         id: gate
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
@@ -210,33 +205,6 @@ jobs:
 
           [ -f frontend/web/index.html ] || skip "the Flutter project has no web platform (run 'flutter create --platforms=web .' in frontend/)."
           [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || skip "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set."
-
-          # Production publishes frontend changes and CI workflow changes. Docs-only
-          # and test-only changes never publish. Manual runs always deploy, as does
-          # any case where the diff cannot be computed.
-          zeros=0000000000000000000000000000000000000000
-          range=""
-          if [ "$EVENT_NAME" = "push" ] && [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "$zeros" ]; then
-            range="$BEFORE_SHA..$GITHUB_SHA"
-          fi
-
-          if [ -n "$range" ]; then
-            if ! files=$(git diff --name-only "$range" 2>/dev/null); then
-              echo "::warning::Could not compute the changed files; deploying anyway."
-            else
-              deploy_web=false
-              while IFS= read -r path; do
-                case "$path" in
-                  frontend/test/*) ;;
-                  frontend/*|package.json|package-lock.json) deploy_web=true ;;
-                  .github/workflows/ci.yml)
-                    [ "$EVENT_NAME" = "push" ] && deploy_web=true
-                    ;;
-                esac
-              done <<< "$files"
-              [ "$deploy_web" = true ] || skip "no frontend or deploy-config changes (docs-only and test-only changes do not deploy)."
-            fi
-          fi
 
           echo "deploy=true" >> "$GITHUB_OUTPUT"
 
@@ -264,7 +232,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          DEPLOY_BRANCH: ${{ github.head_ref || github.ref_name }}
+          DEPLOY_BRANCH: ${{ github.ref_name }}
         run: |
           set -eo pipefail
           npx wrangler pages deploy frontend/build/web             --project-name lagaw             --branch "$DEPLOY_BRANCH"             --commit-hash "$GITHUB_SHA"             --commit-dirty=true | tee deploy.log
@@ -289,8 +257,8 @@ jobs:
     name: Deploy - Cloud Run
     needs: [backend, database, frontend]
     if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     permissions:
@@ -304,15 +272,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Decide whether to deploy
         id: gate
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
           PROJECT: ${{ vars.GCP_PROJECT_ID }}
           REGION: ${{ vars.GCP_REGION }}
           PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -328,20 +291,6 @@ jobs:
           }
 
           [ -f backend/Dockerfile ] || skip "backend/Dockerfile is missing."
-
-          if [ "$EVENT_NAME" = "push" ]; then
-            zeros=0000000000000000000000000000000000000000
-            [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "$zeros" ] || skip "the push base commit cannot be resolved."
-            changed=$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA")
-            deploy_backend=false
-            while IFS= read -r path; do
-              case "$path" in
-                backend/test_*.py|backend/smoke_test.*) ;;
-                backend/*|.github/workflows/ci.yml) deploy_backend=true ;;
-              esac
-            done <<< "$changed"
-            [ "$deploy_backend" = true ] || skip "no backend runtime or deploy workflow changes were made."
-          fi
 
           for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS; do
             [ -n "${!v}" ] || skip "the GCP_* repository variables are not set ($v)."
@@ -412,9 +361,7 @@ jobs:
   staging-changes:
     name: Decide - Staging deployment
     needs: [backend, database, frontend]
-    if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     outputs:
@@ -431,38 +378,32 @@ jobs:
       - name: Decide whether staging needs an update
         id: gate
         env:
-          EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
         run: |
           backend=false
           frontend=false
 
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+          zeros=0000000000000000000000000000000000000000
+          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "$zeros" ]; then
+            backend=true
+            frontend=true
+          elif ! files=$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" 2>/dev/null); then
+            echo "::warning::Could not compute changed files; updating staging to the main commit."
             backend=true
             frontend=true
           else
-            zeros=0000000000000000000000000000000000000000
-            if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "$zeros" ]; then
-              backend=true
-              frontend=true
-            elif ! files=$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" 2>/dev/null); then
-              echo "::warning::Could not compute changed files; updating staging to the main commit."
-              backend=true
-              frontend=true
-            else
-              while IFS= read -r path; do
-                case "$path" in
-                  backend/test_*.py|backend/smoke_test.*|frontend/test/*) ;;
-                  backend/*) backend=true ;;
-                  frontend/*|package.json|package-lock.json) frontend=true ;;
-                  .github/workflows/ci.yml)
-                    backend=true
-                    frontend=true
-                    ;;
-                esac
-              done <<< "$files"
-            fi
+            while IFS= read -r path; do
+              case "$path" in
+                backend/test_*.py|backend/smoke_test.*|frontend/test/*) ;;
+                backend/*) backend=true ;;
+                frontend/*|package.json|package-lock.json) frontend=true ;;
+                .github/workflows/ci.yml)
+                  backend=true
+                  frontend=true
+                  ;;
+              esac
+            done <<< "$files"
           fi
 
           deploy=false

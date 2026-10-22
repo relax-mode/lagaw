@@ -20,15 +20,15 @@ The database project is the development project, separate from production projec
 
 ## Deployment controls and status
 
-The workflow in `.github/workflows/ci.yml` deploys staging only after the Backend, Database, and Frontend checks pass. Main pushes deploy the API and/or web app when their source paths change; a manual dispatch on `main` redeploys both. Staging web is built separately with the staging Cloud Run URL. Pull requests run checks without publishing Pages previews.
+The workflow in `.github/workflows/ci.yml` starts staging deployment after the Backend, Database, and Frontend checks pass for relevant pushes to `main`. Backend changes deploy the staging API; frontend or deployment workflow changes build and deploy the staging web app. Manual dispatch on `main` is reserved for production API and web deployments. Pull requests run checks only and do not publish Pages previews.
 
-Staging deployment is guarded by repository variable `STAGING_DEPLOY_ENABLED`. It is currently `false`. The GitHub `staging` environment exists and is restricted to protected branches, with administrator bypass disabled. The team selected `aranx` as reviewer, but GitHub rejected the reviewer configuration and PR review request because that account is not a repository collaborator. Keep the variable false until an administrator grants `aranx` repository access or the team selects an existing collaborator, then configure that reviewer. The job will pause for environment approval before using deploy credentials.
+Staging deployment is enabled by repository variable `STAGING_DEPLOY_ENABLED=true`. The GitHub `staging` environment is restricted to protected branches, requires approval from `aranxshx`, prevents self-review, and disables administrator bypass. The initial reviewer choice `aranx` was rejected because that account is not a repository collaborator; the user then selected the admin collaborator `aranxshx`. Qualifying main pushes run CI and then wait for `aranxshx`'s environment approval before using deployment credentials.
 
-The Cloud Run staging API has been deployed and its `/locations?limit=1` smoke check returned one development location. The Pages staging branch has not yet been deployed, so `https://staging.lagaw.pages.dev` is not available until the protected workflow runs successfully. Issue #30 remains open until web availability, database isolation, and reviewed CI deployment are verified.
+The Cloud Run staging API has been deployed and its `/locations?limit=1` smoke check returned one development location. The Pages staging branch has not yet been deployed; `https://staging.lagaw.pages.dev` will become available after the first qualifying main push and environment approval. Issue #30 remains open until web availability, database isolation, and reviewed CI deployment are verified.
 
 ## Verification
 
-After enabling the protected environment and merging the reviewed workflow to `main`:
+After merging the reviewed workflow to `main` and approving the protected staging deployment:
 
 1. Confirm a successful `Deploy - Staging` job after the three required CI jobs.
 2. Confirm the API smoke step returns at least one location from development data.
@@ -39,7 +39,7 @@ The GitHub Actions run URL, staging browser/API results, and the development-onl
 
 ## Secret rotation
 
-Add a new Secret Manager version for each rotated staging credential, update the pinned version numbers in the `Deploy backend to staging Cloud Run` step of `.github/workflows/ci.yml`, and deploy staging through the protected workflow. Verify the API smoke check before disabling an older version. Do not paste values into the repository, issue, or sprint log.
+Add a new Secret Manager version for each rotated staging credential, update the pinned version numbers in the `Deploy backend to staging Cloud Run` step of `.github/workflows/ci.yml`, and deploy staging through a protected push to `main`. Verify the API smoke check before disabling an older version. Do not paste values into the repository, issue, or sprint log.
 
 ## Rollback
 
