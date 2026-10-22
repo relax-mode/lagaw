@@ -4,6 +4,7 @@ import '../models/trip.dart';
 import '../services/trip_service.dart';
 import '../theme.dart';
 import '../utils/trip_format.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/tactile_motion.dart';
 import '../widgets/trip_card.dart';
@@ -12,7 +13,12 @@ import '../widgets/trip_form/trip_form.dart';
 import 'trip_edit_screen.dart';
 import 'trip_page_scaffold.dart';
 
+/// What a detail page tells the list when it closes.
+enum TripDetailResult { deleted }
+
 /// One saved trip, loaded through `GET /api/v1/trips/{id}`. [S2-04]
+/// Pops [TripDetailResult.deleted] after a delete, or once the trip turns
+/// out to be gone already, so the list can drop it. [S2-05]
 class TripDetailScreen extends StatefulWidget {
   final TripService service;
   final String tripId;
@@ -40,6 +46,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _loading = true;
   String? _error;
   String? _notice;
+  bool _deleting = false;
+
+  /// The backend says this trip no longer exists (deleted elsewhere).
+  bool _missing = false;
 
   @override
   void initState() {
@@ -64,8 +74,46 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     } on TripApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.message;
         _loading = false;
+        if (e.statusCode == 404) {
+          _missing = true;
+          _trip = null;
+        } else {
+          _error = e.message;
+        }
+      });
+    }
+  }
+
+  void _closeAsDeleted() => Navigator.of(context).pop(TripDetailResult.deleted);
+
+  Future<void> _delete() async {
+    final trip = _trip;
+    if (trip == null || _deleting) return;
+    final confirmed = await showTactileConfirmDialog(
+      context,
+      title: 'Delete this trip?',
+      message:
+          '"${trip.title}" will be removed for good. This can\'t be undone.',
+      confirmLabel: 'Delete',
+    );
+    if (!confirmed || !mounted) return;
+
+    setState(() {
+      _deleting = true;
+      _error = null;
+      _notice = null;
+    });
+    try {
+      await widget.service.deleteTrip(trip.id);
+      if (mounted) _closeAsDeleted();
+    } on TripApiException catch (e) {
+      if (!mounted) return;
+      // Already gone (e.g. deleted on another device): same outcome.
+      if (e.statusCode == 404) return _closeAsDeleted();
+      setState(() {
+        _deleting = false;
+        _error = e.message;
       });
     }
   }
@@ -112,6 +160,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           ),
           const SizedBox(height: 14),
         ],
+        if (_missing)
+          StatusBanner(
+            key: const ValueKey('detail-missing'),
+            tone: StatusTone.info,
+            message: 'This trip no longer exists. It may have been deleted.',
+            actionLabel: 'Back to My Trips',
+            onAction: _closeAsDeleted,
+          ),
         if (trip == null && _loading)
           const Padding(
             padding: EdgeInsets.only(top: 80),
@@ -225,7 +281,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         index: 2,
         child: Vector3DButton(
           key: const ValueKey('trip-edit'),
-          onTap: _edit,
+          onTap: _deleting ? null : _edit,
           backgroundColor: AppTheme.primaryBlue,
           shadowColor: const Color(0xFF1D4ED8),
           borderColor: const Color(0xFF93C5FD),
@@ -244,6 +300,50 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
                   color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 14),
+      FadeSlideIn(
+        index: 3,
+        child: Vector3DButton(
+          key: const ValueKey('trip-delete'),
+          onTap: _deleting ? null : _delete,
+          backgroundColor: Colors.white,
+          shadowColor: const Color(0xFFFDA4AF),
+          borderColor: const Color(0xFFFECDD3),
+          borderRadius: 28,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          depth: 3.5,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_deleting)
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Color(0xFFE11D48),
+                  ),
+                )
+              else
+                const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Color(0xFFE11D48),
+                  size: 19,
+                ),
+              const SizedBox(width: 8),
+              Text(
+                _deleting ? 'Deleting…' : 'Delete trip',
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w900,
+                  fontSize: 15,
+                  color: Color(0xFFE11D48),
                 ),
               ),
             ],

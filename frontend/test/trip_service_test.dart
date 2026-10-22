@@ -255,6 +255,31 @@ void main() {
       await service.updateTrip('trip-1', _draft);
     });
 
+    test('deleteTrip sends DELETE and accepts 204', () async {
+      final service = TripService(
+        token: _token,
+        client: MockClient((request) async {
+          expect(request.method, 'DELETE');
+          expect(request.url.path, '/api/v1/trips/trip-1');
+          expect(request.headers['Authorization'], 'Bearer $_token');
+          return http.Response('', 204);
+        }),
+      );
+
+      await service.deleteTrip('trip-1');
+    });
+
+    test('deleteTrip surfaces 404 for an already deleted trip', () async {
+      final service = _serviceReturning(404, {'detail': 'Trip not found.'});
+
+      await expectLater(
+        service.deleteTrip('trip-1'),
+        throwsA(
+          isA<TripApiException>().having((e) => e.statusCode, 'status', 404),
+        ),
+      );
+    });
+
     test('maps HTTP 409 to a reload message', () async {
       final service = _serviceReturning(409, {'detail': 'conflict'});
 

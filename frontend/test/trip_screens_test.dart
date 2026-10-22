@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/models/trip.dart';
 import 'package:frontend/screens/trip_create_screen.dart';
+import 'package:frontend/screens/trip_detail_screen.dart';
 import 'package:frontend/screens/trip_edit_screen.dart';
 import 'package:frontend/screens/trips_tab.dart';
 import 'package:frontend/services/trip_service.dart';
@@ -26,6 +27,7 @@ class FakeTripService extends TripService {
   final List<Exception> errors = [];
   final List<TripDraft> created = [];
   final List<TripDraft> updated = [];
+  final List<String> deleted = [];
 
   FakeTripService([List<Trip>? trips])
     : trips = trips ?? [],
@@ -59,7 +61,22 @@ class FakeTripService extends TripService {
   @override
   Future<TripsPage> listTrips({int limit = 10, int offset = 0}) async {
     _maybeFail();
-    return TripsPage(items: List.of(trips), limit: limit, offset: offset);
+    return TripsPage(
+      items: trips.skip(offset).take(limit).toList(),
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  @override
+  Future<void> deleteTrip(String id) async {
+    _maybeFail();
+    final before = trips.length;
+    trips.removeWhere((t) => t.id == id);
+    deleted.add(id);
+    if (trips.length == before) {
+      throw const TripApiException('Trip not found.', statusCode: 404);
+    }
   }
 
   @override
@@ -336,6 +353,135 @@ void main() {
 
     expect(original.changedFieldsFrom(original), isEmpty);
     expect(edited.changedFieldsFrom(original), {'budget_max', 'group_type'});
+  });
+
+  group('Delete flow [S2-05]', () {
+    Future<FakeTripService> openFirstTrip(
+      WidgetTester tester,
+      List<Trip> trips,
+    ) async {
+      final service = FakeTripService(trips);
+      await _pump(tester, _tab(service));
+      await tester.tap(find.text(trips.first.title));
+      await tester.pumpAndSettle();
+      return service;
+    }
+
+    testWidgets('cancelling the confirmation keeps the trip', (tester) async {
+      final service = await openFirstTrip(tester, [_trip('a', 'Food crawl')]);
+
+      await _tapKey(tester, 'trip-delete');
+      expect(find.text('Delete this trip?'), findsOneWidget);
+      expect(find.textContaining('"Food crawl"'), findsOneWidget);
+      await _tapKey(tester, 'confirm-cancel');
+
+      expect(service.deleted, isEmpty);
+      expect(find.text('Delete this trip?'), findsNothing);
+      expect(find.byKey(const ValueKey('trip-edit')), findsOneWidget);
+    });
+
+    testWidgets('confirming deletes and the trip leaves the list', (
+      tester,
+    ) async {
+      final service = await openFirstTrip(tester, [
+        _trip('a', 'Food crawl'),
+        _trip('b', 'Heritage walk'),
+      ]);
+
+      await _tapKey(tester, 'trip-delete');
+      await _tapKey(tester, 'confirm-accept');
+
+      expect(service.deleted, ['a']);
+      expect(find.text('Trip deleted.'), findsOneWidget);
+      expect(find.text('Food crawl'), findsNothing);
+      expect(find.text('Heritage walk'), findsOneWidget);
+      expect(find.text('1 saved trip'), findsOneWidget);
+    });
+
+    testWidgets('a failed delete stays on the trip with the error', (
+      tester,
+    ) async {
+      final service = await openFirstTrip(tester, [_trip('a', 'Food crawl')]);
+      service.errors.add(
+        const TripApiException('Trips are temporarily unavailable.'),
+      );
+
+      await _tapKey(tester, 'trip-delete');
+      await _tapKey(tester, 'confirm-accept');
+
+      expect(find.text('Trips are temporarily unavailable.'), findsOneWidget);
+      expect(service.trips, hasLength(1));
+      expect(find.byKey(const ValueKey('trip-delete')), findsOneWidget);
+    });
+
+    testWidgets('deleting a trip already gone elsewhere still returns', (
+      tester,
+    ) async {
+      final service = await openFirstTrip(tester, [_trip('a', 'Food crawl')]);
+      service.trips.clear(); // removed on another device
+
+      await _tapKey(tester, 'trip-delete');
+      await _tapKey(tester, 'confirm-accept');
+
+      expect(find.text('Trip deleted.'), findsOneWidget);
+      expect(find.text('No trips yet'), findsOneWidget);
+    });
+
+    testWidgets('opening a trip deleted elsewhere explains and goes back', (
+      tester,
+    ) async {
+      final service = FakeTripService([_trip('a', 'Food crawl')]);
+      await _pump(tester, _tab(service));
+      service.trips.clear();
+
+      await tester.tap(find.text('Food crawl'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('no longer exists'), findsOneWidget);
+
+      await tester.tap(find.text('Back to My Trips'));
+      await tester.pumpAndSettle();
+      expect(find.text('No trips yet'), findsOneWidget);
+    });
+
+    testWidgets('detail pops the deleted result', (tester) async {
+      final service = FakeTripService([_trip('a', 'Food crawl')]);
+      Object? result;
+      await _pump(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      TripDetailScreen(service: service, tripId: 'a'),
+                ),
+              );
+            },
+            child: const Text('open'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await _tapKey(tester, 'trip-delete');
+      await _tapKey(tester, 'confirm-accept');
+
+      expect(result, TripDetailResult.deleted);
+    });
+  });
+
+  testWidgets('My Trips pages past 50 trips with Load more', (tester) async {
+    final service = FakeTripService([
+      for (var i = 0; i < 55; i++) _trip('t$i', 'Trip $i'),
+    ]);
+    await _pump(tester, _tab(service));
+
+    expect(find.text('50+ saved trips'), findsOneWidget);
+    await _tapKey(tester, 'trips-load-more');
+
+    expect(find.text('55 saved trips'), findsOneWidget);
+    expect(find.byKey(const ValueKey('trips-load-more')), findsNothing);
   });
 
   test('service refuses to call the API without a demo token', () async {
