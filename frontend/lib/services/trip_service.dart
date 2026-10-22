@@ -113,6 +113,19 @@ class TripService {
     throw _errorFor(response);
   }
 
+  /// DELETE /api/v1/trips/{id}. Permanent; the backend also removes the
+  /// trip's itinerary items. Succeeds on 204.
+  Future<void> deleteTrip(String id) async {
+    final response = await _send(
+      () => _client.delete(
+        Uri.parse('${AppConfig.tripsEndpoint}/${Uri.encodeComponent(id)}'),
+        headers: _headers,
+      ),
+    );
+    if (response.statusCode == 204) return;
+    throw _errorFor(response);
+  }
+
   Future<http.Response> _send(Future<http.Response> Function() request) async {
     if (_token.isEmpty) {
       throw const TripApiException(

@@ -10,7 +10,8 @@ import 'trip_create_screen.dart';
 import 'trip_detail_screen.dart';
 
 /// "My Trips" tab: saved trips from `GET /api/v1/trips`, with entry points
-/// to create, view and edit. Lives inside the home screen's scroll view. [S2-04]
+/// to create, view, edit and delete. Lives inside the home screen's scroll
+/// view. [S2-04, S2-05]
 class TripsTab extends StatefulWidget {
   final TripService service;
   final bool isWide;
@@ -27,6 +28,12 @@ class _TripsTabState extends State<TripsTab> {
   List<Trip> _trips = const [];
   bool _loading = true;
   String? _error;
+  String? _notice;
+
+  /// A full page came back, so the server may have more trips.
+  bool _hasMore = false;
+  bool _loadingMore = false;
+  String? _loadMoreError;
 
   @override
   void initState() {
@@ -44,6 +51,8 @@ class _TripsTabState extends State<TripsTab> {
       if (!mounted) return;
       setState(() {
         _trips = page.items;
+        _hasMore = page.items.length == _pageSize;
+        _loadMoreError = null;
         _loading = false;
       });
     } on TripApiException catch (e) {
@@ -55,12 +64,57 @@ class _TripsTabState extends State<TripsTab> {
     }
   }
 
-  Future<void> _open(Widget page) async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-    if (mounted) _load();
+  Future<void> _loadMore() async {
+    setState(() {
+      _loadingMore = true;
+      _loadMoreError = null;
+    });
+    try {
+      final page = await widget.service.listTrips(
+        limit: _pageSize,
+        offset: _trips.length,
+      );
+      if (!mounted) return;
+      setState(() {
+        final known = {for (final t in _trips) t.id};
+        _trips = [..._trips, ...page.items.where((t) => !known.contains(t.id))];
+        _hasMore = page.items.length == _pageSize;
+        _loadingMore = false;
+      });
+    } on TripApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadMoreError = e.message;
+        _loadingMore = false;
+      });
+    }
+  }
+
+  /// Opens [page]; whatever happened there, the list is re-fetched after.
+  Future<Object?> _open(Widget page) async {
+    final result = await Navigator.of(context)
+        .push<Object?>(MaterialPageRoute(builder: (_) => page));
+    if (mounted) {
+      setState(() => _notice = null);
+      _load();
+    }
+    return result;
   }
 
   void _create() => _open(TripCreateScreen(service: widget.service));
+
+  Future<void> _openTrip(Trip trip) async {
+    final result = await _open(
+      TripDetailScreen(service: widget.service, tripId: trip.id, initial: trip),
+    );
+    if (result == TripDetailResult.deleted && mounted) {
+      // Drop it right away; the reload started by _open confirms it.
+      setState(() {
+        _trips = _trips.where((t) => t.id != trip.id).toList();
+        _notice = 'Trip deleted.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +139,8 @@ class _TripsTabState extends State<TripsTab> {
                   Text(
                     _loading
                         ? 'Loading your trips…'
+                        : _hasMore
+                        ? '${_trips.length}+ saved trips'
                         : _trips.length == 1
                         ? '1 saved trip'
                         : '${_trips.length} saved trips',
@@ -120,6 +176,14 @@ class _TripsTabState extends State<TripsTab> {
           ],
         ),
         const SizedBox(height: 16),
+        if (_notice != null) ...[
+          StatusBanner(
+            key: const ValueKey('trips-notice'),
+            tone: StatusTone.success,
+            message: _notice!,
+          ),
+          const SizedBox(height: 14),
+        ],
         if (_error != null)
           StatusBanner(
             key: const ValueKey('trips-error'),
@@ -139,6 +203,39 @@ class _TripsTabState extends State<TripsTab> {
           _EmptyTrips(onCreate: _create)
         else
           _buildList(),
+        if (_trips.isNotEmpty && _loadMoreError != null) ...[
+          const SizedBox(height: 14),
+          StatusBanner(
+            key: const ValueKey('trips-more-error'),
+            tone: StatusTone.error,
+            message: _loadMoreError!,
+            actionLabel: 'Retry',
+            onAction: _loadMore,
+          ),
+        ] else if (_trips.isNotEmpty && _hasMore) ...[
+          SizedBox(height: widget.isWide ? 18 : 6),
+          Center(
+            child: Vector3DButton(
+              key: const ValueKey('trips-load-more'),
+              onTap: _loadingMore ? null : _loadMore,
+              backgroundColor: Colors.white,
+              shadowColor: const Color(0xFFCBD5E1),
+              borderColor: const Color(0xFFE2E8F0),
+              borderRadius: 22,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              depth: 3,
+              child: Text(
+                _loadingMore ? 'Loading…' : 'Load more',
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13.5,
+                  color: AppTheme.slateDark,
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -149,16 +246,7 @@ class _TripsTabState extends State<TripsTab> {
         FadeSlideIn(
           key: ValueKey(trip.id),
           index: i,
-          child: TripCard(
-            trip: trip,
-            onTap: () => _open(
-              TripDetailScreen(
-                service: widget.service,
-                tripId: trip.id,
-                initial: trip,
-              ),
-            ),
-          ),
+          child: TripCard(trip: trip, onTap: () => _openTrip(trip)),
         ),
     ];
 
