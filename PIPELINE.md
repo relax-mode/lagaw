@@ -12,8 +12,8 @@ flowchart TD
   Backend --> Gate{All checks pass?}
   Frontend --> Gate
   Database --> Gate
-  Gate -->|Same-repository PR| Preview[Cloudflare Pages preview + HTTP smoke test]
-  Gate -->|main, frontend changes| ProductionWeb[Cloudflare Pages production + HTTP smoke test]
+  Gate -->|Same-repository PR, frontend changes| Preview[Cloudflare Pages preview + HTTP smoke test]
+  Gate -->|main, frontend or CI workflow changes| ProductionWeb[Cloudflare Pages production + HTTP smoke test]
   Gate -->|main, backend changes| ProductionAPI[Cloud Run production + API smoke test]
 ```
 
@@ -27,7 +27,7 @@ The `Lagaw CI` workflow runs on every pull request, push to `main`, and manual d
 
 Both deployment jobs depend on all three checks, so a failed check prevents the corresponding deploy. The backend deploy runs only for `main` pushes that change backend runtime files or the CI workflow; manual production deploys can be started by dispatching the workflow on `main`. Google Cloud authentication uses Workload Identity Federation restricted to `main`.
 
-Same-repository pull requests publish a Cloudflare Pages preview after all checks pass. Fork pull requests run checks but do not receive deploy credentials. Production Pages deploys run after checks on `main`. Both Pages deployments use the web artifact built by the frontend job and perform an HTTP smoke check. The backend production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
+Same-repository pull requests publish a Cloudflare Pages preview after all checks pass when frontend or package files change; CI workflow-only, docs-only, and test-only changes skip preview publishing. Fork pull requests run checks but do not receive deploy credentials. Production Pages deploys run after checks on `main` when frontend, package, or CI workflow files change. Both Pages deployments use the web artifact built by the frontend job and perform an HTTP smoke check. The backend production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
 
 Main branch protection now requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deploy jobs are not required checks because they only run after a merge to `main`.
 

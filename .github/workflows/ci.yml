@@ -213,9 +213,9 @@ jobs:
           [ -f frontend/web/index.html ] || skip "the Flutter project has no web platform (run 'flutter create --platforms=web .' in frontend/)."
           [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || skip "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set."
 
-          # Only app changes deploy: the frontend (minus its tests) and deploy config.
-          # Docs-only and test-only merges therefore never publish. Manual runs always
-          # deploy, and so does any case where the diff cannot be computed.
+          # PR previews deploy frontend changes only. Main also republishes for CI
+          # workflow changes. Docs-only and test-only changes never publish. Manual
+          # runs always deploy, as does any case where the diff cannot be computed.
           zeros=0000000000000000000000000000000000000000
           range=""
           if [ "$EVENT_NAME" = "pull_request" ]; then
