@@ -12,7 +12,6 @@ flowchart TD
   Backend --> Gate{All checks pass?}
   Frontend --> Gate
   Database --> Gate
-  Gate -->|Same-repository PR, frontend changes| Preview[Cloudflare Pages preview + HTTP smoke test]
   Gate -->|manual dispatch on main| ProductionWeb[Cloudflare Pages production + HTTP smoke test]
   Gate -->|manual dispatch on main| ProductionAPI[Cloud Run production + API smoke test]
   Gate -->|main push, staging enabled + reviewer approval| Staging[Staging Cloud Run + Pages + smoke checks]
@@ -28,15 +27,15 @@ The `Lagaw CI` workflow runs on every pull request, push to `main`, and manual d
 
 Both production deployment jobs depend on all three checks, so a failed check prevents either deploy. Production API and Pages deployments run only after manually dispatching the workflow on `main`; each deploys the current `main` commit and performs its smoke check. Main pushes do not deploy production. Google Cloud authentication uses Workload Identity Federation restricted to `main`.
 
-Pull requests run checks only; they do not publish Pages previews or production deployments. This prevents PR bundles from calling production and keeps production releases manual. The Cloud Run production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
+Pull requests run checks only; they do not publish Pages previews or production deployments. Main pushes automatically deploy staging for relevant backend, frontend, or deployment workflow changes after all three checks and approval by the required reviewer in the `staging` environment. The staging web app is built separately against the staging Cloud Run URL and deployed to the Cloudflare Pages `staging` branch. Manual dispatch on `main` is reserved for production deployment. The Cloud Run production smoke check requests `/locations?limit=1` and requires at least one returned location.
 
-Main branch protection now requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deploy jobs are not required checks because production deploys run only by manual dispatch and staging deploys follow a `main` push after required environment approval.
+Main branch protection requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deployment jobs are not required checks: staging follows qualifying pushes to `main` and production runs only after manual dispatch.
 
 ## Environment boundaries
 
 Production Cloud Run reads `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from Google Secret Manager. GitHub Actions stores only non-secret GCP identifiers as repository variables; its Cloudflare deploy credentials are repository Actions secrets.
 
-**PR previews are not yet data-isolated.** The Flutter web build currently uses the repository-level `API_BASE_URL`, which points to the production backend. A preview therefore calls production until the staging environment in [issue #30](https://github.com/relax-mode/lagaw/issues/30) is configured. Do not treat a Pages preview as a staging acceptance check before that work is complete.
+Staging uses the existing development Supabase project and separate Cloud Run service credentials. The workflow pins staging Secret Manager versions and a separate runtime service account can access only the staging secrets. A separate Workload Identity provider is restricted to this repository's `main` branch and the GitHub `staging` environment; production identity configuration is unchanged. Automatic staging deployments are enabled and pause for `aranxshx` to approve the protected environment. See [the staging runbook](docs/staging.md) for service boundaries and remaining verification.
 
 The API tests use mocked HTTP transports and do not verify writes through a live Supabase Data API. The disposable PostgreSQL job verifies migrations and SQLAlchemy relationships separately. See [issue #29](https://github.com/relax-mode/lagaw/issues/29) for the remaining database-backed API test acceptance.
 

@@ -357,3 +357,230 @@ jobs:
           curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 \
             "$SERVICE_URL/locations?limit=1" | python -c "import sys,json; d=json.load(sys.stdin); assert d['items'], 'no locations returned'; print('smoke test ok:', len(d['items']), 'location')"
           echo "### Cloud Run deployment smoke test passed" >> "$GITHUB_STEP_SUMMARY"
+
+  staging-changes:
+    name: Decide - Staging deployment
+    needs: [backend, database, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    outputs:
+      deploy: ${{ steps.gate.outputs.deploy }}
+      backend: ${{ steps.gate.outputs.backend }}
+      frontend: ${{ steps.gate.outputs.frontend }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide whether staging needs an update
+        id: gate
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          backend=false
+          frontend=false
+
+          zeros=0000000000000000000000000000000000000000
+          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "$zeros" ]; then
+            backend=true
+            frontend=true
+          elif ! files=$(git diff --name-only "$BEFORE_SHA" "$HEAD_SHA" 2>/dev/null); then
+            echo "::warning::Could not compute changed files; updating staging to the main commit."
+            backend=true
+            frontend=true
+          else
+            while IFS= read -r path; do
+              case "$path" in
+                backend/test_*.py|backend/smoke_test.*|frontend/test/*) ;;
+                backend/*) backend=true ;;
+                frontend/*|package.json|package-lock.json) frontend=true ;;
+                .github/workflows/ci.yml)
+                  backend=true
+                  frontend=true
+                  ;;
+              esac
+            done <<< "$files"
+          fi
+
+          deploy=false
+          if [ "$backend" = true ] || [ "$frontend" = true ]; then
+            deploy=true
+          fi
+          echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
+          echo "backend=$backend" >> "$GITHUB_OUTPUT"
+          echo "frontend=$frontend" >> "$GITHUB_OUTPUT"
+
+  deploy-staging:
+    name: Deploy - Staging
+    needs: [backend, database, frontend, staging-changes]
+    if: >-
+      needs.staging-changes.outputs.deploy == 'true' &&
+      vars.STAGING_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+
+    permissions:
+      contents: read
+      id-token: write
+
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check staging deployment configuration
+        id: gate
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          PROVIDER: ${{ vars.STAGING_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          DEPLOYER: ${{ vars.STAGING_GCP_DEPLOYER_SERVICE_ACCOUNT }}
+          RUNTIME: ${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
+          CORS: ${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            [ -n "${!v}" ] || { echo "::error::Staging deployment configuration is missing ($v)."; exit 1; }
+          done
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        if: steps.gate.outputs.deploy == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.STAGING_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.STAGING_GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Configure Docker for Artifact Registry
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend == 'true'
+        run: gcloud auth configure-docker "${{ vars.GCP_REGION }}-docker.pkg.dev" --quiet
+
+      - name: Set up Docker Buildx
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push staging image
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:staging-${{ github.sha }}
+          cache-from: type=gha,scope=lagaw-staging
+          cache-to: type=gha,scope=lagaw-staging,mode=max
+
+      - name: Deploy backend to staging Cloud Run
+        id: deploy-backend-staging
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend == 'true'
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: lagaw-api-staging
+          region: ${{ vars.GCP_REGION }}
+          image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:staging-${{ github.sha }}
+          env_vars: |
+            CORS_ALLOWED_ORIGINS=${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
+          secrets: |
+            SUPABASE_URL=STAGING_SUPABASE_URL:2
+            SUPABASE_SERVICE_ROLE_KEY=STAGING_SUPABASE_SERVICE_ROLE_KEY:2
+          flags: >-
+            --allow-unauthenticated
+            --service-account=${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
+            --min-instances=0
+            --max-instances=2
+            --cpu=1
+            --memory=512Mi
+            --concurrency=20
+            --timeout=60
+            --port=8080
+
+      - name: Read existing staging API URL
+        id: existing-staging-api
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend != 'true'
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+        run: |
+          url=$(gcloud run services describe lagaw-api-staging --project "$PROJECT" --region "$REGION" --format='value(status.url)')
+          [ -n "$url" ] || { echo "::error::Staging Cloud Run URL is missing."; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test staging API
+        if: steps.gate.outputs.deploy == 'true'
+        env:
+          SERVICE_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
+        run: |
+          set -eo pipefail
+          [ -n "$SERVICE_URL" ] || { echo "::error::Staging API URL is missing."; exit 1; }
+          curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 \
+            "$SERVICE_URL/locations?limit=1" | python -c "import sys,json; d=json.load(sys.stdin); assert d['items'], 'no locations returned'; print('staging smoke test ok:', len(d['items']), 'location')"
+
+      - name: Set up Flutter
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Build staging Flutter Web
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        working-directory: frontend
+        env:
+          API_BASE_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
+        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      - name: Set up Node.js
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Wrangler
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        run: npm ci
+
+      - name: Deploy staging Flutter Web
+        id: deploy-staging-web
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -eo pipefail
+          npx wrangler pages deploy frontend/build/web \
+            --project-name lagaw \
+            --branch staging \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-dirty=true | tee deploy-staging.log
+          url=$(python -c 'import pathlib, re, sys; matches = re.findall(r"https://[A-Za-z0-9.-]+\.pages\.dev", pathlib.Path(sys.argv[1]).read_text()); print(matches[-1] if matches else "")' deploy-staging.log)
+          [ -n "$url" ] || { echo "::error::Could not determine the staging Pages URL."; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "### Staging deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "API: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Web: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke test staging Flutter Web
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
+        env:
+          DEPLOY_URL: ${{ steps.deploy-staging-web.outputs.url }}
+        run: |
+          set -eo pipefail
+          [ -n "$DEPLOY_URL" ] || { echo "::error::Staging Pages URL is missing."; exit 1; }
+          curl --fail --silent --show-error --location --retry 3 --retry-delay 5 --max-time 30 \
+            "$DEPLOY_URL" --output /dev/null
+          echo "Staging Pages HTTP smoke test passed: $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
