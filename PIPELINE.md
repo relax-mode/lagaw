@@ -13,8 +13,9 @@ flowchart TD
   Frontend --> Gate
   Database --> Gate
   Gate -->|Same-repository PR, frontend changes| Preview[Cloudflare Pages preview + HTTP smoke test]
-  Gate -->|main, frontend or CI workflow changes| ProductionWeb[Cloudflare Pages production + HTTP smoke test]
-  Gate -->|main, backend changes| ProductionAPI[Cloud Run production + API smoke test]
+  Gate -->|manual dispatch on main| ProductionWeb[Cloudflare Pages production + HTTP smoke test]
+  Gate -->|manual dispatch on main| ProductionAPI[Cloud Run production + API smoke test]
+  Gate -->|main push, staging enabled + reviewer approval| Staging[Staging Cloud Run + Pages + smoke checks]
 ```
 
 ## Pull requests and deployment gates
@@ -25,11 +26,11 @@ The `Lagaw CI` workflow runs on every pull request, push to `main`, and manual d
 - `Database - PostgreSQL migrations and smoke tests`: migrations and SQLAlchemy relationship checks against a disposable PostgreSQL service. The CI credentials are test-only.
 - `Frontend - Flutter`: Flutter tests, analysis, and a web build.
 
-Both deployment jobs depend on all three checks, so a failed check prevents the corresponding deploy. The backend deploy runs only for `main` pushes that change backend runtime files or the CI workflow; manual production deploys can be started by dispatching the workflow on `main`. Google Cloud authentication uses Workload Identity Federation restricted to `main`.
+Both production deployment jobs depend on all three checks, so a failed check prevents either deploy. Production API and Pages deployments run only after manually dispatching the workflow on `main`; each deploys the current `main` commit and performs its smoke check. Main pushes do not deploy production. Google Cloud authentication uses Workload Identity Federation restricted to `main`.
 
-Same-repository pull requests publish a Cloudflare Pages preview after all checks pass when frontend or package files change; CI workflow-only, docs-only, and test-only changes skip preview publishing. Fork pull requests run checks but do not receive deploy credentials. Production Pages deploys run after checks on `main` when frontend, package, or CI workflow files change. Both Pages deployments use the web artifact built by the frontend job and perform an HTTP smoke check. The backend production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
+Pull requests run checks only; they do not publish Pages previews or production deployments. This prevents PR bundles from calling production and keeps production releases manual. The Cloud Run production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
 
-Main branch protection now requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deploy jobs are not required checks because they only run after a merge to `main`.
+Main branch protection now requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deploy jobs are not required checks because production deploys run only by manual dispatch and staging deploys follow a `main` push after required environment approval.
 
 ## Environment boundaries
 
