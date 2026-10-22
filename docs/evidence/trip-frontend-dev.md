@@ -82,8 +82,10 @@ on an emulator, use `--dart-define=API_BASE_URL=http://10.0.2.2:8000`.
 ## Notes for reviewers
 
 - `TRIP_DEMO_TOKEN` is compiled into the client through `--dart-define`. Anyone
-  can read it in a web build, so use it only for local development until the team
-  agrees on a client-safe approach (see the open decision in the milestones doc).
+  can read it in a web build. The deployed demo now builds with the production
+  demo token from a GitHub Actions secret, so treat that token as exposed and
+  keep it scoped to the synthetic demo profile until a client-safe approach
+  replaces it.
 - `TripService.updateTrip` sends `PATCH` with only the fields that changed
   (`TripDraft.changedFieldsFrom`). Cleared transport or group goes out as `null`,
   cleared tags as `[]`, matching `docs/trip-mutations-api.md`. A 409 conflict

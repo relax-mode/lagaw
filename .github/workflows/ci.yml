@@ -160,7 +160,8 @@ jobs:
         if: steps.project.outputs.exists == 'true'
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-        run: flutter build web --release ${API_BASE_URL:+--dart-define=API_BASE_URL=$API_BASE_URL}
+          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+        run: flutter build web --release ${API_BASE_URL:+--dart-define=API_BASE_URL=$API_BASE_URL} --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
 
       - name: Upload web build
         if: steps.project.outputs.exists == 'true'
@@ -195,6 +196,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
         run: |
           skip() {
             echo "deploy=false" >> "$GITHUB_OUTPUT"
@@ -205,6 +207,7 @@ jobs:
 
           [ -f frontend/web/index.html ] || skip "the Flutter project has no web platform (run 'flutter create --platforms=web .' in frontend/)."
           [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || skip "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set."
+          [ -n "$TRIP_DEMO_TOKEN" ] || skip "TRIP_DEMO_TOKEN is not set, so trip creation would be disabled in the deployed app."
 
           echo "deploy=true" >> "$GITHUB_OUTPUT"
 
