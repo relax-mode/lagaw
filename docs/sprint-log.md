@@ -224,6 +224,8 @@ The S1 issue plan assigned [schema (#6)](https://github.com/relax-mode/lagaw/iss
 - **October 19, 2026** — The team was informed that Week 2 backlog preparation was complete (confirmed by Kyle on October 20).
 - **October 20, 2026** — Next advisor consultation confirmed for **Thursday, October 22, 2026, at 3:30 PM in CSL 1** (Asia/Singapore).
 
+- **October 22, 2026** — Started [issue #31](https://github.com/relax-mode/lagaw/issues/31) on `chore/issue-31-ci-gates`. The latest pull request CI run ([39729412277](https://github.com/relax-mode/lagaw/actions/runs/39729412277)) passed 69 backend tests, including Trip HTTP CRUD tests through mocked Supabase requests; those tests do not verify persistence in a real database. The separate Database CI run uses disposable PostgreSQL. Confirmed that main had no branch protection and the backend deploy workflow was independent of the CI workflow, so deployment could begin before all checks finished. Recorded the 41-second database job baseline in `docs/pipeline-metrics.md`.
+
 Consultation outcomes and the Sprint 2 retrospective remain pending; record them after the meeting.
 
 ## Sprint 3 — Recommendations and itinerary integration
