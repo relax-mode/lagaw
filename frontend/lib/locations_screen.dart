@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'config.dart';
 import 'models/location.dart';
+import 'screens/trip_create_screen.dart';
+import 'screens/trips_tab.dart';
 import 'services/api_service.dart';
+import 'services/trip_service.dart';
 import 'theme.dart';
 import 'widgets/bacolod_3d_badges.dart';
+import 'widgets/tactile_motion.dart';
 
-enum AppTab { explore, swipe, spots }
+enum AppTab { explore, swipe, spots, trips }
 
 enum ApiViewState { live, loading, empty, error }
 
 class LocationsScreen extends StatefulWidget {
-  const LocationsScreen({super.key});
+  /// Injectable for tests; defaults to the live trip API. [S2-04]
+  final TripService? tripService;
+
+  const LocationsScreen({super.key, this.tripService});
 
   @override
   State<LocationsScreen> createState() => _LocationsScreenState();
@@ -33,6 +40,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   // [S1-04] Live API Fetching & State
   final ApiService _apiService = ApiService();
+  late final TripService _tripService = widget.tripService ?? TripService();
   List<LocationItem> _locations = [];
   String _errorMessage = '';
   ApiViewState _apiState = ApiViewState.loading;
@@ -46,6 +54,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   @override
   void dispose() {
     _apiService.dispose();
+    if (widget.tripService == null) _tripService.dispose();
     super.dispose();
   }
 
@@ -81,6 +90,19 @@ class _LocationsScreenState extends State<LocationsScreen> {
       _locations = List.of(kBacolodLocations);
       _apiState = ApiViewState.live;
     });
+  }
+
+  /// Opens trip creation; lands on My Trips once a trip is saved. [S2-04]
+  Future<void> _planTrip() async {
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => TripCreateScreen(service: _tripService)),
+    );
+    if (created == true && mounted) {
+      setState(() {
+        _showOnlySaved = false;
+        _activeTab = AppTab.trips;
+      });
+    }
   }
 
   List<LocationItem> get _availableLocations {
@@ -365,10 +387,17 @@ class _LocationsScreenState extends State<LocationsScreen> {
                       Column(
                         children: [
                           const SizedBox(height: 8),
-                          if (_activeTab == AppTab.explore) ...[
-                            _buildLagawHero(isWide: isWide),
-                            const SizedBox(height: 10),
-                          ],
+                          AnimatedSize(
+                            duration: TactileMotion.tab,
+                            curve: TactileMotion.curve,
+                            alignment: Alignment.topCenter,
+                            child: _activeTab == AppTab.explore
+                                ? Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: _buildLagawHero(isWide: isWide),
+                                  )
+                                : const SizedBox(width: double.infinity),
+                          ),
                           _buildTopGlassHeader(isWide: isWide),
                           Expanded(
                             child: SingleChildScrollView(
@@ -378,7 +407,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                 isWide ? 32 : 20,
                                 isWide ? 40 : 110,
                               ),
-                              child: _buildActiveTabContent(isWide: isWide),
+                              child: TactilePageSwitcher(
+                                pageKey: (_activeTab, _showOnlySaved),
+                                child: _buildActiveTabContent(isWide: isWide),
+                              ),
                             ),
                           ),
                         ],
@@ -589,6 +621,14 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 },
               ),
               const SizedBox(width: 8),
+              _buildWebNavButton(
+                icon: Icons.luggage_rounded,
+                label: 'My Trips',
+                tab: AppTab.trips,
+                // Icon-only until there is room for a third label. [S2-04]
+                iconOnly: MediaQuery.of(context).size.width < 1040,
+              ),
+              const SizedBox(width: 8),
             ],
 
             // 3D Swipe Deck Icon Button
@@ -639,7 +679,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
             const SizedBox(width: 8),
 
             // 3D Saved Heart Button
-            GestureDetector(
+            TactilePressable(
               onTap: _viewSavedLocations,
               child: Tooltip(
                 message: 'View Itinerary (${_savedIds.length})',
@@ -714,9 +754,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
     required String label,
     required AppTab tab,
     VoidCallback? onTapOverride,
+    bool iconOnly = false,
   }) {
     final isActive = _activeTab == tab && !_showOnlySaved;
-    return Vector3DButton(
+    final button = Vector3DButton(
       onTap: onTapOverride ??
           () => setState(() {
                 _showOnlySaved = false;
@@ -742,19 +783,22 @@ class _LocationsScreenState extends State<LocationsScreen> {
             size: 15,
             color: isActive ? Colors.white : AppTheme.slateDark,
           ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w900,
-              color: isActive ? Colors.white : AppTheme.slateDark,
-              fontFamily: 'Outfit',
+          if (!iconOnly) ...[
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w900,
+                color: isActive ? Colors.white : AppTheme.slateDark,
+                fontFamily: 'Outfit',
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
+    return iconOnly ? Tooltip(message: label, child: button) : button;
   }
 
   Widget _buildActiveTabContent({required bool isWide}) {
@@ -765,6 +809,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
         return _buildSwipeTab(isWide: isWide);
       case AppTab.spots:
         return _buildSpotsDirectoryTab(isWide: isWide);
+      case AppTab.trips:
+        return TripsTab(service: _tripService, isWide: isWide);
     }
   }
 
@@ -803,7 +849,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                             offset: const Offset(-88, 12),
                             child: Transform.rotate(
                               angle: -0.20,
-                              child: GestureDetector(
+                              child: TactilePressable(
                                 onTap: () => setState(() => _featuredIndex--),
                                 child: _buildSideFanCard(leftSpot),
                               ),
@@ -813,13 +859,16 @@ class _LocationsScreenState extends State<LocationsScreen> {
                             offset: const Offset(88, 12),
                             child: Transform.rotate(
                               angle: 0.20,
-                              child: GestureDetector(
+                              child: TactilePressable(
                                 onTap: () => setState(() => _featuredIndex++),
                                 child: _buildSideFanCard(rightSpot),
                               ),
                             ),
                           ),
-                          _buildCenterFanCard(centerSpot),
+                          TactilePageSwitcher(
+                            pageKey: centerSpot.id,
+                            child: _buildCenterFanCard(centerSpot),
+                          ),
                         ],
                       ),
                     ),
@@ -851,6 +900,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    _buildPlanTripButton(),
                   ],
                 ),
               ),
@@ -864,7 +915,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   children: [
                     _buildBentoStats(isWide: true),
                     const SizedBox(height: 16),
-                    GestureDetector(
+                    TactilePressable(
                       onTap: () {
                         setState(() {
                           _showOnlySaved = false;
@@ -959,7 +1010,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   offset: const Offset(-78, 12),
                   child: Transform.rotate(
                     angle: -0.20,
-                    child: GestureDetector(
+                    child: TactilePressable(
                       onTap: () => setState(() => _featuredIndex--),
                       child: _buildSideFanCard(leftSpot),
                     ),
@@ -969,13 +1020,16 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   offset: const Offset(78, 12),
                   child: Transform.rotate(
                     angle: 0.20,
-                    child: GestureDetector(
+                    child: TactilePressable(
                       onTap: () => setState(() => _featuredIndex++),
                       child: _buildSideFanCard(rightSpot),
                     ),
                   ),
                 ),
-                _buildCenterFanCard(centerSpot),
+                TactilePageSwitcher(
+                  pageKey: centerSpot.id,
+                  child: _buildCenterFanCard(centerSpot),
+                ),
               ],
             ),
           ),
@@ -1006,6 +1060,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          _buildPlanTripButton(),
           const SizedBox(height: 14),
           _buildBentoStats(isWide: false),
         ],
@@ -1013,55 +1069,94 @@ class _LocationsScreenState extends State<LocationsScreen> {
     );
   }
 
+  /// Secondary Home CTA into trip creation. [S2-04]
+  Widget _buildPlanTripButton() {
+    return Vector3DButton(
+      key: const ValueKey('home-plan-trip'),
+      onTap: _planTrip,
+      backgroundColor: Colors.white,
+      shadowColor: const Color(0xFFCBD5E1),
+      borderColor: const Color(0xFFE2E8F0),
+      borderRadius: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      depth: 3.5,
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.luggage_rounded, size: 17, color: Color(0xFFEA580C)),
+          SizedBox(width: 8),
+          Text(
+            'Plan a Trip',
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+              color: AppTheme.slateDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCategoryPills() {
+    final gutter = MediaQuery.of(context).size.width >= 768 ? 32.0 : 20.0;
+    // The row stays 44px tall, but painting may spill past it so the pills'
+    // bevel shadows and hover/press motion are not sliced, and pills scroll
+    // out to the screen edge instead of being hard-cut at the page gutter.
     return SizedBox(
       height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final cat = _categories[index];
-          final catId = cat['id']!;
-          final isSelected = _selectedCategory == catId;
-          final theme = _categoryThemes[catId] ?? _categoryThemes['all']!;
+      child: ClipRect(
+        clipper: _BleedClipper(horizontal: gutter, vertical: 16),
+        child: ListView.separated(
+          clipBehavior: Clip.none,
+          scrollDirection: Axis.horizontal,
+          itemCount: _categories.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final cat = _categories[index];
+            final catId = cat['id']!;
+            final isSelected = _selectedCategory == catId;
+            final theme = _categoryThemes[catId] ?? _categoryThemes['all']!;
 
-          return Vector3DButton(
-            onTap: () {
-              setState(() {
-                _selectedCategory = catId;
-                _featuredIndex = 0;
-              });
-            },
-            backgroundColor: isSelected ? theme.bg : Colors.white,
-            shadowColor: isSelected ? theme.shadow : const Color(0xFFCBD5E1),
-            borderColor: isSelected ? Colors.white : const Color(0xFFE2E8F0),
-            borderRadius: 24,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            depth: isSelected ? 3.5 : 2.5,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  theme.icon,
-                  size: 16,
-                  color: isSelected ? Colors.white : theme.bg,
-                ),
-                const SizedBox(width: 7),
-                Text(
-                  cat['label']!,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
-                    fontFamily: 'Outfit',
-                    color: isSelected ? Colors.white : AppTheme.slateDark,
-                    letterSpacing: 0.2,
+            return Vector3DButton(
+              onTap: () {
+                setState(() {
+                  _selectedCategory = catId;
+                  _featuredIndex = 0;
+                });
+              },
+              backgroundColor: isSelected ? theme.bg : Colors.white,
+              shadowColor: isSelected ? theme.shadow : const Color(0xFFCBD5E1),
+              borderColor: isSelected ? Colors.white : const Color(0xFFE2E8F0),
+              borderRadius: 24,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              depth: isSelected ? 3.5 : 2.5,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    theme.icon,
+                    size: 16,
+                    color: isSelected ? Colors.white : theme.bg,
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(width: 7),
+                  Text(
+                    cat['label']!,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
+                      fontFamily: 'Outfit',
+                      color: isSelected ? Colors.white : AppTheme.slateDark,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -1070,7 +1165,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
     return Row(
       children: [
         Expanded(
-          child: GestureDetector(
+          child: TactilePressable(
             onTap: () {
               setState(() {
                 _showOnlySaved = false;
@@ -1134,7 +1229,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: GestureDetector(
+          child: TactilePressable(
             onTap: _viewSavedLocations,
             child: GlassContainer(
               borderRadius: 20,
@@ -1302,14 +1397,23 @@ class _LocationsScreenState extends State<LocationsScreen> {
                               ),
                             ),
                           ),
-                          GestureDetector(
+                          TactilePressable(
                             onTap: () => _toggleSave(spot.id),
-                            child: Icon(
-                              isSaved ? Icons.favorite : Icons.favorite_border,
-                              size: 18,
-                              color: isSaved
-                                  ? const Color(0xFFF43F5E)
-                                  : Colors.white,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 260),
+                              switchInCurve: Curves.elasticOut,
+                              transitionBuilder: (child, animation) =>
+                                  ScaleTransition(scale: animation, child: child),
+                              child: KeyedSubtree(
+                                key: ValueKey(isSaved),
+                                child: Icon(
+                                  isSaved ? Icons.favorite : Icons.favorite_border,
+                                  size: 18,
+                                  color: isSaved
+                                      ? const Color(0xFFF43F5E)
+                                      : Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -2391,15 +2495,26 @@ class _LocationsScreenState extends State<LocationsScreen> {
             Wrap(
               spacing: 16,
               runSpacing: 16,
-              children: _filteredLocations.map((item) {
-                return _buildWebSpotCard(item);
-              }).toList(),
+              children: [
+                for (final (i, item) in _filteredLocations.indexed)
+                  FadeSlideIn(
+                    key: ValueKey(item.id),
+                    index: i,
+                    child: TactilePressable(child: _buildWebSpotCard(item)),
+                  ),
+              ],
             )
           else
             // Mobile Vertical List Layout
-            ..._filteredLocations.map((item) {
-              return _buildMobileSpotCard(item);
-            }),
+            for (final (i, item) in _filteredLocations.indexed)
+              FadeSlideIn(
+                key: ValueKey(item.id),
+                index: i,
+                child: TactilePressable(
+                  hoverLift: 2,
+                  child: _buildMobileSpotCard(item),
+                ),
+              ),
       ],
     );
   }
@@ -2447,14 +2562,23 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           ),
                         ),
                       ),
-                      GestureDetector(
+                      TactilePressable(
                         onTap: () => _toggleSave(item.id),
-                        child: Icon(
-                          isSaved ? Icons.favorite : Icons.favorite_border,
-                          size: 18,
-                          color: isSaved
-                              ? const Color(0xFFF43F5E)
-                              : AppTheme.slateMuted,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 260),
+                          switchInCurve: Curves.elasticOut,
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(scale: animation, child: child),
+                          child: KeyedSubtree(
+                            key: ValueKey(isSaved),
+                            child: Icon(
+                              isSaved ? Icons.favorite : Icons.favorite_border,
+                              size: 18,
+                              color: isSaved
+                                  ? const Color(0xFFF43F5E)
+                                  : AppTheme.slateMuted,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -2552,7 +2676,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: GestureDetector(
+                    child: TactilePressable(
                       onTap: () => _toggleSave(item.id),
                       child: Container(
                         padding: const EdgeInsets.all(6),
@@ -2560,12 +2684,21 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           color: Color(0x80000000),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          isSaved ? Icons.favorite : Icons.favorite_border,
-                          size: 16,
-                          color: isSaved
-                              ? const Color(0xFFF43F5E)
-                              : Colors.white,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 260),
+                          switchInCurve: Curves.elasticOut,
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(scale: animation, child: child),
+                          child: KeyedSubtree(
+                            key: ValueKey(isSaved),
+                            child: Icon(
+                              isSaved ? Icons.favorite : Icons.favorite_border,
+                              size: 16,
+                              color: isSaved
+                                  ? const Color(0xFFF43F5E)
+                                  : Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -2675,6 +2808,11 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   label: 'Spots',
                   tab: AppTab.spots,
                 ),
+                _buildNavPillButton(
+                  icon: Icons.luggage_rounded,
+                  label: 'Trips',
+                  tab: AppTab.trips,
+                ),
               ],
             ),
           ),
@@ -2708,7 +2846,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
     required AppTab tab,
   }) {
     final isActive = _activeTab == tab && !_showOnlySaved;
-    return Vector3DButton(
+    // Three pills share the dock; shrink rather than overflow on tiny phones.
+    final pill = Vector3DButton(
       onTap: () => setState(() {
         _showOnlySaved = false;
         _activeTab = tab;
@@ -2723,7 +2862,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
           ? Colors.transparent
           : const Color(0xFFF1F5F9),
       borderRadius: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       depth: 3.0,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2746,5 +2885,29 @@ class _LocationsScreenState extends State<LocationsScreen> {
         ],
       ),
     );
+    return Flexible(
+      child: FittedBox(fit: BoxFit.scaleDown, child: pill),
+    );
   }
+}
+
+/// Clips to the child's box grown by [horizontal] and [vertical] pixels, so
+/// decorations can paint just outside a scroll view without being cut off.
+class _BleedClipper extends CustomClipper<Rect> {
+  final double horizontal;
+  final double vertical;
+
+  const _BleedClipper({required this.horizontal, required this.vertical});
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTRB(
+    -horizontal,
+    -vertical,
+    size.width + horizontal,
+    size.height + vertical,
+  );
+
+  @override
+  bool shouldReclip(_BleedClipper oldClipper) =>
+      oldClipper.horizontal != horizontal || oldClipper.vertical != vertical;
 }
