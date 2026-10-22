@@ -69,8 +69,9 @@ class GlassContainer extends StatelessWidget {
   }
 }
 
-/// Tactile 3D Vector Button with Solid Colorful Depth
-class Vector3DButton extends StatelessWidget {
+/// Tactile 3D Vector Button with Solid Colorful Depth.
+/// Lifts slightly on hover and sinks into its bevel when pressed.
+class Vector3DButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final Color backgroundColor;
@@ -93,32 +94,65 @@ class Vector3DButton extends StatelessWidget {
   });
 
   @override
+  State<Vector3DButton> createState() => _Vector3DButtonState();
+}
+
+class _Vector3DButtonState extends State<Vector3DButton> {
+  bool _hovered = false;
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(
-            color: borderColor ?? shadowColor,
-            width: 2.0,
+    final enabled = widget.onTap != null;
+    // Pressed: the face travels down into its bevel. Hovered: it rises a touch.
+    final travel = _pressed
+        ? widget.depth * 0.75
+        : (_hovered && enabled ? -1.5 : 0.0);
+    final edge = widget.depth - travel;
+
+    return MouseRegion(
+      cursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() {
+        _hovered = false;
+        _pressed = false;
+      }),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onTapDown: enabled ? (_) => _setPressed(true) : null,
+        onTapUp: enabled ? (_) => _setPressed(false) : null,
+        onTapCancel: enabled ? () => _setPressed(false) : null,
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: _pressed ? 70 : 160),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.translationValues(0, travel, 0),
+          padding: widget.padding,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            border: Border.all(
+              color: widget.borderColor ?? widget.shadowColor,
+              width: 2.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: widget.shadowColor,
+                offset: Offset(0, edge),
+                blurRadius: 0, // Solid 3D vector bottom edge
+              ),
+              BoxShadow(
+                color: const Color(0x220F172A),
+                offset: Offset(0, edge + 3),
+                blurRadius: _hovered && !_pressed ? 10 : 6,
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor,
-              offset: Offset(0, depth),
-              blurRadius: 0, // Solid 3D vector bottom edge
-            ),
-            BoxShadow(
-              color: const Color(0x220F172A),
-              offset: Offset(0, depth + 3),
-              blurRadius: 6,
-            ),
-          ],
+          child: widget.child,
         ),
-        child: child,
       ),
     );
   }

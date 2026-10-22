@@ -381,8 +381,9 @@ completes the reported production CRUD and itinerary-cascade verification.
 - [x] All four CRUD operations verified through the development and deployed APIs/databases.
 - [x] Persisted partial updates, invalid-update preservation, ownership, and
       actual development and production itinerary cascades verified.
-- [ ] Publish this evidence and link it from issue #24.
+- [x] Evidence published and linked to issue #24 in documentation PR #42.
 
-The implementation and deployment conditions are complete. Publish this
-evidence in a reviewed documentation PR and link it from issue #24 before
-closing the issue.
+The implementation, deployment, and evidence publication conditions are
+complete. The developer reported documentation PR #42 was reviewed, merged, and
+all tests passed. GitHub issue closure status was not independently verified
+from this session.

@@ -1,0 +1,354 @@
+import 'package:flutter/material.dart';
+
+import '../models/trip.dart';
+import '../services/trip_service.dart';
+import '../theme.dart';
+import '../utils/trip_format.dart';
+import '../widgets/status_banner.dart';
+import '../widgets/tactile_motion.dart';
+import '../widgets/trip_card.dart';
+import '../widgets/trip_form/choice_chips_field.dart';
+import '../widgets/trip_form/trip_form.dart';
+import 'trip_edit_screen.dart';
+import 'trip_page_scaffold.dart';
+
+/// One saved trip, loaded through `GET /api/v1/trips/{id}`. [S2-04]
+class TripDetailScreen extends StatefulWidget {
+  final TripService service;
+  final String tripId;
+
+  /// Shown immediately while the fresh copy loads (e.g. right after create).
+  final Trip? initial;
+
+  /// One-off success message, such as after creating the trip.
+  final String? notice;
+
+  const TripDetailScreen({
+    super.key,
+    required this.service,
+    required this.tripId,
+    this.initial,
+    this.notice,
+  });
+
+  @override
+  State<TripDetailScreen> createState() => _TripDetailScreenState();
+}
+
+class _TripDetailScreenState extends State<TripDetailScreen> {
+  Trip? _trip;
+  bool _loading = true;
+  String? _error;
+  String? _notice;
+
+  @override
+  void initState() {
+    super.initState();
+    _trip = widget.initial;
+    _notice = widget.notice;
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final trip = await widget.service.getTrip(widget.tripId);
+      if (!mounted) return;
+      setState(() {
+        _trip = trip;
+        _loading = false;
+      });
+    } on TripApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.message;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _edit() async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) =>
+            TripEditScreen(service: widget.service, tripId: widget.tripId),
+      ),
+    );
+    if (saved == true && mounted) {
+      setState(() => _notice = 'Changes saved.');
+      _load();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final trip = _trip;
+
+    return TripPageScaffold(
+      title: trip?.title ?? 'your trip',
+      subtitle: trip == null
+          ? null
+          : formatDateRange(trip.startDate, trip.endDate),
+      trailing: trip == null ? null : TripStatusPill(trip.status),
+      children: [
+        if (_notice != null) ...[
+          StatusBanner(
+            key: const ValueKey('detail-notice'),
+            tone: StatusTone.success,
+            message: _notice!,
+          ),
+          const SizedBox(height: 14),
+        ],
+        if (_error != null) ...[
+          StatusBanner(
+            key: const ValueKey('detail-error'),
+            tone: StatusTone.error,
+            message: _error!,
+            actionLabel: 'Retry',
+            onAction: _load,
+          ),
+          const SizedBox(height: 14),
+        ],
+        if (trip == null && _loading)
+          const Padding(
+            padding: EdgeInsets.only(top: 80),
+            child: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
+        if (trip != null) ..._buildDetails(trip),
+      ],
+    );
+  }
+
+  List<Widget> _buildDetails(Trip trip) {
+    final transport = chipOptionFor(
+      kTransportationModes,
+      trip.transportationMode,
+    );
+    final group = chipOptionFor(kGroupTypes, trip.groupType);
+    final tags = [
+      for (final tag in trip.preferredTags)
+        chipOptionFor(kPreferredTags, tag) ?? ChipOption(tag, tag, Icons.tag),
+    ];
+
+    return [
+      FadeSlideIn(
+        child: Row(
+          children: [
+            Expanded(
+              child: _FactTile(
+                icon: Icons.calendar_month_rounded,
+                label: 'Dates',
+                value: formatDayCount(
+                  tripDayCount(trip.startDate, trip.endDate),
+                ),
+                detail: formatDateRange(trip.startDate, trip.endDate),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _FactTile(
+                icon: Icons.payments_rounded,
+                label: 'Budget',
+                value: formatPeso(trip.budgetMax),
+                detail: trip.budgetMin == trip.budgetMax
+                    ? 'Fixed budget'
+                    : 'From ${formatPeso(trip.budgetMin)}',
+                accent: const Color(0xFF16A34A),
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 14),
+      FadeSlideIn(
+        index: 1,
+        child: GlassContainer(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _infoRow(
+                'Getting around',
+                transport?.label ?? 'Not set',
+                transport?.icon ?? Icons.alt_route_rounded,
+              ),
+              const Divider(height: 24, color: Color(0xFFE2E8F0)),
+              _infoRow(
+                'Who is coming',
+                group?.label ?? 'Not set',
+                group?.icon ?? Icons.group_add_rounded,
+              ),
+              const Divider(height: 24, color: Color(0xFFE2E8F0)),
+              const Text(
+                'Vibes',
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  color: AppTheme.slateMuted,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (tags.isEmpty)
+                const Text(
+                  'No vibes picked yet',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.slateDark,
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final tag in tags)
+                      TripPill(
+                        label: tag.label,
+                        icon: tag.icon,
+                        color: const Color(0xFFC2410C),
+                        background: const Color(0xFFFFF7ED),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 20),
+      FadeSlideIn(
+        index: 2,
+        child: Vector3DButton(
+          key: const ValueKey('trip-edit'),
+          onTap: _edit,
+          backgroundColor: AppTheme.primaryBlue,
+          shadowColor: const Color(0xFF1D4ED8),
+          borderColor: const Color(0xFF93C5FD),
+          borderRadius: 28,
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          depth: 4.5,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Edit trip',
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Widget _infoRow(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 18, color: AppTheme.primaryBlue),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+              color: AppTheme.slateMuted,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            color: AppTheme.slateDark,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FactTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final String detail;
+  final Color accent;
+
+  const _FactTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.detail,
+    this.accent = AppTheme.primaryBlue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassContainer(
+      borderRadius: 20,
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: accent),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  color: AppTheme.slateMuted,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontWeight: FontWeight.w900,
+              fontSize: 22,
+              color: AppTheme.slateDark,
+            ),
+          ),
+          Text(
+            detail,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 11.5,
+              color: AppTheme.slateMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
