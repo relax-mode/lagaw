@@ -12,9 +12,9 @@ flowchart TD
   Backend --> Gate{All checks pass?}
   Frontend --> Gate
   Database --> Gate
-  Gate -->|Same-repository PR, frontend changes| Preview[Cloudflare Pages preview + HTTP smoke test]
   Gate -->|main, frontend or CI workflow changes| ProductionWeb[Cloudflare Pages production + HTTP smoke test]
-  Gate -->|main, backend changes| ProductionAPI[Cloud Run production + API smoke test]
+  Gate -->|main, backend or CI workflow changes| ProductionAPI[Cloud Run production + API smoke test]
+  Gate -->|main, staging enabled| Staging[Staging Cloud Run + Pages, staging API and web smoke tests]
 ```
 
 ## Pull requests and deployment gates
@@ -25,9 +25,11 @@ The `Lagaw CI` workflow runs on every pull request, push to `main`, and manual d
 - `Database - PostgreSQL migrations and smoke tests`: migrations and SQLAlchemy relationship checks against a disposable PostgreSQL service. The CI credentials are test-only.
 - `Frontend - Flutter`: Flutter tests, analysis, and a web build.
 
-Both deployment jobs depend on all three checks, so a failed check prevents the corresponding deploy. The backend deploy runs only for `main` pushes that change backend runtime files or the CI workflow; manual production deploys can be started by dispatching the workflow on `main`. Google Cloud authentication uses Workload Identity Federation restricted to `main`.
+Production deployments depend on all three checks, so a failed check prevents the corresponding deploy. The backend deploy runs only for `main` pushes that change backend runtime files or the CI workflow; manual production deploys can be started by dispatching the workflow on `main`. Google Cloud authentication uses Workload Identity Federation restricted to `main`.
 
-Same-repository pull requests publish a Cloudflare Pages preview after all checks pass when frontend or package files change; CI workflow-only, docs-only, and test-only changes skip preview publishing. Fork pull requests run checks but do not receive deploy credentials. Production Pages deploys run after checks on `main` when frontend, package, or CI workflow files change. Both Pages deployments use the web artifact built by the frontend job and perform an HTTP smoke check. The backend production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
+Pull requests run checks only; they do not publish Pages previews. This prevents PR bundles from calling the production API. Production Pages deploys run after checks on `main` when frontend, package, or CI workflow files change. Production builds use the production API base URL and perform an HTTP smoke check. The backend production deploy smoke check requests `/locations?limit=1` and requires at least one returned location.
+
+When enabled, the staging job also waits for all three checks and runs only for relevant changes on `main` or a manual dispatch on `main`. It builds a separate Flutter bundle against the staging Cloud Run URL, deploys it to the Cloudflare Pages `staging` branch, and checks both the API and deployed web response. See [the staging runbook](docs/staging.md) for the service boundaries, activation gate, and verification steps.
 
 Main branch protection now requires one approving review and the three CI checks above, with stale approvals dismissed and strict up-to-date checks enabled. Force pushes and branch deletion are disabled. Deploy jobs are not required checks because they only run after a merge to `main`.
 
@@ -35,7 +37,7 @@ Main branch protection now requires one approving review and the three CI checks
 
 Production Cloud Run reads `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from Google Secret Manager. GitHub Actions stores only non-secret GCP identifiers as repository variables; its Cloudflare deploy credentials are repository Actions secrets.
 
-**PR previews are not yet data-isolated.** The Flutter web build currently uses the repository-level `API_BASE_URL`, which points to the production backend. A preview therefore calls production until the staging environment in [issue #30](https://github.com/relax-mode/lagaw/issues/30) is configured. Do not treat a Pages preview as a staging acceptance check before that work is complete.
+Staging uses the existing development Supabase project and separate Cloud Run service credentials. The workflow pins staging Secret Manager versions and a separate runtime service account can access only the staging secrets. A separate Workload Identity provider is restricted to this repository's `main` branch and the GitHub `staging` environment; production identity configuration is unchanged. Automated staging deploys remain disabled until the `staging` GitHub environment has a required reviewer. Current provisioning and the remaining activation step are recorded in [the staging runbook](docs/staging.md).
 
 The API tests use mocked HTTP transports and do not verify writes through a live Supabase Data API. The disposable PostgreSQL job verifies migrations and SQLAlchemy relationships separately. See [issue #29](https://github.com/relax-mode/lagaw/issues/29) for the remaining database-backed API test acceptance.
 
