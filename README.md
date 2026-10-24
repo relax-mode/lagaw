@@ -59,6 +59,9 @@ verification: [trip API guide](docs/trips-api.md).
 Trip partial updates, deletion, and development-first cascade verification:
 [trip update/delete guide](docs/trip-mutations-api.md).
 
+Manual trip-location association endpoints and development-first verification:
+[trip items API guide](docs/trip-items-api.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.

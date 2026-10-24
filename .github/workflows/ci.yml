@@ -111,6 +111,21 @@ jobs:
         env:
           DATABASE_URL: postgresql+psycopg://postgres:local_ci_only@localhost:5432/lagaw_test?sslmode=disable
         run: python backend/verify_trip_relationships.py --ci
+      - name: Start disposable PostgREST for association API tests
+        run: |
+          docker run --detach --name issue26-postgrest --network host \
+            -e PGRST_DB_URI=postgresql://postgres:local_ci_only@127.0.0.1:5432/lagaw_test \
+            -e PGRST_DB_SCHEMAS=public \
+            -e PGRST_DB_ANON_ROLE=service_role \
+            -e PGRST_SERVER_HOST=127.0.0.1 \
+            -e PGRST_SERVER_PORT=53000 \
+            postgrest/postgrest:v12.2.3
+      - name: Verify itinerary association API against disposable PostgreSQL
+        timeout-minutes: 3
+        run: python backend/verify_trip_items.py --ci
+      - name: Remove disposable association test service
+        if: always()
+        run: docker rm --force issue26-postgrest || true
 
   frontend:
     name: Frontend - Flutter
