@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 
 from app.database import DatabaseUnavailable, LocationDatabase, get_database
 from app.schemas import LocationsPage
+from app.trip_items import router as trip_items_router
 from app.trips import router as trips_router
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -88,6 +89,7 @@ def create_app() -> FastAPI:
     application.add_exception_handler(DatabaseUnavailable, database_unavailable)
     application.add_exception_handler(RequestValidationError, validation_error)
     application.include_router(trips_router)
+    application.include_router(trip_items_router)
     application.add_api_route(
         "/locations", list_locations, methods=["GET"], response_model=LocationsPage,
         tags=["locations"], responses={
