@@ -1,0 +1,21 @@
+{
+  "schema_version": "1",
+  "provenance": "synthetic_development_fixture",
+  "source": "supabase/data/locations.json",
+  "source_location_count": 10,
+  "synthetic_location_ids": [
+    "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+    "e85a71d7-502c-5396-885c-b0d80313056c",
+    "b47be37f-b524-5dc7-a646-ecd5a0542059",
+    "c94fe265-67a8-5136-a19e-98bf2b3994d5"
+  ],
+  "traveler_labels": {
+    "budget_cafe": "64400982-a7c9-51f3-970d-39f9ca198457",
+    "heritage": "d9cf4d01-14ac-5565-863d-5efa42d771ab",
+    "family_nature": "5309ea30-3adb-520c-8820-56622e597986",
+    "premium_food": "66178ac8-b20a-562f-8780-f085d9c60e84",
+    "cold_start": "1e8a7b6b-032c-5a35-b130-7b82b0d6b9ea",
+    "cold_start_no_tags": "97574180-f495-58c8-b2d3-3f8ce0fe09c4"
+  },
+  "warning": "No real users or interactions. Synthetic IDs are not database IDs."
+}

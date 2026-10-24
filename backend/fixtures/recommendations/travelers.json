@@ -1,0 +1,98 @@
+[
+  {
+    "user_id": "64400982-a7c9-51f3-970d-39f9ca198457",
+    "preferred_tags": [
+      "cafe",
+      "relaxing"
+    ],
+    "budget_min": "0",
+    "budget_max": "100",
+    "group_type": "solo",
+    "preferred_categories": [],
+    "setting": null,
+    "requires_step_free_access": false,
+    "max_visit_duration_minutes": null,
+    "origin": null,
+    "max_distance_km": null,
+    "excluded_location_ids": []
+  },
+  {
+    "user_id": "d9cf4d01-14ac-5565-863d-5efa42d771ab",
+    "preferred_tags": [
+      "heritage",
+      "photography"
+    ],
+    "budget_min": "0",
+    "budget_max": "500",
+    "group_type": "couple",
+    "preferred_categories": [],
+    "setting": null,
+    "requires_step_free_access": false,
+    "max_visit_duration_minutes": null,
+    "origin": null,
+    "max_distance_km": null,
+    "excluded_location_ids": []
+  },
+  {
+    "user_id": "5309ea30-3adb-520c-8820-56622e597986",
+    "preferred_tags": [
+      "nature"
+    ],
+    "budget_min": "0",
+    "budget_max": "300",
+    "group_type": "family",
+    "preferred_categories": [],
+    "setting": null,
+    "requires_step_free_access": false,
+    "max_visit_duration_minutes": null,
+    "origin": null,
+    "max_distance_km": null,
+    "excluded_location_ids": []
+  },
+  {
+    "user_id": "66178ac8-b20a-562f-8780-f085d9c60e84",
+    "preferred_tags": [
+      "food"
+    ],
+    "budget_min": "0",
+    "budget_max": "1500",
+    "group_type": "friends",
+    "preferred_categories": [],
+    "setting": null,
+    "requires_step_free_access": false,
+    "max_visit_duration_minutes": null,
+    "origin": null,
+    "max_distance_km": null,
+    "excluded_location_ids": []
+  },
+  {
+    "user_id": "1e8a7b6b-032c-5a35-b130-7b82b0d6b9ea",
+    "preferred_tags": [
+      "photography"
+    ],
+    "budget_min": "0",
+    "budget_max": "500",
+    "group_type": "solo",
+    "preferred_categories": [],
+    "setting": null,
+    "requires_step_free_access": false,
+    "max_visit_duration_minutes": null,
+    "origin": null,
+    "max_distance_km": null,
+    "excluded_location_ids": []
+  },
+  {
+    "user_id": "97574180-f495-58c8-b2d3-3f8ce0fe09c4",
+    "preferred_tags": [],
+    "budget_min": "0",
+    "budget_max": "0",
+    "group_type": "group",
+    "preferred_categories": [],
+    "setting": null,
+    "requires_step_free_access": false,
+    "max_visit_duration_minutes": null,
+    "origin": null,
+    "max_distance_km": null,
+    "excluded_location_ids": []
+  }
+]

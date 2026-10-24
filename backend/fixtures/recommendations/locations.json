@@ -1,0 +1,353 @@
+[
+  {
+    "id": "83961c6c-0db3-52d3-811f-3023a8081394",
+    "name": "San Sebastian Cathedral",
+    "category": "heritage",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 25,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.67035,
+      "longitude": 122.94715
+    },
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+    "name": "The Negros Museum",
+    "category": "museum",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "estimated_cost_min": "70",
+    "estimated_cost_max": "100",
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 60,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.67516,
+      "longitude": 122.95032
+    },
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "4ce6bbc2-9cb1-5c0e-a198-f0c000f29fce",
+    "name": "Negros Forest Park",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "photography"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 60,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.67507,
+      "longitude": 122.95105
+    },
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "ae8f28c8-893c-5f4e-9d96-e6098a50cee2",
+    "name": "Orange Project",
+    "category": "gallery",
+    "vibe_tags": [
+      "photography",
+      "relaxing"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 45,
+    "is_active": true,
+    "coordinates": null,
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "f6247abf-d4bb-5c13-b917-53b7667c19ce",
+    "name": "Capitol Park and Lagoon",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "relaxing",
+      "photography"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 35,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.676,
+      "longitude": 122.95213
+    },
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "293aa580-efbb-50b9-a447-f44377c0ffd7",
+    "name": "Negros Occidental Provincial Capitol",
+    "category": "landmark",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 20,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.67647,
+      "longitude": 122.95093
+    },
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "b017f14a-5758-5783-94ab-9e5a4a4dea11",
+    "name": "Cafetolyo Coffee Shop",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe",
+      "food",
+      "relaxing"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 35,
+    "is_active": true,
+    "coordinates": null,
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "7f4cf896-3678-56aa-8ce0-a073dec2a6c3",
+    "name": "Arima Restaurant",
+    "category": "restaurant",
+    "vibe_tags": [
+      "food",
+      "relaxing"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 75,
+    "is_active": true,
+    "coordinates": null,
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "02751cab-b744-599f-b61d-78127577685b",
+    "name": "Panaad Park and Sports Complex",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "photography"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 60,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.62379,
+      "longitude": 122.96481
+    },
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "6ea47f8c-ce5a-513e-9833-7ce9fa10e765",
+    "name": "Calea Pastries & Coffee",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe",
+      "food",
+      "relaxing"
+    ],
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends"
+    ],
+    "typical_visit_duration": 40,
+    "is_active": true,
+    "coordinates": null,
+    "setting": null,
+    "step_free_access": null
+  },
+  {
+    "id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+    "name": "Budget cafe test variant",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe",
+      "relaxing"
+    ],
+    "estimated_cost_min": "50",
+    "estimated_cost_max": "100",
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 30,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.676,
+      "longitude": 122.95213
+    },
+    "setting": "indoor",
+    "step_free_access": true
+  },
+  {
+    "id": "e85a71d7-502c-5396-885c-b0d80313056c",
+    "name": "Premium dining test variant",
+    "category": "restaurant",
+    "vibe_tags": [
+      "food"
+    ],
+    "estimated_cost_min": "800",
+    "estimated_cost_max": "1200",
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 30,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.676,
+      "longitude": 122.95213
+    },
+    "setting": "indoor",
+    "step_free_access": true
+  },
+  {
+    "id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+    "name": "Free park test variant",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "photography"
+    ],
+    "estimated_cost_min": "0",
+    "estimated_cost_max": "0",
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 30,
+    "is_active": true,
+    "coordinates": {
+      "latitude": 10.676,
+      "longitude": 122.95213
+    },
+    "setting": "outdoor",
+    "step_free_access": true
+  },
+  {
+    "id": "c94fe265-67a8-5136-a19e-98bf2b3994d5",
+    "name": "Inactive cafe test variant",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe"
+    ],
+    "estimated_cost_min": "50",
+    "estimated_cost_max": "100",
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "typical_visit_duration": 30,
+    "is_active": false,
+    "coordinates": {
+      "latitude": 10.676,
+      "longitude": 122.95213
+    },
+    "setting": "indoor",
+    "step_free_access": true
+  }
+]
