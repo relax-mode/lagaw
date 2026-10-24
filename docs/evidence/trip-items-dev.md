@@ -1,4 +1,4 @@
-﻿# Issue #26 — manual itinerary association verification
+# Issue #26 — manual itinerary association verification
 
 Status: local offline, guarded development database, and guided development
 Swagger/SQL verification have passed. PR/CI/review/merge, deployed acceptance
@@ -107,10 +107,17 @@ verifier fixtures were cleaned.
 
 ## CI, review and deployed checks
 
-Pending: PR URL, all required CI checks, disposable PostgREST/PostgreSQL
-association test execution, teammate review and merge. Docker/PostgreSQL
-executables were unavailable in the agent environment, so development success
-does not claim that the disposable CI container has already run.
+The developer reported committing/pushing the implementation and creating
+[PR #60](https://github.com/relax-mode/lagaw/pull/60) targeting main. The local
+feature branch head is `cf6d101` (`feat: add manual trip itinerary location associations`),
+and local Git status shows the branch aligned with its saved remote-tracking ref.
+GitHub could not be accessed from the agent session, so live CI, review and merge
+status are unverified.
+
+Pending: all required CI checks, disposable PostgREST/PostgreSQL association test
+execution, teammate review and merge. Docker/PostgreSQL executables were
+unavailable in the agent environment, so development success does not claim
+that the disposable CI container has already run.
 
 After reviewed merge, coordinate staging verification against development,
 then authorized production deployment and independent hosted database checks.
