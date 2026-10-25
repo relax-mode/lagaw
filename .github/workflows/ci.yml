@@ -415,7 +415,7 @@ jobs:
               case "$path" in
                 backend/test_*.py|backend/smoke_test.*|frontend/test/*) ;;
                 backend/*) backend=true ;;
-                frontend/*|package.json|package-lock.json) frontend=true ;;
+                frontend/*|package.json|package-lock.json|scripts/smoke_staging.py) frontend=true ;;
                 .github/workflows/ci.yml)
                   backend=true
                   frontend=true
@@ -464,10 +464,12 @@ jobs:
           DEPLOYER: ${{ vars.STAGING_GCP_DEPLOYER_SERVICE_ACCOUNT }}
           RUNTIME: ${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
           CORS: ${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
+          TRIP_DEMO_USER_ID: ${{ vars.STAGING_TRIP_DEMO_USER_ID }}
+          TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS TRIP_DEMO_USER_ID TRIP_DEMO_TOKEN CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
             [ -n "${!v}" ] || { echo "::error::Staging deployment configuration is missing ($v)."; exit 1; }
           done
           echo "deploy=true" >> "$GITHUB_OUTPUT"
@@ -507,9 +509,11 @@ jobs:
           image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:staging-${{ github.sha }}
           env_vars: |
             CORS_ALLOWED_ORIGINS=${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
+            TRIP_DEMO_USER_ID=${{ vars.STAGING_TRIP_DEMO_USER_ID }}
           secrets: |
             SUPABASE_URL=STAGING_SUPABASE_URL:2
             SUPABASE_SERVICE_ROLE_KEY=STAGING_SUPABASE_SERVICE_ROLE_KEY:2
+            TRIP_DEMO_TOKEN=STAGING_TRIP_DEMO_TOKEN:1
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
@@ -535,12 +539,10 @@ jobs:
       - name: Smoke test staging API
         if: steps.gate.outputs.deploy == 'true'
         env:
-          SERVICE_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
-        run: |
-          set -eo pipefail
-          [ -n "$SERVICE_URL" ] || { echo "::error::Staging API URL is missing."; exit 1; }
-          curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 \
-            "$SERVICE_URL/locations?limit=1" | python -c "import sys,json; d=json.load(sys.stdin); assert d['items'], 'no locations returned'; print('staging smoke test ok:', len(d['items']), 'location')"
+          STAGING_API_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
+          STAGING_TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
+          STAGING_TRIP_DEMO_USER_ID: ${{ vars.STAGING_TRIP_DEMO_USER_ID }}
+        run: python3 scripts/smoke_staging.py
 
       - name: Set up Flutter
         if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
@@ -559,7 +561,8 @@ jobs:
         working-directory: frontend
         env:
           API_BASE_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
-        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL"
+          TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
+        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
 
       - name: Set up Node.js
         if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
