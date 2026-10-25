@@ -1,0 +1,257 @@
+{
+  "model_version": "content-v1",
+  "data": "synthetic development fixtures",
+  "case_count": 10,
+  "cases": [
+    {
+      "case": "budget_cafe",
+      "candidate_count": 14,
+      "interaction_count": 4,
+      "result_count": 3,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.7999999999999999,
+          "recommendation_reason": "Tags: cafe, relaxing; category: not specified; budget headroom: 0.00; group: solo; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 0.19999999999999998,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+        },
+        {
+          "name": "The Negros Museum",
+          "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+          "recommendation_score": 0.0,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.00; group: solo; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "heritage",
+      "candidate_count": 14,
+      "interaction_count": 4,
+      "result_count": 3,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "The Negros Museum",
+          "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+          "recommendation_score": 0.96,
+          "recommendation_reason": "Tags: heritage, photography; category: not specified; budget headroom: 0.80; group: couple; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 0.6,
+          "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 1.00; group: couple; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.16,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.80; group: couple; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "family_nature",
+      "candidate_count": 14,
+      "interaction_count": 4,
+      "result_count": 3,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 1.0,
+          "recommendation_reason": "Tags: nature; category: not specified; budget headroom: 1.00; group: family; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.13333333333333333,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.67; group: family; all requested hard constraints satisfied."
+        },
+        {
+          "name": "The Negros Museum",
+          "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+          "recommendation_score": 0.13333333333333333,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.67; group: family; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "premium_food",
+      "candidate_count": 14,
+      "interaction_count": 4,
+      "result_count": 4,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Premium dining test variant",
+          "location_id": "e85a71d7-502c-5396-885c-b0d80313056c",
+          "recommendation_score": 0.84,
+          "recommendation_reason": "Tags: food; category: not specified; budget headroom: 0.20; group: friends; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 0.19999999999999998,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: friends; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.18666666666666665,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.93; group: friends; all requested hard constraints satisfied."
+        },
+        {
+          "name": "The Negros Museum",
+          "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+          "recommendation_score": 0.18666666666666665,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.93; group: friends; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "cold_start",
+      "candidate_count": 14,
+      "interaction_count": 0,
+      "result_count": 3,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 1.0,
+          "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+        },
+        {
+          "name": "The Negros Museum",
+          "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+          "recommendation_score": 0.96,
+          "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.16,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "cold_start_no_tags",
+      "candidate_count": 14,
+      "interaction_count": 0,
+      "result_count": 1,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 1.0,
+          "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 1.00; group: group; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "accessibility_indoor",
+      "candidate_count": 14,
+      "interaction_count": 0,
+      "result_count": 1,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.16,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "distance_and_duration",
+      "candidate_count": 14,
+      "interaction_count": 0,
+      "result_count": 2,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 1.0,
+          "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+        },
+        {
+          "name": "Budget cafe test variant",
+          "location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5",
+          "recommendation_score": 0.16,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+        }
+      ]
+    },
+    {
+      "case": "empty_result",
+      "candidate_count": 14,
+      "interaction_count": 0,
+      "result_count": 0,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": []
+    },
+    {
+      "case": "explicit_exclusion",
+      "candidate_count": 14,
+      "interaction_count": 4,
+      "result_count": 2,
+      "eligible_examples_returned": true,
+      "empty_result_correct": true,
+      "reproducible": true,
+      "ranking": [
+        {
+          "name": "Free park test variant",
+          "location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059",
+          "recommendation_score": 0.19999999999999998,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+        },
+        {
+          "name": "The Negros Museum",
+          "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+          "recommendation_score": 0.0,
+          "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.00; group: solo; all requested hard constraints satisfied."
+        }
+      ]
+    }
+  ],
+  "benchmark": {
+    "python": "3.12.10",
+    "platform": "Windows",
+    "calls": 1000,
+    "candidates_per_call": 14,
+    "median_ms": 0.1119,
+    "p95_ms": 0.1305,
+    "scope": "local warm calls including validation; excludes fixture loading and network"
+  }
+}

@@ -1,5 +1,9 @@
 # Recommendation foundation (v1)
 
+The offline content implementation is now documented in the
+[content-based recommender guide](content-based-recommender.md). The foundation
+contracts below remain schema v1; ranking is implemented in a separate module.
+
 The executable source of truth is
 [`contracts.py`](../backend/app/recommendations/contracts.py). These Pydantic v2
 models can be used by FastAPI without importing the running app, Trip CRUD,
