@@ -11,10 +11,12 @@ Lagaw staging runs the FastAPI service and Flutter Web against the existing deve
 | Runtime identity | `lagaw-api-staging-runtime@relax-mode-lagaw.iam.gserviceaccount.com` |
 | Database | Development Supabase project `vnpkyvtbupnquvirzlzp` |
 | API secrets | Secret Manager `STAGING_SUPABASE_URL` and `STAGING_SUPABASE_SERVICE_ROLE_KEY` |
+| Trip demo | Dedicated synthetic profile `16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c`; Secret Manager `STAGING_TRIP_DEMO_TOKEN:1` |
+| GitHub staging environment | Secret `STAGING_TRIP_DEMO_TOKEN`; variable `STAGING_TRIP_DEMO_USER_ID` |
 | Web | Cloudflare Pages project `lagaw`, branch `staging`; expected branch URL `https://staging.lagaw.pages.dev` |
 | Browser origin | `https://staging.lagaw.pages.dev` |
 
-The staging runtime service account has Secret Accessor on the two staging secrets only. The automated deployment uses its own service account and a separate Workload Identity provider constrained to `relax-mode/lagaw`, `refs/heads/main`, and the GitHub `staging` environment. The workflow currently pins both staging secrets to version `2`; it never prints secret values.
+The staging runtime service account has Secret Accessor on its two Supabase secrets and its separate Trip demo token. The automated deployment uses its own service account and a separate Workload Identity provider constrained to `relax-mode/lagaw`, `refs/heads/main`, and the GitHub `staging` environment. The workflow pins the Supabase secrets to version `2` and the Trip token to version `1`; it never prints secret values. The matching token is stored in the GitHub `staging` environment and supplied only to the staging build and checks. The compiled Flutter token is public, as in the existing demo design; the profile contains synthetic data only. Production's demo token is separate.
 
 The database project is the development project, separate from production project `zjnuqqtbapbpudsjbpif`. Staging writes therefore target development data. CI's disposable PostgreSQL service remains independent and CI tests do not use either Supabase project.
 
@@ -22,16 +24,32 @@ The database project is the development project, separate from production projec
 
 The workflow in `.github/workflows/ci.yml` starts staging deployment after the Backend, Database, and Frontend checks pass for relevant pushes to `main`. Backend changes deploy the staging API; frontend or deployment workflow changes build and deploy the staging web app. Manual dispatch on `main` is reserved for production API and web deployments. Pull requests run checks only and do not publish Pages previews.
 
-Staging deployment is enabled by repository variable `STAGING_DEPLOY_ENABLED=true`. The GitHub `staging` environment is restricted to protected branches, requires approval from `aranxshx`, prevents self-review, and disables administrator bypass. The initial reviewer choice `aranx` was rejected because that account is not a repository collaborator; the user then selected the admin collaborator `aranxshx`. Qualifying main pushes run CI and then wait for `aranxshx`'s environment approval before using deployment credentials.
+Staging deployment is enabled by repository variable `STAGING_DEPLOY_ENABLED=true`. As checked October 25, 2026, the GitHub `staging` environment is restricted to protected branches and has no required-reviewer rule. Earlier setup required `aranxshx` approval; that historical configuration is recorded in the sprint log. Qualifying main pushes run CI and then apply the current environment protection rules. The recovery did not change these rules.
 
-The Cloud Run staging API has been deployed and its `/locations?limit=1` smoke check returned one development location. The Pages staging branch has not yet been deployed; `https://staging.lagaw.pages.dev` will become available after the first qualifying main push and environment approval. Issue #30 remains open until web availability, database isolation, and reviewed CI deployment are verified.
+On October 25, the staging API was configured with its dedicated demo settings on revision `lagaw-api-staging-00005-pkz`. Authenticated Trip create/list/retrieve/update/delete passed, and a direct development-database read confirmed the temporary trip persisted there before exact cleanup. Production revision `lagaw-api-00007-hfl` stayed unchanged. The latest Pages CI attempts failed authentication; Kyle subsequently replaced the GitHub Cloudflare token, with secret metadata confirming the update. A new reviewed CI deployment must confirm the replacement works. See the [investigation and recovery evidence](evidence/staging-incident-2026-10-25.md). Issue #30 remains open until web/browser acceptance and the reviewed CI deployment are verified.
+
+Wrangler's saved OAuth session can manage Pages, but a local `.env` Cloudflare token can override it. To check the saved login without loading repository dotenv files, run `npx --no-install wrangler whoami --cwd "$env:TEMP"` from PowerShell. The saved OAuth session does not have API-token management permission and must not be copied into GitHub as a durable CI credential. Replace `CLOUDFLARE_API_TOKEN` directly in GitHub with an account-scoped Cloudflare Pages Edit token; verify the existing account ID matches the project owner. Both production and staging currently use that repository secret.
+
+## Deploying the recovery and retrying staging
+
+Merge the reviewed recovery PR after its required CI checks pass. Its workflow change qualifies both the staging API and web app for deployment on the resulting `main` push. This applies the new staging token settings, builds Flutter with the matching token, and checks both locations and Trip authentication/CORS before publishing Pages.
+
+If that new main push run fails after the Cloudflare token has been replaced, identify the run for the recovery merge commit and retry its failed jobs:
+
+```powershell
+gh run list --repo relax-mode/lagaw --workflow ci.yml --branch main --event push --limit 5
+gh run rerun <recovery-main-push-run-id> --failed --repo relax-mode/lagaw
+gh run watch <recovery-main-push-run-id> --exit-status --repo relax-mode/lagaw
+```
+
+A rerun uses the original run's commit and workflow. Rerunning `40098046876` would still use the older staging build that omits the Trip token, so it cannot deliver this workflow fix. Do not use `gh workflow run ci.yml` for staging recovery: manual dispatch currently deploys production. Reconcile that deployment policy with the approved pitch/course requirement separately under #58.
 
 ## Verification
 
-After merging the reviewed workflow to `main` and approving the protected staging deployment:
+After merging the reviewed workflow to `main` and satisfying any current staging environment protection rules:
 
 1. Confirm a successful `Deploy - Staging` job after the three required CI jobs.
-2. Confirm the API smoke step returns at least one location from development data.
+2. Confirm `scripts/smoke_staging.py` passes. It requires a nonempty location response, unauthenticated Trips returning 401, authenticated Trips returning 200, owner filtering, and exact staging CORS headers. It makes GET requests only and rejects production URLs before sending credentials.
 3. Open `https://staging.lagaw.pages.dev`, confirm the page loads, then exercise a staging write and verify the record in the development database only.
 4. Confirm production service `lagaw-api` and `https://lagaw.pages.dev` remain healthy.
 
@@ -39,7 +57,7 @@ The GitHub Actions run URL, staging browser/API results, and the development-onl
 
 ## Secret rotation
 
-Add a new Secret Manager version for each rotated staging credential, update the pinned version numbers in the `Deploy backend to staging Cloud Run` step of `.github/workflows/ci.yml`, and deploy staging through a protected push to `main`. Verify the API smoke check before disabling an older version. Do not paste values into the repository, issue, or sprint log.
+Add a new Secret Manager version for each rotated staging credential, update the pinned version numbers in the `Deploy backend to staging Cloud Run` step of `.github/workflows/ci.yml`, and deploy staging through a protected push to `main`. For the Trip demo token, also update the matching `STAGING_TRIP_DEMO_TOKEN` secret in the GitHub `staging` environment so the backend, Flutter bundle, and smoke check agree. Verify the API smoke check before disabling an older version. Do not paste values into the repository, issue, or sprint log.
 
 ## Rollback
 
