@@ -1,2 +1,4 @@
 -r requirements.txt
 pytest>=8,<9
+# Starlette TestClient uses httpx2; backend provider/database clients still use httpx.
+httpx2>=2.16,<3

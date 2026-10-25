@@ -1,0 +1,44 @@
+[
+  {
+    "id": "cheap_coffee_afternoon",
+    "prompt": "A cheap relaxing afternoon with coffee and photos.",
+    "provider": {"budget_level": "low", "tags": ["relaxing", "cafe", "photography", "cafe"], "duration": "afternoon", "pace": "slow"},
+    "explicit_preferences": {},
+    "expected": {"preferred_tags": ["cafe", "photography", "relaxing"], "budget_level": "low", "duration": "afternoon", "pace": "slow", "budget_min": null, "budget_max": null, "group_type": null}
+  },
+  {
+    "id": "heritage_morning",
+    "prompt": "Heritage and photography in the morning.",
+    "provider": {"budget_level": "unspecified", "tags": ["photography", "heritage"], "duration": "morning", "pace": "unspecified"},
+    "explicit_preferences": {},
+    "expected": {"preferred_tags": ["heritage", "photography"], "budget_level": "unspecified", "duration": "morning", "pace": "unspecified", "budget_min": null, "budget_max": null, "group_type": null}
+  },
+  {
+    "id": "explicit_form_wins",
+    "prompt": "Suggest a fast expensive food evening.",
+    "provider": {"budget_level": "high", "tags": ["food"], "duration": "evening", "pace": "fast"},
+    "explicit_preferences": {"preferred_tags": ["nature"], "budget_level": "low", "budget_min": "0", "budget_max": "300", "group_type": "family", "duration": "morning", "pace": "slow"},
+    "expected": {"preferred_tags": ["nature"], "budget_level": "low", "duration": "morning", "pace": "slow", "budget_min": "0", "budget_max": "300", "group_type": "family"}
+  },
+  {
+    "id": "explicit_clear_and_zero_budget",
+    "prompt": "I usually like cafes.",
+    "provider": {"budget_level": "medium", "tags": ["cafe"], "duration": "full_day", "pace": "moderate"},
+    "explicit_preferences": {"preferred_tags": [], "budget_min": "0", "budget_max": "0", "group_type": "solo", "duration": "unspecified", "pace": "unspecified"},
+    "expected": {"preferred_tags": [], "budget_level": "medium", "duration": "unspecified", "pace": "unspecified", "budget_min": "0", "budget_max": "0", "group_type": "solo"}
+  },
+  {
+    "id": "no_invented_defaults",
+    "prompt": "Explore Bacolod.",
+    "provider": {"budget_level": "unspecified", "tags": [], "duration": "unspecified", "pace": "unspecified"},
+    "explicit_preferences": {},
+    "expected": {"preferred_tags": [], "budget_level": "unspecified", "duration": "unspecified", "pace": "unspecified", "budget_min": null, "budget_max": null, "group_type": null}
+  },
+  {
+    "id": "numeric_prompt_requires_form",
+    "prompt": "A 500 peso trip with friends.",
+    "provider": {"budget_level": "unspecified", "tags": [], "duration": "unspecified", "pace": "unspecified"},
+    "explicit_preferences": {},
+    "expected": {"preferred_tags": [], "budget_level": "unspecified", "duration": "unspecified", "pace": "unspecified", "budget_min": null, "budget_max": null, "group_type": null}
+  }
+]

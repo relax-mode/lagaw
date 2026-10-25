@@ -3,11 +3,12 @@
 import json
 import os
 from pathlib import Path
-from typing import Literal
 
 import httpx
 from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, ValidationError
+
+from app.preference_vocabulary import BudgetLevel, Duration, Pace, TravelTag
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -18,10 +19,10 @@ class DeepSeekFailure(Exception):
 
 class Preferences(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    budget_level: Literal["low", "medium", "high", "unspecified"]
-    tags: list[Literal["cafe", "photography", "relaxing", "heritage", "food", "nature"]]
-    duration: Literal["morning", "afternoon", "evening", "full_day", "unspecified"]
-    pace: Literal["slow", "moderate", "fast", "unspecified"]
+    budget_level: BudgetLevel
+    tags: list[TravelTag]
+    duration: Duration
+    pace: Pace
 
 
 def extract_preferences(prompt: str) -> Preferences:

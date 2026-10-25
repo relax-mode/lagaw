@@ -43,6 +43,9 @@ Database schema, local migrations, and verification:
 
 Backend DeepSeek setup and verification: [step-by-step guide](docs/deepseek-setup.md).
 
+Versioned structured extraction API, confirmation and manual fallback:
+[preference extraction contract](docs/preference-extraction-api.md).
+
 Run and verify the database-backed locations API: [setup guide](docs/locations-api.md).
 
 Connect Flutter Web to FastAPI locally and on Cloudflare Pages:
