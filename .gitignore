@@ -65,6 +65,7 @@ htmlcov/
 # Trained model artifacts (remove these lines if the models should be committed)
 *.pkl
 *.joblib
+backend/model_artifacts/
 
 # ===== Database / local data =====
 *.sqlite3

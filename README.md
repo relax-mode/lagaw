@@ -71,6 +71,9 @@ Independent recommendation contracts, synthetic fixtures and AI/backend handoff:
 Offline scoring, ranking, cold-start behavior and evaluation:
 [content-based recommender](docs/content-based-recommender.md).
 
+Offline matrix factorization, hybrid scoring, artifacts and held-out comparison:
+[hybrid recommender](docs/hybrid-recommender.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.

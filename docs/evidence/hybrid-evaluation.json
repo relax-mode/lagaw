@@ -1,0 +1,1176 @@
+{
+  "model_version": "signed-svd-v1",
+  "seed": 20261025,
+  "provenance": "synthetic",
+  "training_event_count": 256,
+  "held_out_event_count": 24,
+  "training_digest": "fc031300cf14b3547731701c8d4a1fea217a873078c6cb56fc3156dbd5f7b47e",
+  "rank": 3,
+  "evaluation_users": 24,
+  "summary": {
+    "content": {
+      "recall_at_3": 0.75,
+      "ndcg_at_3": 0.589777,
+      "hit_at_1": 0.375
+    },
+    "hybrid": {
+      "recall_at_3": 1.0,
+      "ndcg_at_3": 1.0,
+      "hit_at_1": 1.0
+    }
+  },
+  "users": [
+    {
+      "user_id": "4392b7bf-d8fe-51d0-8feb-35007a9e7d3f",
+      "held_out_location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.763637998106,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7091 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.678992346232,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4975 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.661352883885,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4534 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "59e5a3d9-193b-550e-901a-3522c4f8eb06",
+      "held_out_location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.6309297535714575,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.759869979525,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6997 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.676549338501,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4914 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.660721008901,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4518 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "cff3b6a9-efe1-5354-b81c-762a0b797dfc",
+      "held_out_location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.6309297535714575,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.752368809473,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6809 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.682903502553,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.5073 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.652648347861,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4316 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "35ffc350-86e9-5232-95fc-85aa6cf529a1",
+      "held_out_location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.765325718709,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7133 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.676016293919,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4900 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.663062624825,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4577 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "88fccc8d-ec37-5d35-89c9-606289131a28",
+      "held_out_location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.753560816487,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6839 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.68246314835,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.5062 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.651872682271,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4297 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "21dc9ac2-1d99-589d-bff8-7f170a720323",
+      "held_out_location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.6309297535714575,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.759869979525,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6997 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.676549338501,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4914 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.660721008901,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4518 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "8db74fe7-8d00-5f3f-b9fd-d25d5bfd2e8d",
+      "held_out_location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.6309297535714575,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.759809057125,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6995 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.672985374112,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4825 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.666366779548,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4659 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "52ba9e36-6b59-56d5-9476-e7eefab0a7f1",
+      "held_out_location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.762853106101,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7071 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.670581914576,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4765 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.662216264447,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4555 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "b4300889-a03c-5874-9d8d-5902d2b8a6f9",
+      "held_out_location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.759989059301,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7000 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.671345617188,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4784 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.657223065903,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4431 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "a3a02704-22ba-5e68-8c33-ccdf332a27ca",
+      "held_out_location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.6309297535714575,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.759571699464,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6989 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.672483052599,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4812 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.660161623894,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4504 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "d8284978-8b02-5029-9325-03327f468b9e",
+      "held_out_location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.5,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.755970696189,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6899 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.649489222991,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4237 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.649484026649,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4237 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "dd99671b-4b75-55fc-a8b0-da6f43786f6a",
+      "held_out_location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.758434743129,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6961 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.670825686598,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4771 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.665533131379,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4638 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "7bb1f10d-aac1-5083-bb40-31d3c2fb46b7",
+      "held_out_location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.759965871629,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6999 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.661823886459,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4546 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.659557982773,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4489 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "3bb66edc-5b20-5c12-9680-c56ab7fed9b1",
+      "held_out_location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.5,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.761382747563,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7035 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.666963760575,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4674 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.65608618949,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4402 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "82f87bb8-498e-57b7-9d44-6442ee66609c",
+      "held_out_location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+      "content": {
+        "recall_at_3": 0,
+        "ndcg_at_3": 0,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.755130009207,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6878 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.671455386789,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4786 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.668860403723,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4722 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "97a7ed05-cd9e-5172-ad6d-8849f987419d",
+      "held_out_location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.761569894343,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7039 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.672243547638,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4806 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.659397323152,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4485 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "ddcc2dc4-fbd3-53ea-b715-819c9c4af59e",
+      "held_out_location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.758512728555,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6963 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.674546508137,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4864 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.65672679282,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4418 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "aeed3a04-7111-56a7-8a8b-f7ce8295ae45",
+      "held_out_location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+      "content": {
+        "recall_at_3": 0,
+        "ndcg_at_3": 0,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "e89706a1-4100-53cf-a4fa-e0f259477d8c",
+            "recommendation_score": 0.753651727861,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6841 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.668618024673,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4715 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.660696119448,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4517 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "e19576dd-e76e-52b2-b973-63e6202b2379",
+      "held_out_location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+      "content": {
+        "recall_at_3": 0,
+        "ndcg_at_3": 0,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.76003919605,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7001 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.664863027143,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4622 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.656631487093,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4416 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "4f95df0f-095f-529b-826e-5b5e96c1844d",
+      "held_out_location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+      "content": {
+        "recall_at_3": 0,
+        "ndcg_at_3": 0,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.753098800977,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6827 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.662854333389,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4571 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.6606647203,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4517 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "ab049c35-5039-561b-9c55-bf94cf1b3942",
+      "held_out_location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+      "content": {
+        "recall_at_3": 0,
+        "ndcg_at_3": 0,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "ee58f55a-2144-5f16-8a90-4a38e5f08cef",
+            "recommendation_score": 0.751284054395,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6782 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.670839446314,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4771 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "aa9470bf-b5f1-5e3a-aab3-cefef211a3df",
+            "recommendation_score": 0.645611215352,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4140 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "6e2e5c4c-8746-518c-b6fd-d991f93d3597",
+      "held_out_location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+      "content": {
+        "recall_at_3": 0,
+        "ndcg_at_3": 0,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "66b53b5e-fd7d-5dad-ac3f-999a645c26d6",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.76101596771,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7025 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "45185e95-de80-55b6-ac4a-ead0e5efb7f3",
+            "recommendation_score": 0.656338368112,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4408 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "8ec665ff-3c37-5f5d-8e58-3260043d058e",
+            "recommendation_score": 0.655291979647,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4382 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "61fb86e6-9a1d-5299-9069-5f4a7eff045b",
+      "held_out_location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.5,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "ce43b0cf-620b-52cc-b7f0-277bb6a32aad",
+            "recommendation_score": 0.758534088166,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.6963 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.664409906338,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4610 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "6416c2e6-ebc1-5240-8df2-07576b408a8d",
+            "recommendation_score": 0.660754037781,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4519 (40%); constraints satisfied."
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "0033909b-aaea-59ab-9744-2a2d76674433",
+      "held_out_location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+      "content": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 0.5,
+        "hit_at_1": 0,
+        "items": [
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "88fc8026-c349-5d39-9540-70c4dec26968",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.8,
+            "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.80; group: solo; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "hybrid": {
+        "recall_at_3": 1,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1,
+        "items": [
+          {
+            "location_id": "c412c20b-1847-5036-84e2-2ef2413ebff1",
+            "recommendation_score": 0.760905832991,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.7023 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "2d1c6565-1b70-5b7e-bc08-87798367467d",
+            "recommendation_score": 0.661284669753,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4532 (40%); constraints satisfied."
+          },
+          {
+            "location_id": "d6fe2fc9-b9f8-5d5f-b011-b03e0b1b7f05",
+            "recommendation_score": 0.659326848021,
+            "recommendation_reason": "Hybrid: content=0.8000 (60%); collaborative=0.4483 (40%); constraints satisfied."
+          }
+        ]
+      }
+    }
+  ]
+}
