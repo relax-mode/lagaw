@@ -1,0 +1,12 @@
+{
+  "fixture_revision": "week3-eval-v1",
+  "provenance": "synthetic",
+  "implementation_base": "fd5a31e",
+  "success_cases": "cases.json",
+  "rejection_cases": "regressions-v1.json",
+  "recommendation_cases": "../recommendations/evaluation_cases.json",
+  "hybrid_dataset": "../hybrid/dataset.json",
+  "evaluation_mode": "mocked_http_and_synthetic_recommendations",
+  "live_provider_evaluation": "not_performed",
+  "notes": "Expected provider bodies are stubs, not measured DeepSeek predictions. Prompt-injection and non-travel examples do not prove live robustness."
+}

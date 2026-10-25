@@ -66,6 +66,7 @@ htmlcov/
 *.pkl
 *.joblib
 backend/model_artifacts/
+backend/test-results/
 
 # ===== Database / local data =====
 *.sqlite3

@@ -74,6 +74,9 @@ Offline scoring, ranking, cold-start behavior and evaluation:
 Offline matrix factorization, hybrid scoring, artifacts and held-out comparison:
 [hybrid recommender](docs/hybrid-recommender.md).
 
+Week 3 versioned extraction/model evaluation and one offline CI command:
+[evaluation suite and handoff](docs/week3-evaluation.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.
