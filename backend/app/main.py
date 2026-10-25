@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import DatabaseUnavailable, LocationDatabase, get_database
+from app.preference_extraction import router as preference_extraction_router
 from app.schemas import LocationsPage
 from app.trip_items import router as trip_items_router
 from app.trips import router as trips_router
@@ -28,6 +29,11 @@ async def database_unavailable(request: Request, exc: DatabaseUnavailable) -> JS
 
 
 async def validation_error(request: Request, exc: RequestValidationError):
+    if request.url.path.startswith("/api/v1/preferences"):
+        return JSONResponse(status_code=422, content={"detail": {
+            "code": "invalid_request", "message": "The travel request is invalid.",
+            "manual_fallback": True,
+        }})
     if request.url.path.startswith("/api/v1/trips"):
         # Omit submitted values and validator context, including tokens and NaN.
         return JSONResponse(status_code=422, content={"detail": [
@@ -90,6 +96,7 @@ def create_app() -> FastAPI:
     application.add_exception_handler(RequestValidationError, validation_error)
     application.include_router(trips_router)
     application.include_router(trip_items_router)
+    application.include_router(preference_extraction_router)
     application.add_api_route(
         "/locations", list_locations, methods=["GET"], response_model=LocationsPage,
         tags=["locations"], responses={
