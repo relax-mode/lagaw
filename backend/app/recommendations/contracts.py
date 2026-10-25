@@ -131,7 +131,7 @@ class RecommendationResponse(Contract):
 
 
 class Recommender(Protocol):
-    """Implement in #51; implementations receive data, never API clients or secrets."""
+    """Shared engine interface; implementations receive data, not API clients or secrets."""
 
     def recommend(self, request: RecommendationRequest) -> RecommendationResponse: ...
 

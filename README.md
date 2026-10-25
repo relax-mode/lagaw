@@ -65,6 +65,9 @@ Manual trip-location association endpoints and development-first verification:
 Independent recommendation contracts, synthetic fixtures and AI/backend handoff:
 [recommendation foundation](docs/recommendation-contract.md).
 
+Offline scoring, ranking, cold-start behavior and evaluation:
+[content-based recommender](docs/content-based-recommender.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.
