@@ -62,6 +62,9 @@ Trip partial updates, deletion, and development-first cascade verification:
 Manual trip-location association endpoints and development-first verification:
 [trip items API guide](docs/trip-items-api.md).
 
+Independent recommendation contracts, synthetic fixtures and AI/backend handoff:
+[recommendation foundation](docs/recommendation-contract.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.
