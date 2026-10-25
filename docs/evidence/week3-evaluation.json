@@ -1,0 +1,689 @@
+{
+  "fixture_revision": "week3-eval-v1",
+  "implementation_base": "fd5a31e",
+  "mode": "mocked_http_and_synthetic_recommendations",
+  "live_provider_evaluation": "not_performed",
+  "identifiers": {
+    "prompt_sha256": "92a8614f8bcff4aff3017d52be3e996684ca64cfdc8db8c16329280fd8ed444f",
+    "configuration_sha256": "9f3d5f96a3816facdb9c03dafdba887d09e5a10d1e3767a583e993149652973b",
+    "requested_model": "deepseek-flash",
+    "provider_model_revision": "unknown_not_contacted",
+    "configuration": {
+      "model": "deepseek-flash",
+      "response_format": {
+        "type": "json_object"
+      },
+      "thinking": {
+        "type": "disabled"
+      },
+      "max_tokens": 512,
+      "stream": false,
+      "timeout_seconds": {
+        "connect": 30.0,
+        "read": 30.0,
+        "write": 30.0,
+        "pool": 30.0
+      }
+    },
+    "fixture_sha256": {
+      "extraction/manifest.json": "e03bd6b2d0f5e36f7e3e2b3947d79600bee313a44e4aae26767b572df2186588",
+      "extraction/cases.json": "e1e1db36cec30728771d8257ba068203755979b4d9b44a58f7de92ab56572fc1",
+      "extraction/regressions-v1.json": "fd0a0b963b89ee2b356e835b8c077bbad3238c57222a3ba592bfc9d7a29dbc19",
+      "recommendations/evaluation_cases.json": "0058b81463c4f87e90cf0a469811bbd1f4f5b51dae32b170f47e5e3092232e52",
+      "hybrid/dataset.json": "200c0267c9a8a3ea8fe3fc7072d8f5ccebf7ce19389d2fa72585ca77e7d865f3"
+    }
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows",
+    "packages": {
+      "fastapi": "0.143.1",
+      "pydantic": "2.14.1",
+      "httpx": "0.28.1",
+      "httpx2": "2.16.0",
+      "numpy": "2.5.4"
+    }
+  },
+  "extraction": {
+    "case_count": 27,
+    "accepted_cases": 12,
+    "rejected_cases": 15,
+    "passed": 27,
+    "field_checks_passed": 84,
+    "field_checks_total": 84,
+    "cases": [
+      {
+        "id": "cheap_coffee_afternoon",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "heritage_morning",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "explicit_form_wins",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "explicit_clear_and_zero_budget",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "no_invented_defaults",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "numeric_prompt_requires_form",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "medium_food_evening",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "high_budget_full_day",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "ambiguous_budget_and_duration",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "non_travel_input",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "adversarial_instruction",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "negative_and_explicit_constraints",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "schema_valid": true,
+          "confirmation_required": true,
+          "trip_budget_scope": true,
+          "missing_fields": true,
+          "field:preferred_tags": true,
+          "field:budget_level": true,
+          "field:duration": true,
+          "field:pace": true,
+          "field:budget_min": true,
+          "field:budget_max": true,
+          "field:group_type": true
+        },
+        "failures": []
+      },
+      {
+        "id": "unsupported_tag",
+        "expected_status": 502,
+        "actual_status": 502,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "unsupported_budget",
+        "expected_status": 502,
+        "actual_status": 502,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "conflicting_numeric_budget",
+        "expected_status": 422,
+        "actual_status": 422,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "empty_request",
+        "expected_status": 422,
+        "actual_status": 422,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "timeout",
+        "expected_status": 504,
+        "actual_status": 504,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "rate_limit",
+        "expected_status": 429,
+        "actual_status": 429,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "provider_authentication",
+        "expected_status": 503,
+        "actual_status": 503,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "provider_failure",
+        "expected_status": 503,
+        "actual_status": 503,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "network_failure",
+        "expected_status": 503,
+        "actual_status": 503,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "malformed_json",
+        "expected_status": 502,
+        "actual_status": 502,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "truncated_json",
+        "expected_status": 502,
+        "actual_status": 502,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "adversarial_extra_fields",
+        "expected_status": 502,
+        "actual_status": 502,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "missing_provider_fields",
+        "expected_status": 502,
+        "actual_status": 502,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "missing_configuration",
+        "expected_status": 503,
+        "actual_status": 503,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      },
+      {
+        "id": "invalid_configuration",
+        "expected_status": 503,
+        "actual_status": 503,
+        "passed": true,
+        "checks": {
+          "http_status": true,
+          "provider_call_count": true,
+          "saved_trip_unchanged": true,
+          "no_trip_writes": true,
+          "sanitized_response": true,
+          "error_code": true,
+          "manual_fallback": true
+        },
+        "failures": []
+      }
+    ]
+  },
+  "content": {
+    "model_version": "content-v1",
+    "case_count": 10,
+    "cases": [
+      {
+        "id": "budget_cafe",
+        "passed": true,
+        "result_count": 3,
+        "top_location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5"
+      },
+      {
+        "id": "heritage",
+        "passed": true,
+        "result_count": 3,
+        "top_location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1"
+      },
+      {
+        "id": "family_nature",
+        "passed": true,
+        "result_count": 3,
+        "top_location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059"
+      },
+      {
+        "id": "premium_food",
+        "passed": true,
+        "result_count": 4,
+        "top_location_id": "e85a71d7-502c-5396-885c-b0d80313056c"
+      },
+      {
+        "id": "cold_start",
+        "passed": true,
+        "result_count": 3,
+        "top_location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059"
+      },
+      {
+        "id": "cold_start_no_tags",
+        "passed": true,
+        "result_count": 1,
+        "top_location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059"
+      },
+      {
+        "id": "accessibility_indoor",
+        "passed": true,
+        "result_count": 1,
+        "top_location_id": "53e2705b-b38e-5a2e-9587-6e7261ce8bc5"
+      },
+      {
+        "id": "distance_and_duration",
+        "passed": true,
+        "result_count": 2,
+        "top_location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059"
+      },
+      {
+        "id": "empty_result",
+        "passed": true,
+        "result_count": 0,
+        "top_location_id": null
+      },
+      {
+        "id": "explicit_exclusion",
+        "passed": true,
+        "result_count": 2,
+        "top_location_id": "b47be37f-b524-5dc7-a646-ecd5a0542059"
+      }
+    ]
+  },
+  "hybrid": {
+    "model_version": "signed-svd-v1",
+    "seed": 20261025,
+    "training_digest": "fc031300cf14b3547731701c8d4a1fea217a873078c6cb56fc3156dbd5f7b47e",
+    "training_event_count": 256,
+    "held_out_event_count": 24,
+    "evaluation_users": 24,
+    "summary": {
+      "content": {
+        "recall_at_3": 0.75,
+        "ndcg_at_3": 0.589777,
+        "hit_at_1": 0.375
+      },
+      "hybrid": {
+        "recall_at_3": 1.0,
+        "ndcg_at_3": 1.0,
+        "hit_at_1": 1.0
+      }
+    }
+  },
+  "failures": [],
+  "limitations": [
+    "Mocked extraction is not live model accuracy or prompt-injection robustness.",
+    "Synthetic recommendation clusters are intentionally recoverable; no real-user quality claim.",
+    "Model alias does not identify an actually evaluated provider model revision."
+  ]
+}
