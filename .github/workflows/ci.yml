@@ -130,12 +130,21 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,testserver
         run: python evaluate_week3.py --output test-results/week3-evaluation.json
 
-      - name: Compare AI evaluation with committed baseline
+      # Pytest already requires the report to match the committed baseline. A PR
+      # that intentionally refreshes the baseline (for example after a prompt
+      # change) is compared with the target branch's baseline instead, so a quality
+      # drop cannot hide inside a refreshed baseline.
+      - name: Compare AI evaluation with the target branch baseline
         if: steps.project.outputs.exists == 'true'
         run: |
           set -o pipefail
-          python compare_evaluation.py ../docs/evidence/week3-evaluation.json test-results/week3-evaluation.json \
-            | tee -a "$GITHUB_STEP_SUMMARY"
+          baseline=../docs/evidence/week3-evaluation.json
+          if [ -n "$GITHUB_BASE_REF" ] && git fetch --quiet --depth=1 origin "$GITHUB_BASE_REF" \
+              && git show FETCH_HEAD:docs/evidence/week3-evaluation.json > test-results/target-baseline.json 2>/dev/null; then
+            baseline=test-results/target-baseline.json
+            echo "Comparing with the \`$GITHUB_BASE_REF\` baseline." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          python compare_evaluation.py "$baseline" test-results/week3-evaluation.json | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Upload AI evaluation report
         if: always() && steps.project.outputs.exists == 'true'
