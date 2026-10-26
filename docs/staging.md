@@ -10,19 +10,19 @@ Lagaw staging runs the FastAPI service and Flutter Web against the existing deve
 | API | Cloud Run service `lagaw-api-staging`; `https://lagaw-api-staging-i5kvldluga-as.a.run.app` |
 | Runtime identity | `lagaw-api-staging-runtime@relax-mode-lagaw.iam.gserviceaccount.com` |
 | Database | Development Supabase project `vnpkyvtbupnquvirzlzp` |
-| API secrets | Secret Manager `STAGING_SUPABASE_URL` and `STAGING_SUPABASE_SERVICE_ROLE_KEY` |
+| API secrets | Secret Manager `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_SERVICE_ROLE_KEY` and `STAGING_DEEPSEEK_API_KEY` (DeepSeek key holder: Kyle) |
 | Trip demo | Dedicated synthetic profile `16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c`; Secret Manager `STAGING_TRIP_DEMO_TOKEN:1` |
 | GitHub staging environment | Secret `STAGING_TRIP_DEMO_TOKEN`; variable `STAGING_TRIP_DEMO_USER_ID` |
 | Web | Cloudflare Pages project `lagaw`, branch `staging`; expected branch URL `https://staging.lagaw.pages.dev` |
 | Browser origin | `https://staging.lagaw.pages.dev` |
 
-The staging runtime service account has Secret Accessor on its two Supabase secrets and its separate Trip demo token. The automated deployment uses its own service account and a separate Workload Identity provider constrained to `relax-mode/lagaw`, `refs/heads/main`, and the GitHub `staging` environment. The workflow pins the Supabase secrets to version `2` and the Trip token to version `1`; it never prints secret values. The matching token is stored in the GitHub `staging` environment and supplied only to the staging build and checks. The compiled Flutter token is public, as in the existing demo design; the profile contains synthetic data only. Production's demo token is separate.
+The staging runtime service account has Secret Accessor on its two Supabase secrets, its separate Trip demo token and the staging DeepSeek key. The automated deployment uses its own service account and a separate Workload Identity provider constrained to `relax-mode/lagaw`, `refs/heads/main`, and the GitHub `staging` environment. The workflow pins the Supabase secrets to version `2` and the Trip token to version `1`; it never prints secret values. The matching token is stored in the GitHub `staging` environment and supplied only to the staging build and checks. The compiled Flutter token is public, as in the existing demo design; the profile contains synthetic data only. Production's demo token is separate.
 
 The database project is the development project, separate from production project `zjnuqqtbapbpudsjbpif`. Staging writes therefore target development data. CI's disposable PostgreSQL service remains independent and CI tests do not use either Supabase project.
 
 ## Deployment controls and status
 
-The workflow in `.github/workflows/ci.yml` starts staging deployment after the Backend, Database, and Frontend checks pass for relevant pushes to `main`. Backend changes deploy the staging API; frontend or deployment workflow changes build and deploy the staging web app. Manual dispatch on `main` is reserved for production API and web deployments. Pull requests run checks only and do not publish Pages previews.
+The workflow in `.github/workflows/ci.yml` starts staging deployment after the Backend, Database, and Frontend checks pass for relevant pushes to `main`. Backend changes deploy the staging API; frontend or deployment workflow changes build and deploy the staging web app. After staging and its smoke checks pass, the same commit is promoted to production automatically (see [`PIPELINE.md`](../PIPELINE.md#continuous-deployment)). Manual dispatch on `main` is a production recovery redeploy and does not touch staging. Pull requests run checks only and do not publish Pages previews.
 
 Staging deployment is enabled by repository variable `STAGING_DEPLOY_ENABLED=true`. As checked October 25, 2026, the GitHub `staging` environment is restricted to protected branches and has no required-reviewer rule. Earlier setup required `aranxshx` approval; that historical configuration is recorded in the sprint log. Qualifying main pushes run CI and then apply the current environment protection rules. The recovery did not change these rules.
 
@@ -42,14 +42,20 @@ gh run rerun <recovery-main-push-run-id> --failed --repo relax-mode/lagaw
 gh run watch <recovery-main-push-run-id> --exit-status --repo relax-mode/lagaw
 ```
 
-A rerun uses the original run's commit and workflow. Rerunning `40098046876` would still use the older staging build that omits the Trip token, so it cannot deliver this workflow fix. Do not use `gh workflow run ci.yml` for staging recovery: manual dispatch currently deploys production. Reconcile that deployment policy with the approved pitch/course requirement separately under #58.
+A rerun uses the original run's commit and workflow. Rerunning `40098046876` would still use the older staging build that omits the Trip token, so it cannot deliver this workflow fix. Do not use `gh workflow run ci.yml` for staging recovery: manual dispatch redeploys production only.
 
 ## Verification
 
 After merging the reviewed workflow to `main` and satisfying any current staging environment protection rules:
 
 1. Confirm a successful `Deploy - Staging` job after the three required CI jobs.
-2. Confirm `scripts/smoke_staging.py` passes. It requires a nonempty location response, unauthenticated Trips returning 401, authenticated Trips returning 200, owner filtering, and exact staging CORS headers. It makes GET requests only and rejects production URLs before sending credentials.
+2. Confirm `scripts/smoke_deployed.py staging` passes. It requires:
+   - a nonempty location response;
+   - unauthenticated Trips returning 401 and authenticated Trips returning 200, with owner filtering;
+   - an extraction request with a blank prompt returning 422 (rejected before any provider call);
+   - exact staging CORS headers.
+
+   It never writes data, and it rejects URLs outside the staging allowlist before sending credentials.
 3. Open `https://staging.lagaw.pages.dev`, confirm the page loads, then exercise a staging write and verify the record in the development database only.
 4. Confirm production service `lagaw-api` and `https://lagaw.pages.dev` remain healthy.
 
