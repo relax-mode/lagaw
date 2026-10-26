@@ -248,6 +248,48 @@ Consultation outcomes and the Sprint 2 retrospective remain pending; record them
 - These issues define a staged backlog; no implementation or sprint planning meeting is recorded here.
 
 
+### Sprint 3 plan and status (recorded October 26)
+
+**Sprint goal** ([milestone](https://github.com/relax-mode/lagaw/milestone/3), due November 1): the AI feature works end to end through the backend, with validated output, a small evaluation set, mocked LLM tests in CI, and AI error handling.
+
+This plan was recorded by CyGray from the GitHub milestone, issue assignments and merged PRs. Priorities follow the dependency order. Status was checked October 26. Several AI items merged October 24–25, ahead of the Sprint 3 start.
+
+| Issue | Owner | Depends on | Priority | Status (Oct 26) | Evidence |
+|---|---|---|---|---|---|
+| [#32](https://github.com/relax-mode/lagaw/issues/32) Recommendation contract and fixtures | Jayperson (s2302663-del) | none | 1 | Done | PR [#61](https://github.com/relax-mode/lagaw/pull/61) |
+| [#33](https://github.com/relax-mode/lagaw/issues/33) Content-based baseline | Jayperson | #32 | 1 | Done | PR [#63](https://github.com/relax-mode/lagaw/pull/63), [results](evidence/content-based-results.md) |
+| [#50](https://github.com/relax-mode/lagaw/issues/50) Validated preference extraction API | Jayperson | none | 1 | Done; deployed to staging | PR [#64](https://github.com/relax-mode/lagaw/pull/64), [staging check](evidence/ai-ci-cd-2026-10-26.md) (#73) |
+| [#51](https://github.com/relax-mode/lagaw/issues/51) Collaborative and hybrid scoring | Jayperson | #32, #33 | 1 | Done | PR [#65](https://github.com/relax-mode/lagaw/pull/65), [results](evidence/hybrid-results.md) |
+| [#57](https://github.com/relax-mode/lagaw/issues/57) Evaluation set and mocked LLM regressions | Jayperson | #50, #51 | 1 | Done | PR [#66](https://github.com/relax-mode/lagaw/pull/66), [results](evidence/week3-results.md) |
+| [#26](https://github.com/relax-mode/lagaw/issues/26) Trip–itinerary association API | Andrew (aranxshx) | none | 1 | Merged (PR [#60](https://github.com/relax-mode/lagaw/pull/60)); issue open pending deployed acceptance | [trip items evidence](evidence/trip-items-dev.md) |
+| [#52](https://github.com/relax-mode/lagaw/issues/52) Persist swipes, saves and ratings | Andrew | none | 2 | Open | none yet |
+| [#53](https://github.com/relax-mode/lagaw/issues/53) Recommendations in the Trip API | Andrew | #51 | 1 | Open: blocks #56 and the end-to-end demo | none yet |
+| [#54](https://github.com/relax-mode/lagaw/issues/54) Constraint-aware itinerary generation | Andrew | #53 | 1 | Open: blocks #56 | none yet |
+| [#34](https://github.com/relax-mode/lagaw/issues/34) Itinerary locations in Flutter | Roel (roellumauagjr) | #26 | 2 | Open | none yet |
+| [#55](https://github.com/relax-mode/lagaw/issues/55) Extraction in the Flutter trip form | Roel | #50 | 1 | Open: the backend endpoint is ready on staging | none yet |
+| [#56](https://github.com/relax-mode/lagaw/issues/56) Recommendations and itineraries in Flutter | Roel | #53, #54 | 1 | Open | none yet |
+| [#58](https://github.com/relax-mode/lagaw/issues/58) AI tests in CI and production promotion | Kyle (CyGray) | #57, #30, #31 | 1 | In review: PR [#73](https://github.com/relax-mode/lagaw/pull/73) | [AI CI/CD evidence](evidence/ai-ci-cd-2026-10-26.md) |
+| [#59](https://github.com/relax-mode/lagaw/issues/59) Sprint 3 record and consultation evidence | Kyle | all | ongoing | In progress | this section |
+
+**Carried over from Sprint 2** (milestone due October 25):
+- [#29](https://github.com/relax-mode/lagaw/issues/29) Trip CRUD database integration tests (Andrew). Not started. The CI hook for tests marked `db` is ready in PR #68.
+- [#30](https://github.com/relax-mode/lagaw/issues/30) Staging acceptance (Kyle). In review: PR [#67](https://github.com/relax-mode/lagaw/pull/67).
+- [#31](https://github.com/relax-mode/lagaw/issues/31) CI quality gates (Kyle). In review: PR [#68](https://github.com/relax-mode/lagaw/pull/68).
+
+**Risks and re-plan.**
+- **Top risk.** The end-to-end demo path (request → validated preferences → recommendations → saved itinerary) needs #53, #54, #55 and #56, all still open with five days left. Mitigation:
+  - Andrew prioritises #53, then #54.
+  - Roel starts #55 now against the staging extraction endpoint.
+  - #56 can stub recommendations until #53 lands.
+  - If #54 slips, demo recommendations plus a manually saved itinerary (#26 is already merged) and report the slip.
+- **Second risk.** Production lagged `main` by four days ([INC-3](incident-log.md#inc-3-production-drifted-behind-main), recorded in #73). Merging #68 and #73 restores automatic deployment before the consultation.
+
+**Standups.** None has been posted to this log for Sprint 3 yet. Add each one when it happens, with the date and, per member, what was done, what is next and what blocks them; do not backfill. Target: Oct 27, Oct 29 and Oct 31.
+
+**Consultation (November 1).** Evidence links and the live-demo checklist are in the [Sprint 3 consultation pack](sprint-3-consultation.md). The outcome and retrospective are recorded only after the consultation.
+
+- **October 26, 2026** — CyGray drafted the [DevOps implementation plan](devops-implementation-plan.md) on October 25. It covers #30, #31, #58, #59, the instruction-required DevOps deliverables and an improvement backlog. CyGray then worked through the plan on October 26 (PRs #67, #68, #73 and this record), and added the team roles to the README, which the course requires.
+
 ### Issue #26 activity
 - **October 24, 2026** — Issue #26 implementation publication confirmed as reported by the developer: committed/pushed the feature and created [PR #60](https://github.com/relax-mode/lagaw/pull/60). Local head is `cf6d101` and the branch is aligned with its saved origin tracking ref; only the unrelated local `test-results/` directory is untracked. Recorded the PR link in the evidence. GitHub was inaccessible from this session, so no live CI/review/merge status is claimed. Required checks, teammate review/merge, deployed acceptance and actual hosted redeployment evidence remain pending. `.env` and production were not changed.
 - **October 24, 2026** — Issue #26 guided development removal persistence passed as reported: after another FastAPI restart and Swagger refresh/reauthorization, GET returned HTTP 200 with only original Museum item `b378e1f4-c286-4953-a5a7-20ce168a95a8` at day 1/order 2; the removed Cathedral item remained absent. Development verification now includes automatic isolated database checks, manual add/list/remove, duplicates/invalid requests, ownership/auth rejection, direct SQL persistence/location preservation, and local restart/refresh for additions and removal. Consolidated the evidence into the final outcomes and reviewed the scoped routes/database access/CI diff; whitespace check passed. Preparing the explicit #26 file list for the developer's staging and PR workflow. `.env` and production remain untouched. Required CI execution, review/merge, deployed acceptance and actual hosted redeployment evidence remain pending.
