@@ -49,6 +49,7 @@ class CorsTests(unittest.TestCase):
         })
 
     def test_approved_local_and_deployed_origins_can_read_locations(self):
+        self.assertTrue(False, "deliberate CI gate failure")
         for origin in (LOCAL_ORIGIN, WEB_ORIGIN):
             with self.subTest(origin=origin):
                 response = self.client.get("/locations", headers={"Origin": origin})
