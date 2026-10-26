@@ -23,7 +23,7 @@ def cases(report, section):
 def compare(baseline, current):
     """Return (markdown lines, regression messages)."""
     regressions = []
-    lines = ["## AI evaluation versus committed baseline", ""]
+    lines = ["## AI evaluation versus baseline", ""]
 
     changed = [key for key in IDENTIFIERS
                if baseline["identifiers"].get(key) != current["identifiers"].get(key)]
