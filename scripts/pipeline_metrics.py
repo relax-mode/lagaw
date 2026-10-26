@@ -16,7 +16,11 @@ from datetime import datetime
 
 REPO = "relax-mode/lagaw"
 WORKFLOW = "ci.yml"
-PRODUCTION_JOBS = {"Deploy - Production", "Deploy - Cloud Run", "Deploy - Cloudflare Pages"}
+PRODUCTION_JOBS = {
+    "Deploy - Production API", "Deploy - Production web",
+    # Names used before production promotion (#58).
+    "Deploy - Cloud Run", "Deploy - Cloudflare Pages",
+}
 
 
 def gh(*args):
