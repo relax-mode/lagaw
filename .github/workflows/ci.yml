@@ -46,6 +46,8 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - 'scripts/smoke_deployed.py'
+              - 'scripts/ai_live_smoke.py'
               - 'docs/evidence/week3-evaluation.json'
               - '.github/workflows/ci.yml'
             database:
@@ -107,9 +109,41 @@ jobs:
         if: steps.project.outputs.exists == 'true'
         run: python -m compileall -q app
 
-      - name: Test backend regressions (offline)
+      # Tests and the evaluation never reach the network or the paid provider:
+      # the key is a dummy and real HTTPX transports go through an unreachable
+      # proxy, so only mocked transports can answer.
+      - name: Test backend regressions (offline, provider mocked)
         if: steps.project.outputs.exists == 'true'
+        env:
+          DEEPSEEK_API_KEY: ci-dummy-not-a-real-key
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,testserver
         run: python -m pytest -v -m "not db"
+
+      - name: Evaluate AI fixtures (offline, provider mocked)
+        if: steps.project.outputs.exists == 'true'
+        env:
+          DEEPSEEK_API_KEY: ci-dummy-not-a-real-key
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,testserver
+        run: python evaluate_week3.py --output test-results/week3-evaluation.json
+
+      - name: Compare AI evaluation with committed baseline
+        if: steps.project.outputs.exists == 'true'
+        run: |
+          set -o pipefail
+          python compare_evaluation.py ../docs/evidence/week3-evaluation.json test-results/week3-evaluation.json \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload AI evaluation report
+        if: always() && steps.project.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-evaluation
+          path: backend/test-results/week3-evaluation.json
+          if-no-files-found: ignore
 
   database:
     name: Database - PostgreSQL migrations and smoke tests
@@ -245,214 +279,13 @@ jobs:
         if: steps.project.outputs.exists == 'true'
         run: flutter test
 
-      # Pull request builds only check that the app compiles; they never receive
-      # the production demo token.
+      # This build only proves the app compiles. Each deploy job builds its own
+      # bundle with environment-scoped configuration, so this job needs no secrets.
       - name: Build Flutter Web
         if: steps.project.outputs.exists == 'true'
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-          TRIP_DEMO_TOKEN: ${{ github.event_name != 'pull_request' && secrets.TRIP_DEMO_TOKEN || '' }}
-        run: flutter build web --release ${API_BASE_URL:+--dart-define=API_BASE_URL=$API_BASE_URL} --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
-
-      - name: Upload web build
-        if: steps.project.outputs.exists == 'true' && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: frontend/build/web
-          if-no-files-found: error
-
-  # Production Pages publishing is a manual operation on main.
-  deploy-web:
-    name: Deploy - Cloudflare Pages
-    needs: [backend, database, frontend]
-    if: >-
-      needs.frontend.outputs.exists == 'true' &&
-      github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    concurrency:
-      group: deploy-web-production
-      cancel-in-progress: false
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Every check skips with a visible reason instead of failing, so CI stays
-      # green until there is something real to serve.
-      - name: Decide whether to deploy
-        id: gate
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
-        run: |
-          skip() {
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Skipping deploy: $1"
-            echo "Deploy skipped: $1" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          }
-
-          [ -f frontend/web/index.html ] || skip "the Flutter project has no web platform (run 'flutter create --platforms=web .' in frontend/)."
-          [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || skip "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set."
-          [ -n "$TRIP_DEMO_TOKEN" ] || skip "TRIP_DEMO_TOKEN is not set, so trip creation would be disabled in the deployed app."
-
-          echo "deploy=true" >> "$GITHUB_OUTPUT"
-
-      - name: Download web build
-        if: steps.gate.outputs.deploy == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: web-build
-          path: frontend/build/web
-
-      - name: Set up Node.js
-        if: steps.gate.outputs.deploy == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install Wrangler
-        if: steps.gate.outputs.deploy == 'true'
-        run: npm ci
-
-      - name: Deploy to Cloudflare Pages
-        id: deploy
-        if: steps.gate.outputs.deploy == 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          DEPLOY_BRANCH: ${{ github.ref_name }}
-        run: |
-          set -eo pipefail
-          npx wrangler pages deploy frontend/build/web             --project-name lagaw             --branch "$DEPLOY_BRANCH"             --commit-hash "$GITHUB_SHA"             --commit-dirty=true | tee deploy.log
-          url=$(python -c 'import pathlib, re, sys; matches = re.findall(r"https://[A-Za-z0-9.-]+\.pages\.dev", pathlib.Path(sys.argv[1]).read_text()); print(matches[-1] if matches else "")' deploy.log)
-          [ -n "$url" ] || { echo "::error::Could not determine the Cloudflare Pages deployment URL."; exit 1; }
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "### Cloudflare Pages deployment ($DEPLOY_BRANCH)" >> "$GITHUB_STEP_SUMMARY"
-          echo "$url" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Smoke test Cloudflare Pages deployment
-        if: steps.gate.outputs.deploy == 'true'
-        env:
-          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
-        run: |
-          set -eo pipefail
-          [ -n "$DEPLOY_URL" ] || { echo "::error::Deployment URL is missing."; exit 1; }
-          curl --fail --silent --show-error --location --retry 3 --retry-delay 5 --max-time 30 \
-            "$DEPLOY_URL" --output /dev/null
-          echo "HTTP smoke test passed: $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
-
-  deploy-backend:
-    name: Deploy - Cloud Run
-    needs: [backend, database, frontend]
-    if: >-
-      github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    permissions:
-      contents: read
-      id-token: write
-
-    concurrency:
-      group: deploy-backend
-      cancel-in-progress: false
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Decide whether to deploy
-        id: gate
-        env:
-          PROJECT: ${{ vars.GCP_PROJECT_ID }}
-          REGION: ${{ vars.GCP_REGION }}
-          PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          DEPLOYER: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
-          RUNTIME: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
-          CORS: ${{ vars.CORS_ALLOWED_ORIGINS }}
-        run: |
-          skip() {
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Skipping deploy: $1"
-            echo "Deploy skipped: $1" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          }
-
-          [ -f backend/Dockerfile ] || skip "backend/Dockerfile is missing."
-
-          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS; do
-            [ -n "${!v}" ] || skip "the GCP_* repository variables are not set ($v)."
-          done
-
-          echo "deploy=true" >> "$GITHUB_OUTPUT"
-
-      - name: Authenticate to Google Cloud
-        if: steps.gate.outputs.deploy == 'true'
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
-
-      - name: Configure Docker for Artifact Registry
-        if: steps.gate.outputs.deploy == 'true'
-        run: gcloud auth configure-docker "${{ vars.GCP_REGION }}-docker.pkg.dev" --quiet
-
-      - name: Set up Docker Buildx
-        if: steps.gate.outputs.deploy == 'true'
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push image
-        if: steps.gate.outputs.deploy == 'true'
-        uses: docker/build-push-action@v6
-        with:
-          context: backend
-          push: true
-          tags: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Deploy to Cloud Run
-        id: deploy
-        if: steps.gate.outputs.deploy == 'true'
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: lagaw-api
-          region: ${{ vars.GCP_REGION }}
-          image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:${{ github.sha }}
-          env_vars: |
-            CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS }}
-          secrets: |
-            SUPABASE_URL=SUPABASE_URL:latest
-            SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest
-          flags: >-
-            --allow-unauthenticated
-            --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
-            --min-instances=0
-            --max-instances=2
-            --cpu=1
-            --memory=512Mi
-            --concurrency=20
-            --timeout=60
-            --port=8080
-
-      - name: Smoke test
-        if: steps.gate.outputs.deploy == 'true'
-        env:
-          SERVICE_URL: ${{ steps.deploy.outputs.url }}
-        run: |
-          set -eo pipefail
-          [ -n "$SERVICE_URL" ] || { echo "::error::Cloud Run service URL is missing."; exit 1; }
-          curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 \
-            "$SERVICE_URL/locations?limit=1" | python -c "import sys,json; d=json.load(sys.stdin); assert d['items'], 'no locations returned'; print('smoke test ok:', len(d['items']), 'location')"
-          echo "### Cloud Run deployment smoke test passed" >> "$GITHUB_STEP_SUMMARY"
+        run: flutter build web --release ${API_BASE_URL:+--dart-define=API_BASE_URL=$API_BASE_URL}
 
   staging-changes:
     name: Decide - Staging deployment
@@ -493,8 +326,8 @@ jobs:
             while IFS= read -r path; do
               case "$path" in
                 backend/test_*.py|backend/smoke_test.*|frontend/test/*) ;;
-                backend/*) backend=true ;;
-                frontend/*|package.json|package-lock.json|scripts/smoke_staging.py) frontend=true ;;
+                backend/*|scripts/smoke_deployed.py) backend=true ;;
+                frontend/*|package.json|package-lock.json) frontend=true ;;
                 .github/workflows/ci.yml)
                   backend=true
                   frontend=true
@@ -590,10 +423,13 @@ jobs:
           env_vars: |
             CORS_ALLOWED_ORIGINS=${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
             TRIP_DEMO_USER_ID=${{ vars.STAGING_TRIP_DEMO_USER_ID }}
+            DEEPSEEK_MODEL=deepseek-flash
+            DEEPSEEK_TIMEOUT_MS=20000
           secrets: |
             SUPABASE_URL=STAGING_SUPABASE_URL:2
             SUPABASE_SERVICE_ROLE_KEY=STAGING_SUPABASE_SERVICE_ROLE_KEY:2
             TRIP_DEMO_TOKEN=STAGING_TRIP_DEMO_TOKEN:1
+            DEEPSEEK_API_KEY=STAGING_DEEPSEEK_API_KEY:1
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
@@ -619,10 +455,10 @@ jobs:
       - name: Smoke test staging API
         if: steps.gate.outputs.deploy == 'true'
         env:
-          STAGING_API_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
-          STAGING_TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
-          STAGING_TRIP_DEMO_USER_ID: ${{ vars.STAGING_TRIP_DEMO_USER_ID }}
-        run: python3 scripts/smoke_staging.py
+          SMOKE_API_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
+          SMOKE_TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
+          SMOKE_TRIP_DEMO_USER_ID: ${{ vars.STAGING_TRIP_DEMO_USER_ID }}
+        run: python3 scripts/smoke_deployed.py staging
 
       - name: Set up Flutter
         if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
@@ -685,3 +521,206 @@ jobs:
           curl --fail --silent --show-error --location --retry 3 --retry-delay 5 --max-time 30 \
             "$DEPLOY_URL" --output /dev/null
           echo "Staging Pages HTTP smoke test passed: $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  # Production follows staging automatically. After a main push passes the
+  # checks and the staging deploy and its smoke tests, the same commit is promoted:
+  # the API reuses the image staging tested, and the web app is rebuilt with
+  # production configuration. A manual run on main redeploys production for recovery.
+  deploy-backend:
+    name: Deploy - Production API
+    needs: [backend, database, frontend, staging-changes, deploy-staging]
+    if: >-
+      !cancelled() && github.ref == 'refs/heads/main' &&
+      needs.backend.result == 'success' && needs.database.result == 'success' &&
+      needs.frontend.result == 'success' &&
+      ((github.event_name == 'push' && needs.staging-changes.outputs.backend == 'true' &&
+        needs.deploy-staging.result == 'success') ||
+       github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    concurrency:
+      group: deploy-backend-production
+      cancel-in-progress: false
+
+    env:
+      IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check production deployment configuration
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          DEPLOYER: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+          RUNTIME: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+          CORS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+          TRIP_DEMO_USER_ID: ${{ vars.TRIP_DEMO_USER_ID }}
+          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+        run: |
+          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS TRIP_DEMO_USER_ID TRIP_DEMO_TOKEN; do
+            [ -n "${!v}" ] || { echo "::error::Production deployment configuration is missing ($v)."; exit 1; }
+          done
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Promote the image staging tested
+        if: github.event_name == 'push'
+        run: gcloud artifacts docker tags add "$IMAGE:staging-$GITHUB_SHA" "$IMAGE:$GITHUB_SHA" --quiet
+
+      - name: Configure Docker for Artifact Registry
+        if: github.event_name == 'workflow_dispatch'
+        run: gcloud auth configure-docker "${{ vars.GCP_REGION }}-docker.pkg.dev" --quiet
+
+      - name: Set up Docker Buildx
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image (manual recovery run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: lagaw-api
+          region: ${{ vars.GCP_REGION }}
+          image: ${{ env.IMAGE }}:${{ github.sha }}
+          env_vars: |
+            CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS }}
+            TRIP_DEMO_USER_ID=${{ vars.TRIP_DEMO_USER_ID }}
+            DEEPSEEK_MODEL=deepseek-flash
+            DEEPSEEK_TIMEOUT_MS=20000
+          secrets: |
+            SUPABASE_URL=SUPABASE_URL:1
+            SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:1
+            TRIP_DEMO_TOKEN=TRIP_DEMO_TOKEN:1
+            DEEPSEEK_API_KEY=DEEPSEEK_API_KEY:1
+          flags: >-
+            --allow-unauthenticated
+            --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+            --min-instances=0
+            --max-instances=2
+            --cpu=1
+            --memory=512Mi
+            --concurrency=20
+            --timeout=60
+            --port=8080
+
+      - name: Smoke test production API
+        env:
+          SMOKE_API_URL: ${{ steps.deploy.outputs.url }}
+          SMOKE_TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+          SMOKE_TRIP_DEMO_USER_ID: ${{ vars.TRIP_DEMO_USER_ID }}
+        run: |
+          python3 scripts/smoke_deployed.py production
+          echo "### Production API deployed and smoke-tested: $SMOKE_API_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-web:
+    name: Deploy - Production web
+    needs: [backend, database, frontend, staging-changes, deploy-staging, deploy-backend]
+    if: >-
+      !cancelled() && github.ref == 'refs/heads/main' &&
+      needs.backend.result == 'success' && needs.database.result == 'success' &&
+      needs.frontend.result == 'success' && needs.frontend.outputs.exists == 'true' &&
+      needs.deploy-backend.result != 'failure' && needs.deploy-backend.result != 'cancelled' &&
+      ((github.event_name == 'push' && needs.staging-changes.outputs.frontend == 'true' &&
+        needs.deploy-staging.result == 'success') ||
+       github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://lagaw.pages.dev
+
+    concurrency:
+      group: deploy-web-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check production web configuration
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for v in API_BASE_URL TRIP_DEMO_TOKEN CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            [ -n "${!v}" ] || { echo "::error::Production web configuration is missing ($v)."; exit 1; }
+          done
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Build production Flutter Web
+        working-directory: frontend
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Wrangler
+        run: npm ci
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -eo pipefail
+          npx wrangler pages deploy frontend/build/web \
+            --project-name lagaw \
+            --branch main \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-dirty=true | tee deploy.log
+          url=$(python -c 'import pathlib, re, sys; matches = re.findall(r"https://[A-Za-z0-9.-]+\.pages\.dev", pathlib.Path(sys.argv[1]).read_text()); print(matches[-1] if matches else "")' deploy.log)
+          [ -n "$url" ] || { echo "::error::Could not determine the Cloudflare Pages deployment URL."; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test production web
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          set -eo pipefail
+          for url in "$DEPLOY_URL" https://lagaw.pages.dev; do
+            curl --fail --silent --show-error --location --retry 3 --retry-delay 5 --max-time 30 "$url" --output /dev/null
+          done
+          echo "### Production web deployed: $DEPLOY_URL (https://lagaw.pages.dev)" >> "$GITHUB_STEP_SUMMARY"
