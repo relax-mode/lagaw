@@ -669,7 +669,7 @@
     "evaluation_users": 24,
     "summary": {
       "content": {
-        "recall_at_3": 0.75,
+        "recall_at_3": 0.8,
         "ndcg_at_3": 0.589777,
         "hit_at_1": 0.375
       },
