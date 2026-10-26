@@ -70,11 +70,16 @@ def main():
     parser.add_argument("--since", required=True, help="first day, YYYY-MM-DD (UTC)")
     parser.add_argument("--until", required=True, help="last day, YYYY-MM-DD (UTC)")
     parser.add_argument("--jobs", action="store_true", help="also report per-job durations")
+    parser.add_argument("--exclude-branch-prefix", default="test/ci-proof-",
+                        help="skip deliberate CI evidence probes (default: %(default)s; empty keeps all)")
     args = parser.parse_args()
 
     runs = gh("run", "list", "--workflow", WORKFLOW, "--created", f"{args.since}..{args.until}", "--limit", "500",
               "--json", "databaseId,event,headBranch,headSha,conclusion,status,createdAt,updatedAt")
     runs = [r for r in runs if r["status"] == "completed"]
+    prefix = args.exclude_branch_prefix
+    probes = [r for r in runs if prefix and r["headBranch"].startswith(prefix)]
+    runs = [r for r in runs if r not in probes]
     wall = {r["databaseId"]: (ts(r["updatedAt"]) - ts(r["createdAt"])).total_seconds() for r in runs}
 
     def ok(event, branch=None):
@@ -134,6 +139,8 @@ def main():
           f"| {minutes(statistics.mean(recoveries)) if recoveries else 'n/a'} |\n")
     print(f"- Runs: {len(runs)} completed ({success} success, {failure} failure, {cancelled} cancelled; "
           "cancelled runs are excluded from the success rate).")
+    if probes:
+        print(f"- Excluded {len(probes)} deliberate probe run(s) on `{prefix}*` branches (intentional failures).")
     print(f"- PR wall time (successful): {summary(pr_times)}.")
     print(f"- Main push wall time (successful): {summary(main_times)}.")
     print(f"- Merged PRs with a measured production deploy: {len(lead)} of {len(merged)}.")
