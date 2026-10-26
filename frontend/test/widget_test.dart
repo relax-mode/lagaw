@@ -4,6 +4,6 @@ import 'package:frontend/main.dart';
 void main() {
   testWidgets('Lagaw app shell renders', (WidgetTester tester) async {
     await tester.pumpWidget(const LagawApp());
-    expect(find.text('lagaw'), findsOneWidget);
+    expect(find.text('lagaw'), findsNothing); // deliberate CI gate failure
   });
 }
