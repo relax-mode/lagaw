@@ -69,6 +69,20 @@ The S1 issue plan assigned [schema (#6)](https://github.com/relax-mode/lagaw/iss
 
 - **October 21, 2026** — The developer supplied [merged implementation PR #37](https://github.com/relax-mode/lagaw/pull/37), reporting all four issue #22 checks passed and an approved teammate review. Inspected their screenshot of the latest `main` [Deploy Backend job](https://github.com/relax-mode/lagaw/actions/runs/39455881955/job/118742502234): Cloud Run deployment succeeded, and the smoke-test log reads `smoke test ok: 1 location`. After deployment, the developer ran the complete transactional `supabase/tests/schema_smoke.sql` script in production project `zjnuqqtbapbpudsjbpif` and reported `Success. No rows returned`. Updated the verification record with the supplied PR/deployment links and production result. No schema migration was added or applied. Publishing this post-deployment documentation through a reviewed PR and linking the final evidence to issue #22 before closure remain pending.
 
+- **October 26, 2026** — Completed the remaining issue #31 CI work for CyGray in [PR #68](https://github.com/relax-mode/lagaw/pull/68):
+  - Path-filtered PR checks: skipped jobs still satisfy branch protection, and a classification failure runs everything.
+  - Per-run concurrency for `main`, which prevents [INC-2](incident-log.md#inc-2-main-runs-blocked-behind-a-staging-approval).
+  - Job timeouts, pinned Ruff, the preinstalled `psql`, and no production token in PR web builds.
+  - A `pytest -m db` hook in the Database job, ready for #29.
+  - `scripts/pipeline_metrics.py` for the weekly log.
+
+  Throwaway probe PRs #69–#72 proved the change, and were closed unmerged:
+  - A failing backend test and a failing Flutter test each turned their required check red.
+  - Docs-only PRs fell from 83 s to a 9 s median; backend-only PRs fell to a 54 s median (previous PR median 90 s).
+  - The `psql` step fell from 8 s to 0 s.
+
+  Filled the Sprint 1 and 2 rows of the official metrics table and started the [incident log](incident-log.md) (INC-1 staging credential, INC-2 blocked main runs). Recorded that #31's manual-production wording conflicts with the approved docs; it is resolved under #58. Evidence: [CI quality gates](evidence/ci-quality-gates-2026-10-26.md).
+
 ### Standup and retrospective
 
 - **October 22, 2026** — Deployed trip creation diagnosis and fix: `https://lagaw.pages.dev` served the new trip UI but rejected every trip request because CI built the Flutter Web bundle without `TRIP_DEMO_TOKEN`; the production Cloud Run service already had the demo user and Secret Manager token mapping (a live unauthenticated `/api/v1/trips` request returned 401, not 503). To unblock the demo, the web build now receives `TRIP_DEMO_TOKEN` from a GitHub Actions secret and compiles it with `--dart-define`, and the Pages deploy gate skips when that secret is missing. The token is therefore readable in the public bundle, so it must stay scoped to the synthetic demo profile and be rotated if abused. A client-safe proxy or authenticated identity remains the proper replacement. No secret values were read or recorded.

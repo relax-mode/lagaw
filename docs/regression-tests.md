@@ -1,9 +1,9 @@
 # Regression tests
 
-Run backend checks from `backend/` after installing `requirements-dev.txt` and Ruff:
+Run backend checks from `backend/` after installing `requirements-dev.txt`, which pins Ruff:
 
 ```sh
-python -m pytest -v
+python -m pytest -v -m "not db"
 python -m ruff check .
 ```
 
@@ -40,7 +40,27 @@ Cloudflare deployment job from running.
 Trip HTTP CRUD tests are present and run in the backend job. They use mocked
 Supabase responses, so they do not prove API persistence through PostgREST.
 The database job separately checks migrations and SQLAlchemy relationships
-against disposable PostgreSQL. Database-backed API fixtures and persistence
-checks remain tracked in [#29](https://github.com/relax-mode/lagaw/issues/29).
-Deployment gates, branch protection, and measured pipeline improvement are
-tracked in [#31](https://github.com/relax-mode/lagaw/issues/31).
+against disposable PostgreSQL.
+
+## Database-backed API tests
+
+Mark a test with `@pytest.mark.db` (the marker is registered in
+`backend/pytest.ini`) when it needs a real database. The backend job runs
+`pytest -m "not db"`. The Database job runs `pytest -m db` after applying the
+migrations and starting a disposable PostgREST, with:
+
+- `DATABASE_URL`: the CI PostgreSQL service (`lagaw_test`, test-only credentials)
+- `CI_POSTGREST_URL`: `http://127.0.0.1:53000/`, PostgREST at the root path
+
+The application's Data API client appends `/rest/v1/` to `SUPABASE_URL`, but
+the CI PostgREST serves from `/`. Database-backed tests should therefore
+override `get_database` with an `httpx.Client` whose `base_url` is
+`CI_POSTGREST_URL`, as `backend/verify_trip_items.py --ci` does. Each test
+must create and remove its own rows. Until marked tests exist, the step
+reports a notice and passes. A failing marked test fails the Database check.
+Database-backed fixtures for Trip CRUD are tracked in
+[#29](https://github.com/relax-mode/lagaw/issues/29).
+
+Pull requests run only the checks their changed paths need (see
+[`PIPELINE.md`](../PIPELINE.md)). Run the commands above locally before
+pushing.
