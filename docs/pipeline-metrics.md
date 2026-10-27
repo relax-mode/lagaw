@@ -2,6 +2,24 @@
 
 Record actual GitHub Actions run IDs and job durations. Compare the same job and event type; include cache state so a warm-cache result is clear.
 
+## Weekly metrics log
+
+Generated from the GitHub Actions API with `python scripts/pipeline_metrics.py --since <first day> --until <last day>` for the `Lagaw CI` workflow (UTC weeks). Notes on the columns:
+
+- PR and main times are the mean wall time of successful runs. Cancelled runs are excluded from the success rate.
+- Production deploys count only runs whose deploy step actually ran on `main`. Deploys from the retired separate `Deploy Backend` workflow are not included.
+- Lead time is measured from PR merge to the first successful production deploy of the merge commit, so it covers only merges that reached production through the pipeline.
+- Failed deploys include staging. Time to recover is measured from a failed deploy to the next successful run of the same deploy job.
+
+| Week | Avg PR pipeline time (min) | Main pipeline time (min) | Pipeline success rate (%) | Production deploys | Avg lead time, merge to live (min) | Failed deploys | Time to recover (min) | Change made this week |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Sprint 1 (Oct 12–18) | 4.5 | 1.9 | 96.8 | 2 | 4.2 | 0 | n/a | First CI pipeline and Cloudflare Pages deploys (Cloud Run was deployed by a separate workflow). The Android APK build made PR runs slow (median 239 s). |
+| Sprint 2 (Oct 19–25) | 1.6 | 2.2 | 96.6 | 3 | 1.9 (3 of 22 merges) | 2 (staging, [INC-1](incident-log.md#inc-1-staging-cloudflare-credential-rejected)) | 863.9 | Removed the APK build (#35); pip cache in the DB job; staging environment; production deploys made manual (#44), which is why only 3 of 22 merges reached production. |
+| Sprint 3 (Oct 26–Nov 1) | | | | | | | | Path-filtered PR checks and pipeline hardening (#31, below); production promotion and AI checks (#58). |
+| Sprint 4 | | | | | | | | |
+
+Fill the Sprint 3 row from the script output before the Sprint 3 consultation, and record the remaining weeks as they happen.
+
 ## Sprint 2 — Database job dependency cache
 
 Optimization: enable the existing `setup-python` pip cache in the PostgreSQL CI job, keyed by `backend/requirements.txt`. The backend CI job already uses the same key, so the database job can reuse that dependency cache instead of downloading the same packages on every run.
@@ -20,3 +38,26 @@ Both updated CI runs passed the migrations and SQLAlchemy relationship checks. T
 ## Other measured pipeline changes
 
 - PR #35 removed the Android APK build after a successful `main` run showed that step taking 148 seconds. The pipeline metrics log does not yet contain a comparable before/after total-duration measurement for that change.
+
+## Sprint 3: Path-filtered pull request checks (#31)
+
+**Bottleneck.** `Frontend - Flutter` was the slowest job in every sampled run: median 84 s, p90 92 s over 40 PR runs from Oct 19–25. It ran on every PR, including 6 docs-only and 8 backend-only PRs among the 22 merged in Sprint 2. Every PR waited about 90 s regardless of what it changed.
+
+**Change.** A `Detect changed areas` job (`dorny/paths-filter`) classifies each PR. Backend, Database and Frontend checks run only when their paths change, and a skipped check still satisfies branch protection. Pushes to `main` and manual runs still run everything. The same PR also reuses the runner's preinstalled `psql` instead of `apt-get install postgresql-client`.
+
+| Pull request type | Before (old workflow ran every check) | After (path-filtered) |
+| --- | --- | --- |
+| Docs-only | 83 s ([#67](https://github.com/relax-mode/lagaw/pull/67), run [40303263203](https://github.com/relax-mode/lagaw/actions/runs/40303263203)); Sprint 2 PR median 90 s (n=39) | **9 s** median: 9, 12, 9 s (run [40304669945](https://github.com/relax-mode/lagaw/actions/runs/40304669945) attempts 1–3) |
+| Backend-only | Sprint 2 PR median 90 s (n=39) | **54 s** median: 50, 54, 56 s (run [40304682540](https://github.com/relax-mode/lagaw/actions/runs/40304682540) attempts 1–3) |
+| Workflow change (all checks) | Sprint 2 PR median 90 s (n=39) | 90 s (run [40304632572](https://github.com/relax-mode/lagaw/actions/runs/40304632572), n=1) |
+| Database job "PostgreSQL client" step | 8 s (`apt-get`, run [39729412274](https://github.com/relax-mode/lagaw/actions/runs/39729412274)) | **0 s**, 3 of 3 runs (psql 16.15 preinstalled) |
+
+**Expected effect.** If Sprint 2's 22 merged PRs are re-weighted with these timings, the mean PR wait falls from about 90 s to about 54 s, roughly 40% shorter. The re-weighting uses 6 docs-only at 10 s, 8 backend at 54 s, 2 frontend at an estimated 85 s, and 6 full at 90 s. Runner minutes fall further, because skipped jobs use none.
+
+**Cost.** Runs that need every check gain the 3–5 s classification job, so they did not get faster. The measured wall time for these was unchanged in the one sample.
+
+**What we learned.**
+- Path filtering helped because most of our PRs touch a single area, not because any one job got faster. Docs-only PRs now return in about 10 s, which matters most during the Demo Day live-deploy rehearsal and sprint-log updates.
+- The Flutter job itself is still about 85 s. The next optimization target is the Flutter toolchain setup and build.
+- Re-measure the Sprint 3 average with `scripts/pipeline_metrics.py` once real Sprint 3 PRs accumulate. These figures come from controlled probe PRs: [#69](https://github.com/relax-mode/lagaw/pull/69) and [#70](https://github.com/relax-mode/lagaw/pull/70), closed without merging.
+
