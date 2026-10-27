@@ -302,6 +302,7 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 **Consultation (November 1).** Evidence links and the live-demo checklist are in the [Sprint 3 consultation pack](sprint-3-consultation.md). The outcome and retrospective are recorded only after the consultation.
 
+- **October 27, 2026** — PR #77 was approved and merged to `main`. [Run 40482703372](https://github.com/relax-mode/lagaw/actions/runs/40482703372) passed staging and both production deployments, resolving [INC-3](incident-log.md#inc-3-production-drifted-behind-main). The production web job finished 6 min 17 sec after the merge; independent live extraction and browser acceptance remain pending.
 - **October 26, 2026** — CyGray drafted the [DevOps implementation plan](devops-implementation-plan.md) on October 25. It covers #30, #31, #58, #59, the instruction-required DevOps deliverables and an improvement backlog. CyGray then worked through the plan on October 26 (PRs #67, #68, #73 and this record), and added the team roles to the README, which the course requires.
 
 ### Issue #26 activity
