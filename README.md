@@ -32,6 +32,17 @@ The recommender is our own Python model and runs on our backend. If DeepSeek is 
 | Hosting | Android APK for testing, web build on Cloudflare Pages, backend on Google Cloud Run, Supabase for database and storage |
 | DevOps | GitHub Actions CI/CD; Wrangler CLI for managing and deploying Cloudflare Pages, run locally and from CI/CD |
 
+## Team
+
+| Member | GitHub | Role | Owns |
+| --- | --- | --- | --- |
+| Kyle | [@CyGray](https://github.com/CyGray) | DevOps Engineer | CI/CD pipeline, environments and secrets, deployments, pipeline metrics and incidents ([`PIPELINE.md`](PIPELINE.md)) |
+| Andrew | [@aranxshx](https://github.com/aranxshx) | Backend / API Engineer | FastAPI endpoints, validation, database access, backend and database tests |
+| Roel | [@roellumauagjr](https://github.com/roellumauagjr) | Frontend Engineer | Flutter app, web build, wiring the UI to the API |
+| Jayperson | [@s2302663-del](https://github.com/s2302663-del) | AI Engineer | Preference extraction, recommendation models, AI evaluation |
+
+Roles follow the issue assignments. Record any role change, with its reason, in the [sprint log](docs/sprint-log.md).
+
 ## Configuration
 
 Copy `.env.example` to `.env` and fill in your own values, including a DeepSeek API key (`DEEPSEEK_API_KEY`). The `.env` file is gitignored and no secret should ever be hardcoded.
