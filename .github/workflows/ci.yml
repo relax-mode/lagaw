@@ -1,4 +1,3 @@
-
 name: Lagaw CI
 
 on:
@@ -11,14 +10,64 @@ on:
 permissions:
   contents: read
 
+# A new commit cancels an outdated pull request run. Main and manual runs each
+# get their own group, so a deploy waiting in one run never queues or cancels
+# checks for later commits; the deploy jobs serialize through their own groups.
 concurrency:
-  group: lagaw-ci-${{ github.event.pull_request.number || github.ref }}
+  group: lagaw-ci-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Pull requests run only the checks their changed paths need. A skipped job
+  # still satisfies its required status check. If classification fails, every
+  # check runs. Pushes and manual runs always run every check.
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      contents: read
+      pull-requests: read
+
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      database: ${{ steps.filter.outputs.database }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Classify changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'docs/evidence/week3-evaluation.json'
+              - '.github/workflows/ci.yml'
+            database:
+              - 'backend/**'
+              - 'supabase/**'
+              - 'scripts/check_database.py'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'frontend/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - '.github/workflows/ci.yml'
+
   backend:
     name: Backend - Python
+    needs: changes
+    if: >-
+      !cancelled() &&
+      (github.event_name != 'pull_request' || needs.changes.result != 'success' ||
+       needs.changes.outputs.backend == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     defaults:
       run:
@@ -48,13 +97,11 @@ jobs:
 
       - name: Install dependencies
         if: steps.project.outputs.exists == 'true'
-        run: |
-          python -m pip install -r requirements-dev.txt
-          python -m pip install ruff
+        run: python -m pip install -r requirements-dev.txt
 
       - name: Lint Python
         if: steps.project.outputs.exists == 'true'
-        run: ruff check .
+        run: ruff check --output-format=github .
 
       - name: Check Python syntax
         if: steps.project.outputs.exists == 'true'
@@ -62,11 +109,17 @@ jobs:
 
       - name: Test backend regressions (offline)
         if: steps.project.outputs.exists == 'true'
-        run: python -m pytest -v
+        run: python -m pytest -v -m "not db"
 
   database:
     name: Database - PostgreSQL migrations and smoke tests
+    needs: changes
+    if: >-
+      !cancelled() &&
+      (github.event_name != 'pull_request' || needs.changes.result != 'success' ||
+       needs.changes.outputs.database == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -98,15 +151,14 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: backend/requirements.txt
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-client
+          cache-dependency-path: backend/requirements-dev.txt
+      # GitHub's Ubuntu runner image ships psql; install it only if that changes.
+      - name: Check PostgreSQL client
+        run: psql --version || { sudo apt-get update && sudo apt-get install --yes postgresql-client; }
       - name: Apply migrations and verify database behavior
         run: python scripts/check_database.py --bootstrap-roles
       - name: Install backend dependencies
-        run: python -m pip install -r backend/requirements.txt
+        run: python -m pip install -r backend/requirements-dev.txt
       - name: Verify SQLAlchemy trip relationships
         env:
           DATABASE_URL: postgresql+psycopg://postgres:local_ci_only@localhost:5432/lagaw_test?sslmode=disable
@@ -123,13 +175,35 @@ jobs:
       - name: Verify itinerary association API against disposable PostgreSQL
         timeout-minutes: 3
         run: python backend/verify_trip_items.py --ci
+      # Tests marked `db` use the disposable services above. pytest exits with
+      # code 5 when nothing is marked yet (#29), which counts as a pass.
+      - name: Test database-backed API (pytest -m db)
+        timeout-minutes: 5
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:local_ci_only@localhost:5432/lagaw_test?sslmode=disable
+          CI_POSTGREST_URL: http://127.0.0.1:53000/
+        run: |
+          status=0
+          python -m pytest -v -m db || status=$?
+          if [ "$status" -eq 5 ]; then
+            echo "::notice::No database-backed API tests are marked yet."
+            exit 0
+          fi
+          exit "$status"
       - name: Remove disposable association test service
         if: always()
         run: docker rm --force issue26-postgrest || true
 
   frontend:
     name: Frontend - Flutter
+    needs: changes
+    if: >-
+      !cancelled() &&
+      (github.event_name != 'pull_request' || needs.changes.result != 'success' ||
+       needs.changes.outputs.frontend == 'true')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     outputs:
       exists: ${{ steps.project.outputs.exists }}
@@ -163,23 +237,25 @@ jobs:
         if: steps.project.outputs.exists == 'true'
         run: flutter pub get
 
-      - name: Test Flutter regressions
-        if: steps.project.outputs.exists == 'true'
-        run: flutter test
-
       - name: Analyze Dart code
         if: steps.project.outputs.exists == 'true'
         run: flutter analyze
 
+      - name: Test Flutter regressions
+        if: steps.project.outputs.exists == 'true'
+        run: flutter test
+
+      # Pull request builds only check that the app compiles; they never receive
+      # the production demo token.
       - name: Build Flutter Web
         if: steps.project.outputs.exists == 'true'
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+          TRIP_DEMO_TOKEN: ${{ github.event_name != 'pull_request' && secrets.TRIP_DEMO_TOKEN || '' }}
         run: flutter build web --release ${API_BASE_URL:+--dart-define=API_BASE_URL=$API_BASE_URL} --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
 
       - name: Upload web build
-        if: steps.project.outputs.exists == 'true'
+        if: steps.project.outputs.exists == 'true' && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: web-build
@@ -195,6 +271,7 @@ jobs:
       github.event_name == 'workflow_dispatch' &&
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     concurrency:
       group: deploy-web-production
@@ -278,6 +355,7 @@ jobs:
       github.event_name == 'workflow_dispatch' &&
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     permissions:
       contents: read
@@ -381,6 +459,7 @@ jobs:
     needs: [backend, database, frontend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     outputs:
       deploy: ${{ steps.gate.outputs.deploy }}
@@ -439,6 +518,7 @@ jobs:
       needs.staging-changes.outputs.deploy == 'true' &&
       vars.STAGING_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: staging
 
     permissions:
