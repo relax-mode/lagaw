@@ -4,7 +4,8 @@ Improvements to the Cloudflare Pages pipeline in [`.github/workflows/ci.yml`](..
 
 ## Security
 
-- **Scope secrets to GitHub Environments (highest priority).** Repository-level secrets can be read by any workflow on any branch, so anyone with push access could edit a workflow on a branch and print the token. Create a `production` Environment restricted to the `main` branch and move `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` there; add a `preview` Environment for pull-request deploys. This also satisfies the rubric's "secrets scoped per environment" criterion ([official instructions](official-instructions.md), Section 8).
+- **Finish scoping secrets to GitHub Environments (highest priority).** Repository-level secrets can be read by any workflow on any branch, so anyone with push access could edit a workflow on a branch and print the token. The `staging` and `production` environments, both limited to protected branches, now hold each environment's demo token; the production one was added October 26 under #58. `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are still shared repository secrets. Create a second Cloudflare Pages token, store one in each environment (the token holder must do this in the Cloudflare dashboard), and then delete the repository copies and the unused repository `TRIP_DEMO_TOKEN`.
+- **Scope deployer identities per environment.** Both deployer service accounts trust the whole `github` Workload Identity pool by repository. After the first successful environment-based production deploy, bind each deployer to `attribute.environment/<env>` only. The commands are in the [AI CI/CD evidence](evidence/ai-ci-cd-2026-10-26.md#post-merge-identity-scoping).
 - **Pin third-party actions to commit SHAs.** The workflow uses version tags (`@v2`, `@v4`), which can be moved by the action's owner. Pin to full SHAs and let Dependabot propose updates.
 - **Keep the deploy token narrow.** Scope is already limited to Cloudflare Pages edit. Cloudflare cannot scope it to a single project, so rotate it when a team member leaves.
 - **Keep secrets out of the Flutter web bundle.** Everything compiled into a web build is public. Pass the backend URL with `--dart-define`; never compile in the DeepSeek key or any other secret.
@@ -12,9 +13,9 @@ Improvements to the Cloudflare Pages pipeline in [`.github/workflows/ci.yml`](..
 ## Reliability
 
 - **Pin the Flutter version.** `channel: stable` lets a new Flutter release change or break the build with no change in this repository. Pin `flutter-version` in `ci.yml`.
-- **Keep smoke checks representative.** The pipeline now checks the deployed Pages URL and the backend `/locations` endpoint. These checks verify HTTP availability; they do not verify browser CORS or database writes. Add those checks after staging is isolated.
+- **Keep smoke checks representative.** `scripts/smoke_deployed.py` checks locations, Trip authentication and ownership, the extraction route, and exact CORS on staging and production after every deploy. It deliberately does not write data. Browser-level writes were verified manually on staging ([staging acceptance](evidence/staging-acceptance-2026-10-26.md)).
 - **Keep the rollback procedure current.** Cloud Run revision rollback and Cloudflare Pages promotion steps are documented in [`PIPELINE.md`](../PIPELINE.md). Rehearse both before Demo Day.
-- **Do not rely on the path filter to recover from failures.** If a deploy fails, or secrets are added later, nothing redeploys until the frontend changes again. Use the manual `workflow_dispatch` run in that case.
+- **Do not rely on the path filter to recover from failures.** If a deploy fails, or secrets are added later, nothing redeploys until the affected area changes again. Use the manual `workflow_dispatch` run on `main`, which redeploys production. For staging, rerun the failed main run.
 
 ## Pipeline efficiency
 

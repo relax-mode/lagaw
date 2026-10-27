@@ -6,6 +6,7 @@ Every broken build or failed deploy that reached `main` or a deployed environmen
 |---|---|---|---|---|---|
 | [INC-1](#inc-1-staging-cloudflare-credential-rejected) | Oct 24–25, 2026 | Staging web | Staging Pages not updated; `staging.lagaw.pages.dev` returned 404 | `Deploy - Staging` failure | about 15.4 h (failed deploy → next successful staging deploy) |
 | [INC-2](#inc-2-main-runs-blocked-behind-a-staging-approval) | Oct 22–24, 2026 | `main` CI | Two `main` commits never received CI or a staging deploy | Run history review on Oct 26 | about 53.5 h of blocked `main` pipeline |
+| [INC-3](#inc-3-production-drifted-behind-main) | Oct 22–26, 2026 | Production API and web | Production missed four days of merged work: no AI extraction route, and no matching demo token in the web bundle | Smoke and bundle checks on Oct 26 | open until the first automatic promotion (#58) |
 
 ## INC-1: Staging Cloudflare credential rejected
 
@@ -29,3 +30,16 @@ Every broken build or failed deploy that reached `main` or a deployed environmen
   - Every job now has a `timeout-minutes` limit.
   - Manual approval gates are kept off the automatic deploy path.
   - The weekly metrics review (`scripts/pipeline_metrics.py`) shows outlier wall times, so a stuck run is noticed within a week.
+
+## INC-3: Production drifted behind main
+
+- **What happened.** Production deploys became manual-dispatch only on Oct 22 (PR #44). No dispatch run followed. On Oct 26:
+  - Production Pages still served the build from run `8aa469c` (07:36 UTC, Oct 22). That predates #49, which compiled the demo token into web builds, so the production web bundle does not contain the production demo token and its trip requests cannot authenticate. A check of the downloaded bundle found 0 occurrences of the production token; the same check on staging found its token.
+  - The production API (`lagaw-api-00007-hfl`) returned **404** for `/api/v1/preferences/extract`. Meanwhile `main` and staging had shipped the extraction API (#64), the Week 3 evaluation (#66) and the association API (#60).
+- **Root cause.** A manual production step conflicted with the course requirement and the approved pitch: every merge must deploy without manual steps. Nothing alerted anyone to the gap, because only staging deployed automatically and only staging was smoke-tested on each merge.
+- **Fix.** #58 promotes every qualifying `main` push to production after staging passes. It reuses the staging-tested image, rebuilds the web app with the production token from the GitHub `production` environment, and runs the same smoke checks as staging, including the extraction route. The first promotion after merge closes this incident; record its run here.
+- **Prevention.**
+  - No manual step remains on the deploy path; manual dispatch is for recovery only.
+  - The production smoke check fails if a route that `main` serves is missing.
+  - The weekly metrics now report merge-to-live lead time, which exposes any merge that never reached production.
+
