@@ -20,6 +20,8 @@ Generated from the GitHub Actions API with `python scripts/pipeline_metrics.py -
 
 Fill the Sprint 3 row from the script output before the Sprint 3 consultation, and record the remaining weeks as they happen.
 
+On October 27, [PR #77](https://github.com/relax-mode/lagaw/pull/77) merged at 09:41:28 UTC. Its [promotion run](https://github.com/relax-mode/lagaw/actions/runs/40482703372) completed the production API job at 09:46:29 (5 min 1 sec after merge) and the production web job at 09:47:45 (6 min 17 sec after merge). These are individual job completion times, not the Sprint 3 average.
+
 ## Sprint 2 — Database job dependency cache
 
 Optimization: enable the existing `setup-python` pip cache in the PostgreSQL CI job, keyed by `backend/requirements.txt`. The backend CI job already uses the same key, so the database job can reuse that dependency cache instead of downloading the same packages on every run.
