@@ -411,10 +411,35 @@ reload after actual production redeployment. The existing read-only production
 SQL check is next to confirm full trip/revision/total equality before cleanup;
 no direct agent protected production database read is claimed.
 
+Andrew supplied the **post-deployment read-only production SQL PASS and complete
+saved state**. Parsed comparison equals the pre-deployment baseline in every
+trip/item/location field, score/reason, revision `c906b3caf89e3fa668ba434c8c7f3df4`
+and PHP 120.00 total. Combined with the new ready revision/100% traffic report and
+authenticated post-deployment GET, **production actual redeployment persistence
+passed**, following staging first. Both environments now have completed deployed,
+refresh and actual later-deployment persistence evidence.
+
+Prepared single-use exact cleanup SQL for
+[staging](itinerary-generation-staging-cleanup.sql) and
+[production](itinerary-generation-production-cleanup.sql). Each locks its exact
+owner/trip/locations, compares the full verified saved state, refuses acquired
+outside references, deletes only one exact synthetic trip (cascading three items)
+and three exact venues, then checks absence/counts and unchanged demo-profile
+fingerprint before commit. Migration/functions and existing shared records remain.
+
+Development cleanup was rehearsed with rollback: all guard/delete/cascade/profile
+checks ran, and complete saved-state equality after rollback was independently
+verified. The same development script then committed successfully. A separate
+guarded SQL session confirms the exact development trip/items/venues absent,
+existing staging demo profile unchanged, and migration/generation function retained.
+The staging JSON contains exact cleanup IDs/results. Production's local script
+copy matches the documented production SQL exactly and is prepared for Andrew's
+SQL Editor execution; production cleanup has **not** yet been reported or executed
+by the agent. Private `.env` and CLI development linkage remain unchanged.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
-- Cloud Run staging-before-production actual redeployment persistence.
-- Persistence across an actual hosted redeployment, then exact fixture cleanup.
+- Exact production acceptance-fixture cleanup and final evidence publication.
 - Final issue-linked evidence and closure after the Definition of Done is satisfied.
 
 The [API guide](../itinerary-generation-api.md) gives the safe release/verification

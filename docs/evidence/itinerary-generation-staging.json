@@ -1892,7 +1892,7 @@
     "f7c0a84f-0e17-4f47-b86c-bcfe463f84fc",
     "582e663d-052a-45db-88ab-beee1d905084"
   ],
-  "authenticated_staging_functional_acceptance": "passed including actual redeployment persistence; exact fixture cleanup pending",
+  "authenticated_staging_functional_acceptance": "passed including actual redeployment persistence; exact fixture cleanup committed and independently verified",
   "redeployment": {
     "status": "passed: new ready revision/100 percent traffic reported; authenticated GET and independent complete database equality verified",
     "before_revision": "lagaw-api-staging-00022-pk2",
@@ -2067,5 +2067,25 @@
         "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
       }
     ]
+  },
+  "cleanup": {
+    "status": "passed",
+    "source": "agent guarded-development SQL execution after full rollback rehearsal",
+    "script": "docs/evidence/itinerary-generation-staging-cleanup.sql",
+    "deleted_trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+    "deleted_item_ids": [
+      "7b99d4e1-853f-41db-8c26-6ff660ac89b9",
+      "f7c0a84f-0e17-4f47-b86c-bcfe463f84fc",
+      "582e663d-052a-45db-88ab-beee1d905084"
+    ],
+    "deleted_location_ids": [
+      "ad2ca02d-b441-402c-9b01-be576dfc660c",
+      "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+      "2b418dcb-b520-4eff-bdae-b9577bf7547d"
+    ],
+    "dry_run_rolled_back_and_exact_state_restored": true,
+    "separate_session_absence_verified": true,
+    "existing_demo_profile_unchanged": true,
+    "migration_and_generation_function_retained": true
   }
 }
