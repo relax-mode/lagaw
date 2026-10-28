@@ -525,6 +525,8 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 ## Open follow-ups
 
+- **October 28, 2026** — Andrew reported CyGray's review of #54 and asked whether PR #89 can merge. Independently confirmed CyGray approved the current head `92536e7` at 12:21:21 UTC, all required applicable checks passed in [run 40686293474](https://github.com/relax-mode/lagaw/actions/runs/40686293474), and GitHub reports the PR clean/mergeable. Production's migration is still an unverified release prerequisite because merges automatically deploy and deployment does not apply SQL. Created separate local `docs/issue-54-release-evidence` branch to preserve approval on the implementation PR, and prepared an ignored production SQL transaction wrapper embedding the exact reviewed migration with preceding-history and post-install privilege/trigger checks. Guiding Andrew to run it only in production SQL Editor before merging; no production execution, `.env` edit or CLI-link change has been made by the agent.
+
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.
 - Write and verify the deploy and rollback runbook with Wrangler commands.
 - Confirm the deployed frontend shows deployed database data (issue #11 acceptance criterion). Issue #11 is closed, and backend plus frontend deployment workflows succeeded, but the log does not record browser acceptance evidence.
