@@ -481,6 +481,8 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 - **October 28, 2026** — Final #53 offline suite passed **495 tests**, 91 database tests deselected in 10.12 seconds, after tightening HTTP numeric constraints and rejecting coerced boolean/string model scores. The development verifier's four PASS groups and exact cleanup are recorded in [evidence](evidence/trip-recommendations.md). Confirmed GitHub access as Andrew and checked the existing main protection: all three required CI contexts plus one teammate approval are required, with stale approvals dismissed. Preparing the issue-only PR; no protection or deployment settings are changed.
 
+- **October 28, 2026** — Published #53 in [PR #86](https://github.com/relax-mode/lagaw/pull/86), code commit `9f7781a`. [CI run 40674256269](https://github.com/relax-mode/lagaw/actions/runs/40674256269) passed Backend and Database; Flutter and deployment correctly skipped for the backend-only PR. Downloaded and parsed [JUnit artifact 12809638076](https://github.com/relax-mode/lagaw/actions/runs/40674256269/artifacts/12809638076): **91 database tests**, zero failures/errors/skips, 3.947 seconds, including the new #53 persistence-backed recommendation/owner-isolation test (0.151 seconds). Linked the existing CI evaluation artifact and observed results in [evidence](evidence/trip-recommendations.md). Teammate approval, merge and authenticated staging-before-production acceptance remain pending. No production request or `.env` edit was made.
+
 ## Open follow-ups
 
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.

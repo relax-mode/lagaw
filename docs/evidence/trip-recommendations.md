@@ -3,6 +3,8 @@
 Prepared October 28, 2026 for [#53](https://github.com/relax-mode/lagaw/issues/53),
 on `feat/s3-08-trip-recommendations`, based on up-to-date main `bde91ce`.
 Scope and reproducible commands: [API guide](../trip-recommendations-api.md).
+Implementation: [PR #86](https://github.com/relax-mode/lagaw/pull/86),
+code commit `9f7781a6579efa0a8045260ff124e2a45a2e4bea`.
 
 | Check | Observed result |
 | --- | --- |
@@ -12,7 +14,10 @@ Scope and reproducible commands: [API guide](../trip-recommendations-api.md).
 | Evaluation comparison | No regression; content Recall@3 0.75, NDCG@3 0.5898, HitRate@1 0.375; synthetic hybrid metrics remain 1.0 (not real-user quality evidence) |
 | Development Supabase verification | Passed using the existing private app configuration, with target guard restricted to `vnpkyvtbupnquvirzlzp` |
 | Development cleanup | Every generated interaction, item, trip, user and location removed; absence independently checked |
-| Database CI, required checks and artifacts | Pending PR run |
+| Required PR CI | [Run 40674256269](https://github.com/relax-mode/lagaw/actions/runs/40674256269): Backend and Database succeeded; Flutter/deployment correctly skipped for this backend-only PR |
+| Disposable PostgreSQL/PostgREST tests | 91 passed, zero failures/errors/skips, 3.947 seconds; new saved-trip recommendation persistence/owner test passed in 0.151 seconds |
+| Independently downloaded JUnit | [trip-integration-results artifact 12809638076](https://github.com/relax-mode/lagaw/actions/runs/40674256269/artifacts/12809638076), XML parsed to confirm counts and the new test |
+| CI evaluation artifact | [ai-evaluation artifact 12810021358](https://github.com/relax-mode/lagaw/actions/runs/40674256269/artifacts/12810021358); Backend job's evaluation and regression gate passed |
 | Teammate review and merge | Pending |
 | Deployed staging and production acceptance | Pending reviewed merge/deployment; local API checks are not hosted deployment evidence |
 
@@ -41,3 +46,17 @@ PASS: Exact fixture cleanup and independent absence checks.
 No schema, Flutter, scheduling, training or deployment configuration changes are
 included. Production `zjnuqqtbapbpudsjbpif` remains untouched. The existing untracked
 root `test-results/` directory is excluded from this work.
+
+## Remaining acceptance evidence
+
+The PR body references #53, linking implementation, contract, checks and this
+evidence to the assigned issue. Main requires one teammate approval and successful
+required checks. No review, merge or deployment is claimed by this evidence.
+
+After merge, record the serving revision/commit and authenticated responses for
+the new route in staging/development, then production: a ranked nonempty result
+from a saved synthetic trip, required-accessibility empty result, invalid limit,
+missing/other-owner trip and unauthenticated access. Compare the trip and itinerary
+before/after. Reuse existing private demo credentials; do not paste them into chat
+or change `.env`. The endpoint itself is read-only. Preserve existing saved data;
+if a fresh acceptance trip is necessary, record its exact ID and clean up only it.
