@@ -25,3 +25,9 @@ approve promotion. Restore the previous reviewer setting after the rollout.
 The existing protected-branch restriction is retained. This changes release
 ordering; it does not reduce the reviewed-PR, CI or deployed-acceptance criteria.
 
+Completed October 29: #92 merged as `7186a08`; staging and production deployment
+and backend ownership verification passed in order. The temporary production
+reviewer was removed afterward, preserving the original protected-branch policy.
+Automatic promotion is restored. [Final backend evidence](evidence/authentication-79.md)
+records acceptance, cleanup and the explicit remaining #80 limitation.
+

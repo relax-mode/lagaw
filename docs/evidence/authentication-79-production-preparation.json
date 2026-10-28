@@ -1,0 +1,27 @@
+{
+  "issue": 79,
+  "environment": "production",
+  "project_ref": "zjnuqqtbapbpudsjbpif",
+  "recorded_at_utc": "2026-10-28T18:13:09.672849+00:00",
+  "migration_version": "20261029090000",
+  "migration_provenance": "Andrew-reported production SQL Editor PASS after corrected snapshot query validation in development",
+  "reported_result": "PASS: Issue79 production migration and two confirmed test profiles ready; existing records preserved.",
+  "profiles": [
+    {
+      "subject": "58ae6726-3d51-43ef-b221-ebe07c3b94ea",
+      "profile_id": "2210f0de-37c6-4d9b-a07e-1393485dfa6b"
+    },
+    {
+      "subject": "09a100ba-2b24-49d5-9a68-7792d39ef420",
+      "profile_id": "7419762a-9aca-4425-8643-e74f09a893b4"
+    }
+  ],
+  "private_credentials_included": false,
+  "configuration_check": "Both secret names and both variable names independently verified; no secret values retrieved",
+  "production_api_promotion_approved": true,
+  "workflow": "https://github.com/relax-mode/lagaw/actions/runs/40739574662",
+  "limitations": [
+    "Production SQL execution reported by Andrew; no direct agent production SQL connection",
+    "Deployed production acceptance was pending at preparation time; subsequent production acceptance record reports PASS"
+  ]
+}

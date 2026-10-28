@@ -2,11 +2,12 @@
 
 ## Authentication handoff (#79 / #80)
 
-The proposed [Supabase session and backend ownership contract](docs/authentication.md)
-supersedes demo-token setup below when #79 is released. Use verified access tokens
-for all calls; Flutter sessions/screens remain #80. Contract agreement and
-development/staging acceptance are pending. The #56 payload contract below remains
-unchanged.
+The deployed [Supabase session and backend ownership contract](docs/authentication.md)
+supersedes demo-token setup below. Backend #79 passed development, deployed staging
+and production ownership verification. Protected calls now require Supabase access
+tokens; Flutter sessions/screens remain #80 and teammate acknowledgment is deferred.
+Existing compiled demo-token calls receive 401. The #56 payload contract below is
+unchanged. Explicit synthetic demo mode is restricted to development/loopback.
 
 **The #54 backend is implemented, merged, deployed and verified. Andrew confirmed
 on October 29, 2026 that Roel agreed to this API contract.** This is the frontend

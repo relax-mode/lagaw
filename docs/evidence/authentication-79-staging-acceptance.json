@@ -1,0 +1,91 @@
+{
+  "issue": 79,
+  "environment": "staging",
+  "project_ref": "vnpkyvtbupnquvirzlzp",
+  "recorded_at_utc": "2026-10-28T17:57:04.265645+00:00",
+  "implementation_head": "7186a080336838d0b2fdba5590d445ef3a6b0ffb",
+  "transport": "Actual HTTPS requests to deployed staging Cloud Run and development Supabase Auth/Data API; no identity/database mocks",
+  "credentials": "Synthetic passwords and access tokens held in process memory only; no credential output or dotenv edit",
+  "confirmation": "Admin-created confirmed synthetic accounts; separate unconfirmed account password sign-in rejected; no emails sent",
+  "safe_auth_fixture_ids": [
+    "b6f92be4-3a57-40dd-8f49-8b5269702c02",
+    "5062c9dd-5934-468f-88b1-0048dda95577",
+    "886f10c2-593a-4ea9-821a-cd0707a94797"
+  ],
+  "safe_profile_fixture_ids": [
+    "11dbf608-0df4-494e-8da4-c4d4cf4769f6",
+    "339bf912-df59-4463-9162-c2d83fb4137a"
+  ],
+  "interaction_fixture_id": "d2a57918-5b5e-45a9-b13b-111cf078ef68",
+  "checks": [
+    "Supabase password sign-in rejects unconfirmed email",
+    "Live Supabase email/password sign-in and access-token verification",
+    "Missing/invalid tokens return 401",
+    "Idempotent profile creation",
+    "Two-owner trip create/update; cross-user GET/PATCH/DELETE and item access return 404",
+    "Verifier exact trip cleanup and owner-visible trip preservation",
+    "Live verified interaction write/read with two-user history/recommendation isolation",
+    "Client-supplied trip owner rejected with 422",
+    "All five application tables exactly match pre-verification count/hash baseline after cleanup"
+  ],
+  "before": {
+    "users": {
+      "rows": 5,
+      "md5_all_columns": "2143478eb916ac4eb89378155f3d010f"
+    },
+    "locations": {
+      "rows": 10,
+      "md5_all_columns": "243bfb377b4c981abf11540c79d92584"
+    },
+    "trips": {
+      "rows": 7,
+      "md5_all_columns": "e193559ed6404c589444490cc0af152a"
+    },
+    "itinerary_items": {
+      "rows": 3,
+      "md5_all_columns": "eb5872d3b87ef7893691231d0ab2bae8"
+    },
+    "user_location_interactions": {
+      "rows": 0,
+      "md5_all_columns": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "after": {
+    "users": {
+      "rows": 5,
+      "md5_all_columns": "2143478eb916ac4eb89378155f3d010f"
+    },
+    "locations": {
+      "rows": 10,
+      "md5_all_columns": "243bfb377b4c981abf11540c79d92584"
+    },
+    "trips": {
+      "rows": 7,
+      "md5_all_columns": "e193559ed6404c589444490cc0af152a"
+    },
+    "itinerary_items": {
+      "rows": 3,
+      "md5_all_columns": "eb5872d3b87ef7893691231d0ab2bae8"
+    },
+    "user_location_interactions": {
+      "rows": 0,
+      "md5_all_columns": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "existing_data_equal": true,
+  "exact_fixture_cleanup": true,
+  "production_contacted": false,
+  "limitations": [
+    "Not a production acceptance run",
+    "Email delivery, Flutter flow and genuinely expired live session remain separate acceptance; expiry rejection covered offline"
+  ],
+  "main_ci_run": "https://github.com/relax-mode/lagaw/actions/runs/40739574662",
+  "staging_deploy_job": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122998145295",
+  "observed_staging_revisions": [],
+  "revision_metadata_note": "Revision IDs were not emitted in the selected job logs; successful deployment and deployed Auth schema/behavior verified separately.",
+  "public_checks": [
+    "SupabaseAccessToken OpenAPI scheme present",
+    "Missing token returns 401",
+    "Exact staging origin allowed by CORS"
+  ]
+}

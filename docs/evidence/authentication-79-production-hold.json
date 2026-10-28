@@ -11,5 +11,9 @@
     "custom_branch_policies": false
   },
   "production_service_or_database_changed": false,
-  "restore_after_rollout": "Remove the temporary required reviewer, retaining the protected-branch policy and existing settings"
+  "restore_after_rollout": "Remove the temporary required reviewer, retaining the protected-branch policy and existing settings",
+  "restored_at_utc": "2026-10-28T18:18:55.411534+00:00",
+  "restored_required_reviewers": [],
+  "restoration_verified": true,
+  "restoration_condition": "All main CI/staging/production API/web jobs successful and Andrew production two-account acceptance passed"
 }

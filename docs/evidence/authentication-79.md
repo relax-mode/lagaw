@@ -1,5 +1,14 @@
 # #79 authentication verification evidence
 
+Backend delivery: **reviewed, merged and deployed**, with development first,
+then deployed staging and production verification. [PR #92](https://github.com/relax-mode/lagaw/pull/92)
+merged as `7186a08`; [main run 40739574662](https://github.com/relax-mode/lagaw/actions/runs/40739574662)
+passed every check and deployment job. Temporary fixtures were cleaned and the
+production promotion policy restored. Flutter #80 and teammate acknowledgment
+remain explicit follow-up at Andrew's direction; no frontend Auth completion is
+claimed. Final operational evidence and the SQL-wrapper correction are published
+through the separate release-evidence PR.
+
 ## October 29, 2026 — implementation preparation
 
 - Andrew requested backend issue #79 only; Flutter authentication stays in #80.
@@ -152,20 +161,73 @@
   acceptance are complete. The temporary reviewer rule must be restored after
   the backend rollout. This preparation does not mark #79 complete.
 
-## Required evidence before completion
+## October 29, 2026 — completed backend deployment and production acceptance
+
+- Jayperson's final approval matched `e80f86f`; all required checks passed.
+  Merged PR #92 through the normal reviewed-PR path as `7186a08`. Main CI passed
+  **719 backend tests** (11.64 seconds), **106 database tests** (zero failures,
+  errors or skips), **104 Flutter tests**, syntax/lint and AI checks, then all
+  staging/API/web deployment and smoke jobs.
+  [Machine-readable CI record](authentication-79-main-ci.json) links each job.
+- [Deployed staging acceptance](authentication-79-staging-acceptance.json) used
+  actual HTTPS Cloud Run requests and development Supabase Auth/Data API, without
+  identity/database mocks. Missing/invalid auth, unconfirmed password sign-in,
+  two-owner trip CRUD/items, interaction history/recommendation isolation and
+  rejected owner spoofing passed. Exact temporary accounts/profiles/trips/events
+  were removed; all five application tables matched full before/after row hashes.
+  Andrew's two reusable development profiles remain intentionally.
+- Andrew privately configured production smoke credentials/public key and
+  verified two distinct confirmed production identities. Matched reported SQL
+  profile IDs to the exact generated plan. The first wrapper attempt failed in
+  the pre-change snapshot because generation lost empty-string quotes; no
+  migration/profile inserts were reached. Corrected both snapshot templates with
+  dollar quoting, validated each on all five development tables, and rehearsed
+  the full installed-migration verification path in a rolled-back development
+  transaction. The original schema migration was unchanged. Andrew reported
+  the successful corrected SQL execution and exact profile mappings in production.
+  [Preparation/provenance record](authentication-79-production-preparation.json)
+  distinguishes this from direct agent production SQL execution.
+- Approved API promotion only after staging acceptance and reported production
+  prerequisites passed. The production API's authenticated smoke passed, followed
+  by production web deployment/smoke for the same reviewed main merge. Independently
+  confirmed the deployed Supabase security scheme, missing-token 401, exact
+  production CORS and denial of profile reads with the public key alone; no
+  profile rows or credential values were retrieved in that public-key check.
+- Andrew ran the production-only verifier with credentials hidden in his
+  terminal. [Production acceptance](authentication-79-production-acceptance.json)
+  records all PASS lines and exact expected profile IDs: two verified owners
+  could create/update their own trips, cross-user GET/PATCH/DELETE/item requests
+  returned 404, exact temporary trips were removed and both accounts' existing
+  trip histories matched their baselines. Reusable production profiles remain
+  for safe smoke/acceptance use. Production interaction events were not created;
+  live interaction write/isolation coverage passed in staging, plus isolated CI.
+- Restored the prior production Environment policy after the entire workflow
+  and production ownership acceptance passed: no required reviewer, existing
+  protected-branch restriction retained. [Hold/restoration record](authentication-79-production-hold.json)
+  captures both phases. Later main changes again use the existing automatic
+  staging-to-production promotion flow.
+- Private `.env` and the pre-existing root `test-results/` remained unchanged.
+  No credentials, tokens or email confirmation links are included. Real email
+  delivery/Flutter session journeys and teammate acknowledgment are deferred to
+  #80/operations handoff at Andrew's instruction. Genuine expired-token rejection
+  was covered in isolated tests; no live token-lifetime setting was shortened.
+
+## Delivery status and explicitly deferred follow-up
 
 | Requirement | Status |
 | --- | --- |
 | Final offline lint/regression/AI evaluation | Passed locally; 719 offline tests, no AI regression |
 | Disposable migration + real PostgreSQL/PostgREST Auth mapping/isolation tests | Passed: [run 40731191149](https://github.com/relax-mode/lagaw/actions/runs/40731191149), 106 DB tests |
-| Roel agrees #80 token/confirmation/refresh contract | Handoff prepared; agreement pending |
-| Development/staging Auth smoke configuration | Configured by Andrew; verified names; Kyle handoff/contract acknowledgment pending |
+| Roel agrees #80 token/confirmation/refresh contract | Handoff published; acknowledgment deferred by Andrew to #80 |
+| Environment Auth smoke configuration | Both environments configured by Andrew; Kyle operations handoff deferred |
 | Development migration and two-account verified acceptance | Passed; linked migration/live acceptance JSON above; exact fixtures cleaned |
-| Candidate deployed staging acceptance, with safe result links | Not run |
-| Reviewed PR, required CI and merge | #92 ready for review; prior approval dismissed after release-notes update; fresh approval/merge pending |
-| Production migration/configuration after development acceptance | Not performed |
-| Deployed production acceptance and cleanup | Not run |
+| Deployed staging acceptance, with safe result links | Passed; live HTTPS/interaction/cleanup evidence above |
+| Reviewed implementation PR, required CI and merge | #92 approved on final head, merged `7186a08`; main checks/deployments passed |
+| Production migration/configuration after development/staging acceptance | Reported SQL PASS matched plan; both environments' smoke configuration verified |
+| Deployed production acceptance and cleanup | Passed; both owner histories preserved and exact temporary trips removed |
+| Temporary production promotion hold | Restored to previous reviewer policy after successful rollout |
 
-Do not mark #79 complete from offline tests alone. Add actual commit/PR/run links,
-safe results, migration versions and provenance as these steps occur. Never add
-passwords, access/refresh tokens, API keys or email confirmation links.
+The backend delivery is supported by reviewed merge, main CI, actual staging and
+production deployment and ownership evidence above. This does not claim Flutter
+or email-delivery acceptance or teammate agreement that was not recorded.
+Never add passwords, access/refresh tokens, keys or confirmation links.
