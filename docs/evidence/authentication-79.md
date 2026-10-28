@@ -42,17 +42,66 @@
   private login before it can create the PR and inspect Actions. No PR, CI run,
   review, merge or deployment is claimed by this branch publication.
 
+## October 29, 2026 — PR CI and live development acceptance
+
+- Andrew completed private GitHub CLI login. Created [draft PR #92](https://github.com/relax-mode/lagaw/pull/92).
+  A fresh fetch found Roel's #55 PR #91 had merged as `bd17ccf` after the earlier
+  main check. Integrated current main as `1007440`, preserving both sides of the
+  sprint-log-only conflict and leaving Roel's implementation unchanged.
+- [CI run 40731191149](https://github.com/relax-mode/lagaw/actions/runs/40731191149)
+  passed changed-area detection, Backend, Database and Flutter on `1007440`.
+  Backend: **719 passed, 106 deselected**, 15.04 seconds; lint, compile and AI
+  baseline comparison passed. Database artifact `trip-integration-results`:
+  **106 tests, 0 failures, 0 errors, 0 skips**, including all four new Auth-profile
+  creation/race/legacy-collision/interaction tests. Flutter: **104 passed**, web
+  build passed. All deployment jobs correctly skipped for the draft PR.
+- A guarded read-only development check established that the new profile column
+  was absent. The existing SQLAlchemy connection independently passed the known
+  development target guard; history contained exactly the three preceding
+  repository migration versions. No connection string or credential was shown.
+- Rehearsed the exact additive SQL in a transaction and rolled it back. Verified
+  schema/history restoration and equality of all existing application rows.
+  Then applied `20261029090000_link_verified_auth_profiles.sql` in development
+  through that guarded SQLAlchemy connection, recording the matching version,
+  name and source in Supabase migration history in the same transaction. No CLI
+  link, private `.env`, Auth setting or production database was changed.
+  [Migration evidence](authentication-79-development-migration.json) records
+  rollback rehearsal, both new constraints, zero assigned legacy Auth links,
+  migration source hash and before/after row counts/hashes.
+- Development's read-only Auth settings reported email enabled, anonymous sign-in
+  disabled, sign-ups enabled and email autoconfirm disabled. Confirmation mail
+  delivery and redirect configuration still need Kyle/Roel coordination.
+- Executed local FastAPI through ASGI TestClient against **actual development
+  Supabase Auth and Data API**, without identity/database substitution. Created
+  two confirmed synthetic email/password accounts and one unconfirmed account
+  through the admin fixture API; generated passwords and access tokens remained
+  solely in process memory. No mail was sent or credentials shared/stored.
+- Live checks passed: unconfirmed password sign-in rejected; missing/invalid
+  backend tokens rejected; two verified owners could create/update their own
+  trips; cross-user GET/PATCH/DELETE and item access returned 404; verified event
+  writes/readback worked while other-user history/recommendation input stayed
+  isolated; forged owner fields returned 422.
+- Removed only the exact created fixture profiles and their trips/events plus
+  the three synthetic Auth accounts; verified their absence. All five application
+  tables matched complete before/after counts and hashes, including the new Auth
+  column: **3 existing profiles, 10 locations, 7 trips, 3 itinerary items, 0
+  interactions** remained unchanged. [Live acceptance evidence](authentication-79-development-acceptance.json)
+  records safe fixture IDs, method and limits. This is development backend
+  acceptance, not deployed staging, Flutter, email-delivery or production evidence.
+  Genuine expired-session rejection remains covered by isolated automated tests;
+  no project token-lifetime setting was changed for acceptance.
+
 ## Required evidence before completion
 
 | Requirement | Status |
 | --- | --- |
 | Final offline lint/regression/AI evaluation | Passed locally; 719 offline tests, no AI regression |
-| Disposable migration + real PostgreSQL/PostgREST Auth mapping/isolation tests | Pending CI |
+| Disposable migration + real PostgreSQL/PostgREST Auth mapping/isolation tests | Passed: [run 40731191149](https://github.com/relax-mode/lagaw/actions/runs/40731191149), 106 DB tests |
 | Roel agrees #80 token/confirmation/refresh contract | Handoff prepared; agreement pending |
 | Kyle agrees/configures development Auth + environment smoke accounts | Handoff prepared; confirmation pending |
-| Development migration and two-account verified acceptance | Not run |
+| Development migration and two-account verified acceptance | Passed; linked migration/live acceptance JSON above; exact fixtures cleaned |
 | Candidate deployed staging acceptance, with safe result links | Not run |
-| Reviewed PR, required CI and merge | Pending |
+| Reviewed PR, required CI and merge | Draft #92; CI passed; teammate review and merge pending |
 | Production migration/configuration after development acceptance | Not performed |
 | Deployed production acceptance and cleanup | Not run |
 

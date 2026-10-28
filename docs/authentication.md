@@ -1,7 +1,8 @@
 # Supabase authentication and backend ownership — #79
 
-Status: implementation prepared; teammate contract agreement, hosted development
-acceptance, review, required CI, merge and deployed acceptance are still pending.
+Status: [draft PR #92](https://github.com/relax-mode/lagaw/pull/92), required CI
+and live development backend acceptance passed. Teammate contract agreement,
+review, merge and deployed staging/production acceptance remain pending.
 Evidence: [authentication verification record](evidence/authentication-79.md).
 Flutter screens and session management belong to Roel's #80.
 
