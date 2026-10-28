@@ -343,6 +343,16 @@ staging image/configuration first, with before/after revision evidence, followed
 by saved-state comparison; production follows only after staging persistence passes.
 No Cloud Run settings or deployments have yet been changed for this check.
 
+Andrew reported Cloud Shell's staging `latestReadyRevisionName` as
+`lagaw-api-staging-00022-pk2`. Recorded that before revision alongside the retained
+generated-state baseline. Prepared and Bash-syntax-checked a staging-only redeploy
+command which refuses an intervening revision change, reads that revision's exact
+immutable Artifact Registry image digest, and deploys it as
+`lagaw-api-staging-issue54-persist`. It supplies no environment/secret configuration
+flags and leaves the local `.env` intact. The final read returns ready revision and
+traffic metadata only. This is prepared guidance, not an observed deployment;
+actual execution and subsequent saved-state comparison remain pending.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Cloud Run staging-before-production actual redeployment persistence.
