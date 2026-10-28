@@ -98,6 +98,14 @@ changing to latest-event semantics requires an agreed contract update.
 
 ## Andrew's backend integration (#53)
 
+The saved-trip endpoint is implemented in the [#53 API guide](trip-recommendations-api.md).
+Its HTTP wrapper adds verified location details and explicit budget-allocation
+metadata; the engine input/output contracts here remain unchanged. The backend
+cleans validly shaped eligibility/duplicate rows, validates the cleaned output
+with `validate_response`, and rereads database state before delivery. Malformed
+schemas/scores fail with a sanitized service error. No automatic persistence or
+scheduling is part of #53.
+
 1. Authenticate the caller and derive `user_id` server-side. Resolve validated trip
    or form preferences, normalize approved tags/categories, and allocate budgets.
    The inference interface itself does not need a trip ID or HTTP call.
