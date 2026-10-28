@@ -1,0 +1,234 @@
+{
+  "environment": "production",
+  "date": "2026-10-28",
+  "source": "Andrew supplied the deployed Swagger status and response. No production database credentials are copied into this record.",
+  "api_base_url": "https://lagaw-api-i5kvldluga-as.a.run.app",
+  "baseline": {
+    "method": "GET",
+    "path": "/api/v1/trips?limit=100&offset=0",
+    "status": 200,
+    "selected_trip": {
+      "title": "Production API verification",
+      "start_date": "2026-11-01",
+      "end_date": "2026-11-01",
+      "budget_min": "100",
+      "budget_max": "500.5",
+      "transportation_mode": "walking",
+      "group_type": "solo",
+      "preferred_tags": [
+        "heritage",
+        "cafe"
+      ],
+      "id": "9c45ad80-3762-4203-95ac-a97128fd68a2",
+      "user_id": "23000000-0000-4000-8000-000000000001",
+      "status": "draft",
+      "estimated_total_cost": null
+    },
+    "other_trip_ids": [
+      "13035281-7a2c-4f55-9e6b-a4bd7ebb73bc"
+    ]
+  },
+  "itinerary_baseline": {
+    "method": "GET",
+    "path": "/api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2/items?limit=100&offset=0",
+    "status": 200,
+    "response": {
+      "items": [],
+      "limit": 100,
+      "offset": 0
+    }
+  },
+  "checks": [
+    {
+      "name": "ranked_recommendations",
+      "method": "POST",
+      "path": "/api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2/recommendations",
+      "request": {
+        "party_size": 1,
+        "planned_visits": 3,
+        "limit": 10
+      },
+      "status": 200,
+      "response": {
+        "schema_version": "1",
+        "trip_id": "9c45ad80-3762-4203-95ac-a97128fd68a2",
+        "budget": {
+          "scope": "per_person_per_visit",
+          "party_size": 1,
+          "planned_visits": 3,
+          "budget_min": "33.33",
+          "budget_max": "166.83"
+        },
+        "items": [
+          {
+            "location_id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+            "recommendation_score": 0.48011748486483247,
+            "recommendation_reason": "Tags: heritage; category: not specified; budget headroom: 0.40; group: solo; all requested hard constraints satisfied.",
+            "location": {
+              "id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+              "name": "The Negros Museum",
+              "description": "A museum of Negros history, heritage and the arts near the provincial capitol, with exhibits that introduce local culture.",
+              "category": "museum",
+              "vibe_tags": [
+                "heritage",
+                "photography"
+              ],
+              "address": "Gatuslao Street, Bacolod City, Negros Occidental",
+              "latitude": 10.67516,
+              "longitude": 122.95032,
+              "opening_hours": {
+                "friday": [
+                  {
+                    "open": "09:00",
+                    "close": "18:00"
+                  }
+                ],
+                "monday": [
+                  {
+                    "open": "09:00",
+                    "close": "18:00"
+                  }
+                ],
+                "tuesday": [
+                  {
+                    "open": "09:00",
+                    "close": "18:00"
+                  }
+                ],
+                "saturday": [
+                  {
+                    "open": "09:00",
+                    "close": "18:00"
+                  }
+                ],
+                "thursday": [
+                  {
+                    "open": "09:00",
+                    "close": "18:00"
+                  }
+                ],
+                "wednesday": [
+                  {
+                    "open": "09:00",
+                    "close": "18:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 70,
+              "estimated_cost_max": 100,
+              "typical_visit_duration": 60,
+              "suitable_group_types": [
+                "solo",
+                "couple",
+                "family",
+                "friends",
+                "group"
+              ],
+              "image_url": null,
+              "is_active": true
+            }
+          }
+        ],
+        "empty_reason": null
+      }
+    },
+    {
+      "name": "restrictive_accessibility",
+      "method": "POST",
+      "path": "/api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2/recommendations",
+      "request": {
+        "party_size": 1,
+        "planned_visits": 3,
+        "limit": 10,
+        "requires_step_free_access": true
+      },
+      "status": 200,
+      "response": {
+        "schema_version": "1",
+        "trip_id": "9c45ad80-3762-4203-95ac-a97128fd68a2",
+        "budget": {
+          "scope": "per_person_per_visit",
+          "party_size": 1,
+          "planned_visits": 3,
+          "budget_min": "33.33",
+          "budget_max": "166.83"
+        },
+        "items": [],
+        "empty_reason": "no_compatible_locations"
+      }
+    },
+    {
+      "name": "invalid_limit",
+      "method": "POST",
+      "path": "/api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2/recommendations",
+      "request": {
+        "party_size": 1,
+        "planned_visits": 3,
+        "limit": 0
+      },
+      "status": 422,
+      "response": {
+        "detail": [
+          {
+            "loc": [
+              "body",
+              "limit"
+            ],
+            "msg": "Input should be greater than or equal to 1",
+            "type": "greater_than_equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing_trip",
+      "method": "POST",
+      "path": "/api/v1/trips/00000000-0000-0000-0000-000000000000/recommendations",
+      "request": {
+        "party_size": 1,
+        "planned_visits": 3,
+        "limit": 10
+      },
+      "status": 404,
+      "response": {
+        "detail": "Trip not found."
+      }
+    }
+  ],
+  "preservation": {
+    "trip": {
+      "method": "GET",
+      "path": "/api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2",
+      "status": 200,
+      "response": {
+        "title": "Production API verification",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-01",
+        "budget_min": "100",
+        "budget_max": "500.5",
+        "transportation_mode": "walking",
+        "group_type": "solo",
+        "preferred_tags": [
+          "heritage",
+          "cafe"
+        ],
+        "id": "9c45ad80-3762-4203-95ac-a97128fd68a2",
+        "user_id": "23000000-0000-4000-8000-000000000001",
+        "status": "draft",
+        "estimated_total_cost": null
+      },
+      "matches_baseline": true
+    },
+    "itinerary": {
+      "method": "GET",
+      "path": "/api/v1/trips/9c45ad80-3762-4203-95ac-a97128fd68a2/items?limit=100&offset=0",
+      "status": 200,
+      "response": {
+        "items": [],
+        "limit": 100,
+        "offset": 0
+      },
+      "matches_baseline": true
+    }
+  }
+}
