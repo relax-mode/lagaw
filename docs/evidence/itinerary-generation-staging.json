@@ -2087,5 +2087,7 @@
     "separate_session_absence_verified": true,
     "existing_demo_profile_unchanged": true,
     "migration_and_generation_function_retained": true
-  }
+  },
+  "final_status": "Backend deployed/refresh/actual-redeployment verification and exact cleanup complete; frontend contract acknowledgment remains unverified.",
+  "saved_state_note": "Saved states and current_saved_* fields are historical pre-cleanup baselines. Exact acceptance fixture rows have now been removed; see cleanup."
 }

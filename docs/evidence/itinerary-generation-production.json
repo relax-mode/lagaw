@@ -1118,7 +1118,7 @@
       }
     ]
   },
-  "production_functional_acceptance": "passed including refresh and actual redeployment persistence; exact fixture cleanup pending",
+  "production_functional_acceptance": "passed including actual redeployment persistence; exact production fixture cleanup reported and public venue absence independently verified",
   "redeployment": {
     "status": "passed: new revision/100 percent traffic, authenticated item reload and complete post-deployment SQL state equal baseline",
     "before_revision": "lagaw-api-00012-z6p",
@@ -1304,7 +1304,7 @@
     "verification_note": "Full SQL response parsed/compared by agent; no direct agent production database query or credential access."
   },
   "cleanup": {
-    "status": "prepared; awaiting developer production SQL Editor execution after passed development rehearsal and cleanup",
+    "status": "passed: developer-reported guarded SQL cleanup; independent public catalog absence verified",
     "script": "docs/evidence/itinerary-generation-production-cleanup.sql",
     "local_copy": "backend/test-results/issue54-production-cleanup.sql",
     "guard": "complete saved trip/items/location/revision equality with verified post-redeployment baseline; exact reference/count/profile guards",
@@ -1320,6 +1320,23 @@
       "010d414e-50ce-4be3-82e3-8e30ab8207be"
     ],
     "existing_demo_profile": "preserved and fingerprint-checked inside transaction",
-    "development_logic_validation": "same cleanup logic executed/rolled back with exact state restoration, then committed; independent absence/profile checks passed"
-  }
+    "development_logic_validation": "same cleanup logic executed/rolled back with exact state restoration, then committed; independent absence/profile checks passed",
+    "source": "developer-reported production SQL Editor execution after completed development rehearsal/cleanup",
+    "response": [
+      {
+        "result": "PASS: Issue 54 production fixtures cleaned; one trip, three items and three locations removed; existing demo profile preserved.",
+        "cleaned_trip_id": "5b4497d1-a946-4845-bed5-441fbb563180"
+      }
+    ],
+    "public_production_fixture_locations_absent": true,
+    "production_trip_items_and_profile_note": "Exact guarded SQL PASS verifies one trip/three items/three venues removed and profile unchanged; no direct agent protected production database query.",
+    "final_development_fixture_absence_and_profile_preservation_rechecked": true
+  },
+  "remaining_catalog_hours": {
+    "public_active_locations": 10,
+    "locations_without_opening_hours": 8,
+    "note": "Hours are administrator-managed; the planner intentionally skips unknown hours. Acceptance used clearly marked temporary known-hours fixtures, now removed."
+  },
+  "final_status": "Backend deployed/refresh/actual-redeployment verification and exact cleanup complete; frontend contract acknowledgment remains unverified.",
+  "saved_state_note": "Saved states and current_saved_* fields are historical pre-cleanup baselines. Exact acceptance fixture rows have now been removed; see cleanup."
 }
