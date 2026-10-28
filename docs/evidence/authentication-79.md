@@ -35,6 +35,12 @@
 - The existing Supabase CLI project-ref file names the development project;
   only that non-secret project reference was inspected. No CLI link, database
   migration, Auth setting, secret or hosted deployment was changed.
+- Committed the implementation as [`91929f1`](https://github.com/relax-mode/lagaw/commit/91929f1)
+  and pushed `feat/79-supabase-auth-ownership`. A draft PR can be prepared from
+  [the published branch](https://github.com/relax-mode/lagaw/pull/new/feat/79-supabase-auth-ownership).
+  Git push used the existing Git authentication; the GitHub CLI still needs a
+  private login before it can create the PR and inspect Actions. No PR, CI run,
+  review, merge or deployment is claimed by this branch publication.
 
 ## Required evidence before completion
 

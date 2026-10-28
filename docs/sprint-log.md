@@ -581,6 +581,8 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 - **October 29, 2026** — Completed #79 local validation: 719 offline tests passed (106 disposable-database tests deselected), Ruff and Python syntax checks passed, Actionlint 1.7.12 passed the scoped workflow update, and the existing AI evaluation remained at 27/27 extraction cases, 10/10 content cases and 84/84 extraction field checks with no metric regression. Confirmed the existing non-secret Supabase CLI project reference is development; made no link/configuration/database changes. Recorded results and remaining coordinated-release prerequisites in [#79 evidence](evidence/authentication-79.md). Preparing the issue-specific review branch; GitHub authentication, disposable Database CI, Roel/Kyle agreement and development/deployed acceptance remain pending. Private `.env`, production and the root untracked `test-results/` stay unchanged.
 
+- **October 29, 2026** — Committed #79 implementation as [`91929f1`](https://github.com/relax-mode/lagaw/commit/91929f1) and pushed `feat/79-supabase-auth-ownership` using existing Git authentication. GitHub CLI remains unauthenticated, so draft PR creation and disposable Database CI await Andrew's private CLI login (or a browser-created draft PR). Published the exact branch link and local validation in the evidence record. No main commit/merge, database migration, Auth configuration, deployment, private `.env` edit or root `test-results/` change occurred.
+
 ## Open follow-ups
 
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.
