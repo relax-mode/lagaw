@@ -1,0 +1,164 @@
+{
+  "environment": "staging",
+  "date": "2026-10-28",
+  "source": "Andrew supplied the deployed Swagger status and response; database details and saved-data preservation independently checked against guarded development Supabase.",
+  "api_base_url": "https://lagaw-api-staging-i5kvldluga-as.a.run.app",
+  "method": "POST",
+  "path": "/api/v1/trips/abf9c3b7-02d2-48ec-880d-2418bcfc7819/recommendations",
+  "request": {
+    "party_size": 2,
+    "planned_visits": 3,
+    "limit": 10
+  },
+  "status": 200,
+  "response": {
+    "schema_version": "1",
+    "trip_id": "abf9c3b7-02d2-48ec-880d-2418bcfc7819",
+    "budget": {
+      "scope": "per_person_per_visit",
+      "party_size": 2,
+      "planned_visits": 3,
+      "budget_min": "83.33",
+      "budget_max": "333.33"
+    },
+    "items": [
+      {
+        "location_id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+        "recommendation_score": 0.6733327333273332,
+        "recommendation_reason": "Tags: heritage, photography; category: not specified; budget headroom: 0.70; group: couple; all requested hard constraints satisfied.",
+        "location": {
+          "id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+          "name": "The Negros Museum",
+          "description": "A museum of Negros history, heritage and the arts near the provincial capitol, with exhibits that introduce local culture.",
+          "category": "museum",
+          "vibe_tags": [
+            "heritage",
+            "photography"
+          ],
+          "address": "Gatuslao Street, Bacolod City, Negros Occidental",
+          "latitude": 10.67516,
+          "longitude": 122.95032,
+          "opening_hours": {
+            "friday": [
+              {
+                "open": "09:00",
+                "close": "18:00"
+              }
+            ],
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "18:00"
+              }
+            ],
+            "tuesday": [
+              {
+                "open": "09:00",
+                "close": "18:00"
+              }
+            ],
+            "saturday": [
+              {
+                "open": "09:00",
+                "close": "18:00"
+              }
+            ],
+            "thursday": [
+              {
+                "open": "09:00",
+                "close": "18:00"
+              }
+            ],
+            "wednesday": [
+              {
+                "open": "09:00",
+                "close": "18:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 70,
+          "estimated_cost_max": 100,
+          "typical_visit_duration": 60,
+          "suitable_group_types": [
+            "solo",
+            "couple",
+            "family",
+            "friends",
+            "group"
+          ],
+          "image_url": null,
+          "is_active": true
+        }
+      }
+    ],
+    "empty_reason": null
+  },
+  "additional_checks": [
+    {
+      "name": "restrictive_accessibility",
+      "request": {
+        "party_size": 2,
+        "planned_visits": 3,
+        "limit": 10,
+        "requires_step_free_access": true
+      },
+      "status": 200,
+      "response": {
+        "schema_version": "1",
+        "trip_id": "abf9c3b7-02d2-48ec-880d-2418bcfc7819",
+        "budget": {
+          "scope": "per_person_per_visit",
+          "party_size": 2,
+          "planned_visits": 3,
+          "budget_min": "83.33",
+          "budget_max": "333.33"
+        },
+        "items": [],
+        "empty_reason": "no_compatible_locations"
+      }
+    },
+    {
+      "name": "invalid_limit",
+      "request": {
+        "party_size": 2,
+        "planned_visits": 3,
+        "limit": 0
+      },
+      "status": 422,
+      "response": {
+        "detail": [
+          {
+            "loc": [
+              "body",
+              "limit"
+            ],
+            "msg": "Input should be greater than or equal to 1",
+            "type": "greater_than_equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing_trip",
+      "trip_id": "00000000-0000-0000-0000-000000000000",
+      "request": {
+        "party_size": 2,
+        "planned_visits": 3,
+        "limit": 10
+      },
+      "status": 404,
+      "response": {
+        "detail": "Trip not found."
+      }
+    }
+  ],
+  "independent_database_checks": {
+    "project": "vnpkyvtbupnquvirzlzp",
+    "all_returned_location_fields_match": true,
+    "owner_interaction_count": 0,
+    "trip_matches_before_snapshot": true,
+    "itinerary_matches_before_snapshot": true,
+    "itinerary_item_count": 1,
+    "fixture_writes_for_deployed_acceptance": false
+  }
+}

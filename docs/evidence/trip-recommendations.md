@@ -5,6 +5,11 @@ on `feat/s3-08-trip-recommendations`, based on up-to-date main `bde91ce`.
 Scope and reproducible commands: [API guide](../trip-recommendations-api.md).
 Implementation: [PR #86](https://github.com/relax-mode/lagaw/pull/86),
 code commit `9f7781a6579efa0a8045260ff124e2a45a2e4bea`.
+Final evidence publication: [PR #88](https://github.com/relax-mode/lagaw/pull/88).
+Issue [#53](https://github.com/relax-mode/lagaw/issues/53) was closed as completed
+October 28, 2026 at 11:39:47 UTC, after posting the requested
+[evidence comment](https://github.com/relax-mode/lagaw/issues/53#issuecomment-6468022223).
+The documentation-only evidence PR still follows normal teammate review/merge.
 
 | Check | Observed result |
 | --- | --- |
@@ -18,8 +23,26 @@ code commit `9f7781a6579efa0a8045260ff124e2a45a2e4bea`.
 | Disposable PostgreSQL/PostgREST tests | 91 passed, zero failures/errors/skips, 3.947 seconds; new saved-trip recommendation persistence/owner test passed in 0.151 seconds |
 | Independently downloaded JUnit | [trip-integration-results artifact 12809638076](https://github.com/relax-mode/lagaw/actions/runs/40674256269/artifacts/12809638076), XML parsed to confirm counts and the new test |
 | CI evaluation artifact | [ai-evaluation artifact 12810021358](https://github.com/relax-mode/lagaw/actions/runs/40674256269/artifacts/12810021358); Backend job's evaluation and regression gate passed |
-| Teammate review and merge | Pending |
-| Deployed staging and production acceptance | Pending reviewed merge/deployment; local API checks are not hosted deployment evidence |
+| Teammate review and merge | CyGray approved final head `d08c77c`; Andrew merged [PR #86](https://github.com/relax-mode/lagaw/pull/86) October 28, 2026 at 10:56:07 UTC as `38ff7e648bb2be639290cb47912ed61d40cf8487` |
+| Main CI/deployment | [Run 40676016889](https://github.com/relax-mode/lagaw/actions/runs/40676016889): Backend, Database and Flutter passed; staging deployment/smoke checks and production API promotion/smoke checks passed; production web correctly skipped |
+| Post-merge database artifact | Downloaded and parsed [JUnit artifact 12811365043](https://github.com/relax-mode/lagaw/actions/runs/40676016889/artifacts/12811365043): 91 tests, zero failures/errors/skips, 2.878 seconds; #53 persistence/owner test passed in 0.113 seconds |
+| Staging route and unauthenticated access | New route present in deployed OpenAPI; POST without bearer returned 401 and correct `https://staging.lagaw.pages.dev` CORS permission |
+| Deployed staging ranked response | Andrew supplied HTTP 200 for existing trip `abf9c3b7-02d2-48ec-880d-2418bcfc7819`, party size 2, three visits, limit 10: The Negros Museum `61bf94ab-6ec0-5ec3-8451-b575ee06169e`, score `0.6733327333273332`, matching heritage/photography reason, budget allocation 83.33–333.33, `empty_reason: null`; [request/response record](trip-recommendations-staging.json) |
+| Independent staging database checks | Museum is active, matching tags and known PHP 100 upper cost; saved trip and its one itinerary item match the before snapshot exactly. Staging owner has zero persisted events, confirming cold start |
+| Deployed staging restrictive filter | Andrew supplied HTTP 200 for the same saved trip/counts with `requires_step_free_access: true`: unchanged allocation 83.33–333.33, `items: []`, `empty_reason: no_compatible_locations`. Unknown accessibility facts fail closed without turning no-match into an error |
+| Deployed staging invalid limit | Andrew supplied HTTP 422 for `limit: 0`, with only `loc: [body, limit]`, the lower-bound message and `type: greater_than_equal`; no submitted value or validator context exposed |
+| Deployed staging missing trip | Andrew supplied HTTP 404 `Trip not found.` for the zero UUID with otherwise valid options |
+| Staging completion and preservation | Ranked cold-start response, restrictive empty result, sanitized 422, missing-trip 404 and unauthenticated 401 passed. A final guarded database read after these checks confirms the original trip and its one itinerary item are unchanged |
+| Deployed acceptance | Complete in staging/development first, then production; authenticated checks are recorded below, separately from pipeline smoke checks |
+| Production public checks after staging acceptance | New recommendation route present in production OpenAPI; unauthenticated POST returned 401 with correct `https://lagaw.pages.dev` CORS. Public catalog contains the active Museum with known PHP 100 upper cost |
+| Production authorization and trip baseline | Andrew supplied HTTP 200 for GET trips (`limit=100`, `offset=0`), returning two existing trips owned by the configured production demo owner. Selected `9c45ad80-3762-4203-95ac-a97128fd68a2`, saved solo/heritage/cafe preferences and total PHP 100–500.50; [baseline record](trip-recommendations-production.json). The other trip has null group and remains unchanged |
+| Production itinerary baseline | Andrew supplied HTTP 200 for GET items of selected trip (`limit=100`, `offset=0`): empty `items`. Recorded before recommendation requests to check read-only preservation |
+| Production ranked recommendations | Andrew supplied HTTP 200 for selected trip, party size 1, three visits and limit 10: Museum `61bf94ab-6ec0-5ec3-8451-b575ee06169e`, score `0.48011748486483247`, heritage/solo reason and correct PHP 33.33–166.83 allocation. The response validates against the HTTP schema, and every returned location field independently matches the public production catalog. [Request/response record](trip-recommendations-production.json) |
+| Production restrictive filter | Andrew supplied HTTP 200 with `requires_step_free_access: true`, same trip/counts/allocation, `items: []` and `empty_reason: no_compatible_locations`; unavailable accessibility fails closed in production too |
+| Production invalid limit | Andrew supplied HTTP 422 for `limit: 0`, exposing only `loc: [body, limit]`, lower-bound `msg` and `type: greater_than_equal`, matching the sanitized staging response |
+| Production missing trip | Andrew supplied HTTP 404 `Trip not found.` for the zero UUID with valid options |
+| Production final trip and itinerary preservation | Andrew supplied both final GETs with HTTP 200: the complete trip object exactly matches the recorded baseline and items remain empty (`limit=100`, `offset=0`). Parsed comparisons passed; no acceptance records were created or removed |
+| Evidence publication CI | [Documentation run 40681552200](https://github.com/relax-mode/lagaw/actions/runs/40681552200) succeeded for PR #88; changed-area detection correctly skipped application tests and deployments for docs-only changes |
 
 The initial development attempt failed before recommendation assertions because
 the verifier's dependency override accidentally made FastAPI expect an extra model
@@ -44,19 +67,40 @@ PASS: Exact fixture cleanup and independent absence checks.
 ```
 
 No schema, Flutter, scheduling, training or deployment configuration changes are
-included. Production `zjnuqqtbapbpudsjbpif` remains untouched. The existing untracked
+included. Production acceptance used the existing synthetic demo trip through
+read-only requests; no production writes or cleanup were needed. Deployment
+promoted the staging-tested image through the existing pipeline. The existing untracked
 root `test-results/` directory is excluded from this work.
 
-## Remaining acceptance evidence
+## Completion evidence
 
 The PR body references #53, linking implementation, contract, checks and this
 evidence to the assigned issue. Main requires one teammate approval and successful
-required checks. No review, merge or deployment is claimed by this evidence.
+required checks. Review, merge and deployments are linked above; authenticated
+new-route acceptance is tracked separately from the existing pipeline smoke checks.
 
-After merge, record the serving revision/commit and authenticated responses for
-the new route in staging/development, then production: a ranked nonempty result
-from a saved synthetic trip, required-accessibility empty result, invalid limit,
-missing/other-owner trip and unauthenticated access. Compare the trip and itinerary
-before/after. Reuse existing private demo credentials; do not paste them into chat
-or change `.env`. The endpoint itself is read-only. Preserve existing saved data;
-if a fresh acceptance trip is necessary, record its exact ID and clean up only it.
+The deployment jobs for merge commit `38ff7e648bb2be639290cb47912ed61d40cf8487`
+are [staging](https://github.com/relax-mode/lagaw/actions/runs/40676016889/job/122775228818)
+and [production API](https://github.com/relax-mode/lagaw/actions/runs/40676016889/job/122775819821).
+The pipeline promotes the same staging-tested image to production. Public OpenAPI
+checks independently confirmed the new route in both environments.
+
+Andrew executed authenticated Swagger requests privately and supplied the statuses
+and response bodies in the linked JSON records. The agent independently validated
+the response schemas, checked all location fields against development PostgreSQL
+and the public production catalog, compared the supplied production final reads
+with their baselines, and verified staging preservation directly in the guarded
+development database. No direct production SQL verification is claimed.
+
+Normal, fallback, filtering, malformed model output, unavailable artifact,
+database failure and access cases passed automated tests, including persistence-
+backed owner isolation. DeepSeek outage/manual-preference independence was tested
+with a failing mocked provider; no paid provider call or live outage was introduced.
+Unknown setting/accessibility facts and Haversine distance assumptions are documented
+in the API guide. Automatic persistence/scheduling and Flutter display remain #54
+and #56 respectively.
+
+The implementation is reviewed, merged, CI-verified and deployed, and staging then
+production acceptance passed. Final evidence is published through documentation
+PR #88; the requested issue comment linked that record before issue closure. No private
+`.env`, credentials, application code or database data changed during acceptance.
