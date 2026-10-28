@@ -390,6 +390,19 @@ ready revision/traffic metadata. Production execution and post-deployment reload
 remain pending. The command contains no environment/secret configuration flags;
 the local `.env` remains unchanged.
 
+Andrew supplied production redeployment success: before revision
+`lagaw-api-00012-z6p` → new ready revision `lagaw-api-issue54-persist`, serving
+**100%** of traffic. Cloud Shell returned canonical service URL
+`https://lagaw-api-663710289405.asia-southeast1.run.app`. This follows completed
+staging redeployment/reload/database preservation checks and reuses production's
+old immutable image with existing service configuration. Revision/traffic metadata
+is developer-reported, not an independent agent Cloud Run Admin API query.
+Independent public checks show both production URLs retain the generation route,
+and the original URL retains HTTP 401 plus exact production CORS. Authenticated
+post-deployment GET and read-only SQL state comparison are next; production
+saved-state persistence is not yet marked complete. No `.env` or credential change
+was made, and fixtures remain retained until exact cleanup.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Cloud Run staging-before-production actual redeployment persistence.

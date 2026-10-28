@@ -978,7 +978,7 @@
   },
   "production_functional_acceptance": "generation, repeat confirmation, infeasible replacement preservation, refresh and direct SQL verification passed; actual redeployment and exact cleanup pending",
   "redeployment": {
-    "status": "prepared after staging actual-redeployment persistence passed; awaiting developer Cloud Shell execution",
+    "status": "developer-reported actual production redeployment succeeded after passed staging persistence; authenticated reload and SQL comparison pending",
     "before_revision": "lagaw-api-00012-z6p",
     "before_revision_source": "developer-reported gcloud latestReadyRevisionName",
     "planned_after_revision": "lagaw-api-issue54-persist",
@@ -989,8 +989,22 @@
       "expected project Artifact Registry immutable image digest"
     ],
     "runtime_configuration": "existing image and service configuration; no env/secret flags or .env edits",
-    "after_revision": null,
-    "traffic_verification": "pending",
-    "saved_state_comparison": "pending"
+    "after_revision": "lagaw-api-issue54-persist",
+    "traffic_verification": "developer-reported 100 percent to the new ready revision",
+    "saved_state_comparison": "pending production GET and read-only SQL",
+    "after_revision_source": "developer-supplied Cloud Shell deploy output and service describe result",
+    "reported_traffic": {
+      "latestRevision": true,
+      "percent": 100,
+      "revisionName": "lagaw-api-issue54-persist"
+    },
+    "reported_service_url": "https://lagaw-api-663710289405.asia-southeast1.run.app",
+    "post_deployment_public_checks": {
+      "old_and_canonical_openapi_status": 200,
+      "generation_route_present": true,
+      "unauthorized_status": 401,
+      "cors_origin": "https://lagaw.pages.dev"
+    },
+    "authenticated_post_deployment_get": "pending"
   }
 }
