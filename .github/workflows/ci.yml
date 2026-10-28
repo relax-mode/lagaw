@@ -218,22 +218,22 @@ jobs:
       - name: Verify itinerary association API against disposable PostgreSQL
         timeout-minutes: 3
         run: python backend/verify_trip_items.py --ci
-      # Tests marked `db` use the disposable services above. pytest exits with
-      # code 5 when nothing is marked yet (#29), which counts as a pass.
+      # Tests marked `db` use only the disposable services above. Every nonzero
+      # exit, including no tests collected, fails this required check.
       - name: Test database-backed API (pytest -m db)
         timeout-minutes: 5
         working-directory: backend
         env:
           DATABASE_URL: postgresql+psycopg://postgres:local_ci_only@localhost:5432/lagaw_test?sslmode=disable
           CI_POSTGREST_URL: http://127.0.0.1:53000/
-        run: |
-          status=0
-          python -m pytest -v -m db || status=$?
-          if [ "$status" -eq 5 ]; then
-            echo "::notice::No database-backed API tests are marked yet."
-            exit 0
-          fi
-          exit "$status"
+        run: python -m pytest -v -m db --junitxml=test-results/trip-integration.xml
+      - name: Upload Trip database test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trip-integration-results
+          path: backend/test-results/trip-integration.xml
+          if-no-files-found: warn
       - name: Remove disposable association test service
         if: always()
         run: docker rm --force issue26-postgrest || true

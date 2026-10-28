@@ -56,10 +56,13 @@ The application's Data API client appends `/rest/v1/` to `SUPABASE_URL`, but
 the CI PostgREST serves from `/`. Database-backed tests should therefore
 override `get_database` with an `httpx.Client` whose `base_url` is
 `CI_POSTGREST_URL`, as `backend/verify_trip_items.py --ci` does. Each test
-must create and remove its own rows. Until marked tests exist, the step
-reports a notice and passes. A failing marked test fails the Database check.
-Database-backed fixtures for Trip CRUD are tracked in
-[#29](https://github.com/relax-mode/lagaw/issues/29).
+must create and remove its own rows. The Trip CRUD suite for
+[#29](https://github.com/relax-mode/lagaw/issues/29) exercises real persistence,
+validation, owner isolation and user foreign keys. Missing services, failing
+tests, cleanup failures and zero collected database tests fail the Database
+check. JUnit XML uploads as `trip-integration-results`, including on failure.
+See the [Trip integration guide](trip-integration-tests.md) for commands and
+disposable-only target guards; neither hosted Supabase project is used.
 
 Pull requests run only the checks their changed paths need (see
 [`PIPELINE.md`](../PIPELINE.md)). Run the commands above locally before
