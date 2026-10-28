@@ -324,13 +324,28 @@ Prepared ignored local `backend/test-results/issue54-production-verify.sql` for
 the production SQL Editor to verify the exact owner/trip, current revision,
 PHP 120.00 total and three-item count, and return its complete saved state.
 The read-only script was parsed/exercised against guarded development and correctly
-refused it because the exact production trip is absent. Awaiting Andrew's
-production SQL result; no agent protected production database read is claimed.
+refused it because the exact production trip is absent.
+
+Andrew supplied the read-only production SQL **PASS** and full `saved_state`.
+Parsed it as the executable `ItineraryState` schema: every saved item field,
+score/reason and revision equals the initial production API response. The expected
+owner, dates, budgets, title/status, group/tags and transport match setup exactly;
+saved total and sum of item costs both equal PHP 120.00. Thus SQL and refreshed API
+evidence agree on preservation after the two conflict cases. Production SQL is
+developer-reported execution, compared by the agent; no direct agent production
+database query or credential access is claimed. Recorded the complete SQL result
+and exact state as production's actual-redeployment baseline.
+
+Checked subsequent main CI/deployments: latest main is still merge `e2f830c` and
+there has been no later deployment suitable for the persistence check. Andrew
+confirmed Cloud Run access. Preparing guided redeployment of the currently serving
+staging image/configuration first, with before/after revision evidence, followed
+by saved-state comparison; production follows only after staging persistence passes.
+No Cloud Run settings or deployments have yet been changed for this check.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
-- Remaining authenticated deployed acceptance.
-- Authenticated staging/development-before-production acceptance and independent SQL.
+- Cloud Run staging-before-production actual redeployment persistence.
 - Persistence across an actual hosted redeployment, then exact fixture cleanup.
 - Final issue-linked evidence and closure after the Definition of Done is satisfied.
 

@@ -672,5 +672,309 @@
     "party_cost_sum_and_budget_verified": true,
     "persistence_note": "Authenticated reload and direct production SQL evidence remain pending; no agent protected production database read."
   },
-  "browser_refresh_persistence_verified": true
+  "browser_refresh_persistence_verified": true,
+  "production_sql_verification": {
+    "source": "developer-reported production SQL Editor execution of read-only exact-trip verification",
+    "response": [
+      {
+        "result": "PASS: Production saved trip, revision, total and three-item count verified.",
+        "saved_state": {
+          "trip": {
+            "id": "5b4497d1-a946-4845-bed5-441fbb563180",
+            "title": "Issue 54 SYNTHETIC production acceptance",
+            "status": "draft",
+            "user_id": "23000000-0000-4000-8000-000000000001",
+            "end_date": "2026-11-03",
+            "budget_max": 180,
+            "budget_min": 0,
+            "group_type": "friends",
+            "start_date": "2026-11-02",
+            "preferred_tags": [
+              "cafe"
+            ],
+            "transportation_mode": "walking",
+            "estimated_total_cost": 120
+          },
+          "items": [
+            {
+              "location_id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+              "day_number": 1,
+              "visit_order": 1,
+              "id": "83386a42-04f3-45c8-9218-7cd1819a12ec",
+              "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+              "location": {
+                "id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+                "name": "Issue 54 SYNTHETIC production Monday A",
+                "description": "Synthetic issue54 acceptance fixture; not a real destination",
+                "category": "cafe",
+                "vibe_tags": [
+                  "cafe"
+                ],
+                "address": null,
+                "latitude": 10.67,
+                "longitude": 122.95,
+                "opening_hours": {
+                  "monday": [
+                    {
+                      "open": "09:00",
+                      "close": "12:00"
+                    }
+                  ]
+                },
+                "estimated_cost_min": 10,
+                "estimated_cost_max": 10,
+                "typical_visit_duration": 30,
+                "suitable_group_types": [
+                  "friends"
+                ],
+                "image_url": null,
+                "is_active": true
+              },
+              "arrival_time": "09:00:00",
+              "departure_time": "09:30:00",
+              "estimated_travel_time": 0,
+              "estimated_cost": 20,
+              "recommendation_score": 0.9333333333333332,
+              "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.67; group: friends; all requested hard constraints satisfied."
+            },
+            {
+              "location_id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+              "day_number": 1,
+              "visit_order": 2,
+              "id": "83327ba8-f3fd-4efd-8372-3e608be0cc7b",
+              "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+              "location": {
+                "id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+                "name": "Issue 54 SYNTHETIC production Monday B",
+                "description": "Synthetic issue54 acceptance fixture; not a real destination",
+                "category": "cafe",
+                "vibe_tags": [
+                  "cafe"
+                ],
+                "address": null,
+                "latitude": 10.671,
+                "longitude": 122.95,
+                "opening_hours": {
+                  "monday": [
+                    {
+                      "open": "09:00",
+                      "close": "12:00"
+                    }
+                  ]
+                },
+                "estimated_cost_min": 20,
+                "estimated_cost_max": 20,
+                "typical_visit_duration": 30,
+                "suitable_group_types": [
+                  "friends"
+                ],
+                "image_url": null,
+                "is_active": true
+              },
+              "arrival_time": "09:53:00",
+              "departure_time": "10:23:00",
+              "estimated_travel_time": 8,
+              "estimated_cost": 40,
+              "recommendation_score": 0.8666666666666667,
+              "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.33; group: friends; all requested hard constraints satisfied."
+            },
+            {
+              "location_id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+              "day_number": 2,
+              "visit_order": 1,
+              "id": "8ff6b063-c621-41af-9c7c-76f303919992",
+              "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+              "location": {
+                "id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+                "name": "Issue 54 SYNTHETIC production Tuesday",
+                "description": "Synthetic issue54 acceptance fixture; not a real destination",
+                "category": "cafe",
+                "vibe_tags": [
+                  "cafe"
+                ],
+                "address": null,
+                "latitude": 10.672,
+                "longitude": 122.95,
+                "opening_hours": {
+                  "tuesday": [
+                    {
+                      "open": "09:00",
+                      "close": "12:00"
+                    }
+                  ]
+                },
+                "estimated_cost_min": 30,
+                "estimated_cost_max": 30,
+                "typical_visit_duration": 60,
+                "suitable_group_types": [
+                  "friends"
+                ],
+                "image_url": null,
+                "is_active": true
+              },
+              "arrival_time": "09:00:00",
+              "departure_time": "10:00:00",
+              "estimated_travel_time": 0,
+              "estimated_cost": 60,
+              "recommendation_score": 0.7999999999999999,
+              "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
+            }
+          ],
+          "revision": "c906b3caf89e3fa668ba434c8c7f3df4"
+        }
+      }
+    ],
+    "parsed_comparison_with_initial_api_response": {
+      "entire_item_list_equal": true,
+      "owner_and_all_trip_setup_fields_equal": true,
+      "revision_equal": true,
+      "trip_total_and_sum_of_costs_equal": true
+    },
+    "verification_note": "The agent parsed and compared Andrew supplied SQL/API results; no direct agent production database query or credential access."
+  },
+  "redeployment_baseline": {
+    "trip": {
+      "title": "Issue 54 SYNTHETIC production acceptance",
+      "start_date": "2026-11-02",
+      "end_date": "2026-11-03",
+      "budget_min": "0",
+      "budget_max": "180",
+      "transportation_mode": "walking",
+      "group_type": "friends",
+      "preferred_tags": [
+        "cafe"
+      ],
+      "id": "5b4497d1-a946-4845-bed5-441fbb563180",
+      "user_id": "23000000-0000-4000-8000-000000000001",
+      "status": "draft",
+      "estimated_total_cost": "120"
+    },
+    "revision": "c906b3caf89e3fa668ba434c8c7f3df4",
+    "items": [
+      {
+        "location_id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+        "day_number": 1,
+        "visit_order": 1,
+        "id": "83386a42-04f3-45c8-9218-7cd1819a12ec",
+        "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+        "location": {
+          "id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+          "name": "Issue 54 SYNTHETIC production Monday A",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.67,
+          "longitude": 122.95,
+          "opening_hours": {
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 10.0,
+          "estimated_cost_max": 10.0,
+          "typical_visit_duration": 30,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:00:00",
+        "departure_time": "09:30:00",
+        "estimated_travel_time": 0,
+        "estimated_cost": "20.00",
+        "recommendation_score": 0.9333333333333332,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.67; group: friends; all requested hard constraints satisfied."
+      },
+      {
+        "location_id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+        "day_number": 1,
+        "visit_order": 2,
+        "id": "83327ba8-f3fd-4efd-8372-3e608be0cc7b",
+        "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+        "location": {
+          "id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+          "name": "Issue 54 SYNTHETIC production Monday B",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.671,
+          "longitude": 122.95,
+          "opening_hours": {
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 20.0,
+          "estimated_cost_max": 20.0,
+          "typical_visit_duration": 30,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:53:00",
+        "departure_time": "10:23:00",
+        "estimated_travel_time": 8,
+        "estimated_cost": "40.00",
+        "recommendation_score": 0.8666666666666667,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.33; group: friends; all requested hard constraints satisfied."
+      },
+      {
+        "location_id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+        "day_number": 2,
+        "visit_order": 1,
+        "id": "8ff6b063-c621-41af-9c7c-76f303919992",
+        "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+        "location": {
+          "id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+          "name": "Issue 54 SYNTHETIC production Tuesday",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.672,
+          "longitude": 122.95,
+          "opening_hours": {
+            "tuesday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 30.0,
+          "estimated_cost_max": 30.0,
+          "typical_visit_duration": 60,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:00:00",
+        "departure_time": "10:00:00",
+        "estimated_travel_time": 0,
+        "estimated_cost": "60.00",
+        "recommendation_score": 0.7999999999999999,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
+      }
+    ]
+  },
+  "production_functional_acceptance": "generation, repeat confirmation, infeasible replacement preservation, refresh and direct SQL verification passed; actual redeployment and exact cleanup pending"
 }
