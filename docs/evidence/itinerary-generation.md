@@ -199,10 +199,19 @@ item IDs/fields, nested locations, scores/reasons, total and revision equal the
 after-generation baseline exactly. Repeated generation did not replace any saved
 record. The full safe request/response and comparison are in staging JSON evidence.
 
-Next staging checks: an infeasible confirmed afternoon replacement must preserve
-these exact records, then authenticated item reload/refresh and manual compatibility.
-The saved plan remains available for actual redeployment persistence. No new
-production acceptance request has run.
+Andrew supplied the confirmed afternoon replacement's staging **HTTP 409**:
+`requested_visits_do_not_fit`, zero scheduled of three requested, and each exact
+fixture ID skipped as `insufficient_time_or_closed`. The request used the current
+revision and explicit replacement confirmation, so this exercises planning failure
+after confirmation rather than the initial confirmation guard. Independent guarded
+development reads show the complete trip and all saved item/location fields,
+scores/reasons, revision and PHP 120.00 total still equal the original generation
+baseline exactly. No old item was erased or replaced and no partial itinerary was
+saved. Full safe request/response and comparison are in staging JSON evidence.
+
+Next staging checks: authenticated item reload after browser refresh and manual
+compatibility. The saved plan remains available for actual redeployment persistence.
+No new production acceptance request has run.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
