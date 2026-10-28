@@ -575,6 +575,8 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 ## Open follow-ups
 
+- **October 29, 2026** — Published #54's final deployed/refresh/actual-redeployment/cleanup evidence in [PR #90](https://github.com/relax-mode/lagaw/pull/90), documentation commit `45c1095`. Its [docs-only CI run 40721526465](https://github.com/relax-mode/lagaw/actions/runs/40721526465) passed changed-area detection and correctly skipped application/database/Flutter tests and deployment. Validated archived evidence against the executable schemas and credential-field guards; diff contains only six #54 docs/evidence files. Updated issue #54's completed backend task/acceptance/DoD checklist and direct evidence links, leaving the explicit Roel contract coordination checkbox open after no published acknowledgment or #56 implementation was found. Final evidence PR awaits normal teammate review/merge; no app, migration, workflow, Flutter, private `.env` or root untracked `test-results/` changes were made by this follow-up.
+
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.
 - Write and verify the deploy and rollback runbook with Wrangler commands.
 - Confirm the deployed frontend shows deployed database data (issue #11 acceptance criterion). Issue #11 is closed, and backend plus frontend deployment workflows succeeded, but the log does not record browser acceptance evidence.
