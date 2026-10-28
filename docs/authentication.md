@@ -221,7 +221,18 @@ not inferred from Andrew's release instruction.
 
 The backend still requires environment-specific smoke configuration, deployed
 staging verification before production, the production schema prerequisite,
-passing CI and the reviewed PR. The pipeline automatically promotes a successful
-main staging deployment to production, so production prerequisites must be ready
-before merging. Development verification alone does not complete the deployed
-backend acceptance. Private `.env` edits are unnecessary for this rollout.
+passing CI and the reviewed PR. Staging's four smoke settings are now configured.
+For this rollout, the production GitHub Environment temporarily requires
+`aranxshx` approval; its existing protected-branch restriction is retained. This
+lets the reviewed merge deploy to staging while production waits for verified
+staging results, its migration and its own smoke configuration. Do not approve
+production promotion before those checks pass. Restore the previous environment
+reviewer setting after the rollout and record that restoration.
+
+[Production prerequisite SQL](evidence/authentication-79-production-migration.sql)
+preserves existing rows and records the exact repository migration version. It
+must be run by Andrew in the production SQL Editor after staging passes, with
+the selected project checked explicitly. Its development-marker refusal was
+exercised against development and rolled back. Production execution is pending.
+Development verification alone does not complete deployed backend acceptance.
+Private `.env` edits are unnecessary for this rollout.

@@ -120,6 +120,38 @@
   PR #92 remains draft and mergeable, with no published reviews or comments at
   this check. Roel/Kyle agreement and deployed acceptance remain pending.
 
+## October 29, 2026 — independent backend rollout preparation
+
+- Andrew explicitly directed #79 to proceed independently of #80 and the pending
+  teammate follow-up. Recorded the expected Flutter demo-token 401 limitation;
+  no Flutter implementation or frontend acceptance is claimed by this decision.
+- Jayperson approved `c818a96`. The documentation update recording Andrew's
+  release-order instruction at `6fc3960` caused GitHub to dismiss that approval.
+  CI on `6fc3960` passed; one fresh teammate approval on the final preparation
+  commit is required. PR #92 is now ready for review, not draft.
+- Andrew ran the private staging setup helper and reported every PASS: public
+  key/confirmed sign-in/profile verified and all four staging smoke settings
+  configured. Independently checked GitHub configuration names only; both secrets
+  and both variables are present. No credential values were retrieved.
+  [Safe staging setup record](authentication-79-staging-configuration.json)
+  records the non-secret profile ID and configured names. Andrew retains his
+  private test-account password; the runner reads its environment secret.
+- Installed a temporary required reviewer (`aranxshx`) on GitHub's production
+  Environment, preserving its protected-branch restriction. Its prior setting
+  had no required reviewer. [Hold record](authentication-79-production-hold.json)
+  records the reason and restoration requirement. This changes promotion
+  control only; no production service, database or credential was changed.
+- Prepared [production migration SQL](authentication-79-production-migration.sql)
+  with history checks, a development-marker refusal, short timeouts and complete
+  existing-row comparisons. Rehearsed its expected refusal against development;
+  the transaction rolled back. Production execution is pending and follows
+  successful deployed staging verification. The exact original migration had
+  already passed disposable CI, development rollback rehearsal and application.
+- After reviewed merge, staging can deploy with the configured smoke account;
+  production must remain waiting until its migration/configuration and staging
+  acceptance are complete. The temporary reviewer rule must be restored after
+  the backend rollout. This preparation does not mark #79 complete.
+
 ## Required evidence before completion
 
 | Requirement | Status |
@@ -127,10 +159,10 @@
 | Final offline lint/regression/AI evaluation | Passed locally; 719 offline tests, no AI regression |
 | Disposable migration + real PostgreSQL/PostgREST Auth mapping/isolation tests | Passed: [run 40731191149](https://github.com/relax-mode/lagaw/actions/runs/40731191149), 106 DB tests |
 | Roel agrees #80 token/confirmation/refresh contract | Handoff prepared; agreement pending |
-| Kyle agrees/configures development Auth + environment smoke accounts | Handoff prepared; confirmation pending |
+| Development/staging Auth smoke configuration | Configured by Andrew; verified names; Kyle handoff/contract acknowledgment pending |
 | Development migration and two-account verified acceptance | Passed; linked migration/live acceptance JSON above; exact fixtures cleaned |
 | Candidate deployed staging acceptance, with safe result links | Not run |
-| Reviewed PR, required CI and merge | Draft #92; CI passed; teammate review and merge pending |
+| Reviewed PR, required CI and merge | #92 ready for review; prior approval dismissed after release-notes update; fresh approval/merge pending |
 | Production migration/configuration after development acceptance | Not performed |
 | Deployed production acceptance and cleanup | Not run |
 
