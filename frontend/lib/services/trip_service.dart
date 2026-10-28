@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import '../models/trip.dart';
+import '../models/trip_item.dart';
 
 /// A failed trip request, with a message safe to show to users. [S2-04]
 class TripApiException implements Exception {
@@ -124,6 +125,110 @@ class TripService {
     );
     if (response.statusCode == 204) return;
     throw _errorFor(response);
+  }
+
+  /// GET /api/v1/trips/{id}/items, following pages until every item is read.
+  /// Items arrive ordered by day, then visit order. [S3-34]
+  Future<List<TripItem>> listTripItems(String tripId) async {
+    const pageSize = 100;
+    final items = <TripItem>[];
+    for (var offset = 0; ; offset += pageSize) {
+      final uri = Uri.parse(_itemsUrl(tripId)).replace(
+        queryParameters: {
+          'limit': pageSize.toString(),
+          'offset': offset.toString(),
+        },
+      );
+      final response = await _send(() => _client.get(uri, headers: _headers));
+      if (response.statusCode != 200) throw _itemErrorFor(response);
+      final page = TripItemsPage.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+      items.addAll(page.items);
+      if (page.items.length < pageSize) return items;
+    }
+  }
+
+  /// POST /api/v1/trips/{id}/items. Adds an existing active location at
+  /// [dayNumber]/[visitOrder]; the backend rejects occupied positions (409).
+  Future<TripItem> addTripItem(
+    String tripId, {
+    required String locationId,
+    required int dayNumber,
+    required int visitOrder,
+  }) async {
+    final response = await _send(
+      () => _client.post(
+        Uri.parse(_itemsUrl(tripId)),
+        headers: _headers,
+        body: jsonEncode({
+          'location_id': locationId,
+          'day_number': dayNumber,
+          'visit_order': visitOrder,
+        }),
+      ),
+    );
+    if (response.statusCode == 201) {
+      return TripItem.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+    throw _itemErrorFor(response);
+  }
+
+  /// DELETE /api/v1/trips/{id}/items/{itemId}. The location itself stays in
+  /// the catalog. Succeeds on 204.
+  Future<void> removeTripItem(String tripId, String itemId) async {
+    final response = await _send(
+      () => _client.delete(
+        Uri.parse('${_itemsUrl(tripId)}/${Uri.encodeComponent(itemId)}'),
+        headers: _headers,
+      ),
+    );
+    if (response.statusCode == 204) return;
+    throw _itemErrorFor(response);
+  }
+
+  String _itemsUrl(String tripId) =>
+      '${AppConfig.tripsEndpoint}/${Uri.encodeComponent(tripId)}/items';
+
+  /// Item endpoints share trip errors, but 404/409 mean something more
+  /// specific: the backend's 404 detail names the missing trip, location
+  /// or item.
+  TripApiException _itemErrorFor(http.Response response) {
+    final status = response.statusCode;
+    if (status == 409) {
+      return TripApiException(
+        'That day and stop number is already taken. Reload and try another.',
+        statusCode: status,
+      );
+    }
+    if (status == 404) {
+      final detail = _detailText(response.body).toLowerCase();
+      if (detail.contains('location')) {
+        return TripApiException(
+          'That destination is no longer available.',
+          statusCode: status,
+        );
+      }
+      if (detail.contains('item')) {
+        return TripApiException(
+          'That destination was already removed from this trip.',
+          statusCode: status,
+        );
+      }
+    }
+    return _errorFor(response);
+  }
+
+  String _detailText(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      final detail = decoded is Map<String, dynamic> ? decoded['detail'] : null;
+      return detail is String ? detail : '';
+    } on FormatException {
+      return '';
+    }
   }
 
   Future<http.Response> _send(Future<http.Response> Function() request) async {

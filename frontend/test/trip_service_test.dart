@@ -293,4 +293,187 @@ void main() {
       );
     });
   });
+
+  group('Trip itinerary items', () {
+    Map<String, dynamic> itemJson(String id, {int day = 1, int order = 1}) => {
+      'id': id,
+      'trip_id': 'trip-1',
+      'location_id': 'loc-1',
+      'day_number': day,
+      'visit_order': order,
+      'location': {
+        'id': 'loc-1',
+        'name': 'San Sebastian Cathedral',
+        'category': 'heritage',
+        'address': 'Rizal St, Bacolod City',
+        'estimated_cost_min': 0,
+        'estimated_cost_max': 0,
+        'typical_visit_duration': 45,
+      },
+    };
+
+    test('listTripItems parses nested locations and follows pages', () async {
+      final requests = <http.Request>[];
+      final service = TripService(
+        token: _token,
+        client: MockClient((request) async {
+          requests.add(request);
+          final offset = int.parse(request.url.queryParameters['offset']!);
+          final count = offset == 0 ? 100 : 3;
+          return http.Response(
+            jsonEncode({
+              'items': [
+                for (var i = 0; i < count; i++) itemJson('item-${offset + i}'),
+              ],
+              'limit': 100,
+              'offset': offset,
+            }),
+            200,
+          );
+        }),
+      );
+
+      final items = await service.listTripItems('trip-1');
+
+      expect(items, hasLength(103));
+      expect(items.first.location.name, 'San Sebastian Cathedral');
+      expect(items.first.location.category, 'heritage');
+      expect(requests, hasLength(2));
+      expect(requests.first.url.path, '/api/v1/trips/trip-1/items');
+      expect(requests.last.url.queryParameters['offset'], '100');
+      expect(requests.first.headers['Authorization'], 'Bearer $_token');
+    });
+
+    test('addTripItem posts only location, day and order', () async {
+      late http.Request sent;
+      final service = TripService(
+        token: _token,
+        client: MockClient((request) async {
+          sent = request;
+          return http.Response(jsonEncode(itemJson('item-1', day: 2)), 201);
+        }),
+      );
+
+      final item = await service.addTripItem(
+        'trip-1',
+        locationId: 'loc-1',
+        dayNumber: 2,
+        visitOrder: 1,
+      );
+
+      expect(sent.method, 'POST');
+      expect(sent.url.path, '/api/v1/trips/trip-1/items');
+      expect(jsonDecode(sent.body), {
+        'location_id': 'loc-1',
+        'day_number': 2,
+        'visit_order': 1,
+      });
+      expect(item.dayNumber, 2);
+      expect(item.location.id, 'loc-1');
+    });
+
+    test(
+      'removeTripItem sends DELETE under the trip and accepts 204',
+      () async {
+        late http.Request sent;
+        final service = TripService(
+          token: _token,
+          client: MockClient((request) async {
+            sent = request;
+            return http.Response('', 204);
+          }),
+        );
+
+        await service.removeTripItem('trip-1', 'item-9');
+
+        expect(sent.method, 'DELETE');
+        expect(sent.url.path, '/api/v1/trips/trip-1/items/item-9');
+      },
+    );
+
+    test('maps an occupied position (409) to a pick-another message', () async {
+      final service = _serviceReturning(409, {'detail': 'occupied'});
+
+      await expectLater(
+        service.addTripItem(
+          'trip-1',
+          locationId: 'loc-1',
+          dayNumber: 1,
+          visitOrder: 1,
+        ),
+        throwsA(
+          isA<TripApiException>()
+              .having((e) => e.statusCode, 'statusCode', 409)
+              .having((e) => e.message, 'message', contains('already taken')),
+        ),
+      );
+    });
+
+    for (final (detail, expected) in [
+      ('Active location not found.', 'no longer available'),
+      ('Itinerary item not found.', 'already removed'),
+      ('Trip not found.', 'Trip not found.'),
+    ]) {
+      test('maps 404 "$detail" to a specific message', () async {
+        final service = _serviceReturning(404, {'detail': detail});
+
+        await expectLater(
+          service.removeTripItem('trip-1', 'item-1'),
+          throwsA(
+            isA<TripApiException>().having(
+              (e) => e.message,
+              'message',
+              contains(expected),
+            ),
+          ),
+        );
+      });
+    }
+
+    test('keeps 422 day_number errors for the picker', () async {
+      final service = _serviceReturning(422, {
+        'detail': [
+          {
+            'loc': ['body', 'day_number'],
+            'msg': "day_number must be within the trip's dates.",
+            'type': 'value_error',
+          },
+        ],
+      });
+
+      await expectLater(
+        service.addTripItem(
+          'trip-1',
+          locationId: 'loc-1',
+          dayNumber: 9,
+          visitOrder: 1,
+        ),
+        throwsA(
+          isA<TripApiException>().having(
+            (e) => e.fieldErrors['day_number'],
+            'day_number',
+            contains("trip's dates"),
+          ),
+        ),
+      );
+    });
+
+    test('maps item request timeouts to a retry message', () async {
+      final service = TripService(
+        token: _token,
+        client: MockClient((_) => Completer<http.Response>().future),
+      );
+
+      await expectLater(
+        service.listTripItems('trip-1').timeout(const Duration(seconds: 10)),
+        throwsA(
+          isA<TripApiException>().having(
+            (e) => e.message,
+            'message',
+            contains('too long'),
+          ),
+        ),
+      );
+    });
+  });
 }
