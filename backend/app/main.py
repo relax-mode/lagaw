@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import DatabaseUnavailable, LocationDatabase, get_database
+from app.interactions import router as interactions_router
 from app.preference_extraction import router as preference_extraction_router
 from app.schemas import LocationsPage
 from app.trip_items import router as trip_items_router
@@ -34,7 +35,7 @@ async def validation_error(request: Request, exc: RequestValidationError):
             "code": "invalid_request", "message": "The travel request is invalid.",
             "manual_fallback": True,
         }})
-    if request.url.path.startswith("/api/v1/trips"):
+    if request.url.path.startswith(("/api/v1/trips", "/api/v1/interactions")):
         # Omit submitted values and validator context, including tokens and NaN.
         return JSONResponse(status_code=422, content={"detail": [
             {"loc": error["loc"], "msg": error["msg"], "type": error["type"]}
@@ -95,6 +96,7 @@ def create_app() -> FastAPI:
     application.add_exception_handler(DatabaseUnavailable, database_unavailable)
     application.add_exception_handler(RequestValidationError, validation_error)
     application.include_router(trips_router)
+    application.include_router(interactions_router)
     application.include_router(trip_items_router)
     application.include_router(preference_extraction_router)
     application.add_api_route(

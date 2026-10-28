@@ -82,6 +82,9 @@ Manual trip-location association endpoints and development-first verification:
 Independent recommendation contracts, synthetic fixtures and AI/backend handoff:
 [recommendation foundation](docs/recommendation-contract.md).
 
+Persisted swipes, saves and ratings, owner-scoped history and safe verification:
+[interaction API](docs/interactions-api.md).
+
 Offline scoring, ranking, cold-start behavior and evaluation:
 [content-based recommender](docs/content-based-recommender.md).
 
