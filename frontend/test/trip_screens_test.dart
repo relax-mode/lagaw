@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/models/location.dart';
 import 'package:frontend/models/trip.dart';
+import 'package:frontend/models/trip_item.dart';
 import 'package:frontend/screens/trip_create_screen.dart';
 import 'package:frontend/screens/trip_detail_screen.dart';
 import 'package:frontend/screens/trip_edit_screen.dart';
 import 'package:frontend/screens/trips_tab.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/trip_service.dart';
 
 Trip _trip(String id, String title) => Trip(
@@ -29,12 +32,56 @@ class FakeTripService extends TripService {
   final List<TripDraft> updated = [];
   final List<String> deleted = [];
 
+  /// Itinerary items keyed by trip id; queue [itemErrors] to fail item calls.
+  final Map<String, List<TripItem>> items = {};
+  final List<Exception> itemErrors = [];
+  final List<String> itemCallTrips = [];
+  var _itemSeq = 0;
+
   FakeTripService([List<Trip>? trips])
     : trips = trips ?? [],
       super(token: 'fake');
 
   void _maybeFail() {
     if (errors.isNotEmpty) throw errors.removeAt(0);
+  }
+
+  void _maybeFailItem(String tripId) {
+    itemCallTrips.add(tripId);
+    if (itemErrors.isNotEmpty) throw itemErrors.removeAt(0);
+  }
+
+  @override
+  Future<List<TripItem>> listTripItems(String tripId) async {
+    _maybeFailItem(tripId);
+    return [...items[tripId] ?? const <TripItem>[]];
+  }
+
+  @override
+  Future<TripItem> addTripItem(
+    String tripId, {
+    required String locationId,
+    required int dayNumber,
+    required int visitOrder,
+  }) async {
+    _maybeFailItem(tripId);
+    final location = _locations.firstWhere((l) => l.id == locationId);
+    final item = TripItem(
+      id: 'item-${++_itemSeq}',
+      tripId: tripId,
+      locationId: locationId,
+      dayNumber: dayNumber,
+      visitOrder: visitOrder,
+      location: location,
+    );
+    items.putIfAbsent(tripId, () => []).add(item);
+    return item;
+  }
+
+  @override
+  Future<void> removeTripItem(String tripId, String itemId) async {
+    _maybeFailItem(tripId);
+    items[tripId]?.removeWhere((i) => i.id == itemId);
   }
 
   @override
@@ -114,6 +161,33 @@ class FakeTripService extends TripService {
     );
     trips[index] = saved;
     return saved;
+  }
+}
+
+LocationItem _location(String id, String name, String category) =>
+    LocationItem.fromJson({
+      'id': id,
+      'name': name,
+      'category': category,
+      'address': '$name Rd, Bacolod City',
+      'estimated_cost_min': 0,
+      'estimated_cost_max': 0,
+      'typical_visit_duration': 45,
+    });
+
+final _locations = [
+  _location('loc-cathedral', 'San Sebastian Cathedral', 'heritage'),
+  _location('loc-museum', 'The Negros Museum', 'museum'),
+];
+
+/// Stand-in for `GET /locations`; set [fail] to simulate an outage.
+class FakeLocationsService extends ApiService {
+  bool fail = false;
+
+  @override
+  Future<List<LocationItem>> fetchAllLocations() async {
+    if (fail) throw Exception('offline');
+    return _locations;
   }
 }
 
@@ -468,6 +542,230 @@ void main() {
       await _tapKey(tester, 'confirm-accept');
 
       expect(result, TripDetailResult.deleted);
+    });
+  });
+
+  group('Itinerary locations', () {
+    Future<(FakeTripService, FakeLocationsService)> openDetail(
+      WidgetTester tester, {
+      void Function(FakeTripService)? setup,
+    }) async {
+      final service = FakeTripService([
+        _trip('a', 'Food crawl'),
+        _trip('b', 'Heritage walk'),
+      ]);
+      final locations = FakeLocationsService();
+      setup?.call(service);
+      await _pump(
+        tester,
+        TripDetailScreen(service: service, tripId: 'a', locations: locations),
+      );
+      return (service, locations);
+    }
+
+    TripItem item(String id, String tripId, LocationItem loc, int day, int n) =>
+        TripItem(
+          id: id,
+          tripId: tripId,
+          locationId: loc.id,
+          dayNumber: day,
+          visitOrder: n,
+          location: loc,
+        );
+
+    testWidgets('shows the empty state for a trip without items', (
+      tester,
+    ) async {
+      await openDetail(tester);
+
+      expect(find.text('Itinerary Locations'), findsOneWidget);
+      expect(find.byKey(const ValueKey('itinerary-empty')), findsOneWidget);
+      expect(find.text('No destinations yet'), findsOneWidget);
+    });
+
+    testWidgets('lists saved items grouped by day with location details', (
+      tester,
+    ) async {
+      await openDetail(
+        tester,
+        setup: (s) => s.items['a'] = [
+          item('i1', 'a', _locations[0], 1, 1),
+          item('i2', 'a', _locations[1], 2, 1),
+        ],
+      );
+
+      expect(find.text('Day 1'), findsOneWidget);
+      expect(find.text('Day 2'), findsOneWidget);
+      expect(find.text('San Sebastian Cathedral'), findsOneWidget);
+      expect(find.text('The Negros Museum'), findsOneWidget);
+      expect(find.text('Heritage'), findsOneWidget);
+      expect(
+        find.text('San Sebastian Cathedral Rd, Bacolod City'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('itinerary-empty')), findsNothing);
+    });
+
+    testWidgets('a failed load shows the error and Retry recovers', (
+      tester,
+    ) async {
+      final (service, _) = await openDetail(
+        tester,
+        setup: (s) => s.itemErrors.add(
+          const TripApiException('The server took too long to respond.'),
+        ),
+      );
+      expect(find.byKey(const ValueKey('itinerary-error')), findsOneWidget);
+      // The trip details themselves still render.
+      expect(find.byKey(const ValueKey('trip-edit')), findsOneWidget);
+
+      service.items['a'] = [item('i1', 'a', _locations[0], 1, 1)];
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('itinerary-error')), findsNothing);
+      expect(find.text('San Sebastian Cathedral'), findsOneWidget);
+    });
+
+    testWidgets('adds a picked destination to the chosen day and refreshes', (
+      tester,
+    ) async {
+      final (service, _) = await openDetail(tester);
+
+      await _tapKey(tester, 'itinerary-add');
+      expect(find.text('Add a destination'), findsOneWidget);
+      await _tapKey(tester, 'picker-day-2');
+      await _tapKey(tester, 'destination-loc-museum');
+      await _tapKey(tester, 'picker-submit');
+
+      expect(find.text('Add a destination'), findsNothing);
+      final saved = service.items['a']!.single;
+      expect(saved.locationId, 'loc-museum');
+      expect(saved.dayNumber, 2);
+      expect(saved.visitOrder, 1);
+      expect(find.text('Added The Negros Museum to Day 2.'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('itinerary-item-item-1')),
+        findsOneWidget,
+      );
+      // Only the opened trip was touched.
+      expect(service.items['b'], isNull);
+      expect(service.itemCallTrips.toSet(), {'a'});
+    });
+
+    testWidgets('next stop number follows the day\'s last stop', (
+      tester,
+    ) async {
+      final (service, _) = await openDetail(
+        tester,
+        setup: (s) => s.items['a'] = [item('i1', 'a', _locations[0], 1, 3)],
+      );
+
+      await _tapKey(tester, 'itinerary-add');
+      expect(find.text('Day · stop #4'), findsOneWidget);
+      await _tapKey(tester, 'destination-loc-cathedral');
+      await _tapKey(tester, 'picker-submit');
+
+      expect(service.items['a']!.last.visitOrder, 4);
+    });
+
+    testWidgets('API errors stay in the picker and keep the selection', (
+      tester,
+    ) async {
+      final (service, _) = await openDetail(tester);
+      await _tapKey(tester, 'itinerary-add');
+      await _tapKey(tester, 'destination-loc-cathedral');
+      service.itemErrors.add(
+        const TripApiException(
+          'Some trip details need fixing.',
+          statusCode: 422,
+          fieldErrors: {
+            'day_number': "day_number must be within the trip's dates.",
+          },
+        ),
+      );
+      await _tapKey(tester, 'picker-submit');
+
+      expect(
+        find.text("day_number must be within the trip's dates."),
+        findsOneWidget,
+      );
+      expect(find.text('Add a destination'), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      expect(service.items['a'], isNull);
+
+      // A retry from the same sheet succeeds.
+      await _tapKey(tester, 'picker-submit');
+      expect(service.items['a'], hasLength(1));
+    });
+
+    testWidgets('picker shows a retryable error when locations fail', (
+      tester,
+    ) async {
+      final (_, locations) = await openDetail(tester);
+      locations.fail = true;
+      await _tapKey(tester, 'itinerary-add');
+      expect(find.byKey(const ValueKey('picker-load-error')), findsOneWidget);
+
+      locations.fail = false;
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(find.text('The Negros Museum'), findsOneWidget);
+    });
+
+    testWidgets('cancelling removal keeps the item', (tester) async {
+      final (service, _) = await openDetail(
+        tester,
+        setup: (s) => s.items['a'] = [item('i1', 'a', _locations[0], 1, 1)],
+      );
+
+      await _tapKey(tester, 'itinerary-remove-i1');
+      expect(find.text('Remove this destination?'), findsOneWidget);
+      await _tapKey(tester, 'confirm-cancel');
+
+      expect(service.items['a'], hasLength(1));
+      expect(find.text('San Sebastian Cathedral'), findsOneWidget);
+    });
+
+    testWidgets('confirming removal deletes only that item', (tester) async {
+      final (service, _) = await openDetail(
+        tester,
+        setup: (s) {
+          s.items['a'] = [
+            item('i1', 'a', _locations[0], 1, 1),
+            item('i2', 'a', _locations[1], 1, 2),
+          ];
+          s.items['b'] = [item('i3', 'b', _locations[0], 1, 1)];
+        },
+      );
+
+      await _tapKey(tester, 'itinerary-remove-i1');
+      await _tapKey(tester, 'confirm-accept');
+
+      expect(service.items['a']!.map((i) => i.id), ['i2']);
+      expect(service.items['b'], hasLength(1));
+      expect(find.text('Removed San Sebastian Cathedral.'), findsOneWidget);
+      expect(find.byKey(const ValueKey('itinerary-item-i1')), findsNothing);
+      expect(find.byKey(const ValueKey('itinerary-item-i2')), findsOneWidget);
+    });
+
+    testWidgets('a failed removal shows the error and keeps the list', (
+      tester,
+    ) async {
+      final (service, _) = await openDetail(
+        tester,
+        setup: (s) => s.items['a'] = [item('i1', 'a', _locations[0], 1, 1)],
+      );
+      service.itemErrors.add(
+        const TripApiException('Trips are temporarily unavailable.'),
+      );
+
+      await _tapKey(tester, 'itinerary-remove-i1');
+      await _tapKey(tester, 'confirm-accept');
+
+      expect(find.text('Trips are temporarily unavailable.'), findsOneWidget);
+      expect(find.byKey(const ValueKey('itinerary-item-i1')), findsOneWidget);
+      expect(service.items['a'], hasLength(1));
     });
   });
 

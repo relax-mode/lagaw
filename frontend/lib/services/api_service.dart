@@ -45,6 +45,18 @@ class ApiService {
     }
   }
 
+  /// Every active location, following `/locations` pages (max 100 each).
+  /// Used by the itinerary destination picker. [S3-34]
+  Future<List<LocationItem>> fetchAllLocations() async {
+    const pageSize = 100;
+    final all = <LocationItem>[];
+    for (var offset = 0; ; offset += pageSize) {
+      final page = await fetchLocations(limit: pageSize, offset: offset);
+      all.addAll(page);
+      if (page.length < pageSize) return all;
+    }
+  }
+
   void dispose() {
     _client.close();
   }

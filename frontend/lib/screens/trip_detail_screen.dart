@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../models/trip.dart';
+import '../services/api_service.dart';
 import '../services/trip_service.dart';
 import '../theme.dart';
 import '../utils/trip_format.dart';
 import '../widgets/confirm_dialog.dart';
+import '../widgets/itinerary_section.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/tactile_motion.dart';
 import '../widgets/trip_card.dart';
@@ -29,12 +31,16 @@ class TripDetailScreen extends StatefulWidget {
   /// One-off success message, such as after creating the trip.
   final String? notice;
 
+  /// Source of selectable destinations for the itinerary. [S3-34]
+  final ApiService? locations;
+
   const TripDetailScreen({
     super.key,
     required this.service,
     required this.tripId,
     this.initial,
     this.notice,
+    this.locations,
   });
 
   @override
@@ -50,6 +56,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   /// The backend says this trip no longer exists (deleted elsewhere).
   bool _missing = false;
+
+  late final ApiService _locations = widget.locations ?? ApiService();
 
   @override
   void initState() {
@@ -276,9 +284,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           ),
         ),
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: 14),
       FadeSlideIn(
         index: 2,
+        child: ItineraryLocationsSection(
+          key: ValueKey('itinerary-${trip.id}'),
+          service: widget.service,
+          locations: _locations,
+          trip: trip,
+        ),
+      ),
+      const SizedBox(height: 20),
+      FadeSlideIn(
+        index: 3,
         child: Vector3DButton(
           key: const ValueKey('trip-edit'),
           onTap: _deleting ? null : _edit,
@@ -308,7 +326,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       ),
       const SizedBox(height: 14),
       FadeSlideIn(
-        index: 3,
+        index: 4,
         child: Vector3DButton(
           key: const ValueKey('trip-delete'),
           onTap: _deleting ? null : _delete,
