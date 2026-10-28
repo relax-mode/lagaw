@@ -217,7 +217,15 @@ development read confirms the complete original trip/items/revision and PHP
 120.00 total are still unchanged. Browser-refresh persistence is verified; this
 does not establish persistence through an actual later deployment.
 
-Next staging checks: manual add/remove compatibility, then a confirmed complete
+Andrew supplied manual-add staging **HTTP 201** for existing Monday A at day
+1/order 3: item `fc4fd318-403e-4ed9-a907-ad262a5e5c1c`, all generated schedule,
+travel/cost and recommendation fields null. A guarded development read independently
+matches that exact new row, confirms the original three generated visits and all
+their metadata unchanged, and confirms the trip's complete-plan estimate is now
+null while other trip fields are preserved. The revision changed as expected.
+This establishes manual-add compatibility with the saved generated plan.
+
+Next staging checks: delete only that new manual item, then confirm a complete
 regeneration to restore a validated estimate after manual edits. Exact fixture
 records remain retained for actual redeployment persistence. No new production
 acceptance request has run.
