@@ -353,6 +353,23 @@ flags and leaves the local `.env` intact. The final read returns ready revision 
 traffic metadata only. This is prepared guidance, not an observed deployment;
 actual execution and subsequent saved-state comparison remain pending.
 
+Andrew supplied successful staging redeployment output: new ready revision
+`lagaw-api-staging-issue54-persist` serving **100%** of traffic, replacing before
+revision `lagaw-api-staging-00022-pk2`. Cloud Shell returned canonical service URL
+`https://lagaw-api-staging-663710289405.asia-southeast1.run.app`. This is an actual
+later revision created using the old revision's immutable image and existing
+configuration, not a TestClient/browser restart. Deployment/traffic metadata is
+developer-reported, not an independent agent Cloud Run Admin API query.
+
+After that report, a guarded development read independently confirmed **complete
+equality** with the retained regenerated baseline: all three item IDs, day/order,
+times, travel/cost, scores/reasons, nested locations, trip fields, PHP 120.00 total
+and revision `710c2399e657678caae1bf63cd82b5bc`. Both old and canonical staging
+URLs independently expose the generation route; the old URL retains HTTP 401 and
+correct staging CORS. Authenticated post-deployment GET is next to establish the
+serving revision reload path before production redeployment. Fixtures remain
+retained, and no `.env` or production configuration change occurred.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Cloud Run staging-before-production actual redeployment persistence.
