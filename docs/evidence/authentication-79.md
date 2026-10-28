@@ -7,7 +7,8 @@ passed every check and deployment job. Temporary fixtures were cleaned and the
 production promotion policy restored. Flutter #80 and teammate acknowledgment
 remain explicit follow-up at Andrew's direction; no frontend Auth completion is
 claimed. Final operational evidence and the SQL-wrapper correction are published
-through the separate release-evidence PR.
+through [release-evidence PR #93](https://github.com/relax-mode/lagaw/pull/93),
+which closes #79 on reviewed merge.
 
 ## October 29, 2026 — implementation preparation
 
