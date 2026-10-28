@@ -9,7 +9,10 @@ from app.database import LOCATION_COLUMNS, DatabaseUnavailable
 from app.schemas import Location
 from app.trip_item_schemas import TripItemCreate, TripItemResponse
 
-ITEM_COLUMNS = "id,trip_id,location_id,day_number,visit_order"
+ITEM_COLUMNS = (
+    "id,trip_id,location_id,day_number,visit_order,arrival_time,departure_time,"
+    "estimated_travel_time,estimated_cost,recommendation_score,recommendation_reason"
+)
 ITEM_SELECT = f"{ITEM_COLUMNS},location:locations({LOCATION_COLUMNS})"
 ITEM_LIST = TypeAdapter(list[TripItemResponse])
 LOCATION_LIST = TypeAdapter(list[Location])
