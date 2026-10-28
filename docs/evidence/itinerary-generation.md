@@ -297,6 +297,14 @@ comparison, conflict preservation and actual redeployment persistence remain
 pending; this supplied API success is not an independent agent production database
 query. No production credential or write was used by the agent.
 
+Andrew supplied the same production request's **HTTP 409** response:
+`replacement_confirmation_required`, revision
+`c906b3caf89e3fa668ba434c8c7f3df4`, with the explicit message covering replacement
+of existing/manual items. The reported revision matches initial generation.
+Recorded the exact safe request/response in production JSON. Item-level preservation
+will be checked through the next authenticated reload and production SQL evidence;
+the agent has not performed a protected production database read.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Remaining authenticated deployed acceptance.

@@ -205,6 +205,29 @@
           }
         ]
       }
+    },
+    {
+      "check": "ordinary_repeat_requires_confirmation",
+      "source": "developer-reported authenticated production Swagger",
+      "http_status": 409,
+      "request": {
+        "recommendations": {
+          "party_size": 2,
+          "planned_visits": 3,
+          "limit": 100
+        },
+        "duration": "morning",
+        "pace": "moderate",
+        "replace_existing": false
+      },
+      "response": {
+        "detail": {
+          "code": "replacement_confirmation_required",
+          "revision": "c906b3caf89e3fa668ba434c8c7f3df4",
+          "message": "Confirm replacing all existing itinerary items, including manual items."
+        }
+      },
+      "verification_note": "Revision matches the initial generation response; protected item reload and direct production SQL comparison remain pending."
     }
   ],
   "generation_request": {
