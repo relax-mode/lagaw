@@ -471,6 +471,8 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 - **October 28, 2026** — Andrew supplied #52's final post-cleanup production API response: HTTP 200, schema v1, empty interactions and excluded IDs. Deployed acceptance and exact cleanup are complete in development/staging and production, with existing users/locations preserved. Preparing a documentation-only evidence PR containing the observed CI/deployment/API/database results and the completed cleanup SQL record; no application code, migration, workflow or `.env` changes are included. The issue remains open until final evidence publication/review/merge.
 
+- **October 28, 2026** — Published #52's final documentation evidence in [PR #85](https://github.com/relax-mode/lagaw/pull/85), including the completed exact-ID SQL cleanup record. Its [documentation CI run 40670057760](https://github.com/relax-mode/lagaw/actions/runs/40670057760) passed changed-area detection and correctly skipped application tests/deployment because only docs/evidence changed. Updated issue #52's completed checklist and direct links to implementation PR #84, passing main CI/JUnit, deployed evidence and the final documentation PR. The issue remains open; #85 closes it after teammate-reviewed merge. Untracked `test-results/`, `.env`, application code, migrations and workflows remain untouched by this follow-up.
+
 ## Open follow-ups
 
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.

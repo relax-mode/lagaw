@@ -3,6 +3,8 @@
 - Issue: [#52](https://github.com/relax-mode/lagaw/issues/52).
 - Prepared October 28, 2026, from main `17d93d9`.
 - Branch: `feat/s3-07-user-interactions`.
+- Final deployed evidence: [PR #85](https://github.com/relax-mode/lagaw/pull/85),
+  branch `docs/issue-52-deployed-evidence`.
 - Scope: interaction API/persistence, owner history and S3-01 input adaptation.
 - Jayperson/Roel agreement to v1 semantics confirmed by Andrew in this session.
 - `.env`, schema migrations, model training/ranking and Flutter controls unchanged.
@@ -92,7 +94,8 @@ Its four expected events no longer exist; rerunning it intentionally fails
 verification before deleting anything. No new permanent table or migration was
 created: the expected-events helper is temporary and drops at commit.
 
-Implementation and deployed acceptance are complete. Publication/review/merge
-of this documentation evidence remains before issue closure. The implementation
+Implementation and deployed acceptance are complete. This evidence is published
+in [PR #85](https://github.com/relax-mode/lagaw/pull/85); teammate review and merge
+remain before issue closure. The implementation
 is already reviewed, merged, CI-tested and deployed; this documentation follow-up
 changes no application behavior, migration, workflow or environment file.
