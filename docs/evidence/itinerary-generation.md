@@ -145,8 +145,9 @@ fast-forwarded local main and merged it into the separate documentation branch,
 preserving untracked root `test-results/`. Main
 [run 40708112116](https://github.com/relax-mode/lagaw/actions/runs/40708112116)
 passed Backend, Database and Flutter, followed by successful staging deployment
-and its existing smoke checks. Production promotion is running automatically;
-authenticated acceptance still proceeds in staging first.
+and its existing smoke checks. The same run subsequently completed production API
+promotion and existing smoke checks successfully; production web correctly skipped.
+Authenticated acceptance still proceeds in staging first.
 
 Downloaded and independently parsed main
 [JUnit artifact 12823649025](https://github.com/relax-mode/lagaw/actions/runs/40708112116/artifacts/12823649025):
@@ -167,11 +168,37 @@ Monday visits and one Tuesday visit. A guarded independent development read
 confirmed the trip starts with no items and null total. Exact fixture manifest,
 request and baseline are in [staging evidence](itinerary-generation-staging.json);
 fixtures are retained deliberately for deployed/redeployment acceptance and must
-be cleaned by exact IDs afterward. Authenticated generation is not yet observed.
+be cleaned by exact IDs afterward.
+
+Andrew supplied the authenticated staging generation **HTTP 200** response:
+three saved items, revision `295151016df684c49343b6834454a279`, total PHP 120.00.
+The full safe response is recorded in [staging evidence](itinerary-generation-staging.json).
+It validates against the executable generation schema. Independent arithmetic and
+guarded development reads verified:
+
+- Day 1/order 1, Monday A: 09:00–09:30, zero first-leg travel, party cost PHP 20.00,
+  item `ffaed327-ed3a-48e5-8984-34beec8776bd`, score `0.9333333333333332`.
+- Day 1/order 2, Monday B: 09:53–10:23, eight travel minutes after a 15-minute
+  moderate-pace break, party cost PHP 40.00, item
+  `7dd04d5e-6208-4eb3-b51e-0015bb21737a`, score `0.8666666666666667`.
+- Day 2/order 1, Tuesday: 09:00–10:00, zero first-leg travel, party cost PHP 60.00,
+  item `f5ff4c3b-4772-4c43-af92-fb6267af1329`, score `0.7999999999999999`.
+- All visits fit their real fixture hours on the saved dates, respect typical
+  durations and have no overlaps. Costs equal venue upper costs × two travelers,
+  total exactly PHP 120.00, below saved PHP 180 maximum.
+- Every persisted item field, nested location, score/reason, revision and trip total
+  matches the supplied response. Original trip fields are unchanged except the
+  newly saved estimate. Authenticated generation is developer-reported; the
+  database comparison is an independent agent check with the development guard.
+
+Next staging checks: ordinary repeat must request replacement confirmation,
+infeasible replacement must preserve these exact records, then authenticated item
+reload/refresh and manual compatibility. The saved plan remains available for
+actual redeployment persistence. No new production acceptance request has run.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
-- Completed production promotion and authenticated deployed acceptance.
+- Remaining authenticated deployed acceptance.
 - Authenticated staging/development-before-production acceptance and independent SQL.
 - Persistence across an actual hosted redeployment, then exact fixture cleanup.
 - Final issue-linked evidence and closure after the Definition of Done is satisfied.
