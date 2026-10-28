@@ -17,6 +17,7 @@ from app.interactions import router as interactions_router
 from app.preference_extraction import router as preference_extraction_router
 from app.schemas import LocationsPage
 from app.trip_items import router as trip_items_router
+from app.trip_recommendations import router as trip_recommendations_router
 from app.trips import router as trips_router
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -98,6 +99,7 @@ def create_app() -> FastAPI:
     application.include_router(trips_router)
     application.include_router(interactions_router)
     application.include_router(trip_items_router)
+    application.include_router(trip_recommendations_router)
     application.include_router(preference_extraction_router)
     application.add_api_route(
         "/locations", list_locations, methods=["GET"], response_model=LocationsPage,
