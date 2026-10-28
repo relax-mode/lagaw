@@ -1,0 +1,102 @@
+{
+  "issue": 54,
+  "environment": "staging",
+  "database_project": "vnpkyvtbupnquvirzlzp",
+  "owner_id": "16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c",
+  "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+  "locations": [
+    {
+      "id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+      "name": "Issue 54 SYNTHETIC staging Monday A",
+      "latitude": 10.67,
+      "longitude": 122.95,
+      "hours": {
+        "monday": [
+          {
+            "open": "09:00",
+            "close": "12:00"
+          }
+        ]
+      },
+      "cost": 10,
+      "duration": 30
+    },
+    {
+      "id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+      "name": "Issue 54 SYNTHETIC staging Monday B",
+      "latitude": 10.671,
+      "longitude": 122.95,
+      "hours": {
+        "monday": [
+          {
+            "open": "09:00",
+            "close": "12:00"
+          }
+        ]
+      },
+      "cost": 20,
+      "duration": 30
+    },
+    {
+      "id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+      "name": "Issue 54 SYNTHETIC staging Tuesday",
+      "latitude": 10.672,
+      "longitude": 122.95,
+      "hours": {
+        "tuesday": [
+          {
+            "open": "09:00",
+            "close": "12:00"
+          }
+        ]
+      },
+      "cost": 30,
+      "duration": 60
+    }
+  ],
+  "expected_total": "120.00",
+  "setup_committed": true,
+  "responses": [],
+  "generation_request": {
+    "recommendations": {
+      "party_size": 2,
+      "planned_visits": 3,
+      "limit": 100
+    },
+    "duration": "morning",
+    "pace": "moderate",
+    "replace_existing": false
+  },
+  "public_checks": {
+    "openapi_status": 200,
+    "generation_route_present": true,
+    "unauthorized_status": 401,
+    "unauthorized_response": {
+      "detail": "A valid trip demo bearer token is required."
+    },
+    "cors_origin": "https://staging.lagaw.pages.dev"
+  },
+  "before_state": {
+    "trip": {
+      "id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+      "title": "Issue 54 SYNTHETIC staging acceptance",
+      "status": "draft",
+      "user_id": "16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c",
+      "end_date": "2026-11-03",
+      "budget_max": 180.0,
+      "budget_min": 0.0,
+      "group_type": "friends",
+      "start_date": "2026-11-02",
+      "preferred_tags": [
+        "cafe"
+      ],
+      "transportation_mode": "walking",
+      "estimated_total_cost": null
+    },
+    "items": [],
+    "revision": "97ac2e7ab4a650365d93c4ffedc18968"
+  },
+  "merge_commit": "e2f830c40f43180791671fca1c51e36629b47188",
+  "main_ci_run": "https://github.com/relax-mode/lagaw/actions/runs/40708112116",
+  "authenticated_generation_status": "pending developer Swagger request"
+}

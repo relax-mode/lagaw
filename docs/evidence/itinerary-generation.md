@@ -139,9 +139,39 @@ does not establish deployment or authenticated generated-itinerary acceptance.
 
 ## Pending — do not infer completion
 
+PR #89 merged at **14:39:27 UTC on October 28, 2026** as
+`e2f830c40f43180791671fca1c51e36629b47188`. Independently confirmed the merge,
+fast-forwarded local main and merged it into the separate documentation branch,
+preserving untracked root `test-results/`. Main
+[run 40708112116](https://github.com/relax-mode/lagaw/actions/runs/40708112116)
+passed Backend, Database and Flutter, followed by successful staging deployment
+and its existing smoke checks. Production promotion is running automatically;
+authenticated acceptance still proceeds in staging first.
+
+Downloaded and independently parsed main
+[JUnit artifact 12823649025](https://github.com/relax-mode/lagaw/actions/runs/40708112116/artifacts/12823649025):
+**102 database tests, zero failures/errors/skips, 4.865 seconds**, including the
+new persistence test (0.392 seconds), forced rollback (0.022 seconds) and concurrent
+confirmation (0.037 seconds). Main
+[evaluation artifact 12824252773](https://github.com/relax-mode/lagaw/actions/runs/40708112116/artifacts/12824252773)
+is attached to the same run.
+
+Andrew reported private authorization in staging Swagger. Independently confirmed
+the deployed staging OpenAPI contains the generation route and unauthenticated
+POST returns 401 with exact staging CORS. Created only three new marked synthetic
+development locations with explicit weekly hours and a new staging-owned synthetic
+trip `03b7f114-9b91-4985-9bf5-3efdb3a54d76`, November 2–3, friends/walking, budget
+PHP 0–180. Existing records and the shared owner profile were not edited. Expected
+generation: party size 2, three visits, morning/moderate, total PHP 120.00 with two
+Monday visits and one Tuesday visit. A guarded independent development read
+confirmed the trip starts with no items and null total. Exact fixture manifest,
+request and baseline are in [staging evidence](itinerary-generation-staging.json);
+fixtures are retained deliberately for deployed/redeployment acceptance and must
+be cleaned by exact IDs afterward. Authenticated generation is not yet observed.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
-- Merge; actual staging and production deployments.
+- Completed production promotion and authenticated deployed acceptance.
 - Authenticated staging/development-before-production acceptance and independent SQL.
 - Persistence across an actual hosted redeployment, then exact fixture cleanup.
 - Final issue-linked evidence and closure after the Definition of Done is satisfied.
