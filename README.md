@@ -88,6 +88,9 @@ Persisted swipes, saves and ratings, owner-scoped history and safe verification:
 Validated recommendations for saved trips, budget allocation and model fallback:
 [trip recommendation API](docs/trip-recommendations-api.md).
 
+Constraint-aware generated schedules, atomic persistence and replacement confirmation:
+[itinerary generation API](docs/itinerary-generation-api.md).
+
 Offline scoring, ranking, cold-start behavior and evaluation:
 [content-based recommender](docs/content-based-recommender.md).
 
