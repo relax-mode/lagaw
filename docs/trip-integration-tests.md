@@ -84,6 +84,11 @@ the same commit to check repeatability with fresh disposable services.
 
 Track observed results in [the evidence record](evidence/trip-integration-tests.md).
 The PR uses `Refs #29`, leaving closure until teammate review, passing CI,
-merge and post-merge checks are complete. This change contains tests and
-documentation only; the existing pipeline skips deployment for test-only merges.
-No production mutation or application redeployment is required for acceptance.
+merge and post-merge checks are complete. This change adds tests and
+documentation without changing application behavior or database schema. However,
+it also changes `.github/workflows/ci.yml`, which the existing deployment
+classifier treats as both backend and frontend changes. Merging #82 therefore
+triggers the normal staging deployment and, after staging smoke checks pass,
+production promotion. The database tests themselves still use only disposable
+services. No manual deployment or hosted database test run is required. A later
+documentation-only evidence merge does not trigger deployment.
