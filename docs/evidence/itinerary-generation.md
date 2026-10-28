@@ -276,6 +276,27 @@ production trip/database baseline has not been independently read by the agent.
 Preparing authenticated production generation with its separate demo credential;
 full safe setup result and checks are in the production JSON evidence.
 
+Andrew supplied production generation **HTTP 200**, trip
+`5b4497d1-a946-4845-bed5-441fbb563180`, timezone Asia/Manila, total PHP 120.00,
+revision `c906b3caf89e3fa668ba434c8c7f3df4`. Items:
+
+- Day 1/order 1, 09:00–09:30: `83386a42-04f3-45c8-9218-7cd1819a12ec`,
+  production Monday A, travel 0, cost PHP 20.00, score `0.9333333333333332`.
+- Day 1/order 2, 09:53–10:23: `83327ba8-f3fd-4efd-8372-3e608be0cc7b`,
+  production Monday B, travel eight minutes, cost PHP 40.00, score `0.8666666666666667`.
+- Day 2/order 1, 09:00–10:00: `8ff6b063-c621-41af-9c7c-76f303919992`,
+  production Tuesday, travel 0, cost PHP 60.00, score `0.7999999999999999`.
+
+Validated the executable generation schema, date/day/order, weekly opening hours,
+typical durations, 15-minute break plus eight-minute incoming journey, nonoverlap,
+party costs and total against saved setup budget PHP 180. Every nested location
+field independently matches the current public production catalog. All supplied
+scores are finite/normalized and reasons nonblank. The exact safe response is
+recorded in production JSON evidence. Protected reload/direct production SQL
+comparison, conflict preservation and actual redeployment persistence remain
+pending; this supplied API success is not an independent agent production database
+query. No production credential or write was used by the agent.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Remaining authenticated deployed acceptance.
