@@ -1,4 +1,4 @@
-﻿# Manual trip-itinerary location associations — issue #26
+# Manual trip-itinerary location associations — issue #26
 
 Scope: add, list and remove manual destination associations. Existing Trip CRUD,
 the controlled demo-user context, and the existing PostgreSQL tables/relationships
@@ -192,14 +192,20 @@ open until CI, review/merge, deployed checks and evidence are complete.
 Keep the existing issue #29 stash separate; its test suite is not required
 to run this issue's verifier.
 
-After development passes and the PR merges with green CI, coordinate the
-protected staging deployment with the deployment owner. Staging uses development
-Supabase. If its controlled demo context is not configured, coordinate that
-configuration separately; do not weaken authorization or alter production to
-make the test pass. Production deployment currently requires manual dispatch
-on main, per the newer pipeline policy recorded in the sprint log.
-The pitch/older Trip guides still describe automatic production deployment;
-that documentation discrepancy is flagged, not changed by #26.
+After development passes and the PR merges with green CI, verify the deployed
+staging API against development Supabase. Current main automatically deploys
+staging for application changes, then promotes production after staging checks
+pass; manual workflow dispatch is for production recovery. See the current
+[pipeline](../PIPELINE.md) and [staging guide](staging.md).
+
+Staging has a dedicated synthetic demo profile
+`16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c` and a separate staging token. Obtain
+that token privately from Secret Manager or its authorized holder and use a new staging-owned
+verification trip; the old local demo owner's trip will not be visible in this
+context. Keep `.env` unchanged and record staging writes in development only.
+Record the serving revision before beginning persistence verification. If the
+controlled demo context is unavailable, coordinate with its owner rather than
+weakening authorization or switching the local backend to production.
 
 Once authorized production deployment is ready, use the deployed API and its
 existing separate production demo context. Repeat the manual acceptance checks
