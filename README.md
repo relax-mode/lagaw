@@ -67,6 +67,9 @@ Provider decision and follow-up work: [docs/sprint-log.md](docs/sprint-log.md)
 Backend and Flutter regression checks, CI behavior, and test isolation:
 [testing guide](docs/regression-tests.md).
 
+Trip CRUD tests against disposable PostgreSQL and PostgREST, fixture isolation,
+and CI evidence: [Trip integration tests](docs/trip-integration-tests.md).
+
 Trip create/list/retrieve API, controlled demo-user setup, and development-first
 verification: [trip API guide](docs/trips-api.md).
 
