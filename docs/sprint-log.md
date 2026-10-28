@@ -439,6 +439,8 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 - **October 28, 2026** — Repeated #52's real development verification after simplifying the fixture connection override to retain the route's actual failure handler. All five groups and exact cleanup passed again; final focused API/guard checks passed 76 tests. Preparing the issue-only commit and PR; the existing isolated PostgreSQL job will execute the 90 collected database tests, including the new full interaction verifier. No `.env` changes, migration, production writes or unrelated changes are staged.
 
+- **October 28, 2026** — Published #52 in [PR #84](https://github.com/relax-mode/lagaw/pull/84), code commit `ca9ef21`. [CI run 40663142091](https://github.com/relax-mode/lagaw/actions/runs/40663142091) passed Backend and Database; Flutter and deployments were correctly skipped for this backend-only PR. Actual isolated PostgreSQL/PostgREST verification passed **90 database tests, 403 deselected in 3.04 seconds**, including the new interaction API/FK/cleanup test. Downloaded and parsed [JUnit artifact 12803849469](https://github.com/relax-mode/lagaw/actions/runs/40663142091/artifacts/12803849469): 90 tests, zero failures/errors/skips. Linked results in [issue evidence](evidence/interactions-dev.md). Required teammate review/merge and new-route staging/production deployed acceptance remain pending; no deployment or production data changes were made.
+
 ## Open follow-ups
 
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.

@@ -16,8 +16,10 @@
 | Development Supabase | Guarded verifier passed all five PASS groups against `vnpkyvtbupnquvirzlzp` |
 | Repeat development run | Passed all five groups again after preserving the real route's database-failure handler; new owners `bf841379-9185-4e55-abb2-9e0bdc6fe1f4`, `3bdb804d-3492-4c1e-af2e-dff1a4ed089e`; all fixtures cleaned |
 | Exact fixture cleanup | Passed; all generated events, users and locations removed and absence independently checked |
-| CI disposable PostgreSQL/PostgREST | Pending actual PR Database job; discovered by existing `pytest -m db` command |
-| PR, teammate review and merged commit | Pending |
+| CI disposable PostgreSQL/PostgREST | [Run 40663142091](https://github.com/relax-mode/lagaw/actions/runs/40663142091), code commit `ca9ef21`: Backend and Database passed; **90 database tests passed, 403 deselected in 3.04 seconds** |
+| Downloaded JUnit artifact | [trip-integration-results](https://github.com/relax-mode/lagaw/actions/runs/40663142091/artifacts/12803849469): 90 tests, zero failures/errors/skips; new interaction persistence/owner test passed in 0.225 seconds |
+| Database job log | [Job 122730945064](https://github.com/relax-mode/lagaw/actions/runs/40663142091/job/122730945064); migrated isolated PostgreSQL/PostgREST, no hosted credentials |
+| PR, teammate review and merged commit | [PR #84](https://github.com/relax-mode/lagaw/pull/84) opened; teammate review and merge pending |
 | Deployed staging acceptance | Pending new endpoint deployment; local app against development DB is not deployed acceptance |
 | Production/deployed acceptance | Pending development/staging acceptance and reviewed release |
 
