@@ -314,6 +314,19 @@ request/response. Production authenticated item reload after refresh and direct
 SQL evidence are next to compare the saved rows; the conflict message alone is
 not treated as independent proof of item-level preservation.
 
+After refreshing production Swagger, Andrew supplied authenticated **GET items
+HTTP 200**, limit 100/offset 0. The entire three-item list equals the initial
+generation response: same item/location IDs, day/order, times, travel estimates,
+costs, scores and reasons. It validates against the association page schema.
+Thus the supplied deployed reload confirms browser-refresh persistence and no
+item-level change after ordinary-repeat and infeasible-replacement requests.
+Prepared ignored local `backend/test-results/issue54-production-verify.sql` for
+the production SQL Editor to verify the exact owner/trip, current revision,
+PHP 120.00 total and three-item count, and return its complete saved state.
+The read-only script was parsed/exercised against guarded development and correctly
+refused it because the exact production trip is absent. Awaiting Andrew's
+production SQL result; no agent protected production database read is claimed.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Remaining authenticated deployed acceptance.
