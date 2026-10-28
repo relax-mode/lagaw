@@ -976,5 +976,21 @@
       }
     ]
   },
-  "production_functional_acceptance": "generation, repeat confirmation, infeasible replacement preservation, refresh and direct SQL verification passed; actual redeployment and exact cleanup pending"
+  "production_functional_acceptance": "generation, repeat confirmation, infeasible replacement preservation, refresh and direct SQL verification passed; actual redeployment and exact cleanup pending",
+  "redeployment": {
+    "status": "prepared after staging actual-redeployment persistence passed; awaiting developer Cloud Shell execution",
+    "before_revision": "lagaw-api-00012-z6p",
+    "before_revision_source": "developer-reported gcloud latestReadyRevisionName",
+    "planned_after_revision": "lagaw-api-issue54-persist",
+    "method": "gcloud run deploy using exact existing revision status.imageDigest and explicit new revision suffix",
+    "local_script": "backend/test-results/issue54-production-redeploy.sh",
+    "guards": [
+      "expected prior production revision",
+      "expected project Artifact Registry immutable image digest"
+    ],
+    "runtime_configuration": "existing image and service configuration; no env/secret flags or .env edits",
+    "after_revision": null,
+    "traffic_verification": "pending",
+    "saved_state_comparison": "pending"
+  }
 }

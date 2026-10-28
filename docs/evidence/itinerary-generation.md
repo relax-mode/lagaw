@@ -381,6 +381,15 @@ before/after revision and 100% traffic metadata, authenticated new-deployment GE
 and independent complete database equality. Production redeployment is next;
 fixtures remain retained until exact cleanup.
 
+After staging persistence passed, Andrew supplied production's before ready
+revision `lagaw-api-00012-z6p`. Recorded it with production's complete SQL/API
+baseline and prepared/Bash-syntax-checked the same exact-image command for only
+`lagaw-api`: refuse an intervening ready-revision change, reuse its immutable image
+digest and existing configuration, create `lagaw-api-issue54-persist`, then return
+ready revision/traffic metadata. Production execution and post-deployment reload
+remain pending. The command contains no environment/secret configuration flags;
+the local `.env` remains unchanged.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Cloud Run staging-before-production actual redeployment persistence.
