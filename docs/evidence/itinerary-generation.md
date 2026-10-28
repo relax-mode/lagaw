@@ -99,28 +99,49 @@ absent. The migration/functions/trigger remain intentionally installed. No
 production call/write, shared demo fixture modification or environment-file edit
 was made. This local FastAPI-to-development check is **not deployed staging**.
 
-## Pending — do not infer completion
+## Review and production migration readiness
 
 On October 28, independently confirmed CyGray **approved** the current PR #89
 head `92536e7039c35d6032be783d24dbf9ba86b2e1fa` at 12:21:21 UTC. GitHub reports
 the PR clean/mergeable; latest [CI run 40686293474](https://github.com/relax-mode/lagaw/actions/runs/40686293474)
 passed Backend and Database (Flutter/deployments correctly skipped). Approval is
-complete, but the PR remains unmerged while production migration is prepared.
+complete, and the reviewed implementation head remains unchanged.
 Prepared a single-use transaction wrapper in ignored local
 `backend/test-results/issue54-production-migration.sql`, embedding the exact
 approved migration, guarding the expected preceding migration history, registering
 the new version and checking function/role/trigger state before commit. Andrew
 must select production project `zjnuqqtbapbpudsjbpif` in SQL Editor before running
 it; the SQL has no reliable independent project-ID assertion. Existing development
-already contains the migration and fails the preceding-history guard. No
-production execution has been observed or claimed. The approved implementation
-branch is unchanged; this follow-up is on a separate documentation branch.
+already contains the migration and fails the preceding-history guard. The approved
+implementation branch is unchanged; this follow-up is on a separate documentation
+branch.
+
+Andrew subsequently supplied the production SQL Editor result:
+
+```json
+[
+  {
+    "result": "PASS: Issue 54 migration installed; history, backend privileges and trigger verified.",
+    "migration_version": "20261028130000"
+  }
+]
+```
+
+This is developer-reported execution in the instructed production context, not
+an independent agent production query. It confirms the wrapper committed after
+its migration-history, service/client privilege and trigger checks. The reviewed
+SQL source matches the development-tested migration. The agent did not change
+`.env`, CLI linkage or use production credentials. Rechecked PR #89: CyGray's
+approval still matches head `92536e7`, required applicable checks remain green,
+and GitHub reports clean/mergeable. The production migration prerequisite is
+satisfied; Andrew can merge through the normal reviewed PR flow. This result
+does not establish deployment or authenticated generated-itinerary acceptance.
+
+## Pending — do not infer completion
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Merge; actual staging and production deployments.
-- Production migration coordinated after review/development verification and before
-  merging/deploying the new endpoint; preserve the existing local `.env`.
 - Authenticated staging/development-before-production acceptance and independent SQL.
 - Persistence across an actual hosted redeployment, then exact fixture cleanup.
 - Final issue-linked evidence and closure after the Definition of Done is satisfied.
