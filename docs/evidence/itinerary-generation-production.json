@@ -228,6 +228,36 @@
         }
       },
       "verification_note": "Revision matches the initial generation response; protected item reload and direct production SQL comparison remain pending."
+    },
+    {
+      "check": "infeasible_confirmed_replacement",
+      "source": "developer-reported authenticated production Swagger",
+      "http_status": 409,
+      "request": {
+        "recommendations": {
+          "party_size": 2,
+          "planned_visits": 3,
+          "limit": 100
+        },
+        "duration": "afternoon",
+        "pace": "moderate",
+        "replace_existing": true,
+        "expected_revision": "c906b3caf89e3fa668ba434c8c7f3df4"
+      },
+      "response": {
+        "detail": {
+          "code": "requested_visits_do_not_fit",
+          "scheduled_visits": 0,
+          "requested_visits": 3,
+          "skipped": {
+            "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227": "insufficient_time_or_closed",
+            "035843d7-c6c8-498e-9c0a-86dc0d60527e": "insufficient_time_or_closed",
+            "010d414e-50ce-4be3-82e3-8e30ab8207be": "insufficient_time_or_closed"
+          },
+          "message": "No complete feasible itinerary. Saved data preserved."
+        }
+      },
+      "verification_note": "Reported planner conflict after explicit current-revision confirmation. Compare all saved records via authenticated reload and production SQL before asserting exact preservation."
     }
   ],
   "generation_request": {

@@ -305,6 +305,15 @@ Recorded the exact safe request/response in production JSON. Item-level preserva
 will be checked through the next authenticated reload and production SQL evidence;
 the agent has not performed a protected production database read.
 
+Andrew supplied confirmed-afternoon production **HTTP 409**:
+`requested_visits_do_not_fit`, zero scheduled of three requested, each exact
+production fixture ID skipped as `insufficient_time_or_closed`. The request used
+the current generation revision with explicit replacement confirmation; the result
+therefore exercises infeasible planning after confirmation. Recorded the full safe
+request/response. Production authenticated item reload after refresh and direct
+SQL evidence are next to compare the saved rows; the conflict message alone is
+not treated as independent proof of item-level preservation.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Remaining authenticated deployed acceptance.
