@@ -1,0 +1,82 @@
+{
+  "issue": 79,
+  "merge_commit": "7186a080336838d0b2fdba5590d445ef3a6b0ffb",
+  "ci_run": "https://github.com/relax-mode/lagaw/actions/runs/40739574662",
+  "conclusion": "success",
+  "created_at": "2026-10-28T17:50:53Z",
+  "updated_at": "2026-10-28T18:16:36Z",
+  "jobs": [
+    {
+      "name": "Detect changed areas",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122997196934",
+      "startedAt": "2026-10-28T17:50:55Z",
+      "completedAt": "2026-10-28T17:51:00Z"
+    },
+    {
+      "name": "Frontend - Flutter",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122997258857",
+      "startedAt": "2026-10-28T17:51:02Z",
+      "completedAt": "2026-10-28T17:52:28Z"
+    },
+    {
+      "name": "Database - PostgreSQL migrations and smoke tests",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122997258860",
+      "startedAt": "2026-10-28T17:51:02Z",
+      "completedAt": "2026-10-28T17:51:55Z"
+    },
+    {
+      "name": "Backend - Python",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122997258869",
+      "startedAt": "2026-10-28T17:51:02Z",
+      "completedAt": "2026-10-28T17:51:35Z"
+    },
+    {
+      "name": "Decide - Staging deployment",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122998071921",
+      "startedAt": "2026-10-28T17:52:31Z",
+      "completedAt": "2026-10-28T17:52:36Z"
+    },
+    {
+      "name": "Deploy - Staging",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122998145295",
+      "startedAt": "2026-10-28T17:52:40Z",
+      "completedAt": "2026-10-28T17:55:46Z"
+    },
+    {
+      "name": "Deploy - Production API",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/122999876969",
+      "startedAt": "2026-10-28T18:13:11Z",
+      "completedAt": "2026-10-28T18:14:03Z"
+    },
+    {
+      "name": "Deploy - Production web",
+      "conclusion": "success",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/40739574662/job/123009892630",
+      "startedAt": "2026-10-28T18:15:22Z",
+      "completedAt": "2026-10-28T18:16:35Z"
+    }
+  ],
+  "observed_revisions": {
+    "staging": [],
+    "production": []
+  },
+  "flutter_tests_passed": 104,
+  "backend_tests": {
+    "passed": 719,
+    "db_deselected": 106,
+    "seconds": 11.64
+  },
+  "database_tests": {
+    "tests": 106,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

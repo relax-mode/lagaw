@@ -1,8 +1,11 @@
 # Supabase authentication and backend ownership — #79
 
-Status: [draft PR #92](https://github.com/relax-mode/lagaw/pull/92), required CI
-and live development backend acceptance passed. Teammate contract agreement,
-review, merge and deployed staging/production acceptance remain pending.
+Status: [PR #92](https://github.com/relax-mode/lagaw/pull/92) was reviewed and merged
+as `7186a08`. [Main CI/deployment](https://github.com/relax-mode/lagaw/actions/runs/40739574662)
+passed, followed by deployed staging and production ownership acceptance and
+exact temporary-trip cleanup. The temporary production promotion hold is restored.
+Roel's #80 integration and teammate acknowledgment remain explicitly deferred
+at Andrew's instruction; existing Flutter demo-token calls require that update.
 Evidence: [authentication verification record](evidence/authentication-79.md).
 Flutter screens and session management belong to Roel's #80.
 
@@ -191,10 +194,10 @@ API with that short-lived token. No account password or token reaches output.
 Redirects are refused. Smoke checks create no trips/events and call no AI
 provider; the first call can create the dedicated account's profile.
 
-The release operator must provision the following independently in **each**
-GitHub Environment (`staging`, then `production`) before enabling the release.
-Andrew is proceeding with this backend rollout; Kyle remains the ongoing
-environment owner for the later handoff.
+Andrew provisioned the following independently in **each** GitHub Environment
+(`staging`, then `production`) for the completed backend rollout. Kyle remains
+the ongoing environment owner for the later handoff. Credentials were entered
+privately; values are not recorded in evidence or private `.env` edits.
 
 | Kind | Name | Purpose |
 | --- | --- | --- |
@@ -219,20 +222,22 @@ limitation, not a completed frontend acceptance result. Flutter implementation
 remains outside #79. Teammate contract acknowledgment is still pending and is
 not inferred from Andrew's release instruction.
 
-The backend still requires environment-specific smoke configuration, deployed
-staging verification before production, the production schema prerequisite,
-passing CI and the reviewed PR. Staging's four smoke settings are now configured.
-For this rollout, the production GitHub Environment temporarily requires
-`aranxshx` approval; its existing protected-branch restriction is retained. This
-lets the reviewed merge deploy to staging while production waits for verified
-staging results, its migration and its own smoke configuration. Do not approve
-production promotion before those checks pass. Restore the previous environment
-reviewer setting after the rollout and record that restoration.
+Both environments' four smoke settings are configured. The reviewed merge first
+deployed to staging and passed real HTTPS ownership/interaction verification.
+Production waited behind a temporary `aranxshx` environment approval while Andrew
+completed its migration and dedicated test-profile setup. Production API and web
+deployment/smoke checks then passed, followed by Andrew's two-account production
+ownership verification and exact temporary-trip cleanup. The temporary required
+reviewer was removed after success, preserving the original protected-branch
+restriction and restoring automatic promotion for later changes.
 
 [Production prerequisite SQL](evidence/authentication-79-production-migration.sql)
-preserves existing rows and records the exact repository migration version. It
-must be run by Andrew in the production SQL Editor after staging passes, with
-the selected project checked explicitly. Its development-marker refusal was
-exercised against development and rolled back. Production execution is pending.
-Development verification alone does not complete deployed backend acceptance.
-Private `.env` edits are unnecessary for this rollout.
+preserves existing rows and records the exact repository migration version.
+Andrew reported successful production execution after staging passed, followed
+by creation of the two exact confirmed test-profile links. A quote-generation
+error in the wrapper's initial preservation snapshot was corrected before its
+successful retry; the underlying schema migration is unchanged. Both corrected
+snapshot queries and the installed-migration verification path were exercised
+in development, with rollback. The SQL remains a guarded verification/setup
+artifact, not a command to replay without checking the target and current state.
+Private `.env` was unchanged throughout the rollout.

@@ -1,0 +1,38 @@
+{
+  "issue": 79,
+  "environment": "production",
+  "project_ref": "zjnuqqtbapbpudsjbpif",
+  "recorded_at_utc": "2026-10-28T18:16:31.101878+00:00",
+  "api_url": "https://lagaw-api-i5kvldluga-as.a.run.app",
+  "implementation_merge": "7186a080336838d0b2fdba5590d445ef3a6b0ffb",
+  "main_ci_run": "https://github.com/relax-mode/lagaw/actions/runs/40739574662",
+  "method": "Andrew interactive verifier, actual HTTPS production FastAPI/Supabase Auth, no identity/database mocks",
+  "profiles": {
+    "A": "2210f0de-37c6-4d9b-a07e-1393485dfa6b",
+    "B": "7419762a-9aca-4425-8643-e74f09a893b4"
+  },
+  "safe_outputs": [
+    "PASS: Missing and invalid tokens rejected.",
+    "INFO: Test account A profile UUID: 2210f0de-37c6-4d9b-a07e-1393485dfa6b",
+    "INFO: Test account B profile UUID: 7419762a-9aca-4425-8643-e74f09a893b4",
+    "PASS: Two verified owners can create/update trips; cross-user reads/writes/items return 404.",
+    "PASS: Exact temporary trips removed; both accounts' existing trips preserved.",
+    "PASS: Production Auth verified. Test profiles retained; exact temporary trips removed."
+  ],
+  "existing_owner_trips_preserved": true,
+  "exact_temporary_trip_cleanup": true,
+  "reusable_test_profiles_retained": true,
+  "private_credentials_included": false,
+  "dotenv_changed": false,
+  "limitations": [
+    "No production interaction events created; live write/isolation coverage passed in staging",
+    "Flutter authentication and email-delivery journey remain #80 follow-up",
+    "Genuinely expired live session not awaited; expiry rejection covered by isolated tests"
+  ],
+  "observed_production_revisions": [],
+  "independent_public_checks": [
+    "Missing token returns 401 with exact production CORS",
+    "Public API key alone denied profile reads; no rows fetched"
+  ],
+  "main_ci_conclusion": "success"
+}

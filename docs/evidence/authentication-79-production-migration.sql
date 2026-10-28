@@ -27,7 +27,7 @@ begin
         raise exception 'STOP: known legacy production profile is absent; verify the target';
     end if;
     foreach t in array array['users','locations','trips','itinerary_items','user_location_interactions'] loop
-        execute format('select count(*), md5(coalesce(string_agg(md5((to_jsonb(x) - ''auth_user_id'')::text),  order by x.id), )) from public.%I x', t)
+        execute format($issue79_snapshot$select count(*), md5(coalesce(string_agg(md5((to_jsonb(x) - 'auth_user_id')::text), '' order by x.id), '')) from public.%I x$issue79_snapshot$, t)
             into n, h;
         insert into issue79_before values(t,n,h);
     end loop;
@@ -80,7 +80,7 @@ $issue79_source$]);
         raise exception 'STOP: expected identity-link constraints are missing';
     end if;
     foreach t in array array['users','locations','trips','itinerary_items','user_location_interactions'] loop
-        execute format('select count(*), md5(coalesce(string_agg(md5((to_jsonb(x) - ''auth_user_id'')::text),  order by x.id), )) from public.%I x', t)
+        execute format($issue79_snapshot$select count(*), md5(coalesce(string_agg(md5((to_jsonb(x) - 'auth_user_id')::text), '' order by x.id), '')) from public.%I x$issue79_snapshot$, t)
             into n, h;
         select * into b from issue79_before where table_name=t;
         if n is distinct from b.row_count or h is distinct from b.digest then
