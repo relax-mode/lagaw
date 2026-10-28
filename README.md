@@ -2,6 +2,8 @@
 
 **Swipe through Bacolod. Get a trip that fits you.**
 
+**Roel and coding assistants working on #56: [START HERE — agreed backend APIs and complete frontend flow](ROEL_START_HERE.md).**
+
 Lagaw (Hiligaynon for roaming around) is a swipe-based travel planner for Bacolod City, built as an Android app with a companion web build. It learns what you like, then turns it into a day-by-day itinerary that respects your budget, opening hours, and travel time. No more scrolling through generic "top 10" lists.
 
 ## How it works
@@ -87,6 +89,9 @@ Persisted swipes, saves and ratings, owner-scoped history and safe verification:
 
 Validated recommendations for saved trips, budget allocation and model fallback:
 [trip recommendation API](docs/trip-recommendations-api.md).
+
+Constraint-aware generated schedules, atomic persistence and replacement confirmation:
+[itinerary generation API](docs/itinerary-generation-api.md).
 
 Offline scoring, ranking, cold-start behavior and evaluation:
 [content-based recommender](docs/content-based-recommender.md).

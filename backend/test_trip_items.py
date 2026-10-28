@@ -34,7 +34,11 @@ LOCATION_ROW = {
     "image_url": None, "is_active": True,
 }
 BODY = {"location_id": LOCATION, "day_number": 1, "visit_order": 1}
-ITEM_ROW = {**BODY, "id": ITEM, "trip_id": TRIP, "location": LOCATION_ROW}
+ITEM_ROW = {
+    **BODY, "id": ITEM, "trip_id": TRIP, "location": LOCATION_ROW,
+    "arrival_time": None, "departure_time": None, "estimated_travel_time": None,
+    "estimated_cost": None, "recommendation_score": None, "recommendation_reason": None,
+}
 
 
 class TripItemApiTests(unittest.TestCase):
