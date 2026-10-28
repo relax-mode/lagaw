@@ -55,7 +55,7 @@
     }
   ],
   "expected_total": "120.00",
-  "setup_status": "prepared; awaiting developer production SQL Editor execution",
+  "setup_status": "developer-reported production SQL PASS; all three new venues independently verified through production catalog",
   "merge_commit": "e2f830c40f43180791671fca1c51e36629b47188",
   "main_ci_run": "https://github.com/relax-mode/lagaw/actions/runs/40708112116",
   "responses": [],
@@ -78,5 +78,110 @@
       "detail": "A valid trip demo bearer token is required."
     },
     "cors_origin": "https://lagaw.pages.dev"
-  }
+  },
+  "setup_result": {
+    "source": "developer-reported production SQL Editor execution",
+    "response": {
+      "result": "PASS: Issue 54 production fixtures created.",
+      "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+      "owner_id": "23000000-0000-4000-8000-000000000001",
+      "location_ids": [
+        "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+        "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+        "010d414e-50ce-4be3-82e3-8e30ab8207be"
+      ]
+    }
+  },
+  "independent_setup_checks": {
+    "all_three_public_production_locations_match_fixture_manifest": true,
+    "production_trip_and_venue_ids_absent_from_development": true,
+    "staging_saved_plan_unchanged": true,
+    "production_locations": [
+      {
+        "id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+        "name": "Issue 54 SYNTHETIC production Monday A",
+        "description": "Synthetic issue54 acceptance fixture; not a real destination",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe"
+        ],
+        "address": null,
+        "latitude": 10.67,
+        "longitude": 122.95,
+        "opening_hours": {
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "12:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 10.0,
+        "estimated_cost_max": 10.0,
+        "typical_visit_duration": 30,
+        "suitable_group_types": [
+          "friends"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+        "name": "Issue 54 SYNTHETIC production Monday B",
+        "description": "Synthetic issue54 acceptance fixture; not a real destination",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe"
+        ],
+        "address": null,
+        "latitude": 10.671,
+        "longitude": 122.95,
+        "opening_hours": {
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "12:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 20.0,
+        "estimated_cost_max": 20.0,
+        "typical_visit_duration": 30,
+        "suitable_group_types": [
+          "friends"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+        "name": "Issue 54 SYNTHETIC production Tuesday",
+        "description": "Synthetic issue54 acceptance fixture; not a real destination",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe"
+        ],
+        "address": null,
+        "latitude": 10.672,
+        "longitude": 122.95,
+        "opening_hours": {
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "12:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 30.0,
+        "estimated_cost_max": 30.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "friends"
+        ],
+        "image_url": null,
+        "is_active": true
+      }
+    ]
+  },
+  "initial_trip_baseline_source": "Prepared exact-ID-guarded setup SQL inserts a new trip with null estimate and no itinerary items; developer reported transaction PASS. Protected trip baseline is not an independent production database read."
 }

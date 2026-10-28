@@ -260,8 +260,21 @@ separate production demo profile. The SQL guards migration/profile presence and
 exact-ID absence, creates records transactionally, and returns an exact cleanup
 manifest. Andrew must select production project `zjnuqqtbapbpudsjbpif` in SQL
 Editor; there is no reliable project-ID assertion inside this SQL. Production
-setup execution and authenticated acceptance have not yet been reported. No
-production write or credential access was performed by the agent.
+setup execution was subsequently reported by Andrew as **PASS**, with exact new
+trip `5b4497d1-a946-4845-bed5-441fbb563180`, owner
+`23000000-0000-4000-8000-000000000001`, and location IDs
+`6fe3ecfb-2435-4ef5-bd15-4fc5a4803227`,
+`035843d7-c6c8-498e-9c0a-86dc0d60527e`,
+`010d414e-50ce-4be3-82e3-8e30ab8207be`. The result matches the prepared manifest.
+An independent public production catalog read confirms every new venue's exact
+ID/name, active state, hours, coordinates, costs, duration and group/tags. Guarded
+development reads confirm those production trip/location IDs are absent there
+and the entire regenerated staging plan remains unchanged. Setup is developer-
+reported SQL execution; no agent production write or credential access occurred.
+The known setup script creates a new empty trip with null estimate, but a protected
+production trip/database baseline has not been independently read by the agent.
+Preparing authenticated production generation with its separate demo credential;
+full safe setup result and checks are in the production JSON evidence.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
