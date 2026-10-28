@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../models/preference_draft.dart';
 import '../../models/trip.dart';
+import '../../services/preference_service.dart';
 import '../../services/trip_service.dart';
 import '../../theme.dart';
 import '../tactile_motion.dart';
 import 'budget_range_field.dart';
 import 'choice_chips_field.dart';
 import 'date_range_field.dart';
+import 'describe_trip_card.dart';
+import 'preference_review_sheet.dart';
 import 'tactile_field_style.dart';
 import 'tactile_text_field.dart';
 import 'trip_form_validators.dart';
@@ -56,6 +60,9 @@ class TripForm extends StatefulWidget {
   final bool isSubmitting;
   final Map<String, String> fieldErrors;
 
+  /// Backs the "Describe your trip" suggestions. [S3-06]
+  final PreferenceService? preferenceService;
+
   const TripForm({
     super.key,
     this.initial,
@@ -63,6 +70,7 @@ class TripForm extends StatefulWidget {
     this.submitLabel = 'Save trip',
     this.isSubmitting = false,
     this.fieldErrors = const {},
+    this.preferenceService,
   });
 
   @override
@@ -79,6 +87,31 @@ class TripFormState extends State<TripForm> {
   List<String> _group = const [];
   List<String> _tags = const [];
   bool _triedSubmit = false;
+  String? _suggestionNotice;
+
+  late final PreferenceService _preferences =
+      widget.preferenceService ?? PreferenceService();
+
+  /// Reviews extracted suggestions; only vibes the user ticks are added, and
+  /// nothing already chosen is removed. Saving still needs the Save button.
+  Future<void> _reviewSuggestions(PreferenceDraft draft) async {
+    final add = await showPreferenceReview(
+      context,
+      draft: draft,
+      currentTags: _tags,
+    );
+    if (add == null || !mounted) return;
+    final room = TripFormValidators.maxTags - _tags.length;
+    final accepted = add.take(room).toList();
+    setState(() {
+      _tags = [..._tags, ...accepted];
+      _suggestionNotice = accepted.isEmpty
+          ? 'No changes applied.'
+          : 'Added ${accepted.length} '
+                '${accepted.length == 1 ? 'vibe' : 'vibes'}. '
+                'Check the form, then save.';
+    });
+  }
 
   @override
   void initState() {
@@ -154,6 +187,14 @@ class TripFormState extends State<TripForm> {
             _FormErrorBanner(message: formError),
             const SizedBox(height: 16),
           ],
+          _section(0, [
+            DescribeTripCard(
+              service: _preferences,
+              enabled: !widget.isSubmitting,
+              notice: _suggestionNotice,
+              onSuggestions: _reviewSuggestions,
+            ),
+          ]),
           _section(0, [
             TactileTextField(
               key: const ValueKey('trip-title'),

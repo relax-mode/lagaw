@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/trip.dart';
+import '../services/preference_service.dart';
 import '../services/trip_service.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/trip_form/trip_form.dart';
@@ -12,7 +13,14 @@ import 'trip_page_scaffold.dart';
 class TripCreateScreen extends StatefulWidget {
   final TripService service;
 
-  const TripCreateScreen({super.key, required this.service});
+  /// Backs "Describe your trip"; defaults to the live extraction API.
+  final PreferenceService? preferenceService;
+
+  const TripCreateScreen({
+    super.key,
+    required this.service,
+    this.preferenceService,
+  });
 
   @override
   State<TripCreateScreen> createState() => _TripCreateScreenState();
@@ -81,6 +89,7 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
           isSubmitting: _submitting,
           fieldErrors: _fieldErrors,
           onSubmit: _create,
+          preferenceService: widget.preferenceService,
         ),
       ],
     );

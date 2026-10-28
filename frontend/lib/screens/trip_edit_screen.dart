@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/trip.dart';
+import '../services/preference_service.dart';
 import '../services/trip_service.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/trip_form/trip_form.dart';
@@ -13,10 +14,14 @@ class TripEditScreen extends StatefulWidget {
   final TripService service;
   final String tripId;
 
+  /// Backs "Describe your trip"; defaults to the live extraction API.
+  final PreferenceService? preferenceService;
+
   const TripEditScreen({
     super.key,
     required this.service,
     required this.tripId,
+    this.preferenceService,
   });
 
   @override
@@ -135,6 +140,7 @@ class _TripEditScreenState extends State<TripEditScreen> {
             isSubmitting: _submitting,
             fieldErrors: _fieldErrors,
             onSubmit: _save,
+            preferenceService: widget.preferenceService,
           ),
         ],
       ],
