@@ -26,7 +26,11 @@ create function public.lock_itinerary_parent() returns trigger
 language plpgsql security invoker set search_path = '' as $$
 begin
     if tg_op = 'UPDATE' and new.trip_id <> old.trip_id then
-        raise exception using errcode = '23514', message = 'Item parent is immutable';
+        -- Preserve the existing schema's FK behavior for administrative moves.
+        -- The HTTP association API still never accepts a parent change.
+        perform 1 from public.trips where id in (old.trip_id, new.trip_id) order by id for update;
+        update public.trips set estimated_total_cost = null where id in (old.trip_id, new.trip_id);
+        return new;
     end if;
     if tg_op = 'DELETE' then
         update public.trips set estimated_total_cost = null where id = old.trip_id;

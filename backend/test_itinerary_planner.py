@@ -178,3 +178,22 @@ def test_invalid_counts_confirmations_and_unknown_fields(changes):
 def test_opening_day_is_local_calendar_date():
     assert opening_intervals({"monday": [{"open": "09:00", "close": "10:00"}]},
                              date(2026, 11, 2)) == [(540, 600)]
+
+
+def test_evening_unspecified_and_explicit_duration_cap_use_shared_vocabulary():
+    saved, item = trip(), venue()
+    item.location.opening_hours = {"monday": [{"open": "18:00", "close": "22:00"}]}
+    visits, _ = plan_itinerary(saved, options(1, duration="evening", pace="unspecified"), ranked(saved, [item]))
+    assert visits[0].arrival_time == time(18)
+    config = options(1, duration="evening", pace="slow", recommendations={
+        "party_size": 1, "planned_visits": 1, "max_visit_duration_minutes": 30,
+    })
+    with pytest.raises(PlanningConflict):
+        plan_itinerary(saved, config, ranked(saved, [item]))
+
+
+@pytest.mark.parametrize("mode", ["walking", "jeepney", "taxi", "motorcycle", "private_car"])
+def test_existing_flutter_transport_modes_are_supported(mode):
+    saved, item = trip(transportation_mode=mode), venue()
+    visits, _ = plan_itinerary(saved, options(1), ranked(saved, [item]))
+    assert len(visits) == 1
