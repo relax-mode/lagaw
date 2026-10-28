@@ -191,10 +191,18 @@ guarded development reads verified:
   newly saved estimate. Authenticated generation is developer-reported; the
   database comparison is an independent agent check with the development guard.
 
-Next staging checks: ordinary repeat must request replacement confirmation,
-infeasible replacement must preserve these exact records, then authenticated item
-reload/refresh and manual compatibility. The saved plan remains available for
-actual redeployment persistence. No new production acceptance request has run.
+Andrew then supplied the unchanged request's staging **HTTP 409** response,
+`replacement_confirmation_required`, with the same revision
+`295151016df684c49343b6834454a279` and explicit warning that replacement includes
+manual items. A new guarded development read confirms the entire trip, all three
+item IDs/fields, nested locations, scores/reasons, total and revision equal the
+after-generation baseline exactly. Repeated generation did not replace any saved
+record. The full safe request/response and comparison are in staging JSON evidence.
+
+Next staging checks: an infeasible confirmed afternoon replacement must preserve
+these exact records, then authenticated item reload/refresh and manual compatibility.
+The saved plan remains available for actual redeployment persistence. No new
+production acceptance request has run.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
