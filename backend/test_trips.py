@@ -37,8 +37,9 @@ ROW = {
 class TripApiTests(unittest.TestCase):
     def setUp(self):
         self.environment = patch.dict(os.environ, {
-            "SUPABASE_URL": "https://database.invalid",
+            "SUPABASE_URL": "http://127.0.0.1:54321",
             "SUPABASE_SERVICE_ROLE_KEY": "sb_secret_offline_only",
+            "TRIP_AUTH_MODE": "demo",
             "TRIP_DEMO_USER_ID": OWNER,
             "TRIP_DEMO_TOKEN": TOKEN,
             "CORS_ALLOWED_ORIGINS": "http://localhost:3000",

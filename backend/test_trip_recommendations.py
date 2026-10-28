@@ -41,6 +41,8 @@ def recommendation(identifier=VENUE, **changes):
 def harness(monkeypatch):
     monkeypatch.setenv("TRIP_DEMO_USER_ID", OWNER)
     monkeypatch.setenv("TRIP_DEMO_TOKEN", TOKEN)
+    monkeypatch.setenv("TRIP_AUTH_MODE", "demo")
+    monkeypatch.setenv("SUPABASE_URL", "http://127.0.0.1:54321")
     monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "")
     monkeypatch.delenv("MODEL_FILE_PATH", raising=False)
     with patch("dotenv.load_dotenv"):

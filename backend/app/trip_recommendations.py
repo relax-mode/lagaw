@@ -44,7 +44,7 @@ def get_recommendation_adapter(
 
 
 @router.post("/{trip_id}/recommendations", response_model=TripRecommendationResult, responses={
-    401: {"description": "Missing or invalid demo bearer token"},
+    401: {"description": "Missing, invalid or expired Supabase access token"},
     404: {"description": "Trip not found or belongs to another owner"},
     409: {"description": "Trip changed during inference; reload before retrying"},
     422: {"description": "Invalid options or unsupported saved preferences"},

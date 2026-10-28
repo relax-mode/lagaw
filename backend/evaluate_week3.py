@@ -69,6 +69,8 @@ def run_extraction_case(case):
     """Exercise real FastAPI/helper through an in-memory provider transport."""
     stub = case["stub"]
     environment = {
+        "TRIP_AUTH_MODE": "demo",
+        "SUPABASE_URL": "http://127.0.0.1:54321",
         "TRIP_DEMO_USER_ID": OWNER,
         "TRIP_DEMO_TOKEN": TOKEN,
         "DEEPSEEK_API_KEY": "dummy-week3-key-only",

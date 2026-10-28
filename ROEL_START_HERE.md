@@ -1,5 +1,13 @@
 # Roel and coding assistants: START HERE for #56
 
+## Authentication handoff (#79 / #80)
+
+The proposed [Supabase session and backend ownership contract](docs/authentication.md)
+supersedes demo-token setup below when #79 is released. Use verified access tokens
+for all calls; Flutter sessions/screens remain #80. Contract agreement and
+development/staging acceptance are pending. The #56 payload contract below remains
+unchanged.
+
 **The #54 backend is implemented, merged, deployed and verified. Andrew confirmed
 on October 29, 2026 that Roel agreed to this API contract.** This is the frontend
 handoff for [#56](https://github.com/relax-mode/lagaw/issues/56), including the

@@ -1,0 +1,82 @@
+{
+  "issue": 79,
+  "environment": "development",
+  "project_ref": "vnpkyvtbupnquvirzlzp",
+  "recorded_at_utc": "2026-10-28T17:06:26.198014+00:00",
+  "implementation_head": "1007440d946aac8175c67f3700366447e0163443",
+  "transport": "Local FastAPI ASGI TestClient; actual development Supabase Auth and Data API requests; no identity/database mocks",
+  "credentials": "Synthetic passwords and access tokens held in process memory only; no credential output or dotenv edit",
+  "confirmation": "Admin-created confirmed synthetic accounts; separate unconfirmed account password sign-in rejected; no emails sent",
+  "safe_auth_fixture_ids": [
+    "c7df8ffc-2348-40fe-abac-71ec602ddd3d",
+    "a452f87f-6045-4037-8556-046599cd097f",
+    "961d8c02-03eb-40ab-8314-dea8f2721f43"
+  ],
+  "safe_profile_fixture_ids": [
+    "d32daeda-2844-48b1-a499-5a81c51280fb",
+    "08479fc1-830f-43de-aaf2-ac7fdd7f20e7"
+  ],
+  "interaction_fixture_id": "a1dedfb4-1436-4aab-a01f-a2c9909cd9fd",
+  "checks": [
+    "Supabase password sign-in rejects unconfirmed email",
+    "Live Supabase email/password sign-in and access-token verification",
+    "Missing/invalid tokens return 401",
+    "Idempotent profile creation",
+    "Two-owner trip create/update; cross-user GET/PATCH/DELETE and item access return 404",
+    "Verifier exact trip cleanup and owner-visible trip preservation",
+    "Live verified interaction write/read with two-user history/recommendation isolation",
+    "Client-supplied trip owner rejected with 422",
+    "All five application tables exactly match pre-verification count/hash baseline after cleanup"
+  ],
+  "before": {
+    "users": {
+      "rows": 3,
+      "md5_all_columns": "ac94597892ecd67c78dd4bc09b73d7e0"
+    },
+    "locations": {
+      "rows": 10,
+      "md5_all_columns": "243bfb377b4c981abf11540c79d92584"
+    },
+    "trips": {
+      "rows": 7,
+      "md5_all_columns": "e193559ed6404c589444490cc0af152a"
+    },
+    "itinerary_items": {
+      "rows": 3,
+      "md5_all_columns": "eb5872d3b87ef7893691231d0ab2bae8"
+    },
+    "user_location_interactions": {
+      "rows": 0,
+      "md5_all_columns": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "after": {
+    "users": {
+      "rows": 3,
+      "md5_all_columns": "ac94597892ecd67c78dd4bc09b73d7e0"
+    },
+    "locations": {
+      "rows": 10,
+      "md5_all_columns": "243bfb377b4c981abf11540c79d92584"
+    },
+    "trips": {
+      "rows": 7,
+      "md5_all_columns": "e193559ed6404c589444490cc0af152a"
+    },
+    "itinerary_items": {
+      "rows": 3,
+      "md5_all_columns": "eb5872d3b87ef7893691231d0ab2bae8"
+    },
+    "user_location_interactions": {
+      "rows": 0,
+      "md5_all_columns": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "existing_data_equal": true,
+  "exact_fixture_cleanup": true,
+  "production_contacted": false,
+  "limitations": [
+    "Not a deployed staging/production acceptance run",
+    "Email delivery, Flutter flow and genuinely expired live session remain separate acceptance; expiry rejection covered offline"
+  ]
+}

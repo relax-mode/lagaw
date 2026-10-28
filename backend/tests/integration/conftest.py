@@ -108,6 +108,8 @@ def application(rest, users, monkeypatch):
 
     monkeypatch.setenv("TRIP_DEMO_USER_ID", users.owner)
     monkeypatch.setenv("TRIP_DEMO_TOKEN", DEMO_TOKEN)
+    monkeypatch.setenv("TRIP_AUTH_MODE", "demo")
+    monkeypatch.setenv("SUPABASE_URL", "http://127.0.0.1:54321")
     monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "")
     monkeypatch.setattr("dotenv.load_dotenv", lambda *args, **kwargs: None)
     monkeypatch.setattr(app.database, "load_dotenv", lambda *args, **kwargs: None)

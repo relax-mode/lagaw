@@ -1,0 +1,17 @@
+{
+  "issue": 79,
+  "environment": "staging",
+  "project_ref": "vnpkyvtbupnquvirzlzp",
+  "profile_id": "32e75bf5-a314-4e98-bc49-6a2ea7eb8173",
+  "configured_names": [
+    "SMOKE_AUTH_EMAIL",
+    "SMOKE_AUTH_PASSWORD",
+    "SMOKE_SUPABASE_KEY",
+    "SMOKE_PROFILE_ID"
+  ],
+  "private_credentials_included": false,
+  "production_changed": false,
+  "dotenv_changed": false,
+  "recorded_at_utc": "2026-10-28T17:41:47.571523+00:00",
+  "provenance": "Andrew-reported helper PASS; agent independently verified GitHub environment names only"
+}

@@ -1,0 +1,15 @@
+{
+  "issue": 79,
+  "purpose": "Temporary production promotion pause until staging verification and production prerequisites pass",
+  "recorded_at_utc": "2026-10-28T17:43:50.923420+00:00",
+  "environment": "production",
+  "required_reviewer": "aranxshx",
+  "previous_required_reviewers": [],
+  "previous_wait_timer": 0,
+  "deployment_branch_policy": {
+    "protected_branches": true,
+    "custom_branch_policies": false
+  },
+  "production_service_or_database_changed": false,
+  "restore_after_rollout": "Remove the temporary required reviewer, retaining the protected-branch policy and existing settings"
+}

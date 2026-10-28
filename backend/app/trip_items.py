@@ -12,9 +12,9 @@ from app.trip_item_schemas import TripItemCreate, TripItemResponse, TripItemsPag
 from app.trips import TripOwner, TripStore
 
 router = APIRouter(prefix="/api/v1/trips", tags=["trip items"], responses={
-    401: {"description": "Missing or invalid demo bearer token"},
+    401: {"description": "Missing, invalid or expired Supabase access token"},
     404: {"description": "Trip, location, or item not found in the permitted context"},
-    503: {"description": "Demo context or database unavailable"},
+    503: {"description": "Authentication or database unavailable"},
 })
 
 

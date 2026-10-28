@@ -1,5 +1,7 @@
 # Trip CRUD database tests — issue #29
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 These tests exercise FastAPI's real Trip routes, validation, demo-token
 authorization and `TripDatabase` through an HTTPX-backed TestClient. Database
 requests use real PostgREST and PostgreSQL; database responses are not mocked.

@@ -10,3 +10,18 @@ The pitch planned a Cloudflare Pages preview for every frontend pull request. Th
 
 A per-PR preview of the web app alone would still call the production API, or would need a backend per PR, which free Cloud Run quotas and the per-origin CORS policy make impractical. Pull requests remain fully checked by CI. Recorded by CyGray under [#58](https://github.com/relax-mode/lagaw/issues/58); report it at the next consultation.
 
+## 2026-10-29: Backend authentication rollout before Flutter sessions
+
+Andrew directed #79 to proceed independently so #80 and teammate follow-up can
+be handled afterward. Existing Flutter demo-token calls will receive 401 after
+backend cutover until #80 supplies Supabase access tokens. This is a temporary
+integration limitation; the final functional frontend requirement remains.
+
+For this authentication migration only, production promotion is paused by a
+required `aranxshx` reviewer on the existing production GitHub Environment.
+Staging still deploys through CI and uses development Supabase. Verify staging,
+prepare the production schema and its own smoke account/configuration, then
+approve promotion. Restore the previous reviewer setting after the rollout.
+The existing protected-branch restriction is retained. This changes release
+ordering; it does not reduce the reviewed-PR, CI or deployed-acceptance criteria.
+

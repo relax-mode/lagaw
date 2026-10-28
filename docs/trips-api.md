@@ -1,5 +1,7 @@
 # Trip create, list, and retrieve API — issue #23
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 Scope: `POST /api/v1/trips`, `GET /api/v1/trips`, and
 `GET /api/v1/trips/{trip_id}`. Update/delete, authentication integration,
 itinerary generation, Flutter integration, and expanded CRUD/integration testing

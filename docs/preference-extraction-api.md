@@ -1,5 +1,7 @@
 # Structured preference extraction API
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 `POST /api/v1/preferences/extract` turns a travel request into a validated draft
 for user confirmation. It reuses `app.deepseek.extract_preferences`, the existing
 strict provider schema, timeout/configuration checks and sanitized failures. It

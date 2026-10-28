@@ -1,4 +1,4 @@
-"""Persist swipes, saves and ratings using the existing controlled demo owner."""
+"""Persist swipes, saves and ratings using the verified owner profile."""
 
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -18,8 +18,8 @@ from app.recommendations.contracts import Interaction
 from app.trips import TripOwner, get_trip_user
 
 router = APIRouter(prefix="/api/v1/interactions", tags=["interactions"], responses={
-    401: {"description": "Missing or invalid demo bearer token"},
-    503: {"description": "Demo context or interaction database unavailable"},
+    401: {"description": "Missing, invalid or expired Supabase access token"},
+    503: {"description": "Authentication or interaction database unavailable"},
 })
 
 

@@ -1,5 +1,7 @@
 # Manual trip-itinerary location associations — issue #26
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 Scope: add, list and remove manual destination associations. Existing Trip CRUD,
 the controlled demo-user context, and the existing PostgreSQL tables/relationships
 remain the foundation. Recommendation ranking (#53), generated schedules and

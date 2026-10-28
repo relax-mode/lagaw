@@ -1,0 +1,63 @@
+{
+  "issue": 79,
+  "environment": "development",
+  "project_ref": "vnpkyvtbupnquvirzlzp",
+  "recorded_at_utc": "2026-10-28T17:02:22.846684+00:00",
+  "implementation_head": "1007440d946aac8175c67f3700366447e0163443",
+  "migration_version": "20261029090000",
+  "migration_source_sha256": "061522764fda5cea6d4182a1eac08a5dada23335ef5c45a5628cad1cc01a71d3",
+  "execution": "Agent, through existing guarded SQLAlchemy development connection; no credential output or dotenv edit",
+  "rollback_rehearsal": "passed; schema/history and existing rows restored",
+  "migration_application": "committed; same version/name as repository migration",
+  "before": {
+    "users": {
+      "rows": 3,
+      "md5_existing_rows": "4fc2a525d37c54a742a203698cdc75ad"
+    },
+    "locations": {
+      "rows": 10,
+      "md5_existing_rows": "243bfb377b4c981abf11540c79d92584"
+    },
+    "trips": {
+      "rows": 7,
+      "md5_existing_rows": "e193559ed6404c589444490cc0af152a"
+    },
+    "itinerary_items": {
+      "rows": 3,
+      "md5_existing_rows": "eb5872d3b87ef7893691231d0ab2bae8"
+    },
+    "user_location_interactions": {
+      "rows": 0,
+      "md5_existing_rows": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "after": {
+    "users": {
+      "rows": 3,
+      "md5_existing_rows": "4fc2a525d37c54a742a203698cdc75ad"
+    },
+    "locations": {
+      "rows": 10,
+      "md5_existing_rows": "243bfb377b4c981abf11540c79d92584"
+    },
+    "trips": {
+      "rows": 7,
+      "md5_existing_rows": "e193559ed6404c589444490cc0af152a"
+    },
+    "itinerary_items": {
+      "rows": 3,
+      "md5_existing_rows": "eb5872d3b87ef7893691231d0ab2bae8"
+    },
+    "user_location_interactions": {
+      "rows": 0,
+      "md5_existing_rows": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "existing_data_equal": true,
+  "existing_profiles_linked_to_auth": 0,
+  "production_contacted": false,
+  "limitations": [
+    "No Auth account or setting was changed",
+    "Two-account verified HTTP acceptance remains pending"
+  ]
+}

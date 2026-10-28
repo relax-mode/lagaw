@@ -1,5 +1,7 @@
 # Swipes, saves and ratings — issue #52
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 This API persists events in the existing `user_location_interactions` table via
 the backend's Supabase Data API connection. It reuses the existing `users` and
 `locations` foreign keys, RLS/service-role access model and controlled demo-user
