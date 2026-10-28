@@ -33,7 +33,7 @@ router = APIRouter(prefix="/api/v1/trips", tags=["itinerary generation"])
 
 
 @router.post("/{trip_id}/generate-itinerary", response_model=GenerationResult, responses={
-    401: {"description": "Missing or invalid demo bearer token"},
+    401: {"description": "Missing, invalid or expired Supabase access token"},
     404: {"description": "Trip not found or inaccessible"},
     409: {"description": "Replacement confirmation, concurrent edit or infeasible schedule; saved data preserved"},
     422: {"description": "Invalid options, saved preferences, transportation mode or trip length"},

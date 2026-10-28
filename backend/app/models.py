@@ -37,6 +37,8 @@ class User(Base):
         server_default=text("gen_random_uuid()"),
     )
     name: Mapped[str] = mapped_column(Text)
+    # Explicit identity link. Legacy/demo profiles stay unlinked until reviewed.
+    auth_user_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), unique=True)
     email: Mapped[str] = mapped_column(Text, unique=True)
     traveler_type: Mapped[str | None] = mapped_column(Text)
     preferred_tags: Mapped[list[str]] = mapped_column(

@@ -17,6 +17,7 @@ from verify_trip_items import VerificationFailed, insert, require, rows, validat
 def api_client(database, owner, engine):
     token = secrets.token_urlsafe(32)
     with patch.dict(os.environ, {
+        "TRIP_AUTH_MODE": "demo", "SUPABASE_URL": "http://127.0.0.1:54321",
         "TRIP_DEMO_USER_ID": str(owner), "TRIP_DEMO_TOKEN": token, "CORS_ALLOWED_ORIGINS": "",
     }), patch("dotenv.load_dotenv"):
         from app.main import create_app

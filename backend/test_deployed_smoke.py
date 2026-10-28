@@ -1,8 +1,9 @@
-"""Deployment checks must reject missing demo configuration and unsafe targets."""
+"""Deployment checks reject unsafe targets and use dedicated verified sessions."""
 
 import importlib.util
 import io
 import json
+import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -29,6 +30,27 @@ PRODUCTION_API = "https://lagaw-api-663710289405.asia-southeast1.run.app"
 
 
 class DeployedSmokeTests(unittest.TestCase):
+    def test_sign_in_is_bound_to_correct_auth_project(self):
+        with patch.dict(os.environ, {"SMOKE_AUTH_EMAIL": "synthetic@example.invalid",
+                                    "SMOKE_AUTH_PASSWORD": "synthetic-password-only",
+                                    "SMOKE_SUPABASE_KEY": "publishable-synthetic-only"}, clear=True), \
+                patch.object(smoke, "urlopen", return_value=response(200, {"access_token": TOKEN})) as opened:
+            self.assertEqual(smoke.sign_in(API, "staging"), TOKEN)
+        request = opened.call_args.args[0]
+        self.assertTrue(request.full_url.startswith(smoke.AUTH_URLS["staging"]))
+        self.assertEqual(request.get_method(), "POST")
+
+    def test_sign_in_refuses_environment_mismatch_before_credentials(self):
+        with patch.object(smoke, "urlopen") as opened, self.assertRaises(ValueError):
+            smoke.sign_in(PRODUCTION_API, "staging")
+        opened.assert_not_called()
+
+    def test_missing_smoke_account_never_sends_a_request(self):
+        with patch.dict(os.environ, {}, clear=True), \
+                patch.object(smoke, "urlopen") as opened, self.assertRaises(ValueError):
+            smoke.sign_in(API, "staging")
+        opened.assert_not_called()
+
     def test_refuses_production_before_network(self):
         with patch.object(smoke, "urlopen") as opened, self.assertRaises(ValueError):
             smoke.verify(PRODUCTION_API, TOKEN, OWNER)

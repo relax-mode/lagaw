@@ -49,6 +49,8 @@ def api(monkeypatch):
         patch.dict(
             os.environ,
             {
+                "SUPABASE_URL": "http://127.0.0.1:54321",
+                "TRIP_AUTH_MODE": "demo",
                 "TRIP_DEMO_USER_ID": OWNER,
                 "TRIP_DEMO_TOKEN": TOKEN,
                 "DEEPSEEK_API_KEY": "dummy-extraction-key-only",
@@ -305,7 +307,7 @@ def test_tag_vocabulary_matches_approved_catalog():
 def test_openapi_has_versioned_route_and_existing_security(api):
     schema = api[0].get("/openapi.json").json()
     operation = schema["paths"][BASE]["post"]
-    assert operation["security"] == [{"TripDemoToken": []}]
+    assert operation["security"] == [{"SupabaseAccessToken": []}]
     assert operation["responses"]["200"]["content"]["application/json"]["schema"][
         "$ref"
     ].endswith("ExtractionResponse")

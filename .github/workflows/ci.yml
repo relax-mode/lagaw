@@ -388,10 +388,14 @@ jobs:
           CORS: ${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
           TRIP_DEMO_USER_ID: ${{ vars.STAGING_TRIP_DEMO_USER_ID }}
           TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
+          SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
+          SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
+          SMOKE_SUPABASE_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
+          SMOKE_PROFILE_ID: ${{ vars.SMOKE_PROFILE_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS TRIP_DEMO_USER_ID TRIP_DEMO_TOKEN CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS TRIP_DEMO_USER_ID TRIP_DEMO_TOKEN SMOKE_AUTH_EMAIL SMOKE_AUTH_PASSWORD SMOKE_SUPABASE_KEY SMOKE_PROFILE_ID CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
             [ -n "${!v}" ] || { echo "::error::Staging deployment configuration is missing ($v)."; exit 1; }
           done
           echo "deploy=true" >> "$GITHUB_OUTPUT"
@@ -431,13 +435,12 @@ jobs:
           image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:staging-${{ github.sha }}
           env_vars: |
             CORS_ALLOWED_ORIGINS=${{ vars.STAGING_CORS_ALLOWED_ORIGINS }}
-            TRIP_DEMO_USER_ID=${{ vars.STAGING_TRIP_DEMO_USER_ID }}
+            TRIP_AUTH_MODE=supabase
             DEEPSEEK_MODEL=deepseek-flash
             DEEPSEEK_TIMEOUT_MS=20000
           secrets: |
             SUPABASE_URL=STAGING_SUPABASE_URL:2
             SUPABASE_SERVICE_ROLE_KEY=STAGING_SUPABASE_SERVICE_ROLE_KEY:2
-            TRIP_DEMO_TOKEN=STAGING_TRIP_DEMO_TOKEN:1
             DEEPSEEK_API_KEY=STAGING_DEEPSEEK_API_KEY:1
           flags: >-
             --allow-unauthenticated
@@ -465,8 +468,10 @@ jobs:
         if: steps.gate.outputs.deploy == 'true'
         env:
           SMOKE_API_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
-          SMOKE_TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
-          SMOKE_TRIP_DEMO_USER_ID: ${{ vars.STAGING_TRIP_DEMO_USER_ID }}
+          SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
+          SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
+          SMOKE_SUPABASE_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
+          SMOKE_PROFILE_ID: ${{ vars.SMOKE_PROFILE_ID }}
         run: python3 scripts/smoke_deployed.py staging
 
       - name: Set up Flutter
@@ -574,10 +579,12 @@ jobs:
           DEPLOYER: ${{ vars.GCP_DEPLOYER_SERVICE_ACCOUNT }}
           RUNTIME: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
           CORS: ${{ vars.CORS_ALLOWED_ORIGINS }}
-          TRIP_DEMO_USER_ID: ${{ vars.TRIP_DEMO_USER_ID }}
-          TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
+          SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
+          SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
+          SMOKE_SUPABASE_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
+          SMOKE_PROFILE_ID: ${{ vars.SMOKE_PROFILE_ID }}
         run: |
-          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS TRIP_DEMO_USER_ID TRIP_DEMO_TOKEN; do
+          for v in PROJECT REGION PROVIDER DEPLOYER RUNTIME CORS SMOKE_AUTH_EMAIL SMOKE_AUTH_PASSWORD SMOKE_SUPABASE_KEY SMOKE_PROFILE_ID; do
             [ -n "${!v}" ] || { echo "::error::Production deployment configuration is missing ($v)."; exit 1; }
           done
 
@@ -618,13 +625,12 @@ jobs:
           image: ${{ env.IMAGE }}:${{ github.sha }}
           env_vars: |
             CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS }}
-            TRIP_DEMO_USER_ID=${{ vars.TRIP_DEMO_USER_ID }}
+            TRIP_AUTH_MODE=supabase
             DEEPSEEK_MODEL=deepseek-flash
             DEEPSEEK_TIMEOUT_MS=20000
           secrets: |
             SUPABASE_URL=SUPABASE_URL:1
             SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:1
-            TRIP_DEMO_TOKEN=TRIP_DEMO_TOKEN:1
             DEEPSEEK_API_KEY=DEEPSEEK_API_KEY:1
           flags: >-
             --allow-unauthenticated
@@ -640,8 +646,10 @@ jobs:
       - name: Smoke test production API
         env:
           SMOKE_API_URL: ${{ steps.deploy.outputs.url }}
-          SMOKE_TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
-          SMOKE_TRIP_DEMO_USER_ID: ${{ vars.TRIP_DEMO_USER_ID }}
+          SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
+          SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
+          SMOKE_SUPABASE_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
+          SMOKE_PROFILE_ID: ${{ vars.SMOKE_PROFILE_ID }}
         run: |
           python3 scripts/smoke_deployed.py production
           echo "### Production API deployed and smoke-tested: $SMOKE_API_URL" >> "$GITHUB_STEP_SUMMARY"

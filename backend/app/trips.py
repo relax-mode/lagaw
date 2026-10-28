@@ -1,7 +1,5 @@
-"""Trip CRUD with an explicit, token-protected demo-user context."""
+"""Trip CRUD scoped to a server-verified owner's profile."""
 
-import os
-import secrets
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Annotated
@@ -12,39 +10,27 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import ValidationError
 
+from app.auth import authenticate, unauthorized
 from app.database import DatabaseUnavailable, get_database
 from app.trip_database import TripDatabase, TripUpdateConflict
 from app.trip_schemas import TripCreate, TripResponse, TripsPage, TripUpdate
 
-demo_bearer = HTTPBearer(auto_error=False, scheme_name="TripDemoToken")
+access_bearer = HTTPBearer(auto_error=False, scheme_name="SupabaseAccessToken")
 router = APIRouter(prefix="/api/v1/trips", tags=["trips"], responses={
-    401: {"description": "Missing or invalid demo bearer token"},
-    503: {"description": "Demo context or database unavailable"},
+    401: {"description": "Missing, invalid or expired access token"},
+    403: {"description": "Email confirmation required"},
+    409: {"description": "Existing profile needs an explicit linking decision"},
+    503: {"description": "Authentication, profile or database unavailable"},
 })
 
 
 def get_trip_user(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(demo_bearer)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(access_bearer)],
 ) -> UUID:
-    """Only server configuration selects the demo owner; clients cannot select users."""
-    token = os.environ.get("TRIP_DEMO_TOKEN", "")
-    try:
-        user_id = UUID(os.environ.get("TRIP_DEMO_USER_ID", ""))
-        if (
-            len(token) < 32 or not token.isascii()
-            or any(character.isspace() for character in token) or user_id.int == 0
-        ):
-            raise ValueError
-    except ValueError:
-        raise HTTPException(503, "Trip demo context is not configured.") from None
-    if credentials is None or not secrets.compare_digest(
-        credentials.credentials.encode("utf-8"), token.encode("ascii")
-    ):
-        raise HTTPException(
-            401, "A valid trip demo bearer token is required.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user_id
+    """Clients supply an access token, never a trusted owner ID."""
+    if credentials is None:
+        raise unauthorized()
+    return authenticate(credentials.credentials)
 
 
 def get_trip_database(
@@ -65,7 +51,7 @@ TripStore = Annotated[TripDatabase, Depends(get_trip_database)]
 
 @router.post("", response_model=TripResponse, status_code=201)
 def create_trip(payload: TripCreate, user_id: TripOwner, database: TripStore):
-    """Save a draft trip for the configured demo user. No itinerary is generated."""
+    """Save a draft trip for the verified owner. No itinerary is generated."""
     return database.create_trip(user_id, payload)
 
 

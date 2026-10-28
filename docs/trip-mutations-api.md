@@ -1,5 +1,7 @@
 # Trip partial update and deletion — issue #24
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 Scope: `PATCH /api/v1/trips/{trip_id}` and `DELETE /api/v1/trips/{trip_id}`.
 Both reuse the [existing controlled demo context](trips-api.md), database client,
 and schema. No migration is needed. Authentication integration, itinerary

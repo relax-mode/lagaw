@@ -75,6 +75,9 @@ and CI evidence: [Trip integration tests](docs/trip-integration-tests.md).
 Trip create/list/retrieve API, controlled demo-user setup, and development-first
 verification: [trip API guide](docs/trips-api.md).
 
+Verified Supabase identities, backend ownership, the #80 session handoff and
+development-first release checks: [authentication contract (#79)](docs/authentication.md).
+
 Trip partial updates, deletion, and development-first cascade verification:
 [trip update/delete guide](docs/trip-mutations-api.md).
 

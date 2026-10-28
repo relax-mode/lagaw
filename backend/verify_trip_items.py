@@ -70,6 +70,8 @@ def api_client(database, owner, token):
     # Exercise the real bearer dependency; only the database provider is replaced.
     # No application import is permitted to load/change local configuration here.
     with patch.dict(os.environ, {
+        "SUPABASE_URL": "http://127.0.0.1:54321",
+        "TRIP_AUTH_MODE": "demo",
         "TRIP_DEMO_USER_ID": str(owner), "TRIP_DEMO_TOKEN": token,
         "CORS_ALLOWED_ORIGINS": "",
     }), patch("dotenv.load_dotenv"):

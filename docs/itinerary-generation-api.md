@@ -1,5 +1,7 @@
 # Constraint-aware itinerary generation — issue #54
 
+> **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
+
 `POST /api/v1/trips/{trip_id}/generate-itinerary` schedules validated #53
 recommendations and saves them through the existing `trips → itinerary_items →
 locations` relationship. It uses the existing server-selected demo owner and

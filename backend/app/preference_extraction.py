@@ -80,7 +80,7 @@ router = APIRouter(
     prefix="/api/v1/preferences",
     tags=["preferences"],
     responses={
-        401: {"description": "Missing or invalid existing demo bearer token"},
+        401: {"description": "Missing, invalid or expired Supabase access token"},
         422: {"description": "Invalid request; provider not called"},
         429: {"description": "Extraction rate limited; use the manual trip form"},
         502: {"description": "Invalid extraction output or provider request failure"},
