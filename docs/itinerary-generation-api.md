@@ -6,9 +6,10 @@ locations` relationship. It uses the existing server-selected demo owner and
 bearer authorization. Missing and other-owner trips both return 404. This shares
 the controlled demo context's limitations; it does not introduce individual login.
 
-**Frontend handoff:** this is the concrete proposed contract for Roel's review.
-Andrew has not reported agreement with Roel; that coordination checkbox remains
-open. No Flutter changes are included. Existing #53 canonical tag/group validation
+**Frontend handoff:** Andrew confirmed on October 29, 2026 that Roel agreed to this
+contract. Roel and his coding assistant should start with
+[ROEL_START_HERE.md](../ROEL_START_HERE.md) for the exact API calls, confirmation,
+error and reload flow. No Flutter changes are included. Existing #53 canonical tag/group validation
 still applies. Flutter currently offers some additional tags and `students` as a
 group; those cannot be passed to recommendation/generation as approved preferences.
 That existing mismatch is flagged here for the handoff, not expanded into #54 work.

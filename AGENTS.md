@@ -13,6 +13,12 @@ Read them before planning or changing anything. If code, comments, or other docs
 
 ## Codebase traversal (mandatory)
 
+For Roel's #56 Flutter recommendation/generation integration, first read
+[`ROEL_START_HERE.md`](ROEL_START_HERE.md). It documents the agreed #54 API,
+replacement confirmation, response parsing and saved-plan reload flow. Keep the
+approved pitch/course instructions above as ground truth and keep #56 frontend
+implementation separate from #54 backend/evidence work.
+
 This repository is indexed with CodeGraph. Use these tools, in this order:
 
 1. **CodeGraph for anything structural** — how something works, what calls what, dependencies, imports, blast radius. Prefer the CodeGraph MCP tool (`codegraph_explore`); without MCP, use the CLI (`codegraph explore`, `codegraph callers`, `codegraph impact`). Treat returned source as already read; don't re-verify it with search.

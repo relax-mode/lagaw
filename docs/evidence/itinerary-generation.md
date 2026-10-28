@@ -1,70 +1,67 @@
-# Issue #54 verification evidence
+# Issue #54 — itinerary generation verification
 
-Implementation: [PR #89](https://github.com/relax-mode/lagaw/pull/89), branch
-`feat/s3-09-itinerary-generation`, based on main `af5d580`. Tested code: `2228f96`.
-Only #54 backend/planner/database tests, migration and associated documentation
-are in scope. Private `.env` is unchanged and has not been displayed. Untracked
-root `test-results/` is preserved. No production request or write has been made.
+Backend implementation, deployment, acceptance and cleanup are complete. Andrew
+confirmed on October 29, 2026 that Roel agreed to the API contract. The prominent
+[Roel/coding-assistant handoff](../../ROEL_START_HERE.md), linked from the README
+and AGENTS.md, documents how to use the APIs and the complete frontend flow.
+Final evidence/handoff PR #90 still needs normal review/merge; Flutter #56 remains
+separate implementation work.
 
-## Observed locally — October 28, 2026
+Only #54 backend/planner/database work and its documentation were changed. The
+private `.env` and Supabase CLI development linkage are unchanged. Root untracked
+`test-results/` was preserved. Production credentials were never displayed or
+read by the agent; Andrew performed the reported production SQL/Swagger/Cloud
+Shell steps privately.
 
-- Final full local offline suite: **560 passed**, 102 database tests deselected,
-  18.55 seconds; subsequent cost-serialization change passed all 50 relevant
-  API/association tests locally and the complete suite in CI.
-- Ruff clean.
-- Week 3 evaluation: 27/27 extraction cases, 84/84 fields, 10/10 content cases;
-  baseline comparison reports no regression (including hybrid metrics).
-- Planner tests cover hours/closures/split intervals, missing facts, exact closing
-  boundaries, insufficient time/budget, party cost, travel/origin, pace and sorted
-  multi-day first-fit scheduling. API tests cover confirmation, malformed output,
-  validation/auth and persistence error mapping.
+## Implementation, review and deployment
 
-## Isolated PostgreSQL/PostgREST CI — passed
+- [Implementation PR #89](https://github.com/relax-mode/lagaw/pull/89), approved by
+  CyGray on head `92536e7`, merged October 28, 2026 at 14:39:27 UTC as
+  `e2f830c40f43180791671fca1c51e36629b47188`.
+- [Main CI/deployment run 40708112116](https://github.com/relax-mode/lagaw/actions/runs/40708112116)
+  passed Backend, Database and Flutter, deployed staging and then promoted the
+  same image to production. Production web correctly skipped for this backend change.
+- [API contract and assumptions](../itinerary-generation-api.md): bounded ranked
+  first-fit ordering, Asia/Manila dates/times, known operating hours/durations,
+  documented travel/pace estimates, party budget, explicit replacement confirmation
+  and atomic persistence using the existing schema.
+- Migration `20261028130000_atomic_itinerary_generation` passed isolation and
+  development before production. Development DDL/history registration committed
+  together, and CLI migration list confirmed all versions aligned. Andrew's guarded
+  production SQL returned migration/history/backend-privilege/trigger PASS before merge.
 
-[Run 40685456574](https://github.com/relax-mode/lagaw/actions/runs/40685456574)
-passed at code commit `2228f96`:
+## Automated checks
 
-- Backend: **560 passed**, 102 database tests deselected, 10.95 seconds, Ruff clean,
-  extraction 27/27, fields 84/84, content 10/10, unchanged baseline/hybrid metrics.
-- Database: PostgreSQL 17 migrations, SQL smoke/client-role/server-role checks,
-  ORM relationships and the existing association verifier all passed.
-- Downloaded and independently parsed
-  [JUnit artifact 12815085483](https://github.com/relax-mode/lagaw/actions/runs/40685456574/artifacts/12815085483):
-  **102 tests, zero failures/errors/skips, 4.419 seconds**.
-- New real API persistence/confirmation/manual-edit test: 0.286 seconds.
-- Forced failure on the second replacement insert rolls back original deletion,
-  any new rows and the trip total: 0.020 seconds.
-- Overlap, closed hours, budget overflow, changed catalog, new owner rejection,
-  stale revision and foreign-owner replacement all preserve the saved state.
-- RPC execution denied to client roles; service-role access verified.
-- Two concurrent replacements using the same confirmed revision produce exactly
-  one complete winner: 0.033 seconds; final database state equals that response.
-- [AI evaluation artifact 12815160069](https://github.com/relax-mode/lagaw/actions/runs/40685456574/artifacts/12815160069)
-  is attached to the same successful run.
+| Check | Observed result |
+| --- | --- |
+| Offline regression suite | 560 passed; Ruff clean |
+| Week 3 evaluation | 27/27 extraction cases, 84/84 fields, 10/10 content cases; no baseline/hybrid metric regression |
+| Isolated PostgreSQL 17/PostgREST | 102 tests; zero failures, errors or skips |
+| Existing schema/role/ORM/association checks | Passed |
+| Forced failure on second replacement insert | Original deletion, new rows and trip estimate all roll back |
+| Concurrent confirmed replacements | Exactly one complete winner; final saved state equals its response |
+| Stale/catalog/rejection/overlap/closed/budget/foreign replacements | Rejected with saved state preserved |
+| Production-refusal and exact-cleanup verifier checks | Passed |
 
-Earlier isolated runs caught and resolved an existing-FK error compatibility
-regression in the locking trigger and inconsistent decimal formatting between
-JSONB RPC and item-list responses. These were corrected before hosted migration.
-Frontend and deployment correctly skipped for this backend PR. CI is isolated;
-these results do not establish hosted deployment.
+Independently downloaded and parsed:
 
-## Development Supabase — passed after isolation
+- [PR JUnit artifact 12815085483](https://github.com/relax-mode/lagaw/actions/runs/40685456574/artifacts/12815085483),
+  tested code `2228f96`: 102 tests, zero failures/errors/skips, 4.419 seconds.
+- [Main JUnit artifact 12823649025](https://github.com/relax-mode/lagaw/actions/runs/40708112116/artifacts/12823649025):
+  102 tests, zero failures/errors/skips, 4.865 seconds; new persistence test 0.392s,
+  forced rollback 0.022s, simultaneous confirmation 0.037s.
+- [Main evaluation artifact 12824252773](https://github.com/relax-mode/lagaw/actions/runs/40708112116/artifacts/12824252773).
 
-Target: **`vnpkyvtbupnquvirzlzp`**, independently checked through both the Data API
-guard and the existing SQLAlchemy development-target guard. Production was refused
-by the offline verifier safety test. Neither `.env` nor CLI linkage was changed.
+The first isolated runs caught an FK-error compatibility regression and inconsistent
+cost formatting between RPC and item reads. Both were fixed before hosted migration.
+No workflow, new paid dependency, new table or environment setting was introduced.
 
-Applied only migration `20261028130000_atomic_itinerary_generation` using the
-existing private SQL connection after checking the exact two preceding migration
-versions. DDL and `supabase_migrations.schema_migrations` registration committed
-in one guarded transaction. A subsequent SQL comparison confirms the registered
-statements equal the tested migration file exactly. Supabase CLI
-`migration list --linked` independently reports all three local/remote versions
-aligned. No existing catalog/trip/user records were edited for setup.
+## Development verification before production
 
-Ran `backend/verify_itinerary_generation.py` successfully. It used its own temporary
-process-only owner/token and deterministic ranked fixtures through the real #53
-adapter and PostgreSQL API, never DeepSeek. Observed:
+The guarded `backend/verify_itinerary_generation.py` passed against development
+`vnpkyvtbupnquvirzlzp` after isolation. Its temporary process-only demo credential
+was never displayed. It exercises real saved trips/catalog and the #53 validation
+adapter using deterministic ranked fixtures, without DeepSeek. All four PASS groups:
 
 ```text
 PASS: Real ordered multi-day generation, party total, times, score/reason and association reload.
@@ -73,43 +70,128 @@ PASS: Fresh application persistence, manual removal/addition, estimate invalidat
 PASS: Exact #54 fixture cleanup and independent absence checks.
 ```
 
-The synthetic two-person trip on November 2–3 schedules one 09:00–10:00 visit on
-each known-open day. Total PHP 80.00, persisted scores 0.9/0.8 and nonblank reasons
-reload through GET items. Missing/foreign-owner trips return 404, unauthenticated
-generation returns 401, ordinary repetition requires confirmation, stale/replayed
-revisions conflict, and confirmed replacement succeeds. Closed-afternoon, empty
-and malformed-model attempts preserve original trip/items exactly. A new app/client
-reload succeeds; manual remove/add clears the complete-plan estimate and preserves
-the other item and both locations.
+The initial verifier's two synthetic users, two trips, two venues and related rows
+were removed. A separate guarded SQL connection independently checked their exact
+absence and that migration history matched the tested file. Their manifest remains
+in the sprint history; later deployed acceptance used separate fixtures below.
 
-Exact disposable fixture manifest (all removed):
+## Deployed acceptance
 
-| Type | UUID |
-| --- | --- |
-| Owner | `14b3b779-882f-424a-8aa4-8e48a3c6f330` |
-| Other owner | `ae36f707-d869-4885-892b-434d24654810` |
-| Trip | `ab3ab81c-df34-4470-9096-7fe02abcebba` |
-| Other-owner trip | `14f9b574-697a-4465-86d4-266aa7631052` |
-| Monday venue | `2a0642f2-b865-4deb-9fad-23a125d06a3d` |
-| Tuesday venue | `e4b419b5-6149-4908-af67-50c09666d32a` |
+Full safe requests, responses, baselines and cleanup manifests:
+[staging JSON](itinerary-generation-staging.json) and
+[production JSON](itinerary-generation-production.json).
 
-After the verifier's exact HTTP cleanup, a separate direct development SQL
-connection independently confirmed all six IDs and their itinerary items are
-absent. The migration/functions/trigger remain intentionally installed. No
-production call/write, shared demo fixture modification or environment-file edit
-was made. This local FastAPI-to-development check is **not deployed staging**.
+| Environment | Database | Exact synthetic trip |
+| --- | --- | --- |
+| Staging | `vnpkyvtbupnquvirzlzp` | `03b7f114-9b91-4985-9bf5-3efdb3a54d76` |
+| Production | `zjnuqqtbapbpudsjbpif` | `5b4497d1-a946-4845-bed5-441fbb563180` |
 
-## Pending — do not infer completion
+Each environment used three newly created, clearly marked synthetic venues with
+explicit weekly hours, a new trip for its existing separate demo owner, and dates
+November 2–3. Shared users/catalog/trips were preserved. For two travelers and three
+morning/moderate visits, both deployed APIs returned:
 
-- Roel's agreement on the documented API/confirmation contract (Andrew reports no
-  confirmed prior agreement).
-- Teammate review and merge; actual staging and production deployments.
-- Production migration coordinated after review/development verification and before
-  merging/deploying the new endpoint; preserve the existing local `.env`.
-- Authenticated staging/development-before-production acceptance and independent SQL.
-- Persistence across an actual hosted redeployment, then exact fixture cleanup.
-- Final issue-linked evidence and closure after the Definition of Done is satisfied.
+| Day/order | Arrival–departure | Incoming travel | Party item cost |
+| --- | --- | --- | --- |
+| 1/1 | 09:00–09:30 | 0 minutes | PHP 20.00 |
+| 1/2 | 09:53–10:23 | 8 minutes, after a 15-minute pace break | PHP 40.00 |
+| 2/1 | 09:00–10:00 | 0 minutes, new-day venue start | PHP 60.00 |
 
-The [API guide](../itinerary-generation-api.md) gives the safe release/verification
-sequence. Local mock results do not establish atomic PostgreSQL persistence or
-hosted deployment. Keep #54 open until those gates are complete.
+Total **PHP 120.00**, within saved PHP 180 budget. All visits fit the fixture's
+actual saved hours/day, meet visit duration and avoid overlap. Scores
+`0.9333333333333332`, `0.8666666666666667`, `0.7999999999999999` and nonblank reasons
+persisted and reloaded exactly. Every returned location field independently matched
+the relevant public catalog or guarded development database record.
+
+Verified in staging before repeating production acceptance:
+
+- HTTP 200 complete generation linked to real trip/location database rows.
+- HTTP 409 ordinary repeat requires explicit confirmation and reports the saved revision.
+- HTTP 409 explicitly confirmed afternoon replacement schedules zero visits because
+  all three selected venues are morning-only; the original plan is preserved.
+- HTTP 200 item reload after browser refresh retains every original item and field.
+- Staging additionally exercised deployed manual add (201), exact manual remove
+  (204), invalidated complete-plan estimate and confirmed regeneration (200) restoring
+  a valid schedule/total with new IDs. These paths also passed isolated/live development tests.
+- Both deployed endpoints reject missing credentials with 401 and correct CORS.
+- Production's complete read-only SQL state agrees with its API responses after
+  generation/conflicts/refresh, including owner, dates, budgets, preferences, total and revision.
+
+## Persistence through actual later deployments
+
+Andrew used Cloud Shell to redeploy each currently serving immutable image digest
+with its existing service configuration and a new revision suffix. Staging was
+completed and checked before production. No environment/secret flags or local
+`.env` edits were used. These are explicit #54 persistence deployments, following
+the normal reviewed merge/CI deployment above.
+
+| Environment | Before revision | New revision, ready and 100% traffic | Retained itinerary revision |
+| --- | --- | --- | --- |
+| Staging | `lagaw-api-staging-00022-pk2` | `lagaw-api-staging-issue54-persist` | `710c2399e657678caae1bf63cd82b5bc` |
+| Production | `lagaw-api-00012-z6p` | `lagaw-api-issue54-persist` | `c906b3caf89e3fa668ba434c8c7f3df4` |
+
+After each actual new revision, authenticated GET items retained every pre-deployment
+item ID, nested location, schedule, travel/cost, score and reason. Guarded development
+reads independently confirmed complete staging state/total/revision equality.
+Andrew's complete production SQL response after redeployment was parsed and compared:
+all trip/items/locations, revision and PHP 120.00 total equal its pre-deployment baseline.
+Both original and canonical Cloud Run URLs independently retained generation OpenAPI;
+original URLs retained the expected 401 and exact environment CORS.
+
+Evidence provenance: authenticated Swagger responses, production SQL and Cloud Shell
+revision/traffic metadata were supplied by Andrew. The agent independently checked
+GitHub review/merge/CI/artifacts, guarded development SQL/Data API state, public
+catalog/OpenAPI/CORS and parsed comparisons. No direct agent protected production
+DB or Cloud Run Admin API query is claimed.
+
+## Exact cleanup — complete
+
+Single-use completed SQL records: [staging cleanup](itinerary-generation-staging-cleanup.sql)
+and [production cleanup](itinerary-generation-production-cleanup.sql). Both compare
+the complete verified saved state and guard exact UUIDs, acquired outside references,
+row counts and unchanged existing demo profile before committing.
+
+- Development cleanup ran first as a rollback rehearsal, restoring the exact state,
+  then committed. A separate guarded SQL session verified the exact trip/items/venues
+  absent, demo profile unchanged, migration and generation function retained.
+- Andrew supplied production SQL PASS: one exact trip, three itinerary items and
+  three synthetic locations removed; existing demo profile preserved.
+- Independent public production catalog reads confirm all three production fixture
+  IDs absent. Final guarded development reads confirm its fixtures absent, production
+  fixture IDs absent there, and existing staging demo profile retained.
+- SQL/API evidence and manifests remain in these docs. Test records are removed;
+  migrations, functions, existing demo users and other application data remain.
+
+Current catalog limitation: after cleanup, the public production catalog has ten
+active destinations, eight without supplied opening hours. Unknown hours deliberately
+fail closed. Acceptance used explicit temporary fixture hours; no real venue hours
+were invented or shared catalog facts edited for this issue.
+
+## Agreed frontend handoff and final publication
+
+On October 28, checked Roel's assigned [issue #56](https://github.com/relax-mode/lagaw/issues/56),
+PR #89 discussion/reviews and his published frontend PRs/branches. #56 remains open
+with no comments. His latest merged [PR #87](https://github.com/relax-mode/lagaw/pull/87)
+is the manual #34 itinerary UI. Current Flutter `TripService` has manual item
+methods but no generation call; `TripItem` does not parse arrival/departure,
+travel/cost or score/reason fields. No published #56 implementation or explicit
+Roel contract acknowledgment was found at that time. Andrew subsequently confirmed
+on October 29 that Roel agreed. This is recorded as Andrew's report of agreement,
+without claiming the #56 Flutter implementation is already complete.
+
+[ROEL_START_HERE.md](../../ROEL_START_HERE.md) is linked prominently from the root
+README and AGENTS.md for Roel and his coding assistant. It contains environment
+links, exact preview/generation bodies, the replacement state machine, field parsing,
+object-shaped 409 handling, reload/manual flows, current catalog/enum limitations
+and #56 verification guidance. It reuses the deployed backend and preserves `.env`.
+
+Backend technical acceptance and the contract coordination task are complete.
+Flutter implementation remains his separate #56 scope. This final documentation/
+handoff update follows the normal teammate-reviewed PR/CI/merge workflow in
+[PR #90](https://github.com/relax-mode/lagaw/pull/90). Its
+[documentation CI run 40721526465](https://github.com/relax-mode/lagaw/actions/runs/40721526465)
+passed changed-area detection; app/database/Flutter checks and deployments correctly
+skipped because the PR changes only these evidence/docs files. The actual application
+checks and archived artifacts are linked above. Updated #54's completed technical
+and coordination checklists and evidence/handoff links. The issue remains open
+until the final evidence/handoff PR is reviewed and merged.
