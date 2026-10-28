@@ -233,10 +233,35 @@ as documented after manual editing; other trip fields are unchanged. The current
 revision is `668270157b649de9dce86d2c042b365c`, distinct from both the initial saved
 plan and the four-item manually edited state.
 
-Next staging check: confirmed morning regeneration using that current revision
-to restore a complete validated schedule/estimate. Exact fixture records remain
-retained for actual redeployment persistence. No new production acceptance request
-has run.
+Andrew supplied confirmed morning regeneration's staging **HTTP 200**: revision
+`710c2399e657678caae1bf63cd82b5bc`, total PHP 120.00, new item IDs
+`7b99d4e1-853f-41db-8c26-6ff660ac89b9`,
+`f7c0a84f-0e17-4f47-b86c-bcfe463f84fc`, and
+`582e663d-052a-45db-88ab-beee1d905084`. All location/order/time/travel/cost and
+score/reason fields match the original valid plan. The response validates against
+the generation schema. Independent guarded development reads match every new saved
+item and revision, confirm all three old generated IDs plus the removed manual ID
+are absent, and confirm the original trip/total is restored exactly. This proves
+the successful confirmed-replacement path after manual editing.
+
+Staging functional acceptance now covers generation, repeat confirmation,
+infeasible replacement preservation, browser-refresh reload, manual add/remove
+and successful confirmed regeneration. The exact regenerated state is retained
+in staging JSON as the **actual redeployment baseline**; that later-deployment
+check and exact fixture cleanup are still pending.
+
+After these staging checks, independently confirmed production OpenAPI contains
+the generation route and unauthenticated POST returns 401 with exact production
+CORS. Prepared only a separate production fixture manifest in
+[production evidence](itinerary-generation-production.json) and a local ignored
+`backend/test-results/issue54-production-fixtures.sql`: three new marked synthetic
+venues and trip `5b4497d1-a946-4845-bed5-441fbb563180`, owned by the existing
+separate production demo profile. The SQL guards migration/profile presence and
+exact-ID absence, creates records transactionally, and returns an exact cleanup
+manifest. Andrew must select production project `zjnuqqtbapbpudsjbpif` in SQL
+Editor; there is no reliable project-ID assertion inside this SQL. Production
+setup execution and authenticated acceptance have not yet been reported. No
+production write or credential access was performed by the agent.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).

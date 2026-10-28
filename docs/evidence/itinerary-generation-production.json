@@ -1,0 +1,82 @@
+{
+  "issue": 54,
+  "environment": "production",
+  "database_project": "zjnuqqtbapbpudsjbpif",
+  "owner_id": "23000000-0000-4000-8000-000000000001",
+  "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+  "locations": [
+    {
+      "id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+      "name": "Issue 54 SYNTHETIC production Monday A",
+      "latitude": 10.67,
+      "longitude": 122.95,
+      "hours": {
+        "monday": [
+          {
+            "open": "09:00",
+            "close": "12:00"
+          }
+        ]
+      },
+      "cost": 10,
+      "duration": 30
+    },
+    {
+      "id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+      "name": "Issue 54 SYNTHETIC production Monday B",
+      "latitude": 10.671,
+      "longitude": 122.95,
+      "hours": {
+        "monday": [
+          {
+            "open": "09:00",
+            "close": "12:00"
+          }
+        ]
+      },
+      "cost": 20,
+      "duration": 30
+    },
+    {
+      "id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+      "name": "Issue 54 SYNTHETIC production Tuesday",
+      "latitude": 10.672,
+      "longitude": 122.95,
+      "hours": {
+        "tuesday": [
+          {
+            "open": "09:00",
+            "close": "12:00"
+          }
+        ]
+      },
+      "cost": 30,
+      "duration": 60
+    }
+  ],
+  "expected_total": "120.00",
+  "setup_status": "prepared; awaiting developer production SQL Editor execution",
+  "merge_commit": "e2f830c40f43180791671fca1c51e36629b47188",
+  "main_ci_run": "https://github.com/relax-mode/lagaw/actions/runs/40708112116",
+  "responses": [],
+  "generation_request": {
+    "recommendations": {
+      "party_size": 2,
+      "planned_visits": 3,
+      "limit": 100
+    },
+    "duration": "morning",
+    "pace": "moderate",
+    "replace_existing": false
+  },
+  "api_origin": "https://lagaw-api-i5kvldluga-as.a.run.app",
+  "public_checks": {
+    "openapi_status": 200,
+    "generation_route_present": true,
+    "unauthorized_status": 401,
+    "unauthorized_response": {
+      "detail": "A valid trip demo bearer token is required."
+    },
+    "cors_origin": "https://lagaw.pages.dev"
+  }
+}

@@ -474,6 +474,161 @@
         "complete_plan_estimate_remains_invalidated": true,
         "all_three_fixture_locations_preserved": true
       }
+    },
+    {
+      "check": "confirmed_complete_regeneration_after_manual_edits",
+      "source": "developer-reported authenticated staging Swagger",
+      "http_status": 200,
+      "request": {
+        "recommendations": {
+          "party_size": 2,
+          "planned_visits": 3,
+          "limit": 100
+        },
+        "duration": "morning",
+        "pace": "moderate",
+        "replace_existing": true,
+        "expected_revision": "668270157b649de9dce86d2c042b365c"
+      },
+      "response": {
+        "schema_version": "1",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "timezone": "Asia/Manila",
+        "estimated_total_cost": "120.00",
+        "revision": "710c2399e657678caae1bf63cd82b5bc",
+        "items": [
+          {
+            "location_id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+            "day_number": 1,
+            "visit_order": 1,
+            "id": "7b99d4e1-853f-41db-8c26-6ff660ac89b9",
+            "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+            "location": {
+              "id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+              "name": "Issue 54 SYNTHETIC staging Monday A",
+              "description": "Synthetic issue54 acceptance fixture; not a real destination",
+              "category": "cafe",
+              "vibe_tags": [
+                "cafe"
+              ],
+              "address": null,
+              "latitude": 10.67,
+              "longitude": 122.95,
+              "opening_hours": {
+                "monday": [
+                  {
+                    "open": "09:00",
+                    "close": "12:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 10,
+              "estimated_cost_max": 10,
+              "typical_visit_duration": 30,
+              "suitable_group_types": [
+                "friends"
+              ],
+              "image_url": null,
+              "is_active": true
+            },
+            "arrival_time": "09:00:00",
+            "departure_time": "09:30:00",
+            "estimated_travel_time": 0,
+            "estimated_cost": "20.00",
+            "recommendation_score": 0.9333333333333332,
+            "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.67; group: friends; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+            "day_number": 1,
+            "visit_order": 2,
+            "id": "f7c0a84f-0e17-4f47-b86c-bcfe463f84fc",
+            "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+            "location": {
+              "id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+              "name": "Issue 54 SYNTHETIC staging Monday B",
+              "description": "Synthetic issue54 acceptance fixture; not a real destination",
+              "category": "cafe",
+              "vibe_tags": [
+                "cafe"
+              ],
+              "address": null,
+              "latitude": 10.671,
+              "longitude": 122.95,
+              "opening_hours": {
+                "monday": [
+                  {
+                    "open": "09:00",
+                    "close": "12:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 20,
+              "estimated_cost_max": 20,
+              "typical_visit_duration": 30,
+              "suitable_group_types": [
+                "friends"
+              ],
+              "image_url": null,
+              "is_active": true
+            },
+            "arrival_time": "09:53:00",
+            "departure_time": "10:23:00",
+            "estimated_travel_time": 8,
+            "estimated_cost": "40.00",
+            "recommendation_score": 0.8666666666666667,
+            "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.33; group: friends; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+            "day_number": 2,
+            "visit_order": 1,
+            "id": "582e663d-052a-45db-88ab-beee1d905084",
+            "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+            "location": {
+              "id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+              "name": "Issue 54 SYNTHETIC staging Tuesday",
+              "description": "Synthetic issue54 acceptance fixture; not a real destination",
+              "category": "cafe",
+              "vibe_tags": [
+                "cafe"
+              ],
+              "address": null,
+              "latitude": 10.672,
+              "longitude": 122.95,
+              "opening_hours": {
+                "tuesday": [
+                  {
+                    "open": "09:00",
+                    "close": "12:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 30,
+              "estimated_cost_max": 30,
+              "typical_visit_duration": 60,
+              "suitable_group_types": [
+                "friends"
+              ],
+              "image_url": null,
+              "is_active": true
+            },
+            "arrival_time": "09:00:00",
+            "departure_time": "10:00:00",
+            "estimated_travel_time": 0,
+            "estimated_cost": "60.00",
+            "recommendation_score": 0.7999999999999999,
+            "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
+          }
+        ]
+      },
+      "independent_checks": {
+        "all_new_item_fields_match": true,
+        "old_and_manual_item_ids_absent": true,
+        "trip_total_restored": true,
+        "other_trip_fields_preserved": true,
+        "scores_and_reasons_persisted": true
+      }
     }
   ],
   "generation_request": {
@@ -1300,5 +1455,300 @@
     "pace": "moderate",
     "replace_existing": true,
     "expected_revision": "668270157b649de9dce86d2c042b365c"
-  }
+  },
+  "after_confirmed_regeneration": {
+    "trip": {
+      "title": "Issue 54 SYNTHETIC staging acceptance",
+      "start_date": "2026-11-02",
+      "end_date": "2026-11-03",
+      "budget_min": "0.0",
+      "budget_max": "180.0",
+      "transportation_mode": "walking",
+      "group_type": "friends",
+      "preferred_tags": [
+        "cafe"
+      ],
+      "id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+      "user_id": "16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c",
+      "status": "draft",
+      "estimated_total_cost": "120.0"
+    },
+    "revision": "710c2399e657678caae1bf63cd82b5bc",
+    "items": [
+      {
+        "location_id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+        "day_number": 1,
+        "visit_order": 1,
+        "id": "7b99d4e1-853f-41db-8c26-6ff660ac89b9",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "location": {
+          "id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+          "name": "Issue 54 SYNTHETIC staging Monday A",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.67,
+          "longitude": 122.95,
+          "opening_hours": {
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 10.0,
+          "estimated_cost_max": 10.0,
+          "typical_visit_duration": 30,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:00:00",
+        "departure_time": "09:30:00",
+        "estimated_travel_time": 0,
+        "estimated_cost": "20.00",
+        "recommendation_score": 0.9333333333333332,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.67; group: friends; all requested hard constraints satisfied."
+      },
+      {
+        "location_id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+        "day_number": 1,
+        "visit_order": 2,
+        "id": "f7c0a84f-0e17-4f47-b86c-bcfe463f84fc",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "location": {
+          "id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+          "name": "Issue 54 SYNTHETIC staging Monday B",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.671,
+          "longitude": 122.95,
+          "opening_hours": {
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 20.0,
+          "estimated_cost_max": 20.0,
+          "typical_visit_duration": 30,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:53:00",
+        "departure_time": "10:23:00",
+        "estimated_travel_time": 8,
+        "estimated_cost": "40.00",
+        "recommendation_score": 0.8666666666666667,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.33; group: friends; all requested hard constraints satisfied."
+      },
+      {
+        "location_id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+        "day_number": 2,
+        "visit_order": 1,
+        "id": "582e663d-052a-45db-88ab-beee1d905084",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "location": {
+          "id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+          "name": "Issue 54 SYNTHETIC staging Tuesday",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.672,
+          "longitude": 122.95,
+          "opening_hours": {
+            "tuesday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 30.0,
+          "estimated_cost_max": 30.0,
+          "typical_visit_duration": 60,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:00:00",
+        "departure_time": "10:00:00",
+        "estimated_travel_time": 0,
+        "estimated_cost": "60.00",
+        "recommendation_score": 0.7999999999999999,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
+      }
+    ]
+  },
+  "redeployment_baseline": {
+    "trip": {
+      "title": "Issue 54 SYNTHETIC staging acceptance",
+      "start_date": "2026-11-02",
+      "end_date": "2026-11-03",
+      "budget_min": "0.0",
+      "budget_max": "180.0",
+      "transportation_mode": "walking",
+      "group_type": "friends",
+      "preferred_tags": [
+        "cafe"
+      ],
+      "id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+      "user_id": "16a4e7d4-ed4d-58fb-af4b-ded3c32ca95c",
+      "status": "draft",
+      "estimated_total_cost": "120.0"
+    },
+    "revision": "710c2399e657678caae1bf63cd82b5bc",
+    "items": [
+      {
+        "location_id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+        "day_number": 1,
+        "visit_order": 1,
+        "id": "7b99d4e1-853f-41db-8c26-6ff660ac89b9",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "location": {
+          "id": "ad2ca02d-b441-402c-9b01-be576dfc660c",
+          "name": "Issue 54 SYNTHETIC staging Monday A",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.67,
+          "longitude": 122.95,
+          "opening_hours": {
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 10.0,
+          "estimated_cost_max": 10.0,
+          "typical_visit_duration": 30,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:00:00",
+        "departure_time": "09:30:00",
+        "estimated_travel_time": 0,
+        "estimated_cost": "20.00",
+        "recommendation_score": 0.9333333333333332,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.67; group: friends; all requested hard constraints satisfied."
+      },
+      {
+        "location_id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+        "day_number": 1,
+        "visit_order": 2,
+        "id": "f7c0a84f-0e17-4f47-b86c-bcfe463f84fc",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "location": {
+          "id": "7d465cf0-25fb-4a60-9ae1-55f557aa9a68",
+          "name": "Issue 54 SYNTHETIC staging Monday B",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.671,
+          "longitude": 122.95,
+          "opening_hours": {
+            "monday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 20.0,
+          "estimated_cost_max": 20.0,
+          "typical_visit_duration": 30,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:53:00",
+        "departure_time": "10:23:00",
+        "estimated_travel_time": 8,
+        "estimated_cost": "40.00",
+        "recommendation_score": 0.8666666666666667,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.33; group: friends; all requested hard constraints satisfied."
+      },
+      {
+        "location_id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+        "day_number": 2,
+        "visit_order": 1,
+        "id": "582e663d-052a-45db-88ab-beee1d905084",
+        "trip_id": "03b7f114-9b91-4985-9bf5-3efdb3a54d76",
+        "location": {
+          "id": "2b418dcb-b520-4eff-bdae-b9577bf7547d",
+          "name": "Issue 54 SYNTHETIC staging Tuesday",
+          "description": "Synthetic issue54 acceptance fixture; not a real destination",
+          "category": "cafe",
+          "vibe_tags": [
+            "cafe"
+          ],
+          "address": null,
+          "latitude": 10.672,
+          "longitude": 122.95,
+          "opening_hours": {
+            "tuesday": [
+              {
+                "open": "09:00",
+                "close": "12:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 30.0,
+          "estimated_cost_max": 30.0,
+          "typical_visit_duration": 60,
+          "suitable_group_types": [
+            "friends"
+          ],
+          "image_url": null,
+          "is_active": true
+        },
+        "arrival_time": "09:00:00",
+        "departure_time": "10:00:00",
+        "estimated_travel_time": 0,
+        "estimated_cost": "60.00",
+        "recommendation_score": 0.7999999999999999,
+        "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
+      }
+    ]
+  },
+  "current_saved_revision": "710c2399e657678caae1bf63cd82b5bc",
+  "current_saved_item_ids": [
+    "7b99d4e1-853f-41db-8c26-6ff660ac89b9",
+    "f7c0a84f-0e17-4f47-b86c-bcfe463f84fc",
+    "582e663d-052a-45db-88ab-beee1d905084"
+  ],
+  "authenticated_staging_functional_acceptance": "passed; actual redeployment persistence and exact cleanup pending"
 }
