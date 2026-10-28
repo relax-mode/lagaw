@@ -209,9 +209,18 @@ scores/reasons, revision and PHP 120.00 total still equal the original generatio
 baseline exactly. No old item was erased or replaced and no partial itinerary was
 saved. Full safe request/response and comparison are in staging JSON evidence.
 
-Next staging checks: authenticated item reload after browser refresh and manual
-compatibility. The saved plan remains available for actual redeployment persistence.
-No new production acceptance request has run.
+After refreshing staging Swagger, Andrew supplied authenticated **GET items HTTP
+200**, limit 100/offset 0. The full body retains the original three item IDs,
+locations, day/order, times, travel estimates, costs, scores and reasons exactly.
+It validates against the existing association page schema. A fresh guarded
+development read confirms the complete original trip/items/revision and PHP
+120.00 total are still unchanged. Browser-refresh persistence is verified; this
+does not establish persistence through an actual later deployment.
+
+Next staging checks: manual add/remove compatibility, then a confirmed complete
+regeneration to restore a validated estimate after manual edits. Exact fixture
+records remain retained for actual redeployment persistence. No new production
+acceptance request has run.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
