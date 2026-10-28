@@ -403,6 +403,14 @@ post-deployment GET and read-only SQL state comparison are next; production
 saved-state persistence is not yet marked complete. No `.env` or credential change
 was made, and fixtures remain retained until exact cleanup.
 
+Andrew supplied authenticated production **GET items HTTP 200 after refresh on
+the new revision**. The full three-item list matches the pre-deployment SQL/API
+baseline exactly: IDs, locations, day/order, times, travel/cost, scores and reasons.
+It validates against the association page schema. This establishes generated-item
+reload after actual production redeployment. The existing read-only production
+SQL check is next to confirm full trip/revision/total equality before cleanup;
+no direct agent protected production database read is claimed.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Cloud Run staging-before-production actual redeployment persistence.

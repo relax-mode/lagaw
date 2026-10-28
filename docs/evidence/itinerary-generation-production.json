@@ -400,6 +400,148 @@
       },
       "comparison_with_initial_generation": "all three complete item objects equal",
       "verification_note": "Developer-supplied protected API response; direct production SQL state/total evidence remains pending."
+    },
+    {
+      "check": "authenticated_reload_after_actual_production_redeployment",
+      "source": "developer-reported authenticated production Swagger after new revision/refresh",
+      "http_status": 200,
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/trips/5b4497d1-a946-4845-bed5-441fbb563180/items",
+        "limit": 100,
+        "offset": 0
+      },
+      "response": {
+        "items": [
+          {
+            "location_id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+            "day_number": 1,
+            "visit_order": 1,
+            "id": "83386a42-04f3-45c8-9218-7cd1819a12ec",
+            "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+            "location": {
+              "id": "6fe3ecfb-2435-4ef5-bd15-4fc5a4803227",
+              "name": "Issue 54 SYNTHETIC production Monday A",
+              "description": "Synthetic issue54 acceptance fixture; not a real destination",
+              "category": "cafe",
+              "vibe_tags": [
+                "cafe"
+              ],
+              "address": null,
+              "latitude": 10.67,
+              "longitude": 122.95,
+              "opening_hours": {
+                "monday": [
+                  {
+                    "open": "09:00",
+                    "close": "12:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 10.0,
+              "estimated_cost_max": 10.0,
+              "typical_visit_duration": 30,
+              "suitable_group_types": [
+                "friends"
+              ],
+              "image_url": null,
+              "is_active": true
+            },
+            "arrival_time": "09:00:00",
+            "departure_time": "09:30:00",
+            "estimated_travel_time": 0,
+            "estimated_cost": "20.00",
+            "recommendation_score": 0.9333333333333332,
+            "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.67; group: friends; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+            "day_number": 1,
+            "visit_order": 2,
+            "id": "83327ba8-f3fd-4efd-8372-3e608be0cc7b",
+            "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+            "location": {
+              "id": "035843d7-c6c8-498e-9c0a-86dc0d60527e",
+              "name": "Issue 54 SYNTHETIC production Monday B",
+              "description": "Synthetic issue54 acceptance fixture; not a real destination",
+              "category": "cafe",
+              "vibe_tags": [
+                "cafe"
+              ],
+              "address": null,
+              "latitude": 10.671,
+              "longitude": 122.95,
+              "opening_hours": {
+                "monday": [
+                  {
+                    "open": "09:00",
+                    "close": "12:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 20.0,
+              "estimated_cost_max": 20.0,
+              "typical_visit_duration": 30,
+              "suitable_group_types": [
+                "friends"
+              ],
+              "image_url": null,
+              "is_active": true
+            },
+            "arrival_time": "09:53:00",
+            "departure_time": "10:23:00",
+            "estimated_travel_time": 8,
+            "estimated_cost": "40.00",
+            "recommendation_score": 0.8666666666666667,
+            "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.33; group: friends; all requested hard constraints satisfied."
+          },
+          {
+            "location_id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+            "day_number": 2,
+            "visit_order": 1,
+            "id": "8ff6b063-c621-41af-9c7c-76f303919992",
+            "trip_id": "5b4497d1-a946-4845-bed5-441fbb563180",
+            "location": {
+              "id": "010d414e-50ce-4be3-82e3-8e30ab8207be",
+              "name": "Issue 54 SYNTHETIC production Tuesday",
+              "description": "Synthetic issue54 acceptance fixture; not a real destination",
+              "category": "cafe",
+              "vibe_tags": [
+                "cafe"
+              ],
+              "address": null,
+              "latitude": 10.672,
+              "longitude": 122.95,
+              "opening_hours": {
+                "tuesday": [
+                  {
+                    "open": "09:00",
+                    "close": "12:00"
+                  }
+                ]
+              },
+              "estimated_cost_min": 30.0,
+              "estimated_cost_max": 30.0,
+              "typical_visit_duration": 60,
+              "suitable_group_types": [
+                "friends"
+              ],
+              "image_url": null,
+              "is_active": true
+            },
+            "arrival_time": "09:00:00",
+            "departure_time": "10:00:00",
+            "estimated_travel_time": 0,
+            "estimated_cost": "60.00",
+            "recommendation_score": 0.7999999999999999,
+            "recommendation_reason": "Tags: cafe; category: not specified; budget headroom: 0.00; group: friends; all requested hard constraints satisfied."
+          }
+        ],
+        "limit": 100,
+        "offset": 0
+      },
+      "comparison": "all three complete item/location/metadata objects equal pre-deployment SQL/API baseline",
+      "verification_note": "Post-deployment total/revision/full-trip SQL check remains pending; no direct agent production database query."
     }
   ],
   "generation_request": {
@@ -978,7 +1120,7 @@
   },
   "production_functional_acceptance": "generation, repeat confirmation, infeasible replacement preservation, refresh and direct SQL verification passed; actual redeployment and exact cleanup pending",
   "redeployment": {
-    "status": "developer-reported actual production redeployment succeeded after passed staging persistence; authenticated reload and SQL comparison pending",
+    "status": "actual new production revision/100 percent traffic reported; authenticated item reload matches baseline; post-deployment SQL total/revision comparison pending",
     "before_revision": "lagaw-api-00012-z6p",
     "before_revision_source": "developer-reported gcloud latestReadyRevisionName",
     "planned_after_revision": "lagaw-api-issue54-persist",
@@ -991,7 +1133,7 @@
     "runtime_configuration": "existing image and service configuration; no env/secret flags or .env edits",
     "after_revision": "lagaw-api-issue54-persist",
     "traffic_verification": "developer-reported 100 percent to the new ready revision",
-    "saved_state_comparison": "pending production GET and read-only SQL",
+    "saved_state_comparison": "item/location/metadata equality passed; full trip/revision/total post-deployment SQL pending",
     "after_revision_source": "developer-supplied Cloud Shell deploy output and service describe result",
     "reported_traffic": {
       "latestRevision": true,
@@ -1005,6 +1147,6 @@
       "unauthorized_status": 401,
       "cors_origin": "https://lagaw.pages.dev"
     },
-    "authenticated_post_deployment_get": "pending"
+    "authenticated_post_deployment_get": "HTTP 200 supplied by Andrew; all complete item fields equal baseline"
   }
 }
