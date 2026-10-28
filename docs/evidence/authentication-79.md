@@ -91,6 +91,35 @@
   Genuine expired-session rejection remains covered by isolated automated tests;
   no project token-lifetime setting was changed for acceptance.
 
+## October 29, 2026 — Andrew's interactive local verification
+
+- Andrew reported two reusable development Auth accounts ready; passwords remain
+  private with Andrew. Started local FastAPI on `127.0.0.1:8000` after guarding
+  its existing Supabase configuration against the development project. Selected
+  Supabase Auth through the process environment; private `.env` was unchanged.
+- Andrew ran `backend/verify_auth.py --api-url http://127.0.0.1:8000` and supplied:
+
+  ```text
+  PASS: Missing and invalid tokens rejected.
+  INFO: Test account A profile UUID: 32e75bf5-a314-4e98-bc49-6a2ea7eb8173
+  INFO: Test account B profile UUID: 72e23403-1ad4-4ee3-b2f9-049e29e1c3aa
+  PASS: Two verified owners can create/update trips; cross-user reads/writes/items return 404.
+  PASS: Exact temporary trips removed; both accounts' existing trips preserved.
+  PASS: Development Auth verified. Test profiles retained; production was not contacted.
+  ```
+
+- Recorded this as Andrew-reported interactive HTTP verification. Independently
+  checked development only: both exact profile UUIDs exist, their Auth links are
+  non-null and distinct, their profile IDs differ from their Auth subjects, and
+  no `Issue79*` verification trips remain for either profile. No passwords or
+  tokens were requested, retrieved or included in the evidence. The two reusable
+  profiles intentionally remain; they are separate from the earlier temporary
+  fixtures that were removed after automated live acceptance.
+- Final implementation/evidence head `39f480a` passed all required checks in
+  [CI run 40732759940](https://github.com/relax-mode/lagaw/actions/runs/40732759940).
+  PR #92 remains draft and mergeable, with no published reviews or comments at
+  this check. Roel/Kyle agreement and deployed acceptance remain pending.
+
 ## Required evidence before completion
 
 | Requirement | Status |
