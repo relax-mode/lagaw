@@ -17,6 +17,7 @@ from pydantic import (
 Money = Annotated[Decimal, Field(ge=0, max_digits=12, decimal_places=2)]
 Label = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_]*$", max_length=50)]
 Group = Literal["solo", "couple", "family", "friends", "group"]
+InteractionType = Literal["left_swipe", "right_swipe", "save", "rating"]
 Tags = Annotated[list[Label], Field(max_length=30)]
 
 
@@ -81,7 +82,7 @@ class Interaction(Contract):
     id: UUID
     user_id: UUID
     location_id: UUID
-    interaction_type: Literal["left_swipe", "right_swipe", "save", "rating"]
+    interaction_type: InteractionType
     interaction_value: Decimal
     rating_value: Decimal | None = Field(default=None, ge=1, le=5)
     created_at: AwareDatetime

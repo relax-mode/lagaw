@@ -56,6 +56,13 @@ rating values today: this contract narrows the module boundary without a migrati
 adapter must label genuine persisted events `real`; never mix synthetic events
 into production or silently treat this metadata as persisted.
 
+Issue #52 implements this [persistence API and adapter](interactions-api.md).
+Andrew confirmed Jayperson/Roel agreement on October 28: ratings 1–5 with
+decimals, append-only repeated events, server-derived signals (-1 for left,
++1 otherwise), and the existing conservative any-left-swipe exclusion rule.
+The adapter returns these same `Interaction` objects with `provenance="real"`;
+no second recommendation event schema or persisted provenance column is added.
+
 Requests contain only the target user's events referencing this candidate snapshot;
 location IDs and event IDs must be unique. Repeated user/location events with
 different IDs remain valid. Cross-user training data belongs to a separate future
