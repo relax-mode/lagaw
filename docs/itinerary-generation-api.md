@@ -92,6 +92,9 @@ duration, coordinates and upper venue cost must all be known. A visit must finis
 at or before closing. Weekly schedules are assumed to apply on the saved dates;
 exceptional holiday closures cannot be guaranteed by this weekly schema.
 
+Malformed database record shapes that the existing #53 location schema cannot
+parse fail safely with 503 before planning; they do not bypass that validation.
+
 The seeded catalog currently has unknown hours. A clear conflict for those venues
 is expected until verified administrator-managed hours are supplied. Tests use
 explicitly synthetic fixtures with known hours, leaving shared catalog rows alone.
