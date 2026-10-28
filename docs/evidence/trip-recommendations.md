@@ -5,6 +5,11 @@ on `feat/s3-08-trip-recommendations`, based on up-to-date main `bde91ce`.
 Scope and reproducible commands: [API guide](../trip-recommendations-api.md).
 Implementation: [PR #86](https://github.com/relax-mode/lagaw/pull/86),
 code commit `9f7781a6579efa0a8045260ff124e2a45a2e4bea`.
+Final evidence publication: [PR #88](https://github.com/relax-mode/lagaw/pull/88).
+Issue [#53](https://github.com/relax-mode/lagaw/issues/53) was closed as completed
+October 28, 2026 at 11:39:47 UTC, after posting the requested
+[evidence comment](https://github.com/relax-mode/lagaw/issues/53#issuecomment-6468022223).
+The documentation-only evidence PR still follows normal teammate review/merge.
 
 | Check | Observed result |
 | --- | --- |
@@ -37,6 +42,7 @@ code commit `9f7781a6579efa0a8045260ff124e2a45a2e4bea`.
 | Production invalid limit | Andrew supplied HTTP 422 for `limit: 0`, exposing only `loc: [body, limit]`, lower-bound `msg` and `type: greater_than_equal`, matching the sanitized staging response |
 | Production missing trip | Andrew supplied HTTP 404 `Trip not found.` for the zero UUID with valid options |
 | Production final trip and itinerary preservation | Andrew supplied both final GETs with HTTP 200: the complete trip object exactly matches the recorded baseline and items remain empty (`limit=100`, `offset=0`). Parsed comparisons passed; no acceptance records were created or removed |
+| Evidence publication CI | [Documentation run 40681552200](https://github.com/relax-mode/lagaw/actions/runs/40681552200) succeeded for PR #88; changed-area detection correctly skipped application tests and deployments for docs-only changes |
 
 The initial development attempt failed before recommendation assertions because
 the verifier's dependency override accidentally made FastAPI expect an extra model
@@ -95,6 +101,6 @@ in the API guide. Automatic persistence/scheduling and Flutter display remain #5
 and #56 respectively.
 
 The implementation is reviewed, merged, CI-verified and deployed, and staging then
-production acceptance passed. Final evidence is published through a documentation
-PR; the requested issue comment links that record before issue closure. No private
+production acceptance passed. Final evidence is published through documentation
+PR #88; the requested issue comment linked that record before issue closure. No private
 `.env`, credentials, application code or database data changed during acceptance.
