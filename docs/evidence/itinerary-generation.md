@@ -1,9 +1,11 @@
 # Issue #54 — itinerary generation verification
 
-Backend implementation, deployment, acceptance and cleanup are complete. Roel's
-API-contract acknowledgment remains unverified, and this final evidence update
-still needs the normal documentation PR review/merge. Keep #54 open for that
-coordination item; do not claim the Flutter integration is implemented.
+Backend implementation, deployment, acceptance and cleanup are complete. Andrew
+confirmed on October 29, 2026 that Roel agreed to the API contract. The prominent
+[Roel/coding-assistant handoff](../../ROEL_START_HERE.md), linked from the README
+and AGENTS.md, documents how to use the APIs and the complete frontend flow.
+Final evidence/handoff PR #90 still needs normal review/merge; Flutter #56 remains
+separate implementation work.
 
 Only #54 backend/planner/database work and its documentation were changed. The
 private `.env` and Supabase CLI development linkage are unchanged. Root untracked
@@ -165,7 +167,7 @@ active destinations, eight without supplied opening hours. Unknown hours deliber
 fail closed. Acceptance used explicit temporary fixture hours; no real venue hours
 were invented or shared catalog facts edited for this issue.
 
-## Remaining coordination and publication
+## Agreed frontend handoff and final publication
 
 On October 28, checked Roel's assigned [issue #56](https://github.com/relax-mode/lagaw/issues/56),
 PR #89 discussion/reviews and his published frontend PRs/branches. #56 remains open
@@ -173,16 +175,23 @@ with no comments. His latest merged [PR #87](https://github.com/relax-mode/lagaw
 is the manual #34 itinerary UI. Current Flutter `TripService` has manual item
 methods but no generation call; `TripItem` does not parse arrival/departure,
 travel/cost or score/reason fields. No published #56 implementation or explicit
-Roel contract acknowledgment was found. Private/unpushed work cannot be assessed.
+Roel contract acknowledgment was found at that time. Andrew subsequently confirmed
+on October 29 that Roel agreed. This is recorded as Andrew's report of agreement,
+without claiming the #56 Flutter implementation is already complete.
 
-Backend technical acceptance is complete. Leave the #54 coordination checkbox open
-until Roel acknowledges the documented contract; Flutter implementation remains
-his separate #56 scope. This final documentation/evidence update still follows the
-normal teammate-reviewed PR/CI/merge workflow. Published it as
+[ROEL_START_HERE.md](../../ROEL_START_HERE.md) is linked prominently from the root
+README and AGENTS.md for Roel and his coding assistant. It contains environment
+links, exact preview/generation bodies, the replacement state machine, field parsing,
+object-shaped 409 handling, reload/manual flows, current catalog/enum limitations
+and #56 verification guidance. It reuses the deployed backend and preserves `.env`.
+
+Backend technical acceptance and the contract coordination task are complete.
+Flutter implementation remains his separate #56 scope. This final documentation/
+handoff update follows the normal teammate-reviewed PR/CI/merge workflow in
 [PR #90](https://github.com/relax-mode/lagaw/pull/90). Its
 [documentation CI run 40721526465](https://github.com/relax-mode/lagaw/actions/runs/40721526465)
 passed changed-area detection; app/database/Flutter checks and deployments correctly
 skipped because the PR changes only these evidence/docs files. The actual application
 checks and archived artifacts are linked above. Updated #54's completed technical
-checklist and evidence links; left its coordination checkbox and issue open. Keep
-#54 open while that acknowledgment and final evidence review/merge are pending.
+and coordination checklists and evidence/handoff links. The issue remains open
+until the final evidence/handoff PR is reviewed and merged.
