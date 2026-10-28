@@ -225,10 +225,18 @@ their metadata unchanged, and confirms the trip's complete-plan estimate is now
 null while other trip fields are preserved. The revision changed as expected.
 This establishes manual-add compatibility with the saved generated plan.
 
-Next staging checks: delete only that new manual item, then confirm a complete
-regeneration to restore a validated estimate after manual edits. Exact fixture
-records remain retained for actual redeployment persistence. No new production
-acceptance request has run.
+Andrew supplied manual-remove staging **HTTP 204**, no response body, for only
+`fc4fd318-403e-4ed9-a907-ad262a5e5c1c`. An independent guarded development read
+confirms its absence and exact preservation of all original generated item IDs and
+metadata. All three fixture destinations remain active. The total stays null,
+as documented after manual editing; other trip fields are unchanged. The current
+revision is `668270157b649de9dce86d2c042b365c`, distinct from both the initial saved
+plan and the four-item manually edited state.
+
+Next staging check: confirmed morning regeneration using that current revision
+to restore a complete validated schedule/estimate. Exact fixture records remain
+retained for actual redeployment persistence. No new production acceptance request
+has run.
 
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
