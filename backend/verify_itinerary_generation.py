@@ -88,7 +88,10 @@ def verify(database):
                     and all(i["arrival_time"] == "09:00:00" and i["departure_time"] == "10:00:00"
                             and i["recommendation_reason"] for i in saved["items"]),
                     "Persisted schedule or scores/reasons are incorrect.")
-            require(api.get(items_url).json()["items"] == saved["items"], "Association reload lost generated metadata.")
+            reloaded = api.get(items_url).json()["items"]
+            mismatches = sorted({key for old, new in zip(saved["items"], reloaded, strict=True)
+                                 for key in old if old[key] != new.get(key)})
+            require(not mismatches, "Association reload differs in fields: " + ", ".join(mismatches))
             print("PASS: Real ordered multi-day generation, party total, times, score/reason and association reload.")
 
             before_trip = rows(database, "trips", id=f"eq.{trip}")
