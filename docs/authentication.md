@@ -191,13 +191,15 @@ API with that short-lived token. No account password or token reaches output.
 Redirects are refused. Smoke checks create no trips/events and call no AI
 provider; the first call can create the dedicated account's profile.
 
-Kyle must provision the following independently in **each** GitHub Environment
-(`staging`, then `production`), before enabling the release:
+The release operator must provision the following independently in **each**
+GitHub Environment (`staging`, then `production`) before enabling the release.
+Andrew is proceeding with this backend rollout; Kyle remains the ongoing
+environment owner for the later handoff.
 
 | Kind | Name | Purpose |
 | --- | --- | --- |
 | Environment secret | `SMOKE_AUTH_EMAIL` | Dedicated, confirmed synthetic account in that environment |
-| Environment secret | `SMOKE_AUTH_PASSWORD` | Its password; holder Kyle |
+| Environment secret | `SMOKE_AUTH_PASSWORD` | Its password, entered privately by the release operator; never recorded in evidence |
 | Environment variable | `SMOKE_SUPABASE_KEY` | That project's public publishable/anon key for Auth sign-in |
 | Environment variable | `SMOKE_PROFILE_ID` | The verified account's application profile UUID, not its Auth subject |
 
@@ -208,11 +210,18 @@ rate limits/confirmation mail delivery remain operational dependencies. Backend
 authentication itself has a live Supabase Auth dependency and fails closed when
 it is unavailable; no local-signature-only fallback is introduced.
 
-**Release blockers:** do not merge/deploy to production before #80's normal
-authenticated Flutter flow is ready, development acceptance passes, both target
-schemas are ready under the agreed release plan, and Kyle provisions smoke
-accounts/settings. The current pipeline automatically promotes a successful
-main staging deployment to production. A staging pass alone is not an approval
-to prepare production later. Existing Flutter demo build flags are left to #80;
-they no longer authorize the new normal backend. No production change has been
-made as part of preparing this implementation.
+**Release ordering, updated October 29:** Andrew directed the backend #79 rollout
+to proceed independently, with Roel/Kyle follow-up handled afterward. The earlier
+plan to wait for #80 before releasing #79 is superseded by that instruction.
+Existing Flutter demo-token calls will return 401 after the Auth backend release
+until #80 supplies real sessions; this is an explicit pending integration
+limitation, not a completed frontend acceptance result. Flutter implementation
+remains outside #79. Teammate contract acknowledgment is still pending and is
+not inferred from Andrew's release instruction.
+
+The backend still requires environment-specific smoke configuration, deployed
+staging verification before production, the production schema prerequisite,
+passing CI and the reviewed PR. The pipeline automatically promotes a successful
+main staging deployment to production, so production prerequisites must be ready
+before merging. Development verification alone does not complete the deployed
+backend acceptance. Private `.env` edits are unnecessary for this rollout.
