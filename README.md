@@ -85,6 +85,9 @@ Independent recommendation contracts, synthetic fixtures and AI/backend handoff:
 Persisted swipes, saves and ratings, owner-scoped history and safe verification:
 [interaction API](docs/interactions-api.md).
 
+Validated recommendations for saved trips, budget allocation and model fallback:
+[trip recommendation API](docs/trip-recommendations-api.md).
+
 Offline scoring, ranking, cold-start behavior and evaluation:
 [content-based recommender](docs/content-based-recommender.md).
 
