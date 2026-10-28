@@ -370,6 +370,17 @@ correct staging CORS. Authenticated post-deployment GET is next to establish the
 serving revision reload path before production redeployment. Fixtures remain
 retained, and no `.env` or production configuration change occurred.
 
+Andrew then supplied authenticated staging **GET items HTTP 200 after refresh on
+the new revision**. Every item/location/metadata field matches the pre-deployment
+regenerated baseline, including IDs `7b99d4e1-853f-41db-8c26-6ff660ac89b9`,
+`f7c0a84f-0e17-4f47-b86c-bcfe463f84fc`, and
+`582e663d-052a-45db-88ab-beee1d905084`. A further independent guarded development
+read confirms the entire saved trip/items/revision and PHP 120.00 total still
+match. Staging **actual redeployment persistence passed**: developer-supplied
+before/after revision and 100% traffic metadata, authenticated new-deployment GET,
+and independent complete database equality. Production redeployment is next;
+fixtures remain retained until exact cleanup.
+
 - Roel's agreement on the documented API/confirmation contract (Andrew reports no
   confirmed prior agreement).
 - Cloud Run staging-before-production actual redeployment persistence.
