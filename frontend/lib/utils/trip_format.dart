@@ -51,5 +51,15 @@ String formatPeso(double value) {
   return parts[1] == '00' ? '₱$whole' : '₱$whole.${parts[1]}';
 }
 
+/// "09:30:00" (Asia/Manila wall clock) -> "9:30 AM". Not converted from UTC.
+String formatClock(String hms) {
+  final parts = hms.split(':');
+  final hour = int.tryParse(parts.first) ?? 0;
+  final minute = parts.length > 1 ? parts[1] : '00';
+  final suffix = hour < 12 ? 'AM' : 'PM';
+  final h12 = hour % 12 == 0 ? 12 : hour % 12;
+  return '$h12:$minute $suffix';
+}
+
 String formatBudgetRange(double min, double max) =>
     min == max ? formatPeso(min) : '${formatPeso(min)} – ${formatPeso(max)}';

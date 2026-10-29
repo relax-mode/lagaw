@@ -28,6 +28,9 @@ class DestinationTile extends StatelessWidget {
   /// Shown before the name, e.g. the visit order "1".
   final String? badge;
   final Widget? trailing;
+
+  /// Extra lines under the details, e.g. a generated stop's schedule.
+  final Widget? footer;
   final bool selected;
 
   const DestinationTile({
@@ -35,6 +38,7 @@ class DestinationTile extends StatelessWidget {
     required this.location,
     this.badge,
     this.trailing,
+    this.footer,
     this.selected = false,
   });
 
@@ -130,6 +134,7 @@ class DestinationTile extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (footer != null) ...[const SizedBox(height: 6), footer!],
               ],
             ),
           ),

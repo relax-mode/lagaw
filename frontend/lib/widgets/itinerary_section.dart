@@ -6,6 +6,7 @@ import '../screens/destination_picker_sheet.dart';
 import '../services/api_service.dart';
 import '../services/trip_service.dart';
 import '../theme.dart';
+import '../utils/trip_format.dart';
 import 'confirm_dialog.dart';
 import 'destination_tile.dart';
 import 'status_banner.dart';
@@ -36,6 +37,10 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
   String? _error;
   String? _notice;
   final Set<String> _removing = {};
+
+  /// The backend clears a trip's estimated total on any manual item change,
+  /// so hide the total locally instead of showing a stale figure.
+  bool _totalCleared = false;
 
   @override
   void initState() {
@@ -75,9 +80,10 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
       existing: _items ?? const [],
     );
     if (added == null || !mounted) return;
-    setState(
-      () => _notice = 'Added ${added.location.name} to Day ${added.dayNumber}.',
-    );
+    setState(() {
+      _notice = 'Added ${added.location.name} to Day ${added.dayNumber}.';
+      _totalCleared = true;
+    });
     await _load();
   }
 
@@ -105,6 +111,7 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
       setState(() {
         _removing.remove(item.id);
         _notice = 'Removed ${item.location.name}.';
+        _totalCleared = true;
       });
       await _load();
     } on TripApiException catch (e) {
@@ -128,6 +135,18 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _header(),
+          if (widget.trip.estimatedTotalCost != null && !_totalCleared) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Estimated total: ${formatPeso(widget.trip.estimatedTotalCost!)}',
+              key: const ValueKey('itinerary-total'),
+              style: const TextStyle(
+                fontFamily: 'Outfit',
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF16A34A),
+              ),
+            ),
+          ],
           if (_notice != null) ...[
             const SizedBox(height: 12),
             StatusBanner(
@@ -286,11 +305,58 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
             location: item.location,
             badge: '${item.visitOrder}',
             trailing: _removeButton(item),
+            footer: _schedule(item),
           ),
           const SizedBox(height: 8),
         ],
       ],
     ];
+  }
+
+  /// Generated stops show their saved schedule, cost and reason; manual
+  /// stops have none (null is unknown, not zero). [S3-11]
+  Widget _schedule(TripItem item) {
+    const muted = TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 12,
+      color: AppTheme.slateMuted,
+    );
+    if (!item.isScheduled && item.recommendationReason == null) {
+      return Text(
+        'Added by you · not scheduled',
+        key: ValueKey('itinerary-manual-${item.id}'),
+        style: muted,
+      );
+    }
+    final parts = [
+      if (item.isScheduled)
+        '${formatClock(item.arrivalTime!)} – ${formatClock(item.departureTime!)}',
+      if (item.estimatedTravelTime != null)
+        '${item.estimatedTravelTime} min travel',
+      if (item.estimatedCost != null) formatPeso(item.estimatedCost!),
+    ];
+    return Column(
+      key: ValueKey('itinerary-schedule-${item.id}'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (parts.isNotEmpty)
+          Text(
+            parts.join(' · '),
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12.5,
+              color: AppTheme.primaryBlue,
+            ),
+          ),
+        if (item.recommendationReason != null) ...[
+          const SizedBox(height: 3),
+          Text(
+            item.recommendationReason!,
+            style: muted.copyWith(fontStyle: FontStyle.italic),
+          ),
+        ],
+      ],
+    );
   }
 
   Widget _removeButton(TripItem item) {
