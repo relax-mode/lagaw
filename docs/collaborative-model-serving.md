@@ -126,8 +126,10 @@ secrets, which removes the mount, and explicitly removes `MODEL_FILE_PATH` and
 `MODEL_FILE_SHA256`, so the service returns to the content-only baseline. Cloud Run drops
 the now-unused volume entry on the following deploy (verified); do not delete or disable the
 artifact secret until `gcloud run services describe` shows no volume for it, or later deploys
-fail with a secret permission error. A merge-strategy deploy using only `--remove-secrets`
-leaves exactly that dangling volume, which is why the workflow overwrites secrets.
+fail with a secret permission error. A deploy using only `--remove-secrets` leaves exactly
+that dangling volume, and later merge-strategy deploys do not prune it (re-verified on a clean
+probe service: volumes stayed at 1 across both); overwriting secrets does, one deploy later.
+That is why the workflow overwrites secrets.
 
 ## What the service does with the file
 
