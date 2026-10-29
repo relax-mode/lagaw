@@ -17,6 +17,13 @@ class AppConfig {
     'SUPABASE_ANON_KEY',
   );
 
+  /// Optional override for where confirmation emails return, e.g.
+  /// `--dart-define=AUTH_REDIRECT_URL=https://staging.lagaw.pages.dev`.
+  /// Must be on the Supabase project's redirect allow-list.
+  static const String authRedirectUrl = String.fromEnvironment(
+    'AUTH_REDIRECT_URL',
+  );
+
   static bool get authEnabled =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
