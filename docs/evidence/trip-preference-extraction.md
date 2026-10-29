@@ -83,9 +83,27 @@ its actual output.
   its secrets, so they are verified with mocked responses only. The deployed failure path
   was exercised as a real network failure (step 8).
 
-## Still to record
+## Web, against the deployed staging API (2026-10-29)
 
-- [ ] PR link, teammate review and passing CI run.
-- [ ] Web: after merge, repeat steps 1–9 on `https://staging.lagaw.pages.dev`, using a full
-      page reload for step 6.
-- [ ] Contract agreement comment on #55, per the extraction contract's pending sign-off.
+Web: Chrome on macOS at `https://staging.lagaw.pages.dev`, deployed from `a507305` ([main run 40815760387](https://github.com/relax-mode/lagaw/actions/runs/40815760387), after [PR #96](https://github.com/relax-mode/lagaw/pull/96)), signed in as Supabase test account A. Since #79 the deployed API accepts only signed-in Supabase sessions, so Web verification waited for #80.
+
+| # | Step | Result | Screenshot |
+| --- | --- | --- | --- |
+| 1 | Describe box on the new-trip form with the prompt | Pass | [w55_1](img/web-staging/w55_1.jpg) |
+| 2 | "Reading your description…" while pending; field and button locked | Pass | [w55_2](img/web-staging/w55_2.jpg) |
+| 3 | Review sheet from staging: Café, Photography, Relaxing; Afternoon, Slow; not mentioned: Budget, Group Type | Pass | [w55_3](img/web-staging/w55_3.jpg) |
+| 4 | Cancel: no vibes selected | Pass | [w55_4](img/web-staging/w55_4.jpg) |
+| 5 | Photography unticked, Apply: "Added 2 vibes" | Pass | [w55_5a](img/web-staging/w55_5a.jpg), [w55_5b](img/web-staging/w55_5b.jpg) |
+| 6 | Created "Web extraction verification" with Café and Relaxing; same after a full reload | Pass | [w55_6](img/web-staging/w55_6.jpg), [w55_6b](img/web-staging/w55_6b.jpg) |
+| 7 | Edit, "Heritage walk and local food and coffee": offers Food and Heritage, "Already in your trip: Café"; Apply keeps Café and Relaxing | Pass | [w55_7](img/web-staging/w55_7.jpg), [w55_7b](img/web-staging/w55_7b.jpg) |
+| 8 | Offline: "Could not reach the Lagaw server…", with the unsaved title edit kept; back online, a manual Save persisted the title and all four vibes | Pass | [w55_8](img/web-staging/w55_8.jpg), [w55_8b](img/web-staging/w55_8b.jpg) |
+| 9 | Blank prompt: "Describe your trip first." | Pass | [w55_9](img/web-staging/w55_9.jpg) |
+
+The edit-time "Already in your trip" line, not captured on Android, is shown in step 7.
+
+## Links
+
+- Implementation: [PR #91](https://github.com/relax-mode/lagaw/pull/91), reviewed by CyGray, merged as
+  `bd17ccf`; [main run 40727856244](https://github.com/relax-mode/lagaw/actions/runs/40727856244) passed and deployed.
+- Contract confirmed by Andrew (backend) on [#55](https://github.com/relax-mode/lagaw/issues/55).
+- Android and Web verified against deployed staging (above).
