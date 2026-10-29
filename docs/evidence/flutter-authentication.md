@@ -54,12 +54,28 @@ recorded.
 - An Android confirmation link opens in the browser (no deep link). The user then
   returns to the app and signs in, as expected for this version.
 
-## Pending
+## Web, against deployed staging (2026-10-29)
 
-- [ ] Contract agreement with Andrew (#79) and Supabase Auth settings with Kyle.
-- [ ] PR review and passing CI.
-- [ ] Web on `staging.lagaw.pages.dev` after merge: sign-up/sign-in, restore after
-      reload, sign-out and two-user isolation. This also completes the pending Web
-      checks for #34 and #55.
+Chrome on macOS at `https://staging.lagaw.pages.dev`, deployed from `a507305`
+([main run 40815760387](https://github.com/relax-mode/lagaw/actions/runs/40815760387)). CI built it with
+the fixed development Supabase URL and the staging environment's public key.
+
+| # | Check | Result | Screenshot |
+| --- | --- | --- | --- |
+| 1 | Sign-in page on Web | Pass | [w80_1](img/web-staging/w80_1.jpg) |
+| 2 | Signed in as A, reaching the app | Pass | [w80_2](img/web-staging/w80_2.jpg) |
+| 3 | Full page reload: still signed in (session restored from browser storage) | Pass | [w80_3](img/web-staging/w80_3.jpg) |
+| 4 | Avatar: "Signed in as" A, with Sign out | Pass | [w80_4](img/web-staging/w80_4.jpg) |
+| 5 | Signed out, signed in as B: Trips shows only "Account B Test Trip" | Pass | [w80_5](img/web-staging/w80_5.jpg) |
+| 6 | Back as A: only "Account A Test Trip" | Pass | [w80_6](img/web-staging/w80_6.jpg) |
+
+The same Web session also passed the #34 and #55 checks while signed in
+([itinerary evidence](trip-itinerary-ui.md), [extraction evidence](trip-preference-extraction.md)).
+
+## Links and remaining
+
+- Implementation: [PR #96](https://github.com/relax-mode/lagaw/pull/96), reviewed by CyGray, merged as `a507305`.
+- [ ] Contract confirmation from Andrew (#79) on [#80](https://github.com/relax-mode/lagaw/issues/80).
+- [ ] Supabase Auth settings with Kyle: Web redirect allowlist and rate limits.
 
 Never record passwords, access or refresh tokens, or confirmation links here.
