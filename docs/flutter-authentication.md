@@ -102,6 +102,10 @@ confirmation), restore, sign-out and expiry-with-unsaved-input flows.
 Set in the Supabase dashboard of each project (**Authentication**). These are not
 in `supabase/config.toml`, which only configures a local `supabase start` stack.
 
+Status (October 29, 2026): Site URL and Redirect URLs are applied and verified in
+both projects. Custom SMTP and the higher email limit are still pending; Supabase
+refuses to change the limit until SMTP is configured.
+
 | Setting | Development `vnpkyvtbupnquvirzlzp` | Production `zjnuqqtbapbpudsjbpif` |
 | --- | --- | --- |
 | URL Configuration → Site URL | `https://staging.lagaw.pages.dev` | `https://lagaw.pages.dev` |
