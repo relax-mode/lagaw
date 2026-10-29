@@ -1,6 +1,10 @@
 """Offline HTTP/adapter checks with real contracts, engines and mocked database I/O."""
 
+import hashlib
+import json
+import logging
 from copy import deepcopy
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 from uuid import UUID, uuid4
@@ -12,7 +16,7 @@ from fastapi.testclient import TestClient
 from app.database import LocationDatabase
 from app.recommendation_adapter import RecommendationAdapter
 from app.recommendations.contracts import RecommendationResponse
-from app.recommendations.hybrid import HybridRecommender
+from app.recommendations.hybrid import MAX_ARTIFACT_BYTES, HybridRecommender
 from app.trip_recommendations import get_recommendation_engine
 
 OWNER, OTHER, TRIP, VENUE, SECOND = (str(uuid4()) for _ in range(5))
@@ -369,45 +373,158 @@ def test_empty_catalog(harness):
     assert api.post(URL, json=OPTIONS).json()["items"] == []
 
 
-@pytest.mark.parametrize("contents", [None, "not-json", '{"version":"wrong"}'])
-def test_missing_or_corrupt_artifact_uses_exact_baseline(harness, monkeypatch, tmp_path, contents):
-    api, state = harness
-    path = tmp_path / "artifact.json"
-    if contents is not None:
-        path.write_text(contents)
-    monkeypatch.setenv("MODEL_FILE_PATH", str(path))
-    state.application.dependency_overrides.pop(get_recommendation_engine)
-    get_recommendation_engine.cache_clear()
-    try:
-        assert api.post(URL, json=OPTIONS).status_code == 200
-        assert get_recommendation_engine().model is None
-    finally:
-        get_recommendation_engine.cache_clear()
-
-
-def test_known_hybrid_artifact_scores_reach_api_after_validation(harness, monkeypatch, tmp_path):
+def write_model(path, **changes):
     from app.recommendations.collaborative import CollaborativeModel
 
-    api, state = harness
     # A controlled real-provenance model exercises supported-user/item blending.
     model = CollaborativeModel(
         provenance="real", training_digest="a" * 64, training_event_ids=[uuid4()],
         user_ids=[UUID(OWNER), uuid4(), uuid4()], item_ids=[UUID(VENUE), UUID(SECOND), uuid4()],
         user_counts=[3, 3, 3], item_counts=[3, 3, 3],
         user_factors=[[1.0], [0.5], [0.2]], item_factors=[[0.8], [0.4], [0.1]],
-        rank=1, numpy_version="2.0.0",
+        rank=1, numpy_version="2.0.0", **changes,
     )
-    path = tmp_path / "real-model.json"
     model.save(path)
-    monkeypatch.setenv("MODEL_FILE_PATH", str(path))
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+@pytest.fixture
+def serve(harness, monkeypatch, caplog):
+    """Switch the harness from its stub engine to the real startup loader."""
+    api, state = harness
     state.application.dependency_overrides.pop(get_recommendation_engine)
-    get_recommendation_engine.cache_clear()
-    try:
-        result = api.post(URL, json=OPTIONS)
-        assert result.status_code == 200
-        assert all("Hybrid: content=" in row["recommendation_reason"] for row in result.json()["items"])
-    finally:
+
+    def start(path, digest=None):
+        monkeypatch.setenv("MODEL_FILE_PATH", str(path))
+        if digest is None:
+            monkeypatch.delenv("MODEL_FILE_SHA256", raising=False)
+        else:
+            monkeypatch.setenv("MODEL_FILE_SHA256", digest)
         get_recommendation_engine.cache_clear()
+        caplog.clear()
+        # Entering the app runs its lifespan: the model loads before any request.
+        with (
+            caplog.at_level(logging.INFO, logger="uvicorn.error"),
+            TestClient(state.application, headers=api.headers) as started,
+        ):
+            loaded = [r.getMessage() for r in caplog.records if "recommendation_model" in r.getMessage()]
+            result = started.post(URL, json=OPTIONS)
+        return result, loaded
+
+    get_recommendation_engine.cache_clear()
+    yield start, state
+    get_recommendation_engine.cache_clear()
+
+
+def test_model_loads_at_startup_and_logs_one_safe_line(serve, tmp_path):
+    start, _ = serve
+    path = tmp_path / "real-model.json"
+    digest = write_model(path)
+    result, lines = start(path, digest)
+    assert result.status_code == 200
+    assert all("Hybrid: content=" in row["recommendation_reason"] for row in result.json()["items"])
+    assert get_recommendation_engine().model is not None
+    assert lines == [(
+        "recommendation_model status=present reason=loaded version=signed-svd-v1 provenance=real "
+        f"training_digest={'a' * 64} users=3 items=3 pairs=9 file_sha256={digest}"
+    )]
+    assert not any(value in lines[0] for value in (OWNER, VENUE, SECOND, TRIP))
+
+
+def test_startup_loads_before_first_request_and_requests_do_not_reload(serve, tmp_path, monkeypatch):
+    _, state = serve
+    path = tmp_path / "real-model.json"
+    write_model(path)
+    reads = []
+    original = Path.open
+    monkeypatch.setattr(Path, "open", lambda self, *a, **k: (reads.append(self), original(self, *a, **k))[1])
+    monkeypatch.setenv("MODEL_FILE_PATH", str(path))
+    get_recommendation_engine.cache_clear()
+    with TestClient(state.application) as api:
+        assert reads == [path]  # Loaded by startup alone: no request has been made.
+        for _ in range(3):
+            assert api.post(URL, json=OPTIONS, headers={"Authorization": f"Bearer {TOKEN}"}).status_code == 200
+    assert reads == [path]
+
+
+def test_matching_pin_is_case_insensitive(serve, tmp_path):
+    start, _ = serve
+    path = tmp_path / "real-model.json"
+    digest = write_model(path)
+    result, lines = start(path, f"  {digest.upper()} ")
+    assert result.status_code == 200 and "status=present" in lines[0]
+
+
+@pytest.mark.parametrize("case, reason", [
+    ("missing", "missing"), ("corrupt", "corrupt"), ("empty", "corrupt"), ("wrong_version", "wrong_version"),
+    ("array", "wrong_version"), ("invalid", "invalid_artifact"), ("synthetic", "provenance_mismatch"),
+    ("digest", "digest_mismatch"), ("bad_pin", "invalid_expected_digest"), ("too_large", "too_large"),
+    ("directory", "unreadable"),
+])
+def test_unusable_artifacts_serve_the_content_baseline_with_a_logged_reason(serve, tmp_path, case, reason):
+    start, _ = serve
+    path = tmp_path / "artifact.json"
+    digest = None
+    if case == "directory":
+        path.mkdir()
+    elif case == "synthetic":
+        write_model(path)
+        data = json.loads(path.read_text())
+        data["provenance"] = "synthetic"
+        path.write_text(json.dumps(data))
+    elif case != "missing":
+        digest = write_model(path)
+        data = json.loads(path.read_text())
+        if case == "corrupt":
+            path.write_text("not-json")
+        elif case == "empty":
+            path.write_text("")
+        elif case == "wrong_version":
+            path.write_text(json.dumps({**data, "model_version": "signed-svd-v0"}))
+        elif case == "array":
+            path.write_text("[]")
+        elif case == "invalid":
+            data["user_factors"][0][0] = "nan"
+            path.write_text(json.dumps(data))
+        elif case == "too_large":
+            path.write_text(" " * (MAX_ARTIFACT_BYTES + 1))
+        elif case == "digest":
+            digest = "0" * 64
+        elif case == "bad_pin":
+            digest = "not-a-digest"
+    if case in {"corrupt", "empty", "wrong_version", "array", "invalid", "too_large"}:
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()  # Correctly pinned, still unusable.
+    baseline, _ = start(tmp_path / "nothing-mounted.json")
+    result, lines = start(path, digest)
+    assert result.status_code == 200
+    assert get_recommendation_engine().model is None
+    assert result.json() == baseline.json()
+    assert not any("Hybrid:" in row["recommendation_reason"] for row in result.json()["items"])
+    assert len(lines) == 1 and f"status=absent reason={reason} " in lines[0]
+    assert "version=none provenance=none training_digest=none users=0 items=0 pairs=0" in lines[0]
+
+
+def test_unconfigured_path_is_content_only_and_logged_as_such(serve, monkeypatch, caplog):
+    monkeypatch.delenv("MODEL_FILE_PATH", raising=False)
+    get_recommendation_engine.cache_clear()
+    with caplog.at_level(logging.INFO, logger="uvicorn.error"):
+        assert get_recommendation_engine().model is None
+    assert [r.getMessage() for r in caplog.records if "recommendation_model" in r.getMessage()] == [(
+        "recommendation_model status=absent reason=not_configured version=none provenance=none "
+        "training_digest=none users=0 items=0 pairs=0 file_sha256=none"
+    )]
+
+
+def test_known_hybrid_artifact_scores_reach_api_after_validation(serve, tmp_path):
+    start, _ = serve
+    path = tmp_path / "real-model.json"
+    write_model(path)
+    baseline, _ = start(tmp_path / "nothing-mounted.json")
+    result, _ = start(path)
+    assert result.status_code == 200
+    assert all("Hybrid: content=" in row["recommendation_reason"] for row in result.json()["items"])
+    assert [row["recommendation_score"] for row in result.json()["items"]] != [
+        row["recommendation_score"] for row in baseline.json()["items"]]
 
 
 def test_catalog_guard_rejects_oversized_snapshot(harness, monkeypatch):

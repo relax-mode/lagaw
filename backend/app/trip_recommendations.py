@@ -1,5 +1,6 @@
 """Read-only saved-trip recommendation endpoint; no DeepSeek or scheduling."""
 
+import logging
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -17,7 +18,7 @@ from app.recommendation_adapter import (
     RecommendationUnavailable,
 )
 from app.recommendations.contracts import Recommender
-from app.recommendations.hybrid import HybridRecommender
+from app.recommendations.hybrid import ArtifactReport, HybridRecommender, load_artifact
 from app.trip_recommendation_schemas import (
     TripRecommendationOptions,
     TripRecommendationResult,
@@ -25,12 +26,28 @@ from app.trip_recommendation_schemas import (
 from app.trips import TripOwner, get_trip_user
 
 router = APIRouter(prefix="/api/v1/trips", tags=["recommendations"])
+# Uvicorn configures this logger at INFO, so the startup line reaches Cloud Run logs.
+logger = logging.getLogger("uvicorn.error")
 
 
 @lru_cache(maxsize=1)
 def get_recommendation_engine() -> Recommender:
+    """Load the model once per process and log exactly one identifier-free line.
+
+    Called at application startup (see app.main) and again, from cache, per request.
+    No path means content-only by design; a path that cannot be used is also
+    content-only but is logged with its reason. Training never happens here.
+    """
     path = os.environ.get("MODEL_FILE_PATH", "").strip()
-    return HybridRecommender.from_artifact(Path(path), provenance="real") if path else HybridRecommender()
+    if not path:
+        engine, report = HybridRecommender(), ArtifactReport("not_configured")
+    else:
+        # An unset pin skips only the digest check; a blank pin is treated as unset.
+        pin = os.environ.get("MODEL_FILE_SHA256", "").strip() or None
+        engine, report = load_artifact(Path(path), provenance="real", expected_sha256=pin)
+    (logger.info if report.loaded or report.reason == "not_configured" else logger.warning)(
+        report.log_line())
+    return engine
 
 
 def get_recommendation_adapter(

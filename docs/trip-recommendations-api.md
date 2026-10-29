@@ -147,16 +147,21 @@ The executable HTTP schema is available in FastAPI `/docs` and `/openapi.json`.
 
 ## Model fallback and errors
 
-No artifact/configuration is needed for baseline recommendations. The existing
-pitch's optional `MODEL_FILE_PATH` can name a team-controlled real-provenance JSON
-artifact already accessible inside the backend process. It loads once per process
-on first authorized inference; restart the service after changing the artifact or
-path. Client requests cannot select it. Training/retraining and artifact delivery
-are separate AI/DevOps work; the current container only copies `app/`, so a local
-`backend/model_artifacts/` file is not automatically deployed.
+No artifact/configuration is needed for baseline recommendations. The pitch's optional
+`MODEL_FILE_PATH` names a team-controlled real-provenance JSON artifact inside the
+backend process, and the optional `MODEL_FILE_SHA256` pins that file's SHA-256. The
+model loads **once, at application startup**, not on a request, and logs one
+identifier-free line (`recommendation_model status=present|absent reason=… version=…
+provenance=… training_digest=… users=… items=… pairs=… file_sha256=…`). Restart (redeploy)
+after changing the artifact or path. Client requests cannot select it. Training is an
+offline command ([runbook](collaborative-model-serving.md)); each deployed environment
+mounts its own version-pinned Secret Manager artifact, never one baked into the image.
 
-An absent, unreadable, corrupt, unsupported-version or synthetic-provenance artifact
-uses the exact content baseline. A loaded model blends supported candidates 60%
+An absent, unreadable, corrupt, oversized, unsupported-version, synthetic-provenance
+or digest-mismatched artifact (or an invalid pin) uses the exact content baseline with
+HTTP 200, and the startup line records the reason (`missing`, `unreadable`, `corrupt`,
+`too_large`, `wrong_version`, `invalid_artifact`, `provenance_mismatch`, `digest_mismatch`,
+`invalid_expected_digest`). A loaded model blends supported candidates 60%
 content / 40% collaborative; unseen users/items and insufficient history use the
 existing per-candidate content fallback and explanations. No request-time training
 or cross-user training feed is added. A failing engine or malformed output returns

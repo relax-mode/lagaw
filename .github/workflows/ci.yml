@@ -299,7 +299,9 @@ jobs:
   staging-changes:
     name: Decide - Staging deployment
     needs: [backend, database, frontend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -400,6 +402,14 @@ jobs:
           done
           echo "deploy=true" >> "$GITHUB_OUTPUT"
 
+      - name: Resolve collaborative model delivery
+        id: model
+        if: steps.gate.outputs.deploy == 'true'
+        env:
+          MODEL_ARTIFACT_SECRET: ${{ vars.MODEL_ARTIFACT_SECRET }}
+          MODEL_FILE_SHA256: ${{ vars.MODEL_FILE_SHA256 }}
+        run: python3 scripts/resolve_model_delivery.py >> "$GITHUB_OUTPUT"
+
       - name: Authenticate to Google Cloud
         if: steps.gate.outputs.deploy == 'true'
         uses: google-github-actions/auth@v2
@@ -438,10 +448,14 @@ jobs:
             TRIP_AUTH_MODE=supabase
             DEEPSEEK_MODEL=deepseek-flash
             DEEPSEEK_TIMEOUT_MS=20000
+            ${{ steps.model.outputs.path_line }}
+            ${{ steps.model.outputs.sha_line }}
           secrets: |
             SUPABASE_URL=STAGING_SUPABASE_URL:2
             SUPABASE_SERVICE_ROLE_KEY=STAGING_SUPABASE_SERVICE_ROLE_KEY:2
             DEEPSEEK_API_KEY=STAGING_DEEPSEEK_API_KEY:1
+            ${{ steps.model.outputs.secret_line }}
+          secrets_update_strategy: overwrite
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
@@ -452,6 +466,7 @@ jobs:
             --concurrency=20
             --timeout=60
             --port=8080
+            ${{ steps.model.outputs.flags }}
 
       - name: Read existing staging API URL
         id: existing-staging-api
@@ -588,6 +603,13 @@ jobs:
             [ -n "${!v}" ] || { echo "::error::Production deployment configuration is missing ($v)."; exit 1; }
           done
 
+      - name: Resolve collaborative model delivery
+        id: model
+        env:
+          MODEL_ARTIFACT_SECRET: ${{ vars.MODEL_ARTIFACT_SECRET }}
+          MODEL_FILE_SHA256: ${{ vars.MODEL_FILE_SHA256 }}
+        run: python3 scripts/resolve_model_delivery.py >> "$GITHUB_OUTPUT"
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -628,10 +650,14 @@ jobs:
             TRIP_AUTH_MODE=supabase
             DEEPSEEK_MODEL=deepseek-flash
             DEEPSEEK_TIMEOUT_MS=20000
+            ${{ steps.model.outputs.path_line }}
+            ${{ steps.model.outputs.sha_line }}
           secrets: |
             SUPABASE_URL=SUPABASE_URL:1
             SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:1
             DEEPSEEK_API_KEY=DEEPSEEK_API_KEY:1
+            ${{ steps.model.outputs.secret_line }}
+          secrets_update_strategy: overwrite
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
@@ -642,6 +668,7 @@ jobs:
             --concurrency=20
             --timeout=60
             --port=8080
+            ${{ steps.model.outputs.flags }}
 
       - name: Smoke test production API
         env:

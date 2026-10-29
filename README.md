@@ -28,7 +28,7 @@ The recommender is our own Python model and runs on our backend. If DeepSeek is 
 | --- | --- |
 | Frontend | Flutter (Dart): Android app, plus a Flutter Web build from the same codebase |
 | Backend | FastAPI, Python |
-| Recommender | pandas, NumPy, scikit-learn, LightFM |
+| Recommender | NumPy: content-based scoring plus a rank-3 SVD matrix-factorization model (`signed-svd-v1`) as the approved equivalent to LightFM; see [`docs/hybrid-recommender.md`](docs/hybrid-recommender.md) |
 | Extraction | DeepSeek-V4.1-Flash via the official DeepSeek API (`httpx`) |
 | Database | PostgreSQL on Supabase |
 | Hosting | Android APK for testing, web build on Cloudflare Pages, backend on Google Cloud Run, Supabase for database and storage |
