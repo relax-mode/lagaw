@@ -54,11 +54,24 @@ recorded here. Staging writes go to the development Supabase project only.
 | 08 | Second trip "Itinerary Isolation Check" shows **No destinations yet** | Pass | [08](img/trip-itinerary-android/08-second-trip-empty.jpg) |
 | 09 | Airplane mode: "Could not reach the Lagaw server" with Retry; back online, Retry reloads the Museum | Pass | [09a](img/trip-itinerary-android/09a-offline-error.jpg), [09b](img/trip-itinerary-android/09b-retry-recovered.jpg) |
 
-## Still to record
+## Web, against the deployed staging API (2026-10-29)
 
-- [ ] PR link and passing CI run.
-- [ ] Web: after merge, repeat steps 01–09 on `https://staging.lagaw.pages.dev`,
-      using a full page reload for step 07.
-- [ ] SQL check in the development project (`vnpkyvtbupnquvirzlzp`) for the
-      verification trip, using the query in [trip-items-api.md](../trip-items-api.md):
-      one item (The Negros Museum, day 2, order 1), and both catalog locations still present.
+Web: Chrome on macOS at `https://staging.lagaw.pages.dev`, deployed from `a507305` ([main run 40815760387](https://github.com/relax-mode/lagaw/actions/runs/40815760387), after [PR #96](https://github.com/relax-mode/lagaw/pull/96)), signed in as Supabase test account A. Since #79 the deployed API accepts only signed-in Supabase sessions, so Web verification waited for #80.
+
+| # | Step | Result | Screenshot |
+| --- | --- | --- | --- |
+| 01 | New 2-day trip "w34_1 Test" shows **No destinations yet** | Pass | [w34_1](img/web-staging/w34_1.jpg) |
+| 02 | Picker lists real locations; Day 1 / Day 2 chips; Add disabled until a place is picked | Pass | [w34_2a](img/web-staging/w34_2a.jpg), [w34_2b](img/web-staging/w34_2b.jpg) |
+| 03 | San Sebastian Cathedral added to Day 1 | Pass | [w34_3](img/web-staging/w34_3.jpg) |
+| 04 | The Negros Museum added to Day 2; both grouped by day with details | Pass | [w34_4](img/web-staging/w34_4.jpg) |
+| 05 | Remove asks for confirmation | Pass | [w34_5](img/web-staging/w34_5.jpg) |
+| 06 | Removal deletes only the Cathedral | Pass | [w34_6](img/web-staging/w34_6.jpg) |
+| 07 | Full page reload: only the Museum (Day 2) remains | Pass | [w34_7](img/web-staging/w34_7.jpg) |
+| 08 | Another trip ("Account A Test Trip") shows only its own items | Pass | [w34_8](img/web-staging/w34_8.jpg) |
+
+## Links and remaining
+
+- Implementation: [PR #87](https://github.com/relax-mode/lagaw/pull/87), merged as `2c3a659`.
+- Android and Web verified against deployed staging (above).
+- [ ] Optional: SQL check in the development project (`vnpkyvtbupnquvirzlzp`) using the
+      query in [trip-items-api.md](../trip-items-api.md).
