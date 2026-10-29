@@ -29,7 +29,12 @@ Future<void> main() async {
         session = AuthSession(
           SupabaseAuthClient(
             Supabase.instance.client.auth,
-            emailRedirectTo: kIsWeb ? Uri.base.origin : null,
+            emailRedirectTo: emailRedirectFor(
+              configured: AppConfig.authRedirectUrl,
+              isWeb: kIsWeb,
+              base: Uri.base,
+              supabaseUrl: AppConfig.supabaseUrl,
+            ),
           ),
         );
         AuthSession.current = session;

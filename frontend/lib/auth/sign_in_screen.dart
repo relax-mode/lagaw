@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -43,10 +45,27 @@ class _SignInScreenState extends State<SignInScreen> {
   String? _error;
   String? _info;
 
+  // Seconds left before another attempt after a rate limit, so repeated taps
+  // don't spend more of Supabase's limit.
+  int _cooldown = 0;
+  Timer? _cooldownTimer;
+
   bool get _signingUp => _mode == _Mode.signUp;
+  bool get _canSubmit => !_busy && _cooldown == 0;
+
+  void _startCooldown(Duration wait) {
+    _cooldownTimer?.cancel();
+    _cooldown = wait.inSeconds;
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() => _cooldown--);
+      if (_cooldown <= 0) timer.cancel();
+    });
+  }
 
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
     _email.dispose();
     _password.dispose();
     _confirm.dispose();
@@ -60,11 +79,14 @@ class _SignInScreenState extends State<SignInScreen> {
       _error = null;
       _info = null;
       _confirm.clear();
+      // An email limit on sign-up must not block signing in instead.
+      _cooldownTimer?.cancel();
+      _cooldown = 0;
     });
   }
 
   Future<void> _submit() async {
-    if (_busy || !_formKey.currentState!.validate()) return;
+    if (!_canSubmit || !_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     final email = _email.text.trim();
     setState(() {
@@ -101,6 +123,8 @@ class _SignInScreenState extends State<SignInScreen> {
       if (!mounted) return;
       setState(() {
         _busy = false;
+        final wait = e.retryAfter;
+        if (wait != null) _startCooldown(wait);
         if (e.needsConfirmation) {
           _info = e.message;
         } else {
@@ -289,7 +313,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 const SizedBox(height: 20),
                                 Vector3DButton(
                                   key: const ValueKey('auth-submit'),
-                                  onTap: _busy ? null : _submit,
+                                  onTap: _canSubmit ? _submit : null,
                                   backgroundColor: const Color(0xFFEA580C),
                                   shadowColor: const Color(0xFF9A3412),
                                   borderColor: const Color(0xFFFDBA74),
@@ -317,6 +341,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                             ? (_signingUp
                                                   ? 'Creating account…'
                                                   : 'Signing in…')
+                                            : _cooldown > 0
+                                            ? 'Try again in ${_cooldown}s'
                                             : (_signingUp
                                                   ? 'Create account'
                                                   : 'Sign in'),
