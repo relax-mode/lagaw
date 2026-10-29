@@ -144,8 +144,8 @@ response = engine.recommend(validated_request)
 For real-data training, supply a single authorized `TrainingData` snapshot marked
 `real`, call `train`, and save a non-null model with `model.save(path)`. Do not use
 the synthetic evaluation CLI as a production training job. Train/retrain outside
-HTTP request handling. No auto-training, artifact deployment hook, model registry,
-production data collection or backend route is added here. A caller can observe
+HTTP request handling. No auto-training, model registry or production data
+collection is added here. A caller can observe
 `engine.model is None` at startup and log that state without exposing identifiers.
 Bad training data raises validation errors rather than silently being dropped.
 
@@ -185,7 +185,16 @@ Missing=zero SVD underweights unknown interactions, uses no confidence weighting
 or learned biases, and can lose recall in genuinely sparse data. Evaluate larger,
 independently collected chronological real-data splits before making quality claims.
 
-See [initial comparison results](evidence/hybrid-results.md). Required CI, teammate
-review, merged/integrated artifact checks and any applicable deployed-backend
-verification remain release gates. No new hosted endpoint exists to exercise in
-this offline issue; no deployed inference or artifact availability is claimed.
+See [initial comparison results](evidence/hybrid-results.md). Required CI and teammate
+review remain release gates.
+
+## Deployed serving (#94)
+
+[`collaborative-model-serving.md`](collaborative-model-serving.md) documents how the
+deployed `POST /api/v1/trips/{trip_id}/recommendations` serves this model: an offline
+export/train command over an allowlist of seeded demo accounts, one Secret Manager
+artifact per environment, a startup load with a SHA-256 pin and one safe log line, and
+rollback to the content baseline. Those artifacts are trained on a handful of seeded
+demo accounts. They demonstrate that the serving path blends scores; they are **not**
+evidence of recommendation quality, which stays on the labelled synthetic evaluation
+above.

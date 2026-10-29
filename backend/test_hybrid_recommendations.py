@@ -397,3 +397,16 @@ def test_evaluation_refuses_real_labels(dataset):
     changed["held_out"][0]["provenance"] = "real"
     with pytest.raises(ValueError, match="synthetic data only"):
         evaluate(changed)
+
+
+def test_artifact_digest_pin_accepts_only_the_exact_file(tmp_path, model):
+    import hashlib
+
+    path = tmp_path / "pinned.json"
+    model.save(path)
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    assert HybridRecommender.from_artifact(path, provenance="synthetic", expected_sha256=digest).model == model
+    assert HybridRecommender.from_artifact(path, provenance="synthetic", expected_sha256="0" * 64).model is None
+    assert HybridRecommender.from_artifact(path, provenance="synthetic", expected_sha256="short").model is None
+    path.write_text(path.read_text() + " ", encoding="utf-8")  # Any byte change breaks the pin.
+    assert HybridRecommender.from_artifact(path, provenance="synthetic", expected_sha256=digest).model is None
