@@ -12,6 +12,7 @@ import 'package:frontend/services/preference_service.dart';
 import 'package:frontend/services/trip_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 /// In-memory Supabase stand-in: no network, no real credentials.
 class FakeAuthClient implements AuthClient {
@@ -103,6 +104,36 @@ class FakeAuthClient implements AuthClient {
   }
 }
 
+/// Answers sign-up like Supabase does with email confirmation on.
+class FakeGoTrue extends Fake implements sb.GoTrueClient {
+  List<sb.UserIdentity> identities = [];
+  String? lastRedirect;
+
+  @override
+  Future<sb.AuthResponse> signUp({
+    String? email,
+    String? phone,
+    required String password,
+    String? emailRedirectTo,
+    Map<String, dynamic>? data,
+    String? captchaToken,
+    sb.OtpChannel channel = sb.OtpChannel.sms,
+  }) async {
+    lastRedirect = emailRedirectTo;
+    return sb.AuthResponse(
+      user: sb.User(
+        id: 'user-1',
+        appMetadata: const {},
+        userMetadata: const {},
+        aud: 'authenticated',
+        email: email,
+        createdAt: '2026-10-29T00:00:00Z',
+        identities: identities,
+      ),
+    );
+  }
+}
+
 String _jwt(Map<String, dynamic> payload) {
   String part(Object value) =>
       base64Url.encode(utf8.encode(jsonEncode(value))).replaceAll('=', '');
@@ -135,6 +166,118 @@ void main() {
       expect(isPublicSupabaseKey(_jwt({'role': 'service_role'})), isFalse);
       expect(isPublicSupabaseKey('sb_secret_abc'), isFalse);
       expect(isPublicSupabaseKey('not-a-key'), isFalse);
+    });
+  });
+
+  group('Auth error messages', () {
+    test('a per-address email cooldown names the wait', () {
+      final failure = describeAuthError(
+        'over_email_send_rate_limit',
+        '429',
+        'For security purposes, you can only request this after 42 seconds.',
+      );
+      expect(failure.message, contains('try again in 42 seconds'));
+      expect(failure.retryAfter, const Duration(seconds: 42));
+    });
+
+    test('the hourly email cap points existing sign-ups to their inbox', () {
+      final failure = describeAuthError(
+        'over_email_send_rate_limit',
+        '429',
+        'email rate limit exceeded',
+      );
+      expect(failure.message, contains('cannot send more confirmation emails'));
+      expect(failure.message, contains('then sign in'));
+      expect(failure.retryAfter, isNotNull);
+    });
+
+    test('request limits and bare 429s hold retries', () {
+      for (final failure in [
+        describeAuthError('over_request_rate_limit', '429', ''),
+        describeAuthError(null, '429', ''),
+      ]) {
+        expect(failure.message, contains('Too many attempts'));
+        expect(failure.retryAfter, isNotNull);
+      }
+      expect(
+        describeAuthError('invalid_credentials', '400', '').retryAfter,
+        isNull,
+      );
+    });
+  });
+
+  group('Confirmation email redirect', () {
+    String? redirect({
+      String configured = '',
+      bool isWeb = false,
+      String base = 'https://staging.lagaw.pages.dev/#/trips',
+      String supabaseUrl = 'https://vnpkyvtbupnquvirzlzp.supabase.co',
+    }) => emailRedirectFor(
+      configured: configured,
+      isWeb: isWeb,
+      base: Uri.parse(base),
+      supabaseUrl: supabaseUrl,
+    );
+
+    test('Web returns to its own origin', () {
+      expect(redirect(isWeb: true), 'https://staging.lagaw.pages.dev');
+    });
+
+    test('Android returns to the same project\'s deployed web app', () {
+      expect(redirect(), 'https://staging.lagaw.pages.dev');
+      expect(
+        redirect(supabaseUrl: 'https://zjnuqqtbapbpudsjbpif.supabase.co'),
+        'https://lagaw.pages.dev',
+      );
+      expect(redirect(supabaseUrl: 'https://other.supabase.co'), isNull);
+    });
+
+    test('an explicit AUTH_REDIRECT_URL wins', () {
+      expect(
+        redirect(configured: 'https://example.test', isWeb: true),
+        'https://example.test',
+      );
+    });
+  });
+
+  group('Supabase sign-up', () {
+    sb.UserIdentity identity() => const sb.UserIdentity(
+      id: 'user-1',
+      userId: 'user-1',
+      identityData: {},
+      identityId: 'identity-1',
+      provider: 'email',
+      createdAt: null,
+      lastSignInAt: null,
+    );
+
+    test(
+      'a new account waits for confirmation at the given redirect',
+      () async {
+        final auth = FakeGoTrue()..identities = [identity()];
+        final client = SupabaseAuthClient(
+          auth,
+          emailRedirectTo: 'https://staging.lagaw.pages.dev',
+        );
+
+        expect(await client.signUp('new@example.com', 'long-enough'), isFalse);
+        expect(auth.lastRedirect, 'https://staging.lagaw.pages.dev');
+      },
+    );
+
+    test('an already confirmed email says to sign in instead', () async {
+      final client = SupabaseAuthClient(FakeGoTrue());
+
+      await expectLater(
+        client.signUp('a@example.com', 'long-enough'),
+        throwsA(
+          isA<AuthFailure>().having(
+            (e) => e.message,
+            'message',
+            contains('Sign in instead'),
+          ),
+        ),
+      );
     });
   });
 
@@ -491,6 +634,56 @@ void main() {
       await fill(tester, 'auth-password', 'long-enough');
       await tap(tester, 'auth-submit');
       expect(find.textContaining('Confirm your email first'), findsOneWidget);
+    });
+
+    testWidgets('a rate limit holds submit until the wait is over', (
+      tester,
+    ) async {
+      client.requireConfirmation = true;
+      client.nextFailure = describeAuthError(
+        'over_email_send_rate_limit',
+        '429',
+        'For security purposes, you can only request this after 3 seconds.',
+      );
+      await pumpApp(tester);
+      await tap(tester, 'auth-switch-mode');
+      await fill(tester, 'auth-email', 'new@example.com');
+      await fill(tester, 'auth-password', 'long-enough');
+      await fill(tester, 'auth-confirm', 'long-enough');
+      await tap(tester, 'auth-submit');
+
+      expect(find.textContaining('try again in 3 seconds'), findsOneWidget);
+      expect(find.text('Try again in 3s'), findsOneWidget);
+      // Tapping during the wait sends nothing.
+      await tap(tester, 'auth-submit');
+      expect(client.passwords.containsKey('new@example.com'), isFalse);
+
+      await tester.pump(const Duration(seconds: 3));
+      expect(find.text('Create account'), findsOneWidget);
+      await tap(tester, 'auth-submit');
+      expect(find.textContaining('Check new@example.com'), findsOneWidget);
+    });
+
+    testWidgets('switching to sign-in clears a sign-up cooldown', (
+      tester,
+    ) async {
+      client.nextFailure = describeAuthError(
+        'over_email_send_rate_limit',
+        '429',
+        'email rate limit exceeded',
+      );
+      await pumpApp(tester);
+      await tap(tester, 'auth-switch-mode');
+      await fill(tester, 'auth-email', 'a@example.com');
+      await fill(tester, 'auth-password', 'long-enough');
+      await fill(tester, 'auth-confirm', 'long-enough');
+      await tap(tester, 'auth-submit');
+      expect(find.textContaining('then sign in'), findsOneWidget);
+
+      await tap(tester, 'auth-switch-mode');
+      await fill(tester, 'auth-password', 'correct-pw');
+      await tap(tester, 'auth-submit');
+      expect(find.byKey(const ValueKey('unsaved-field')), findsOneWidget);
     });
 
     testWidgets('sign-up without confirmation signs in directly', (

@@ -9,7 +9,14 @@ class AuthFailure implements Exception {
   /// True when the user should confirm their email before signing in.
   final bool needsConfirmation;
 
-  const AuthFailure(this.message, {this.needsConfirmation = false});
+  /// Set for rate limits: how long to hold the submit button before retrying.
+  final Duration? retryAfter;
+
+  const AuthFailure(
+    this.message, {
+    this.needsConfirmation = false,
+    this.retryAfter,
+  });
 
   @override
   String toString() => 'AuthFailure: $message';
@@ -91,8 +98,17 @@ class SupabaseAuthClient implements AuthClient {
       password: password,
       emailRedirectTo: emailRedirectTo,
     );
+    if (response.session == null && _isExistingAccount(response.user)) {
+      throw const AuthFailure(_existingAccount);
+    }
     return response.session != null;
   });
+
+  /// With confirmation on, Supabase answers a sign-up for an already
+  /// confirmed email with an obfuscated user that has no identities, instead
+  /// of an error, and sends no email.
+  static bool _isExistingAccount(sb.User? user) =>
+      user != null && (user.identities?.isEmpty ?? false);
 
   @override
   Future<void> signIn(String email, String password) =>
@@ -121,6 +137,8 @@ class SupabaseAuthClient implements AuthClient {
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
+    } on AuthFailure {
+      rethrow;
     } on sb.AuthException catch (e) {
       throw describeAuthError(e.code, e.statusCode, e.message);
     } on TimeoutException {
@@ -136,6 +154,60 @@ class SupabaseAuthClient implements AuthClient {
   }
 }
 
+const _existingAccount =
+    'An account with this email already exists. Sign in instead.';
+
+const _requestLimit = AuthFailure(
+  'Too many attempts from this network. Wait a few minutes, then try again.',
+  retryAfter: Duration(minutes: 1),
+);
+
+final RegExp _retryAfterSeconds = RegExp(r'after (\d+) seconds?');
+
+/// Supabase reports two different email limits under one code: a per-address
+/// cooldown ("...only request this after 42 seconds") and the project's
+/// hourly email cap ("email rate limit exceeded").
+AuthFailure _emailLimit(String message) {
+  final seconds = int.tryParse(
+    _retryAfterSeconds.firstMatch(message)?.group(1) ?? '',
+  );
+  if (seconds != null) {
+    return AuthFailure(
+      'An email was just sent to this address. Check your inbox (and spam), '
+      'or try again in $seconds seconds.',
+      retryAfter: Duration(seconds: seconds),
+    );
+  }
+  return const AuthFailure(
+    'Lagaw cannot send more confirmation emails right now. If you already '
+    'signed up, check your inbox (and spam) for the link, then sign in. '
+    'Otherwise try again later.',
+    retryAfter: Duration(minutes: 1),
+  );
+}
+
+/// Where confirmation emails send the user back. Supabase only honors URLs
+/// on the project's redirect allow-list and otherwise falls back to its Site
+/// URL, which defaults to localhost. An explicit `AUTH_REDIRECT_URL` wins;
+/// Web returns to its own origin; Android, which has no deep link, goes to
+/// the deployed web app of the same Supabase project.
+String? emailRedirectFor({
+  required String configured,
+  required bool isWeb,
+  required Uri base,
+  required String supabaseUrl,
+}) {
+  if (configured.isNotEmpty) return configured;
+  if (isWeb) return base.origin;
+  return knownWebApps[Uri.tryParse(supabaseUrl)?.host];
+}
+
+/// Deployed web app per Supabase project host (docs/flutter-authentication.md).
+const knownWebApps = {
+  'vnpkyvtbupnquvirzlzp.supabase.co': 'https://staging.lagaw.pages.dev',
+  'zjnuqqtbapbpudsjbpif.supabase.co': 'https://lagaw.pages.dev',
+};
+
 /// Maps Supabase Auth error codes to user-facing messages.
 AuthFailure describeAuthError(String? code, String? status, String message) {
   switch (code) {
@@ -148,29 +220,21 @@ AuthFailure describeAuthError(String? code, String? status, String message) {
         needsConfirmation: true,
       );
     case 'user_already_exists' || 'email_exists':
-      return const AuthFailure(
-        'An account with this email already exists. Sign in instead.',
-      );
+      return const AuthFailure(_existingAccount);
     case 'weak_password':
       return const AuthFailure(
         'Choose a stronger password (at least 8 characters).',
       );
-    case 'over_email_send_rate_limit' ||
-        'over_request_rate_limit' ||
-        'over_sms_send_rate_limit':
-      return const AuthFailure(
-        'Too many attempts. Wait a minute, then try again.',
-      );
+    case 'over_email_send_rate_limit':
+      return _emailLimit(message);
+    case 'over_request_rate_limit' || 'over_sms_send_rate_limit':
+      return _requestLimit;
     case 'signup_disabled' || 'email_provider_disabled':
       return const AuthFailure('New sign-ups are turned off right now.');
     case 'validation_failed' || 'email_address_invalid':
       return const AuthFailure('Enter a valid email address.');
   }
-  if (status == '429') {
-    return const AuthFailure(
-      'Too many attempts. Wait a minute, then try again.',
-    );
-  }
+  if (status == '429') return _requestLimit;
   if (status != null && status.startsWith('5')) {
     return const AuthFailure(
       'The sign-in service is unavailable right now. Please try again.',

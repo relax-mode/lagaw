@@ -14,11 +14,18 @@ Only **public** values are compiled into the app:
 | `SUPABASE_URL` | `https://vnpkyvtbupnquvirzlzp.supabase.co` | `https://zjnuqqtbapbpudsjbpif.supabase.co` |
 | `SUPABASE_ANON_KEY` | That project's publishable/anon key | That project's publishable/anon key |
 | `API_BASE_URL` | Staging API | Production API |
+| `AUTH_REDIRECT_URL` (optional) | Defaults to `https://staging.lagaw.pages.dev` | Defaults to `https://lagaw.pages.dev` |
 
 At startup the app refuses a `sb_secret_…` key or a JWT whose role is not
 `anon`, so a service-role key can never back the client. CI builds both web
 bundles with the URL above and the environment's existing public
 `SMOKE_SUPABASE_KEY` variable, and fails the build if it is missing.
+
+Confirmation emails return to the Web page's own origin. Android has no deep
+link, so its links go to the same project's deployed web app (known project URLs
+above), or to `AUTH_REDIRECT_URL` when set. Supabase only honors a redirect on the
+project's allow-list and otherwise uses its Site URL; see
+[Hosted Auth settings](#hosted-auth-settings).
 
 Local Android run against staging (public values only):
 
@@ -35,11 +42,16 @@ never sent, including as a fallback.
 
 - **Sign-up:** email, password (at least 8 characters) and confirmation. When the
   project requires email confirmation, the app explains that a link was sent and
-  makes no protected call until the user signs in. On Web the link returns to the
-  page's origin.
+  makes no protected call until the user signs in. Signing up again with an
+  already confirmed email says to sign in instead, rather than "Account created".
 - **Sign-in:** validation first; then Supabase errors are shown as readable
   messages (wrong password, unconfirmed email, existing account, rate limits,
   service outage, offline). The form keeps its values for another try.
+- **Rate limits:** Supabase's email limit is told apart from request limits. A
+  per-address cooldown names the seconds left; the project's hourly email cap
+  tells people who already signed up to check their inbox and sign in. After any
+  limit the submit button counts down ("Try again in 42s") instead of sending
+  more requests. Switching to sign-in clears a sign-up cooldown.
 - **Session restore:** `supabase_flutter` persists the session (Android storage,
   browser storage on Web) and refreshes it automatically. A token expiring within
   30 seconds is refreshed before a request.
@@ -71,11 +83,10 @@ confirmation), restore, sign-out and expiry-with-unsaved-input flows.
 
 ## Remaining limitations and coordination
 
-- **Kyle:** confirm Auth settings per project: email confirmation on, Web
-  redirect allowlist containing `https://staging.lagaw.pages.dev` and
-  `https://lagaw.pages.dev`, token lifetime, and rate limits.
+- **Hosted Auth settings** (below) must be applied in each Supabase project; the
+  app cannot fix localhost links or the email cap by itself.
 - **Android confirmation links:** no app deep link is configured, so the email
-  link opens the project's Site URL in a browser. After confirming, the user
+  link opens the deployed web app in a browser. After confirming, the user
   returns to the app and signs in. Deep links are a follow-up.
 - **Demo token:** CI still compiles the old `TRIP_DEMO_TOKEN` into web builds,
   but a Supabase-configured build never sends it. Removing it from the workflow
@@ -85,3 +96,28 @@ confirmation), restore, sign-out and expiry-with-unsaved-input flows.
 - **Two-user isolation** is enforced by the backend (#79) and must be verified
   end to end on Android and Web with two safe test accounts. See
   [evidence](evidence/flutter-authentication.md).
+
+## Hosted Auth settings
+
+Set in the Supabase dashboard of each project (**Authentication**). These are not
+in `supabase/config.toml`, which only configures a local `supabase start` stack.
+
+| Setting | Development `vnpkyvtbupnquvirzlzp` | Production `zjnuqqtbapbpudsjbpif` |
+| --- | --- | --- |
+| URL Configuration → Site URL | `https://staging.lagaw.pages.dev` | `https://lagaw.pages.dev` |
+| URL Configuration → Redirect URLs | `https://staging.lagaw.pages.dev`, `https://staging.lagaw.pages.dev/**`, `https://*.lagaw.pages.dev` | `https://lagaw.pages.dev`, `https://lagaw.pages.dev/**` |
+| Emails → SMTP Settings | Custom SMTP on | Custom SMTP on |
+| Rate Limits → emails sent per hour | 30 or more (only editable with custom SMTP) | 30 or more |
+
+- **Localhost links:** a new project's Site URL is `http://localhost:3000`, and
+  Supabase uses it whenever the requested redirect is missing or not
+  allow-listed. Setting both rows above fixes the links for Web and Android.
+- **"Too many attempts" on sign-up:** without custom SMTP, Supabase's built-in
+  mailer sends only about 2 auth emails per hour per project, shared by every
+  user, and each sign-up (or repeated sign-up of an unconfirmed address) sends
+  one. The built-in mailer also delivers only to the organization's team
+  members. The app now explains the limit and stops resending, but only custom
+  SMTP (for example Brevo or Resend) with a higher hourly limit removes it. Keep the SMTP
+  password in the dashboard only; never commit it.
+- Keep email confirmation on and anonymous sign-in off (see the
+  [#79 contract](authentication.md)).
