@@ -113,9 +113,13 @@ in `supabase/config.toml`, which only configures a local `supabase start` stack.
   Supabase uses it whenever the requested redirect is missing or not
   allow-listed. Setting both rows above fixes the links for Web and Android.
 - **"Too many attempts" on sign-up:** without custom SMTP, Supabase's built-in
-  mailer sends only about 2 auth emails per hour per project, shared by every
+  mailer sends only 2 auth emails per rolling hour per project, shared by every
   user, and each sign-up (or repeated sign-up of an unconfirmed address) sends
-  one. The built-in mailer also delivers only to the organization's team
+  one. A rejected sign-up creates no account, so even a first attempt fails once
+  two other people have signed up in the past hour. Measured on development on
+  October 29: confirmation emails at 03:16:34 and 03:21:57 UTC (two teammates)
+  blocked every later sign-up until 04:16:37, three seconds after the first left
+  the hour window. The built-in mailer also delivers only to the organization's team
   members. The app now explains the limit and stops resending, but only custom
   SMTP (for example Brevo or Resend) with a higher hourly limit removes it. Keep the SMTP
   password in the dashboard only; never commit it.
