@@ -29,10 +29,7 @@ def test_unset_variables_remove_the_mount_and_variables(secret, digest):
     result = delivery.resolve(secret, digest)
     assert result["enabled"] == "false"
     assert result["secret_line"] == result["path_line"] == result["sha_line"] == ""
-    assert result["flags"] == (
-        "--remove-secrets=/secrets/model/artifact.json "
-        "--remove-env-vars=MODEL_FILE_PATH,MODEL_FILE_SHA256"
-    )
+    assert result["flags"] == "--remove-env-vars=MODEL_FILE_PATH,MODEL_FILE_SHA256"
 
 
 @pytest.mark.parametrize("secret, digest", [
@@ -51,4 +48,6 @@ def test_both_deploy_jobs_use_the_resolver_and_never_mount_latest():
     for variable in ("secret_line", "path_line", "sha_line"):
         assert workflow.count(f"steps.model.outputs.{variable}") == 2
     assert workflow.count("steps.model.outputs.flags") == 2
+    # Overwriting secrets is what prunes the mount's volume on rollback; --remove-secrets leaves it behind.
+    assert workflow.count("secrets_update_strategy: overwrite") == 2
     assert not re.search(r"/secrets/model.*:latest", workflow)

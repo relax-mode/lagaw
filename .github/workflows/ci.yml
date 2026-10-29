@@ -455,6 +455,7 @@ jobs:
             SUPABASE_SERVICE_ROLE_KEY=STAGING_SUPABASE_SERVICE_ROLE_KEY:2
             DEEPSEEK_API_KEY=STAGING_DEEPSEEK_API_KEY:1
             ${{ steps.model.outputs.secret_line }}
+          secrets_update_strategy: overwrite
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
@@ -656,6 +657,7 @@ jobs:
             SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:1
             DEEPSEEK_API_KEY=DEEPSEEK_API_KEY:1
             ${{ steps.model.outputs.secret_line }}
+          secrets_update_strategy: overwrite
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}

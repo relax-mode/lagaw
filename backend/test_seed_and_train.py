@@ -35,9 +35,9 @@ def test_seed_plan_clears_every_gate_and_leaves_fallback_cases():
     assert model.user_counts[model.user_ids.index(target)] >= 3
     assert model.user_counts[model.user_ids.index(PROFILES["E"])] < 3
     modes = {model.score(target, location)[1] for location in CATALOG}
-    assert modes == {"hybrid", "sparse_location", "unseen_location"}
+    assert modes == {"hybrid", "sparse_location"}
     supported = [loc for loc in CATALOG if model.score(target, loc)[1] == "hybrid"]
-    assert len(supported) >= 5
+    assert CATALOG[0] in supported and len(supported) >= 5
     assert model.score(PROFILES["E"], CATALOG[0])[1] == "insufficient_history"
     assert model.score(uuid4(), CATALOG[0])[1] == "unseen_user"
 
@@ -45,7 +45,7 @@ def test_seed_plan_clears_every_gate_and_leaves_fallback_cases():
 def test_plan_has_a_left_swipe_exclusion_and_only_valid_event_types():
     assert any(kind == "left_swipe" for kind in (k for _, k in seed.PLAN["A"]))
     assert {kind for events in seed.PLAN.values() for _, kind in events} <= {"left_swipe", "right_swipe", "save"}
-    assert max(index for events in seed.PLAN.values() for index, _ in events) < seed.CATALOG_SIZE - 1
+    assert max(index for events in seed.PLAN.values() for index, _ in events) < seed.CATALOG_SIZE
 
 
 def manifest():

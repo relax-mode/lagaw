@@ -2,8 +2,9 @@
 
 MODEL_ARTIFACT_SECRET (`SECRET_NAME:VERSION`, numeric version) and MODEL_FILE_SHA256
 (64 hex characters) are set together to mount the trained collaborative artifact
-read-only, or left unset to serve the content baseline. Disabled output removes any
-earlier mount and variables, because the deploy action merges rather than replaces.
+read-only, or left unset to serve the content baseline. The deploy steps overwrite the
+service's secrets (the mount, and its volume, disappear when the line does) but merge
+environment variables, so disabled output explicitly removes the two model variables.
 Prints `name=value` lines for $GITHUB_OUTPUT; never reads or prints a secret value.
 """
 
@@ -21,7 +22,7 @@ def resolve(secret: str, digest: str) -> dict[str, str]:
     if not secret and not digest:
         return {
             "enabled": "false", "secret_line": "", "path_line": "", "sha_line": "",
-            "flags": f"--remove-secrets={MOUNT_PATH} --remove-env-vars=MODEL_FILE_PATH,MODEL_FILE_SHA256",
+            "flags": "--remove-env-vars=MODEL_FILE_PATH,MODEL_FILE_SHA256",
         }
     if not secret or not digest:
         raise ValueError("Set MODEL_ARTIFACT_SECRET and MODEL_FILE_SHA256 together, or neither.")

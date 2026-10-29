@@ -33,12 +33,13 @@ spec.loader.exec_module(smoke)
 REFS = {"staging": "vnpkyvtbupnquvirzlzp", "production": "zjnuqqtbapbpudsjbpif"}
 LOCAL_APIS = {"http://127.0.0.1:8000", "http://localhost:8000"}
 LETTERS = "ABCDE"
-CATALOG_SIZE = 12
+CATALOG_SIZE = 10
 GROUP = "friends"
 EMAIL = "lagaw-demo-{environment}-{letter}@example.invalid"
-# (catalog index, interaction type, rating). A: target with deep history. E: too little
-# history (insufficient_history). Items 7-9 have one supporter each (sparse_location);
-# items 10-11 are never interacted with (unseen_location). Item 3 is left-swiped.
+# (catalog index, interaction type). Index 0 is the only location the content engine can
+# recommend today (the only one with a known cost), so it is the heavily supported item.
+# A: target with deep history. E: too little history (insufficient_history). Items 7-9
+# have one supporter each (sparse_location). Item 3 is left-swiped by A and B.
 PLAN = {
     "A": [(0, "right_swipe"), (0, "save"), (1, "right_swipe"), (2, "right_swipe"),
           (3, "left_swipe"), (8, "right_swipe")],
@@ -119,10 +120,13 @@ def pick_catalog(api: httpx.Client) -> list[str]:
         offset += len(items)
         if len(items) < 100:
             break
-    eligible = sorted(row["id"] for row in rows
-                      if GROUP in row["suitable_group_types"] and row["estimated_cost_max"] is not None)
-    require(len(eligible) >= CATALOG_SIZE, "The catalog has too few friends-compatible, priced locations.")
-    return eligible[:CATALOG_SIZE]
+    # The content engine fails closed on an unknown cost, so priced places come first:
+    # index 0 must be recommendable for the seeded trips to have anything to blend.
+    ordered = sorted(rows, key=lambda row: (row["estimated_cost_max"] is None, row["id"]))
+    require(len(ordered) >= CATALOG_SIZE, "The catalog has too few active locations.")
+    require(GROUP in ordered[0]["suitable_group_types"] and ordered[0]["estimated_cost_max"] is not None,
+            "No priced, friends-compatible location exists to recommend.")
+    return [row["id"] for row in ordered[:CATALOG_SIZE]]
 
 
 def seed(environment: str, api_url: str, private_dir: Path) -> None:
@@ -166,7 +170,7 @@ def seed(environment: str, api_url: str, private_dir: Path) -> None:
                     response = api.post("/api/v1/trips", headers=headers, json={
                         "title": f"Lagaw demo serving trip {letter}", "start_date": "2026-11-01",
                         "end_date": "2026-11-02", "budget_min": "0", "budget_max": "5000",
-                        "group_type": GROUP, "preferred_tags": ["cafe", "relaxing"],
+                        "group_type": GROUP, "preferred_tags": ["heritage", "photography"],
                     })
                     require(response.status_code == 201, "A demo trip could not be created.")
                     manifest["accounts"][letter]["trip_id"] = response.json()["id"]
