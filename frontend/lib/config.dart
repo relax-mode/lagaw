@@ -22,6 +22,7 @@ class AppConfig {
 
   static String get locationsEndpoint => '$apiBaseUrl/locations';
   static String get tripsEndpoint => '$apiBaseUrl/api/v1/trips';
+  static String get interactionsEndpoint => '$apiBaseUrl/api/v1/interactions';
   static String get preferenceExtractEndpoint =>
       '$apiBaseUrl/api/v1/preferences/extract';
 }
