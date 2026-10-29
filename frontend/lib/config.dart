@@ -9,6 +9,17 @@ class AppConfig {
   /// Deployed web bundles are public, so treat this token as exposed. [S2-04]
   static const String tripDemoToken = String.fromEnvironment('TRIP_DEMO_TOKEN');
 
+  /// Public Supabase Auth configuration for this environment, supplied with
+  /// `--dart-define`. Only the project URL and publishable/anon key belong
+  /// here; service-role keys must never be compiled into the app. [S3-16]
+  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+  );
+
+  static bool get authEnabled =>
+      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+
   static String get locationsEndpoint => '$apiBaseUrl/locations';
   static String get tripsEndpoint => '$apiBaseUrl/api/v1/trips';
   static String get preferenceExtractEndpoint =>

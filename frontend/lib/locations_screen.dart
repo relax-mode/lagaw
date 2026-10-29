@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'auth/auth_gate.dart';
+import 'auth/auth_session.dart';
 import 'config.dart';
 import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
@@ -509,6 +511,25 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   /// Top 3D Vector Header (Crisp solid card with 3D tactile buttons)
+  String get _avatarLetter {
+    final email = AuthSession.current?.accountEmail;
+    return email == null || email.isEmpty ? 'R' : email[0].toUpperCase();
+  }
+
+  Widget _accountButton(Widget avatar) {
+    final session = AuthSession.current;
+    if (session == null) return avatar;
+    return Semantics(
+      button: true,
+      label: 'Account and sign out',
+      child: GestureDetector(
+        key: const ValueKey('account-button'),
+        onTap: () => showAccountSheet(context, session),
+        child: avatar,
+      ),
+    );
+  }
+
   Widget _buildTopGlassHeader({required bool isWide}) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isWide ? 32 : 20),
@@ -533,8 +554,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: Row(
           children: [
-            // 3D Avatar Badge
-            Container(
+            // 3D Avatar Badge; opens the account sheet when signed in.
+            _accountButton(Container(
               width: 38,
               height: 38,
               decoration: BoxDecoration(
@@ -554,16 +575,16 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 ],
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'R',
-                style: TextStyle(
+              child: Text(
+                _avatarLetter,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
                   fontSize: 15,
                   fontFamily: 'Outfit',
                 ),
               ),
-            ),
+            )),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

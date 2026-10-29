@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/api_credentials.dart';
+import '../auth/auth_session.dart';
 import '../config.dart';
 import '../models/preference_draft.dart';
 
@@ -27,39 +29,58 @@ class PreferenceApiException implements Exception {
 /// backend; this client never talks to DeepSeek or the database. [S3-06]
 class PreferenceService {
   final http.Client _client;
-  final String _token;
+  final ApiCredentials _auth;
 
   /// The backend allows the provider up to 30 s; leave room for the hop.
   static const Duration _timeout = Duration(seconds: 40);
 
   static const int maxPromptLength = 2000;
 
-  PreferenceService({http.Client? client, String? token})
+  /// Uses the signed-in Supabase session ([AuthSession.current]) unless a
+  /// fixed [token] is given. [S3-16]
+  PreferenceService({http.Client? client, String? token, AuthSession? session})
     : _client = client ?? http.Client(),
-      _token = token ?? AppConfig.tripDemoToken;
+      _auth = ApiCredentials.resolve(
+        token: token,
+        session: session,
+        demoToken: AppConfig.tripDemoToken,
+      );
 
   /// POST /api/v1/preferences/extract. Sends only the prompt: suggestions
   /// are reviewed and merged on the client, so explicit form values are
   /// never overridden by the server. Never retried automatically.
   Future<PreferenceDraft> extract(String prompt) async {
-    if (_token.isEmpty) {
-      throw const PreferenceApiException(
-        'AI suggestions are not set up on this build.',
+    var token = await _auth.token();
+    if (token == null) {
+      throw PreferenceApiException(
+        _auth.usesSession
+            ? AuthMessages.sessionExpired
+            : 'AI suggestions are not set up on this build.',
+        statusCode: _auth.usesSession ? 401 : null,
       );
     }
-    final http.Response response;
+    Future<http.Response> post(String bearer) => _client
+        .post(
+          Uri.parse(AppConfig.preferenceExtractEndpoint),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $bearer',
+          },
+          body: jsonEncode({'prompt': prompt}),
+        )
+        .timeout(_timeout);
+    http.Response response;
     try {
-      response = await _client
-          .post(
-            Uri.parse(AppConfig.preferenceExtractEndpoint),
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $_token',
-            },
-            body: jsonEncode({'prompt': prompt}),
-          )
-          .timeout(_timeout);
+      response = await post(token);
+      // A 401 is rejected before any provider call, so one retry after a
+      // successful refresh cannot double-charge an extraction.
+      if (response.statusCode == 401 &&
+          _auth.usesSession &&
+          await _auth.recover()) {
+        token = await _auth.token();
+        if (token != null) response = await post(token);
+      }
     } on TimeoutException {
       throw const PreferenceApiException(
         'AI suggestions took too long. Try again, or fill in the form yourself.',
@@ -92,9 +113,14 @@ class PreferenceService {
 
   PreferenceApiException _errorFor(http.Response response) {
     final status = response.statusCode;
-    final code = _detailCode(response.body);
+    final code = apiErrorCode(response.body);
     final message = switch ((status, code)) {
-      (401, _) => 'This app is not authorized to use AI suggestions.',
+      (401, _) =>
+        _auth.usesSession
+            ? AuthMessages.sessionExpired
+            : 'This app is not authorized to use AI suggestions.',
+      (403, 'email_confirmation_required') => AuthMessages.emailConfirmation,
+      (409, 'profile_link_required') => AuthMessages.profileLink,
       (_, 'invalid_request') =>
         'Describe your trip in 1 to $maxPromptLength characters.',
       (_, 'extraction_timeout') =>
@@ -114,18 +140,6 @@ class PreferenceService {
             'form yourself.',
     };
     return PreferenceApiException(message, code: code, statusCode: status);
-  }
-
-  /// `{"detail": {"code": ...}}` for extraction errors; access errors use
-  /// a plain string detail and have no code.
-  String? _detailCode(String body) {
-    try {
-      final decoded = jsonDecode(body);
-      final detail = decoded is Map<String, dynamic> ? decoded['detail'] : null;
-      return detail is Map<String, dynamic> ? detail['code']?.toString() : null;
-    } on FormatException {
-      return null;
-    }
   }
 
   void dispose() {

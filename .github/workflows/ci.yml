@@ -507,7 +507,12 @@ jobs:
         env:
           API_BASE_URL: ${{ steps.deploy-backend-staging.outputs.url || steps.existing-staging-api.outputs.url }}
           TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
-        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
+          # Public Supabase Auth config (#80): project URL and publishable/anon key only.
+          SUPABASE_URL: https://vnpkyvtbupnquvirzlzp.supabase.co
+          SUPABASE_ANON_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
+        run: |
+          [ -n "$SUPABASE_ANON_KEY" ] || { echo "::error::Staging web Supabase key is missing (SMOKE_SUPABASE_KEY)."; exit 1; }
+          flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN" --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Set up Node.js
         if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
@@ -732,7 +737,12 @@ jobs:
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
           TRIP_DEMO_TOKEN: ${{ secrets.TRIP_DEMO_TOKEN }}
-        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN"
+          # Public Supabase Auth config (#80): project URL and publishable/anon key only.
+          SUPABASE_URL: https://zjnuqqtbapbpudsjbpif.supabase.co
+          SUPABASE_ANON_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
+        run: |
+          [ -n "$SUPABASE_ANON_KEY" ] || { echo "::error::Production web Supabase key is missing (SMOKE_SUPABASE_KEY)."; exit 1; }
+          flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN" --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
