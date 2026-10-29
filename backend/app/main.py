@@ -1,6 +1,8 @@
 """Lagaw's FastAPI entry point."""
 
 import os
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 from urllib.parse import urlsplit
@@ -18,6 +20,7 @@ from app.itinerary_generation import router as itinerary_generation_router
 from app.preference_extraction import router as preference_extraction_router
 from app.schemas import LocationsPage
 from app.trip_items import router as trip_items_router
+from app.trip_recommendations import get_recommendation_engine
 from app.trip_recommendations import router as trip_recommendations_router
 from app.trips import router as trips_router
 
@@ -84,10 +87,17 @@ def get_cors_origins() -> list[str]:
     return origins
 
 
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    """Load the recommendation model before the first request, not during it."""
+    get_recommendation_engine()
+    yield
+
+
 def create_app() -> FastAPI:
     """Configure each backend environment at startup, before serving requests."""
     load_dotenv(ROOT / ".env", override=False)
-    application = FastAPI(title="Lagaw API", version="0.1.0")
+    application = FastAPI(title="Lagaw API", version="0.1.0", lifespan=lifespan)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=get_cors_origins(),
