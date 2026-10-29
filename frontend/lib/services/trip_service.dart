@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/api_credentials.dart';
+import '../auth/auth_session.dart';
 import '../config.dart';
 import '../models/trip.dart';
 import '../models/trip_item.dart';
@@ -31,18 +33,27 @@ class TripApiException implements Exception {
 
 class TripService {
   final http.Client _client;
-  final String _token;
+  final ApiCredentials _auth;
+
+  /// Bearer token for the request being sent; set by [_send].
+  String _activeToken = '';
 
   static const Duration _timeout = Duration(seconds: 6);
 
-  TripService({http.Client? client, String? token})
+  /// Uses the signed-in Supabase session ([AuthSession.current]) unless a
+  /// fixed [token] is given. [S3-16]
+  TripService({http.Client? client, String? token, AuthSession? session})
     : _client = client ?? http.Client(),
-      _token = token ?? AppConfig.tripDemoToken;
+      _auth = ApiCredentials.resolve(
+        token: token,
+        session: session,
+        demoToken: AppConfig.tripDemoToken,
+      );
 
   Map<String, String> get _headers => {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer $_token',
+    'Authorization': 'Bearer $_activeToken',
   };
 
   /// POST /api/v1/trips
@@ -196,6 +207,8 @@ class TripService {
   /// specific: the backend's 404 detail names the missing trip, location
   /// or item.
   TripApiException _itemErrorFor(http.Response response) {
+    final auth = _authErrorFor(response);
+    if (auth != null) return auth;
     final status = response.statusCode;
     if (status == 409) {
       return TripApiException(
@@ -231,13 +244,34 @@ class TripService {
     }
   }
 
+  /// Sends with the current bearer token. A 401 means authentication failed
+  /// before the operation ran, so after one successful session refresh the
+  /// request is retried once (the #79 contract); it never loops.
   Future<http.Response> _send(Future<http.Response> Function() request) async {
-    if (_token.isEmpty) {
+    final token = await _auth.token();
+    if (token == null) {
+      if (_auth.usesSession) {
+        throw const TripApiException(
+          AuthMessages.sessionExpired,
+          statusCode: 401,
+        );
+      }
       throw const TripApiException(
         'Trips are not set up on this build. Run the app with '
         '--dart-define=TRIP_DEMO_TOKEN=<dev token>.',
       );
     }
+    _activeToken = token;
+    final response = await _timed(request);
+    if (response.statusCode != 401 || !_auth.usesSession) return response;
+    if (!await _auth.recover()) return response;
+    _activeToken = await _auth.token() ?? '';
+    return _timed(request);
+  }
+
+  Future<http.Response> _timed(
+    Future<http.Response> Function() request,
+  ) async {
     try {
       return await request().timeout(_timeout);
     } on TimeoutException {
@@ -251,14 +285,35 @@ class TripService {
     }
   }
 
+  /// Backend authentication outcomes (#79) shared by every endpoint.
+  TripApiException? _authErrorFor(http.Response response) {
+    final status = response.statusCode;
+    final code = apiErrorCode(response.body);
+    if (status == 401) {
+      return TripApiException(
+        _auth.usesSession
+            ? AuthMessages.sessionExpired
+            : 'This app is not authorized to manage trips.',
+        statusCode: status,
+      );
+    }
+    if (status == 403 && code == 'email_confirmation_required') {
+      return TripApiException(
+        AuthMessages.emailConfirmation,
+        statusCode: status,
+      );
+    }
+    if (status == 409 && code == 'profile_link_required') {
+      return TripApiException(AuthMessages.profileLink, statusCode: status);
+    }
+    return null;
+  }
+
   TripApiException _errorFor(http.Response response) {
+    final auth = _authErrorFor(response);
+    if (auth != null) return auth;
     final status = response.statusCode;
     switch (status) {
-      case 401:
-        return TripApiException(
-          'This app is not authorized to manage trips.',
-          statusCode: status,
-        );
       case 404:
         return TripApiException('Trip not found.', statusCode: status);
       case 409:
