@@ -46,9 +46,11 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
-              - 'scripts/smoke_deployed.py'
-              - 'scripts/ai_live_smoke.py'
+              - 'scripts/*.py'
               - 'docs/evidence/week3-evaluation.json'
+              # The audit gate and its allowlist are exercised by backend tests.
+              - '.github/security/**'
+              - '.gitleaks.toml'
               - '.github/workflows/ci.yml'
             database:
               - 'backend/**'
