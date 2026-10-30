@@ -20,11 +20,14 @@ jobs:
     name: Live AI extraction (staging)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
+    permissions:
+      contents: read
     environment: staging
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       # The provider key stays in Secret Manager; this calls the deployed staging
       # API, which spends one extraction on the staging key.
@@ -42,12 +45,15 @@ jobs:
     environment: production
     timeout-minutes: 5
 
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
