@@ -1,0 +1,80 @@
+# Dependency update proposals. Weekly on Monday in Asia/Manila; minor and patch
+# updates are grouped per ecosystem so each ecosystem opens at most one grouped
+# PR, and the open-PR limit keeps the queue small. Major updates stay separate.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Manila
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: chore(ci)
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: pip
+    directory: "/backend"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Manila
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - backend
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      pip-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Manila
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - tooling
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: pub
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Manila
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - frontend
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      pub-minor-patch:
+        update-types:
+          - minor
+          - patch
