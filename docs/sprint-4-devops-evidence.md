@@ -2,19 +2,19 @@
 
 Factual index of Sprint 4 DevOps work for [issue #122](https://github.com/relax-mode/lagaw/issues/122) and the consultation pack. It records what exists on `main` and in GitHub on October 30, 2026, and what is still pending. It does not record outcomes that have not happened. Owner: CyGray (DevOps).
 
-PR numbers are placeholders (`PR: TBD`) until the lead fills them in. Work that is in review is not on `main` yet, so links to its files are not given here.
+PR numbers were filled in on October 30 when the PRs were opened. Work that is in review is not on `main` yet, so links to its files are not given here.
 
 ## Issue to work map
 
 | Issue | Title (as on GitHub, state on Oct 30) | PR | Status | Branch or location |
 |---|---|---|---|---|
-| [#112](https://github.com/relax-mode/lagaw/issues/112) | [S4-12] Evaluate Brevo and Resend for Supabase Authentication Emails (open) | PR: TBD | In review | `chore/s4-resend-auth-readiness` |
-| [#113](https://github.com/relax-mode/lagaw/issues/113) | [S4-13] Configure and Verify Production Authentication Email Delivery (open) | PR: TBD | Blocked on the sender domain and SMTP credentials | `chore/s4-resend-auth-readiness` (preparation only) |
-| [#118](https://github.com/relax-mode/lagaw/issues/118) | [S4-18] Restore Scheduled AI Smoke Checks and Production Verification (open) | PR: TBD | Fix in review. The scheduled check is failing. | `fix/ai-live-smoke-supabase-auth` |
-| [#119](https://github.com/relax-mode/lagaw/issues/119) | [S4-19] Improve CI/CD Security and Pipeline Efficiency (open) | PR: TBD | Security work in review. Metrics work in this branch. | `chore/s4-cicd-security` (security); `docs/s4-devops-records` (metrics and docs) |
-| [#120](https://github.com/relax-mode/lagaw/issues/120) | [S4-20] Document and Execute a Staging Rollback Drill (open) | PR: TBD | Runbook and helper in review. **Drill not performed.** | `chore/s4-rollback-readiness` |
-| [#121](https://github.com/relax-mode/lagaw/issues/121) | [S4-21] Prepare and Publish the Verified v1.0.0 Release (open) | PR: TBD | Changelog and release process in review. **No tag or release exists.** | `chore/s4-release-readiness` |
-| [#122](https://github.com/relax-mode/lagaw/issues/122) | [S4-22] Maintain Sprint 4 Records and Consultation Evidence (open) | PR: TBD | This branch | `docs/s4-devops-records` |
+| [#112](https://github.com/relax-mode/lagaw/issues/112) | [S4-12] Evaluate Brevo and Resend for Supabase Authentication Emails (open) | [PR #123](https://github.com/relax-mode/lagaw/pull/123) | In review | `chore/s4-resend-auth-readiness` |
+| [#113](https://github.com/relax-mode/lagaw/issues/113) | [S4-13] Configure and Verify Production Authentication Email Delivery (open) | [PR #123](https://github.com/relax-mode/lagaw/pull/123) | Blocked on the sender domain and SMTP credentials | `chore/s4-resend-auth-readiness` (preparation only) |
+| [#118](https://github.com/relax-mode/lagaw/issues/118) | [S4-18] Restore Scheduled AI Smoke Checks and Production Verification (open) | [PR #100](https://github.com/relax-mode/lagaw/pull/100) | Fix in review. The scheduled check is failing. | `fix/ai-live-smoke-supabase-auth` |
+| [#119](https://github.com/relax-mode/lagaw/issues/119) | [S4-19] Improve CI/CD Security and Pipeline Efficiency (open) | [PR #125](https://github.com/relax-mode/lagaw/pull/125) (security); this PR (metrics) | Security work in review. Metrics work in this branch. | `chore/s4-cicd-security` (security); `docs/s4-devops-records` (metrics and docs) |
+| [#120](https://github.com/relax-mode/lagaw/issues/120) | [S4-20] Document and Execute a Staging Rollback Drill (open) | [PR #126](https://github.com/relax-mode/lagaw/pull/126) | Runbook and helper in review. **Drill not performed.** | `chore/s4-rollback-readiness` |
+| [#121](https://github.com/relax-mode/lagaw/issues/121) | [S4-21] Prepare and Publish the Verified v1.0.0 Release (open) | [PR #124](https://github.com/relax-mode/lagaw/pull/124) | Changelog and release process in review. **No tag or release exists.** | `chore/s4-release-readiness` |
+| [#122](https://github.com/relax-mode/lagaw/issues/122) | [S4-22] Maintain Sprint 4 Records and Consultation Evidence (open) | this PR | This branch | `docs/s4-devops-records` |
 
 ## Evidence available now
 
@@ -35,7 +35,7 @@ PR numbers are placeholders (`PR: TBD`) until the lead fills them in. Work that 
 
 | Item | Needed before it can be recorded |
 |---|---|
-| Scheduled live AI check passing | The fix merged to `main` (PR #100 is the open fix branch, `fix/ai-live-smoke-supabase-auth`), then a passing run recorded. Scheduled runs are Mondays and Thursdays 09:00 Asia/Manila; a manual run is possible. |
+| Scheduled live AI check passing | The fix merged to `main` ([PR #100](https://github.com/relax-mode/lagaw/pull/100) is the open fix branch, `fix/ai-live-smoke-supabase-auth`), then a passing run recorded. Scheduled runs are Mondays and Thursdays 09:00 Asia/Manila; a manual run is possible. |
 | Staging rollback drill | Explicit authorization to run it on staging. The runbook is still in review. |
 | Release tag `v1.0.0` and release | The `chore/s4-release-readiness` PR merged, then the tag and release created. No tag or release exists on Oct 30. |
 | Email sender domain and SMTP for Supabase Auth | A verified sender domain and SMTP credentials chosen and entered by the owner. Sprint log Oct 29: custom SMTP is required before the email rate limit can be raised. |
