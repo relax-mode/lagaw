@@ -3,7 +3,8 @@
 Signs in as the environment's dedicated confirmed-email smoke account, then
 exercises the deployed backend, its Secret Manager DeepSeek key and the provider
 end to end, without any provider key in GitHub. Spends one extraction call per
-run. Never prints credentials or response bodies.
+run. Never prints credentials or response bodies; a failed sign-in reports only
+its HTTP status or that Supabase Auth was unreachable.
 """
 
 import json
@@ -65,7 +66,13 @@ def verify(base_url, token):
 
 def run(base_url):
     """Sign in first: staging rejects the retired demo token."""
-    return verify(base_url, sign_in(base_url, "staging"))
+    try:
+        token = sign_in(base_url, "staging")
+    except HTTPError as error:  # HTTPError subclasses URLError, so it must come first.
+        raise ValueError(f"Smoke account sign-in failed with HTTP {error.code}.") from None
+    except (URLError, TimeoutError):
+        raise ValueError("Smoke account sign-in could not reach Supabase Auth.") from None
+    return verify(base_url, token)
 
 
 if __name__ == "__main__":

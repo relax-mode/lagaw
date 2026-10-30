@@ -8,7 +8,7 @@ import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -19,6 +19,13 @@ spec.loader.exec_module(live)
 
 API = "https://lagaw-api-staging-i5kvldluga-as.a.run.app"
 TOKEN = "dummy-staging-token-for-offline-checks-only"
+SMOKE_EMAIL = "smoke-dummy@example.test"
+SMOKE_PASSWORD = "dummy-smoke-password-for-offline-checks-only"
+SMOKE_ENV = {
+    "SMOKE_AUTH_EMAIL": SMOKE_EMAIL,
+    "SMOKE_AUTH_PASSWORD": SMOKE_PASSWORD,
+    "SMOKE_SUPABASE_KEY": "dummy-supabase-key-for-offline-checks-only",
+}
 DRAFT = {
     "schema_version": "1",
     "requires_confirmation": True,
@@ -50,6 +57,35 @@ class AiLiveSmokeTests(unittest.TestCase):
                 patch.object(live, "verify") as verified, self.assertRaises(ValueError):
             live.run(API)
         verified.assert_not_called()
+
+    def test_sign_in_http_failures_are_sanitized_and_skip_extraction(self):
+        for code in (400, 429):
+            failure = HTTPError(API, code, "bad request", {}, io.BytesIO(
+                json.dumps({"msg": SMOKE_EMAIL + " " + SMOKE_PASSWORD}).encode()))
+            with self.subTest(code=code), \
+                    patch.dict(os.environ, SMOKE_ENV, clear=True), \
+                    patch.object(live, "sign_in", side_effect=failure), \
+                    patch.object(live, "verify") as verified, \
+                    self.assertRaises(ValueError) as caught:
+                live.run(API)
+            self.assertEqual(str(caught.exception), f"Smoke account sign-in failed with HTTP {code}.")
+            self.assertTrue(caught.exception.__suppress_context__)
+            self.assertNotIn(SMOKE_EMAIL, str(caught.exception))
+            self.assertNotIn(SMOKE_PASSWORD, str(caught.exception))
+            verified.assert_not_called()
+
+    def test_sign_in_network_failures_are_sanitized_and_skip_extraction(self):
+        for failure in (URLError("[Errno 111] Connection refused " + SMOKE_EMAIL), TimeoutError("timed out")):
+            with self.subTest(failure=type(failure).__name__), \
+                    patch.dict(os.environ, SMOKE_ENV, clear=True), \
+                    patch.object(live, "sign_in", side_effect=failure), \
+                    patch.object(live, "verify") as verified, \
+                    self.assertRaises(ValueError) as caught:
+                live.run(API)
+            self.assertEqual(str(caught.exception), "Smoke account sign-in could not reach Supabase Auth.")
+            self.assertTrue(caught.exception.__suppress_context__)
+            self.assertNotIn(SMOKE_EMAIL, str(caught.exception))
+            verified.assert_not_called()
 
     def test_refuses_production_before_network(self):
         with patch.object(live, "urlopen") as opened, self.assertRaises(ValueError):
