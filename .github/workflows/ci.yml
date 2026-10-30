@@ -61,6 +61,68 @@ jobs:
               - 'package-lock.json'
               - '.github/workflows/ci.yml'
 
+  # Secret scanning runs on every pull request and push, never path-filtered, so
+  # a credential cannot slip past because of which files changed. It uses the
+  # gitleaks CLI directly (gitleaks-action needs an organization license). The
+  # binary is checked against a pinned SHA-256 before it is extracted.
+  secret-scan:
+    name: Secret scan - gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install pinned gitleaks binary
+        run: |
+          set -euo pipefail
+          download_dir="$RUNNER_TEMP/gitleaks-download"
+          install_dir="$RUNNER_TEMP/gitleaks-install"
+          mkdir -p "$download_dir" "$install_dir"
+          archive="$download_dir/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl --fail --silent --show-error --location --retry 3 --output "$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum --check --strict -
+          tar -xzf "$archive" -C "$install_dir" gitleaks
+          "$install_dir/gitleaks" version
+          echo "$install_dir" >> "$GITHUB_PATH"
+
+      # Pull requests scan the commits the PR adds. Pushes scan the pushed range,
+      # or the full history when the previous SHA is missing (new branch, force push).
+      # Output is redacted, no report file is written, and nothing is uploaded.
+      - name: Scan for secrets
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -uo pipefail
+          zeros=0000000000000000000000000000000000000000
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            log_opts="${PR_BASE_SHA}..${PR_HEAD_SHA}"
+          elif [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "$zeros" ] \
+              && git cat-file -e "${PUSH_BEFORE_SHA}^{commit}" 2>/dev/null; then
+            log_opts="${PUSH_BEFORE_SHA}..${PUSH_HEAD_SHA}"
+          else
+            log_opts="--all"
+          fi
+          echo "Scanning git log range: ${log_opts}"
+          gitleaks detect --source . --config .gitleaks.toml --redact --no-banner \
+            --log-opts="$log_opts"
+
   backend:
     name: Backend - Python
     needs: changes
