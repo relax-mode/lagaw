@@ -33,9 +33,57 @@ Service container image:
 | --- | --- | --- | --- |
 | `postgrest/postgrest` | v12.2.3 | `sha256:729bf65c733b73f5b52777f0e4b853f22ed73aa67a22d38269d289779b0a8401` | Docker Hub registry v2 manifest GET (token from `auth.docker.io`); `Docker-Content-Digest` header matches the `sha256sum` of the returned manifest-list body. This is a multi-arch manifest-list digest. |
 
-Dependabot (section 2 below) keeps these pins current by proposing SHA bumps.
+Newer majors exist upstream for most of these (for example `actions/checkout` v7, `google-github-actions/auth` v3). They were not adopted here because a major upgrade is a behaviour change; Dependabot proposes them as separate, reviewable PRs.
 
-## Pipeline optimization (Sprint 4)
+## 2. Dependabot
 
-Pending: this section is filled in with the baseline and the post-change
-measurement described below.
+`.github/dependabot.yml` covers the ecosystems that exist in the repository: `github-actions` (`/`), `pip` (`/backend`), `npm` (`/`) and `pub` (`/frontend`). Updates run weekly on Monday (Asia/Manila), minor and patch updates are grouped per ecosystem, and each ecosystem is limited to 3 open PRs to limit noise. Dependabot does not bump the pinned Flutter SDK version (section 5); that is a manual change.
+
+## 3. Secret scanning (`secret-scan` job)
+
+- Runs on every pull request and push, never path-filtered, with `contents: read` only.
+- Uses the gitleaks CLI, not `gitleaks-action` (which needs an organization licence). The release tarball's SHA-256 is hard-coded in the workflow and checked before extraction.
+- Pull requests scan only the commits they add; pushes scan the pushed range, or full history if the previous SHA is unavailable. Output is `--redact`ed, no report file is written and nothing is uploaded.
+- Baseline: a full-history scan found one finding, a deliberately fake literal in `backend/test_auth.py`. It is allowlisted in `.gitleaks.toml` by path **and** literal, so no rule is disabled and the same string elsewhere is still reported.
+- **Policy when it fails:** treat the finding as real. Do not paste the value anywhere. Rotate the credential first, then remove it from the branch. An allowlist entry is acceptable only for a demonstrably synthetic value, with a comment saying why, reviewed in the PR.
+
+## 4. Dependency audit (`dependency-audit` job)
+
+- `pip-audit` on `backend/requirements.txt` and `npm audit --audit-level=high` on the root lockfile. The tools' own exit codes are ignored; `scripts/audit_gate.py` decides and fails closed on an unreadable report.
+- Enforcement distinguishes **new** from **historical** findings: any advisory not listed in `.github/security/audit-allowlist.json` fails the job. An allowlist entry needs an advisory ID, package, reason and `review_by` date, and an entry past its date fails again while the finding exists.
+- Baseline at the time of writing (October 30, 2026): pip-audit 0 vulnerabilities across 23 packages; npm audit 4 high advisories, all `undici` through `wrangler` 4.151.0 (deploy tooling only), allowlisted until 2026-12-31. Two moderate advisories are below the threshold. The job prints only advisory IDs and package names.
+- Flutter/Dart has no audit tool in the pipeline; Dependabot `pub` updates are the only coverage. This is a known gap.
+
+## 5. Permissions
+
+Every job now declares `permissions: contents: read` explicitly. `id-token: write` remains only on `deploy-staging` and `deploy-backend`, the two jobs that authenticate to Google Cloud through Workload Identity Federation. `changes` keeps `pull-requests: read` for the path filter. Environments, `needs`, secrets and deploy steps are unchanged. The new jobs are not required status checks (branch protection requires only Backend, Database and Frontend); making them required is a manual repository setting.
+
+## 6. GitHub settings that need a repository admin
+
+Read-only API output on October 30, 2026 shows these are all **disabled**. They are not changed by this PR:
+
+1. Settings, Code security: enable **Dependabot alerts** and **Dependabot security updates**.
+2. Same page: enable **Secret scanning** and **Push protection** (free for public repositories; for a private repository these need GitHub Secret Protection).
+3. Settings, Branches, `main` rule: optionally add `Secret scan - gitleaks` and `Dependency audit - pip and npm` to the required checks once they have passed on `main` a few times.
+
+## 7. Pipeline optimization (Sprint 4)
+
+**Bottleneck.** On `main` pushes the critical path is `Frontend - Flutter` followed by `Deploy - Staging` and then the production jobs. Each of three jobs runs `subosito/flutter-action` with `channel: stable` and no version, so the SDK cache key follows whatever stable currently is: a new Flutter release invalidates the cache in all three jobs at once, adds a cold download to that run, and makes builds non-reproducible.
+
+**Change.** Pin `flutter-version: "3.47.8"` (with `channel: stable`) in all three jobs. 3.47.8 is the version those jobs resolved in run [40834627148](https://github.com/relax-mode/lagaw/actions/runs/40834627148) and in earlier runs, so the build input does not change. No test, build or smoke step was removed.
+
+**Baseline (before the change).** Seconds per job, successful `Lagaw CI` runs triggered by pushes to `main`, from the GitHub Actions jobs API (`startedAt` to `completedAt`; each job's own run time, not including queue time). Runs: 40834627148, 40831682433, 40824669528, 40815760387, 40814899097, 40745998598, 40739574662, 40727856244. Not every run executed every job.
+
+| Job | n | Values (s) | Median (s) |
+| --- | --- | --- | --- |
+| Frontend - Flutter | 8 | 104, 104, 97, 116, 98, 88, 86, 104 | 101 |
+| Deploy - Staging | 6 | 108, 107, 131, 174, 186, 281 | 152 |
+| Deploy - Production web | 6 | 77, 74, 83, 69, 73, 96 | 76 |
+
+Within run 40834627148 the `Set up Flutter` step took 22 s (CI frontend), 21 s (staging) and 22 s (production web).
+
+**Result.** Implemented, awaiting measurement. The expected benefit is stability rather than a lower median: it avoids the periodic cold-cache run (see the 281 s staging outlier, which was not diagnosed) and makes the SDK reproducible for the release. After merge, compare the same jobs on the next `main` pushes using `python3 scripts/pipeline_metrics.py --jobs` and record the numbers in `docs/pipeline-metrics.md`. A single post-merge run is not enough to claim a speed-up.
+
+**Trade-off.** The SDK no longer follows stable automatically; bumping Flutter becomes an explicit one-line PR. Dependabot does not do this for us.
+
+**Not done.** Splitting the web builds out of the deploy jobs would remove more time from the critical path but changes deploy ordering, so it was not attempted in this PR.
