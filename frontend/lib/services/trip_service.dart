@@ -8,6 +8,7 @@ import '../auth/auth_session.dart';
 import '../config.dart';
 import '../models/trip.dart';
 import '../models/trip_item.dart';
+import '../models/trip_plan.dart';
 
 /// A failed trip request, with a message safe to show to users. [S2-04]
 class TripApiException implements Exception {
@@ -31,6 +32,39 @@ class TripApiException implements Exception {
   String toString() => 'TripApiException($statusCode): $message';
 }
 
+/// A recommendation/generation failure (#53/#54) with the backend's
+/// object-shaped detail kept: `code`, `revision` and skipped reasons. [S3-11]
+class PlanApiException extends TripApiException {
+  /// e.g. `replacement_confirmation_required`, `itinerary_changed`,
+  /// `no_suitable_recommendations`, `requested_visits_do_not_fit`.
+  final String? code;
+
+  /// Present with `replacement_confirmation_required`.
+  final String? revision;
+
+  /// Location ID -> reason code, for infeasible plans.
+  final Map<String, String> skipped;
+  final int? scheduledVisits;
+  final int? requestedVisits;
+
+  const PlanApiException(
+    super.message, {
+    super.statusCode,
+    this.code,
+    this.revision,
+    this.skipped = const {},
+    this.scheduledVisits,
+    this.requestedVisits,
+  });
+
+  bool get needsReplacementConfirmation =>
+      code == 'replacement_confirmation_required' && revision != null;
+  bool get isStaleConfirmation => code == 'itinerary_changed';
+  bool get isInfeasible =>
+      code == 'no_suitable_recommendations' ||
+      code == 'requested_visits_do_not_fit';
+}
+
 class TripService {
   final http.Client _client;
   final ApiCredentials _auth;
@@ -39,6 +73,9 @@ class TripService {
   String _activeToken = '';
 
   static const Duration _timeout = Duration(seconds: 6);
+
+  /// Ranking and scheduling take longer than CRUD.
+  static const Duration _planTimeout = Duration(seconds: 45);
 
   /// Uses the signed-in Supabase session ([AuthSession.current]) unless a
   /// fixed [token] is given. [S3-16]
@@ -200,6 +237,97 @@ class TripService {
     throw _itemErrorFor(response);
   }
 
+  /// POST /api/v1/trips/{id}/recommendations. Read-only ranked suggestions
+  /// for the saved trip; nothing is stored. [S3-11]
+  Future<RecommendationsPage> recommendTrip(
+    String tripId,
+    PlanOptions options,
+  ) async {
+    final response = await _send(
+      () => _client.post(
+        Uri.parse(
+          '${AppConfig.tripsEndpoint}/${Uri.encodeComponent(tripId)}/recommendations',
+        ),
+        headers: _headers,
+        body: jsonEncode(options.recommendationJson()),
+      ),
+      timeout: _planTimeout,
+    );
+    if (response.statusCode == 200) {
+      return RecommendationsPage.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+    throw _planErrorFor(response);
+  }
+
+  /// POST /api/v1/trips/{id}/generate-itinerary. Saves a complete schedule.
+  /// Without [expectedRevision] a trip that already has stops answers with
+  /// [PlanApiException.needsReplacementConfirmation]; pass that revision only
+  /// after the user confirms replacing every stop. Never retried
+  /// automatically.
+  Future<GenerationResult> generateItinerary(
+    String tripId,
+    PlanOptions options, {
+    String? expectedRevision,
+  }) async {
+    final response = await _send(
+      () => _client.post(
+        Uri.parse(
+          '${AppConfig.tripsEndpoint}/${Uri.encodeComponent(tripId)}/generate-itinerary',
+        ),
+        headers: _headers,
+        body: jsonEncode(
+          options.generationJson(expectedRevision: expectedRevision),
+        ),
+      ),
+      timeout: _planTimeout,
+    );
+    if (response.statusCode == 200) {
+      return GenerationResult.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+    throw _planErrorFor(response);
+  }
+
+  /// POST /api/v1/interactions (#52). Each call appends one event, so the
+  /// UI must not send duplicates; a left swipe permanently excludes the
+  /// place from recommendations.
+  Future<void> recordInteraction(
+    String locationId,
+    InteractionType type, {
+    double? rating,
+  }) async {
+    final response = await _send(
+      () => _client.post(
+        Uri.parse(AppConfig.interactionsEndpoint),
+        headers: _headers,
+        body: jsonEncode({
+          'location_id': locationId,
+          'interaction_type': type.value,
+          if (type == InteractionType.rating) 'rating_value': rating,
+        }),
+      ),
+    );
+    if (response.statusCode == 201) return;
+    final auth = _authErrorFor(response);
+    if (auth != null) throw auth;
+    if (response.statusCode == 404) {
+      throw const TripApiException(
+        'That destination is no longer available.',
+        statusCode: 404,
+      );
+    }
+    if (response.statusCode == 503) {
+      throw const TripApiException(
+        'Could not save that right now. Please try again.',
+        statusCode: 503,
+      );
+    }
+    throw _errorFor(response);
+  }
+
   String _itemsUrl(String tripId) =>
       '${AppConfig.tripsEndpoint}/${Uri.encodeComponent(tripId)}/items';
 
@@ -247,7 +375,10 @@ class TripService {
   /// Sends with the current bearer token. A 401 means authentication failed
   /// before the operation ran, so after one successful session refresh the
   /// request is retried once (the #79 contract); it never loops.
-  Future<http.Response> _send(Future<http.Response> Function() request) async {
+  Future<http.Response> _send(
+    Future<http.Response> Function() request, {
+    Duration timeout = _timeout,
+  }) async {
     final token = await _auth.token();
     if (token == null) {
       if (_auth.usesSession) {
@@ -262,18 +393,19 @@ class TripService {
       );
     }
     _activeToken = token;
-    final response = await _timed(request);
+    final response = await _timed(request, timeout);
     if (response.statusCode != 401 || !_auth.usesSession) return response;
     if (!await _auth.recover()) return response;
     _activeToken = await _auth.token() ?? '';
-    return _timed(request);
+    return _timed(request, timeout);
   }
 
   Future<http.Response> _timed(
     Future<http.Response> Function() request,
+    Duration timeout,
   ) async {
     try {
-      return await request().timeout(_timeout);
+      return await request().timeout(timeout);
     } on TimeoutException {
       throw const TripApiException(
         'The server took too long to respond. Please try again.',
@@ -307,6 +439,83 @@ class TripService {
       return TripApiException(AuthMessages.profileLink, statusCode: status);
     }
     return null;
+  }
+
+  /// Recommendation/generation errors: object-shaped 409 details keep their
+  /// code/revision; string details are shown as sent. [S3-11]
+  TripApiException _planErrorFor(http.Response response) {
+    final auth = _authErrorFor(response);
+    if (auth != null) return auth;
+    final status = response.statusCode;
+    Object? detail;
+    try {
+      final decoded = jsonDecode(response.body);
+      detail = decoded is Map<String, dynamic> ? decoded['detail'] : null;
+    } on FormatException {
+      detail = null;
+    }
+    if (detail is Map<String, dynamic>) {
+      final code = detail['code']?.toString();
+      final scheduled = (detail['scheduled_visits'] as num?)?.toInt();
+      final requested = (detail['requested_visits'] as num?)?.toInt();
+      final skippedRaw = detail['skipped'];
+      final message = switch (code) {
+        'replacement_confirmation_required' =>
+          'This trip already has an itinerary. Confirm to replace every stop.',
+        'itinerary_changed' =>
+          'The itinerary changed since you last loaded it. Reload and confirm '
+              'again.',
+        'no_suitable_recommendations' =>
+          'No destinations fit this trip\'s preferences and budget right now. '
+              'Your saved plan is unchanged.',
+        'requested_visits_do_not_fit' =>
+          'Only ${scheduled ?? 0} of ${requested ?? '?'} stops fit the schedule. '
+              'Try fewer stops, a longer time of day or a slower pace. Your '
+              'saved plan is unchanged.',
+        _ => detail['message']?.toString() ?? 'The plan could not be created.',
+      };
+      return PlanApiException(
+        message,
+        statusCode: status,
+        code: code,
+        revision: detail['revision']?.toString(),
+        skipped: skippedRaw is Map<String, dynamic>
+            ? skippedRaw.map((k, v) => MapEntry(k, v.toString()))
+            : const {},
+        scheduledVisits: scheduled,
+        requestedVisits: requested,
+      );
+    }
+    final text = switch (detail) {
+      String text => text,
+      List<dynamic> list =>
+        list
+            .whereType<Map<String, dynamic>>()
+            .map((e) => e['msg']?.toString().replaceFirst('Value error, ', ''))
+            .whereType<String>()
+            .join(' '),
+      _ => null,
+    };
+    return switch (status) {
+      404 => const PlanApiException('Trip not found.', statusCode: 404),
+      409 => PlanApiException(
+        text ?? 'This trip changed. Reload it and try again.',
+        statusCode: status,
+      ),
+      422 => PlanApiException(
+        text == null || text.isEmpty ? 'Some choices need fixing.' : text,
+        statusCode: status,
+      ),
+      503 => const PlanApiException(
+        'Recommendations are temporarily unavailable. Please try again later. '
+        'Your saved plan is unchanged.',
+        statusCode: 503,
+      ),
+      _ => PlanApiException(
+        'Something went wrong (HTTP $status). Your saved plan is unchanged.',
+        statusCode: status,
+      ),
+    };
   }
 
   TripApiException _errorFor(http.Response response) {

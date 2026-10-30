@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/trip.dart';
+import '../models/trip_plan.dart';
 import '../services/api_service.dart';
 import '../services/trip_service.dart';
 import '../theme.dart';
@@ -13,6 +14,7 @@ import '../widgets/trip_card.dart';
 import '../widgets/trip_form/choice_chips_field.dart';
 import '../widgets/trip_form/trip_form.dart';
 import 'trip_edit_screen.dart';
+import 'trip_planner_screen.dart';
 import 'trip_page_scaffold.dart';
 
 /// What a detail page tells the list when it closes.
@@ -124,6 +126,31 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         _error = e.message;
       });
     }
+  }
+
+  /// Bumped to make the itinerary section reload from the server.
+  int _itineraryVersion = 0;
+
+  /// Opens Plan with AI. The trip and itinerary are always reloaded on
+  /// return: a timed-out generation may still have been saved. [S3-11]
+  Future<void> _plan() async {
+    final trip = _trip;
+    if (trip == null) return;
+    final result = await Navigator.of(context).push<GenerationResult>(
+      MaterialPageRoute(
+        builder: (_) => TripPlannerScreen(service: widget.service, trip: trip),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      _itineraryVersion++;
+      if (result != null) {
+        _notice =
+            'Itinerary generated: ${result.items.length} '
+            '${result.items.length == 1 ? 'stop' : 'stops'} saved.';
+      }
+    });
+    _load();
   }
 
   Future<void> _edit() async {
@@ -287,8 +314,38 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       const SizedBox(height: 14),
       FadeSlideIn(
         index: 2,
+        child: Vector3DButton(
+          key: const ValueKey('trip-plan-ai'),
+          onTap: _deleting ? null : _plan,
+          backgroundColor: const Color(0xFF7C3AED),
+          shadowColor: const Color(0xFF5B21B6),
+          borderColor: const Color(0xFFC4B5FD),
+          borderRadius: 28,
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          depth: 4.5,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Plan with AI',
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 14),
+      FadeSlideIn(
+        index: 2,
         child: ItineraryLocationsSection(
-          key: ValueKey('itinerary-${trip.id}'),
+          key: ValueKey('itinerary-${trip.id}-$_itineraryVersion'),
           service: widget.service,
           locations: _locations,
           trip: trip,

@@ -637,6 +637,18 @@ This plan was recorded by CyGray from the GitHub milestone, issue assignments an
 
 - **October 29, 2026** — The Monday/Thursday `Scheduled live checks` run [40831834404](https://github.com/relax-mode/lagaw/actions/runs/40831834404) failed `Live AI extraction (staging)` with HTTP 401. Cause: `scripts/ai_live_smoke.py` still sent the staging demo token, which #79's authenticated rollout makes the API reject. The check now signs in as the existing dedicated smoke account through `scripts/smoke_deployed.py`'s `sign_in`, and `.github/workflows/scheduled-live-checks.yml` passes the `staging` environment's `SMOKE_AUTH_EMAIL`/`SMOKE_AUTH_PASSWORD` secrets and `SMOKE_SUPABASE_KEY` variable instead of `STAGING_TRIP_DEMO_TOKEN`. Added offline tests for the sign-in path, a missing-account failure before any request, and a 401 surfacing as a failed check; all 19 smoke tests pass locally and Ruff is clean. Dispatching the workflow on `fix/ai-live-smoke-supabase-auth` was rejected by the `staging` environment's protected-branch rule, so the first live run is the scheduled run or a manual dispatch after merge. No credential values were read or printed.
 
+### Issue #56 activity
+
+- **October 29, 2026** — Closed #55 with its evidence, commented the final evidence on closed #34, and posted the #80 status asking Andrew to confirm the contract and Kyle to confirm Auth redirect/rate-limit settings. Roel started [#56](https://github.com/relax-mode/lagaw/issues/56) on `feat/trip-recommendations-ui` from `main` at `bf71ae3`, following Andrew's `ROEL_START_HERE.md` handoff and the #52/#53/#54 contracts. Added **Plan with AI** to Trip Details:
+  - party size and total stops chosen explicitly, plus time of day and pace;
+  - a check that blocks unsupported saved choices (e.g. `students`, non-approved tags, missing transport) and offers Edit trip;
+  - ranked recommendations with the backend score and reason, and an empty state;
+  - Like/Not for me (confirmed, permanent exclusion)/Save/Rate through #52, with per-card in-flight locking and a refresh after a dislike or rating;
+  - generation with explicit replace-all confirmation using the returned revision, `itinerary_changed` retry, infeasible explanations with skipped counts, and errors that keep the saved plan, with no automatic retries.
+
+  The #34 itinerary section now shows generated times (Asia/Manila), travel minutes, costs, reasons and the trip's estimated total; manual stops show as unscheduled; trip and items are reloaded after planning. `flutter analyze` clean; `flutter test` 149 passed (24 new). Android/Web deployed verification (cold-start, saved-preference and manual-only trips), PR/CI and evidence remain. See [evidence](evidence/trip-planning-ui.md).
+- **October 29, 2026** — Roel verified #56 on the POCO Pad against staging with accounts A and B (cold-start B generated a plan; recommendations, Like/Save/Rate/Not for me, replace confirmation and cancel, reopen persistence, infeasible 10-stop plan, offline error and the unsupported-trip check all passed). Testing found that the estimated total stayed visible after a manual add, although the backend clears it on manual item changes; the itinerary section now hides it after a manual add or remove (covered by a widget test). Not captured: a successful Replace and a generated plan for the manual-only trip. Staging has few venues with known hours and prices, so most trips get one candidate. Web verification follows the merge.
+
 ## Open follow-ups
 
 - Verify `https://lagaw.pages.dev` in a browser against the deployed API. The production Cloudflare deploy job and Cloud Run deploy smoke test both succeeded, but browser acceptance remains unconfirmed.
