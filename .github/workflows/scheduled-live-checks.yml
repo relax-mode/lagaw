@@ -20,6 +20,9 @@ jobs:
     name: Live AI extraction (staging)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
+    permissions:
+      contents: read
     environment: staging
 
     steps:
@@ -41,6 +44,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 5
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
