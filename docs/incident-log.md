@@ -4,18 +4,20 @@ Every broken build or failed deploy that reached `main` or a deployed environmen
 
 | ID | Date | Environment | Impact | Detected by | Time to recover |
 |---|---|---|---|---|---|
-| [INC-1](#inc-1-staging-cloudflare-credential-rejected) | Oct 24–25, 2026 | Staging web | Staging Pages not updated; `staging.lagaw.pages.dev` returned 404 | `Deploy - Staging` failure | about 15.4 h (failed deploy → next successful staging deploy) |
+| [INC-1](#inc-1-staging-cloudflare-credential-rejected) | Oct 24–25, 2026 | Staging web | Staging Pages not updated; `staging.lagaw.pages.dev` returned 404 | `Deploy - Staging` failure | about 15.5 h (first failed deploy → recovered staging deploy; see INC-1) |
 | [INC-2](#inc-2-main-runs-blocked-behind-a-staging-approval) | Oct 22–24, 2026 | `main` CI | Two `main` commits never received CI or a staging deploy | Run history review on Oct 26 | about 53.5 h of blocked `main` pipeline |
 | [INC-3](#inc-3-production-drifted-behind-main) | Oct 22–27, 2026 | Production API and web | Production missed merged work: no AI extraction route, and no matching demo token in the web bundle | Smoke and bundle checks on Oct 26 | resolved by automatic promotion on Oct 27; independent live acceptance pending |
+| [INC-4](#inc-4-scheduled-live-ai-check-returns-http-401) | Oct 29, 2026 | Staging API (scheduled live AI check) | Scheduled live extraction check failed with HTTP 401; merges and deploys were not blocked, by design | Scheduled run [40831834404](https://github.com/relax-mode/lagaw/actions/runs/40831834404) failure | Not recovered; fix in review (PR #100) |
 
 ## INC-1: Staging Cloudflare credential rejected
 
 - **What happened.** Main runs [39743812096](https://github.com/relax-mode/lagaw/actions/runs/39743812096) and [40098046876](https://github.com/relax-mode/lagaw/actions/runs/40098046876) (attempt 3) passed every check and deployed the staging API. Both then failed at "Deploy staging Flutter Web", where Cloudflare rejected the request with codes `10000`/`9109`. The staging web URL kept returning 404.
 - **Root cause.** The repository secret `CLOUDFLARE_API_TOKEN` was no longer accepted for the `lagaw` Pages project. A local Wrangler OAuth session could still manage the project, which hid the problem from manual checks.
 - **Fix.** Kyle replaced the GitHub secret with an account-scoped Cloudflare Pages Edit token. Main run [40163792050](https://github.com/relax-mode/lagaw/actions/runs/40163792050) then deployed and smoke-tested staging web successfully. Full investigation: [staging incident evidence](evidence/staging-incident-2026-10-25.md).
+- **Recovery time.** Measured from the `Deploy - Staging` job completion in run 39743812096 (13:31:18 UTC, Oct 24) to the next successful staging deploy job in run 40163792050 (05:02:12 UTC, Oct 25): about 15.5 h. Measured from the last failed attempt, run 40098046876 (15:25:45 UTC, Oct 24): about 13.6 h.
 - **Prevention.**
-  - Separate Cloudflare tokens per environment, stored as environment secrets, so one expiry cannot block both (#58).
-  - A scheduled credential check that fails loudly before a deploy needs the token (#58).
+  - Separate Cloudflare tokens per environment, stored as environment secrets, so one expiry cannot block both (#58). **Not done as of Oct 30:** `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are still repository secrets (names checked with `gh api`, see [PIPELINE.md](../PIPELINE.md#environments-and-secrets)).
+  - A scheduled credential check that fails loudly before a deploy needs the token (#58). It exists as the `deploy-credentials` job in `scheduled-live-checks.yml`; it passed in run 40831834404 on Oct 29.
   - The staging deploy fails visibly on missing or invalid configuration instead of skipping.
 
 ## INC-2: Main runs blocked behind a staging approval
@@ -42,4 +44,14 @@ Every broken build or failed deploy that reached `main` or a deployed environmen
   - No manual step remains on the deploy path; manual dispatch is for recovery only.
   - The production smoke check fails if a route that `main` serves is missing.
   - The weekly metrics now report merge-to-live lead time, which exposes any merge that never reached production.
+
+## INC-4: Scheduled live AI check returns HTTP 401
+
+- **What happened.** The scheduled live check (`Scheduled live checks`, run [40831834404](https://github.com/relax-mode/lagaw/actions/runs/40831834404), a scheduled run created 06:52 UTC on Thursday, Oct 29) failed in the `Live AI extraction (staging)` job. The failed step, "Extract preferences through deployed staging", logged `HTTP 401`. The `Cloudflare deploy credential` job in the same run passed. A manual run on the PR #100 branch ([40833831042](https://github.com/relax-mode/lagaw/actions/runs/40833831042), 07:11 UTC) failed in both jobs before any step ran: the `staging` and `production` environments allow only protected branches, so GitHub rejected the branch. That run therefore did not test the fix.
+- **Root cause.** The staging API runs with `TRIP_AUTH_MODE=supabase` (`.github/workflows/ci.yml`, line 448), which ignores the old demo token. `scheduled-live-checks.yml` (line 34) and `scripts/ai_live_smoke.py` (lines 39 and 65) still send `STAGING_TRIP_DEMO_TOKEN` as a bearer token, so the API rejects the request. `backend/test_auth.py` (`test_demo_values_do_not_enable_demo_access_by_default`) covers the rule that demo values do not grant access by default.
+- **Fix.** [PR #100](https://github.com/relax-mode/lagaw/pull/100) (`fix/ai-live-smoke-supabase-auth`, open) changes the live check to sign in with the smoke account. Status: **fix in review**.
+- **Impact.** The live check is off the merge and deploy path (see [PIPELINE.md](../PIPELINE.md#scheduled-live-checks)), so no deploy was blocked. The recorded workflow history contains only the two runs above; no passing live AI run is recorded.
+- **Prevention.**
+  - After PR #100 merges, run `scheduled-live-checks.yml` with `workflow_dispatch` on `main` and record the run here before closing this entry.
+  - The demo token is still compiled into the web bundles; see the open risk in [PIPELINE.md](../PIPELINE.md#open-risks).
 
