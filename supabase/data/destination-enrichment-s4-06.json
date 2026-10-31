@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-31",
+  "timezone": "Asia/Manila",
+  "policy": "No automatic production writes. Source observations require direct operator confirmation and human approval before any update.",
+  "candidates": [
+    {
+      "id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+      "name": "The Negros Museum",
+      "status": "blocked_conflicting_sources",
+      "checked_on": "2026-10-31",
+      "proposal": {
+        "opening_hours": {
+          "monday": [
+            {
+              "open": "08:30",
+              "close": "16:30"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "08:30",
+              "close": "16:30"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "08:30",
+              "close": "16:30"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "08:30",
+              "close": "16:30"
+            }
+          ],
+          "friday": [
+            {
+              "open": "08:30",
+              "close": "16:30"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "08:30",
+              "close": "16:30"
+            }
+          ]
+        },
+        "estimated_cost_min": 120,
+        "estimated_cost_max": 150
+      },
+      "expected": {
+        "opening_hours": {
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 70,
+        "estimated_cost_max": 100
+      },
+      "basis": "The managing foundation currently advertises 08:30–16:30 Mon–Sat and PHP 120–150 by admission class, but another museum-branded site advertises 09:00–18:00 and PHP 70–100. Requires current operator confirmation before a production replacement.",
+      "sources": [
+        {
+          "publisher": "Negros Cultural Foundation Inc. (operator)",
+          "url": "https://www.ncfiph.org/the-negros-museum/museum-tours/",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "Monday–Saturday 08:30–16:30; regular PHP 150, discounted PHP 120",
+          "confidence": "operator_published_unconfirmed_visit_date"
+        },
+        {
+          "publisher": "Legacy museum-branded website",
+          "url": "https://negrosmuseum.wixsite.com/negrosmuseum/museum-hours",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "Monday–Saturday 09:00–18:00; adult PHP 100, student PHP 70, senior PHP 80",
+          "confidence": "older_or_undated_conflicting"
+        }
+      ],
+      "approval": {
+        "approved": false,
+        "reviewed_by": null,
+        "reviewed_on": null,
+        "operator_confirmation_ref": null
+      }
+    },
+    {
+      "id": "b3783066-7484-5917-a09b-404974974880",
+      "name": "Negros Forest Park",
+      "status": "blocked_missing_operator_hours_and_fees",
+      "checked_on": "2026-10-31",
+      "proposal": {},
+      "expected": {},
+      "basis": "Operator confirms place is open to the public but does not publish dated hours or entry fee on accessible official page. Third-party listings conflict on opening time (08:00 vs 09:00); exact entrance point must also be confirmed.",
+      "sources": [
+        {
+          "publisher": "Talarak Foundation (operator)",
+          "url": "https://www.talarak.org/negros-forest-park",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "Public conservation visitor venue at South Capitol Road; no corroborated opening hours or fee",
+          "confidence": "operator_published_partial"
+        },
+        {
+          "publisher": "Out of Town Blog (third party, historical)",
+          "url": "https://outoftownblog.com/negros-forest-park-wildlife-sanctuary-in-bacolod-city/",
+          "checked_on": "2026-10-31",
+          "publication_date": "2022",
+          "claim": "Tuesday–Sunday 08:00–17:00; quoted PHP 50–100 by class; historical only",
+          "confidence": "historical_unverified"
+        },
+        {
+          "publisher": "Waze (user-edited listing)",
+          "url": "https://www.waze.com/live-map/directions/ph/western-visayas/bacolod/negros-forest-park?to=place.ChIJHc9QrprRrjMRg6Cl6HZ4VUM",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "Tuesday–Sunday 09:00–17:00",
+          "confidence": "third_party_unverified"
+        }
+      ],
+      "approval": {
+        "approved": false,
+        "reviewed_by": null,
+        "reviewed_on": null,
+        "operator_confirmation_ref": null
+      }
+    },
+    {
+      "id": "af80a358-d1ad-529f-84b3-ff1e591e041f",
+      "name": "Capitol Park and Lagoon",
+      "status": "blocked_conflicting_visitor_hours_and_free_claim",
+      "checked_on": "2026-10-31",
+      "proposal": {},
+      "expected": {},
+      "basis": "Public visitor hours vary (05:00–22:00, 08:00–17:00 and 24/7) by non-operator listing. Some say free, but an up-to-date responsible provincial authority verification is needed before replacing null cost with zero.",
+      "sources": [
+        {
+          "publisher": "The Pinay Solo Backpacker (third party)",
+          "url": "https://thepinaysolobackpacker.com/bacolod-things-to-do/",
+          "checked_on": "2026-10-31",
+          "publication_date": "2026",
+          "claim": "Daily 05:00–22:00 and free entrance",
+          "confidence": "third_party_unverified"
+        },
+        {
+          "publisher": "Waze (user-edited listing)",
+          "url": "https://www.waze.com/en-GB/live-map/directions/ph/western-visayas/bacolod/capitol-park-and-lagoon?to=place.ChIJU_vwLKnRrjMRbrWcHvpUYKU",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "08:00–17:00 visitor listing",
+          "confidence": "third_party_unverified"
+        },
+        {
+          "publisher": "Traveloka (third party)",
+          "url": "https://www.traveloka.com/en-ph/explore/destination/bacolod-things-to-do/63719",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "24/7 and free entrance claim",
+          "confidence": "third_party_unverified"
+        }
+      ],
+      "approval": {
+        "approved": false,
+        "reviewed_by": null,
+        "reviewed_on": null,
+        "operator_confirmation_ref": null
+      }
+    },
+    {
+      "id": "1a3bca09-5532-5de6-8587-2440c4e5830d",
+      "name": "San Sebastian Cathedral",
+      "status": "blocked_unverified_visitor_access",
+      "checked_on": "2026-10-31",
+      "proposal": {},
+      "expected": {},
+      "basis": "Legacy/third-party 2024 visitor hours and free-entry claims cannot certify sightseeing access in an active cathedral or current event and worship restrictions.",
+      "sources": [
+        {
+          "publisher": "Audiala (third party)",
+          "url": "https://audiala.com/en/philippines/bacolod/san-sebastian-cathedral",
+          "checked_on": "2026-10-31",
+          "publication_date": "2024-08",
+          "claim": "Daily 06:00–20:00; free admission, donations invited",
+          "confidence": "dated_third_party_unverified"
+        },
+        {
+          "publisher": "bacolod.com (third party local guide)",
+          "url": "https://bacolod.com/places/san-sebastian-cathedral",
+          "checked_on": "2026-10-31",
+          "publication_date": null,
+          "claim": "Advise confirming worship services and visitor access",
+          "confidence": "third_party_qualified"
+        }
+      ],
+      "approval": {
+        "approved": false,
+        "reviewed_by": null,
+        "reviewed_on": null,
+        "operator_confirmation_ref": null
+      }
+    }
+  ]
+}
