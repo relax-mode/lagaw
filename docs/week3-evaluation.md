@@ -121,6 +121,15 @@ See the [measured local results](evidence/week3-results.md), the
 [extraction contract](preference-extraction-api.md) and
 [hybrid limitations](hybrid-recommender.md).
 
+## November 1 failure-coverage supplement
+
+The [AI failure audit and technical write-up](ai-failure-coverage.md) maps existing
+coverage and adds only missing malformed-envelope/content, transport-stage,
+explicit-later-request recovery and nonfinite collaborative-score cases. Fixture
+revision, prompt and committed baseline are unchanged. `--check` now also includes
+the saved-trip and onboarding recommendation HTTP suites; new regression cases
+are tests, not extra extraction fixture rows or live-model measurements.
+
 ## Handoff for Kyle (prepared, not sent)
 
 The current backend CI already installs development requirements and runs pytest,

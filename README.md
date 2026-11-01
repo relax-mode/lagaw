@@ -111,6 +111,9 @@ Offline matrix factorization, hybrid scoring, artifacts and held-out comparison:
 Week 3 versioned extraction/model evaluation and one offline CI command:
 [evaluation suite and handoff](docs/week3-evaluation.md).
 
+AI-specific malformed output, outage, recovery and fallback guarantees:
+[failure coverage and technical limits](docs/ai-failure-coverage.md).
+
 ## Branch Strategy
 
 Lagaw uses a simple feature-branch workflow to keep the `main` branch stable and organized.
