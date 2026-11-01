@@ -96,6 +96,9 @@ Validated recommendations for saved trips, budget allocation and model fallback:
 Cold-start discovery from saved onboarding tags, without a saved trip or model:
 [onboarding recommendation API](docs/onboarding-recommendations-api.md).
 
+Realistic cold-start scenarios, catalog coverage and content-first/hybrid roadmap:
+[content-first evaluation](docs/content-first-evaluation.md).
+
 Constraint-aware generated schedules, atomic persistence and replacement confirmation:
 [itinerary generation API](docs/itinerary-generation-api.md).
 

@@ -1,0 +1,1280 @@
+{
+  "revision": "cold-start-v1",
+  "model_version": "content-v1",
+  "source": "supabase/data/locations.json (committed source, not live prices)",
+  "source_sha256": "524b046fdbbfd1835b2f096b033938eada7bd15650f802fdeba385e9adf45f10",
+  "fixture_sha256": "d3440e2c961c2ca2e709c43d3be675210067ddcccec64ca4087eacd9a7df8329",
+  "budget_scope": "PHP per person per venue visit; transport/lodging excluded",
+  "source_catalog_coverage": {
+    "locations": 10,
+    "active": 10,
+    "known_upper_cost": 1,
+    "coordinate_pairs": 6,
+    "nonempty_hours": 2,
+    "tagged": 10,
+    "positive_visit_duration": 10
+  },
+  "catalogs": [
+    {
+      "catalog": "source_catalog",
+      "cases": [
+        {
+          "case": "budget_cafe_solo",
+          "description": "Student exploring cafes alone; no prior swipes.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "heritage_couple",
+          "description": "Couple seeking history and photography.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 7,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 1.0,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.8999999999999999,
+              "recommendation_reason": "Tags: heritage, photography; category: not specified; budget headroom: 0.50; group: couple; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "family_nature",
+          "description": "Family seeking affordable nature stops.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 3,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: family; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "friends_cafe",
+          "description": "Friends seeking a cafe, with group eligibility respected.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: friends; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "food_budget",
+          "description": "Food interests with a modest visit ceiling.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 3,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "food_high_budget",
+          "description": "Same food interests with a higher ceiling; cheaper matches can win.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 3,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.18333333333333332,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.92; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "food_relaxing_high_budget",
+          "description": "Food and relaxing matter jointly to a higher-budget traveler.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.18333333333333332,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.92; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "free_photography",
+          "description": "Photographer requesting confirmed free visits only.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 7,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 1,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "no_tags",
+          "description": "Onboarding interests skipped; rank by budget headroom.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 0,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.5,
+              "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "very_low_budget_cafe",
+          "description": "Cafe interest but only PHP 50 per person per visit.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 1,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "step_free_family",
+          "description": "Family explicitly requires verified step-free access.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 3,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "indoor_relaxing",
+          "description": "Traveler wants an indoor cafe.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "short_visit",
+          "description": "Only 30 minutes available at each stop.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "free_indoor",
+          "description": "Confirmed free indoor visits requested.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 3,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 1,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "nearby_photography",
+          "description": "Photography within one straight-line kilometre of a stated origin.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 10,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 7,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 1.0,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 9,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "The Negros Museum",
+              "location_id": "8f6e023e-8d92-5d56-86db-71d7b1fbbbc1",
+              "recommendation_score": 0.8999999999999999,
+              "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "empty_catalog",
+          "description": "Catalog unavailable as an empty valid snapshot.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 0,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 0,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 0,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        }
+      ],
+      "summary": {
+        "cases": 16,
+        "passed": 16,
+        "empty_cases": 7,
+        "fill_fraction": 0.1875,
+        "tagged_nonempty_cases": 8,
+        "top_with_tag_match": 2,
+        "top_name_counts": {
+          "The Negros Museum": 9
+        }
+      }
+    },
+    {
+      "catalog": "controlled",
+      "cases": [
+        {
+          "case": "budget_cafe_solo",
+          "description": "Student exploring cafes alone; no prior swipes.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 4,
+          "result_count": 3,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 0.333333,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.8999999999999999,
+              "recommendation_reason": "Tags: cafe, relaxing; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 0.19999999999999998,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.12,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.60; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "heritage_couple",
+          "description": "Couple seeking history and photography.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 4,
+          "result_count": 3,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 2,
+          "returned_tag_matches": 2,
+          "tag_match_fraction": 0.666667,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.9199999999999999,
+              "recommendation_reason": "Tags: heritage, photography; category: not specified; budget headroom: 0.60; group: couple; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 0.6,
+              "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 1.00; group: couple; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: couple; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "family_nature",
+          "description": "Family seeking affordable nature stops.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 4,
+          "result_count": 3,
+          "matching_tag_candidates": 1,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 0.333333,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 1.0,
+              "recommendation_reason": "Tags: nature; category: not specified; budget headroom: 1.00; group: family; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.12,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.60; group: family; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: family; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "friends_cafe",
+          "description": "Friends seeking a cafe, with group eligibility respected.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 5,
+          "result_count": 3,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 2,
+          "returned_tag_matches": 2,
+          "tag_match_fraction": 0.666667,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional friends cafe",
+              "location_id": "f342ce01-b610-5660-b43f-424e8d970642",
+              "recommendation_score": 0.9499999999999998,
+              "recommendation_reason": "Tags: cafe, relaxing; category: not specified; budget headroom: 0.75; group: friends; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.8999999999999999,
+              "recommendation_reason": "Tags: cafe, relaxing; category: not specified; budget headroom: 0.50; group: friends; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 0.19999999999999998,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: friends; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "food_budget",
+          "description": "Food interests with a modest visit ceiling.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 4,
+          "result_count": 3,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 0.333333,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional food stop",
+              "location_id": "32406cc1-9e84-52c7-b846-239c27a5ef12",
+              "recommendation_score": 0.85,
+              "recommendation_reason": "Tags: food; category: not specified; budget headroom: 0.25; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 0.19999999999999998,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.12,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.60; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "food_high_budget",
+          "description": "Same food interests with a higher ceiling; cheaper matches can win.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 5,
+          "result_count": 3,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 2,
+          "returned_tag_matches": 2,
+          "tag_match_fraction": 0.666667,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 0,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional food stop",
+              "location_id": "32406cc1-9e84-52c7-b846-239c27a5ef12",
+              "recommendation_score": 0.975,
+              "recommendation_reason": "Tags: food; category: not specified; budget headroom: 0.88; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional premium dining",
+              "location_id": "854389b2-7c4b-5d98-a845-c4f72e361ddc",
+              "recommendation_score": 0.85,
+              "recommendation_reason": "Tags: food; category: not specified; budget headroom: 0.25; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 0.19999999999999998,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "food_relaxing_high_budget",
+          "description": "Food and relaxing matter jointly to a higher-budget traveler.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 5,
+          "result_count": 3,
+          "matching_tag_candidates": 4,
+          "eligible_matching_tag_candidates": 3,
+          "returned_tag_matches": 3,
+          "tag_match_fraction": 1.0,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 0,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional premium dining",
+              "location_id": "854389b2-7c4b-5d98-a845-c4f72e361ddc",
+              "recommendation_score": 0.85,
+              "recommendation_reason": "Tags: food, relaxing; category: not specified; budget headroom: 0.25; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.5833333333333334,
+              "recommendation_reason": "Tags: relaxing; category: not specified; budget headroom: 0.92; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional food stop",
+              "location_id": "32406cc1-9e84-52c7-b846-239c27a5ef12",
+              "recommendation_score": 0.5750000000000001,
+              "recommendation_reason": "Tags: food; category: not specified; budget headroom: 0.88; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "free_photography",
+          "description": "Photographer requesting confirmed free visits only.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 1.0,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 5,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 1.0,
+              "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "no_tags",
+          "description": "Onboarding interests skipped; rank by budget headroom.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 4,
+          "result_count": 3,
+          "matching_tag_candidates": 0,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 1.0,
+              "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.6,
+              "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.60; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.5,
+              "recommendation_reason": "Tags: not specified; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "very_low_budget_cafe",
+          "description": "Cafe interest but only PHP 50 per person per visit.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 1,
+          "result_count": 1,
+          "matching_tag_candidates": 4,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": 0.0,
+          "top_has_requested_tag": false,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 4,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 0.19999999999999998,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "step_free_family",
+          "description": "Family explicitly requires verified step-free access.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 3,
+          "result_count": 3,
+          "matching_tag_candidates": 1,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 0.333333,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 1.0,
+              "recommendation_reason": "Tags: nature; category: not specified; budget headroom: 1.00; group: family; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: family; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional food stop",
+              "location_id": "32406cc1-9e84-52c7-b846-239c27a5ef12",
+              "recommendation_score": 0.049999999999999996,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.25; group: family; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "indoor_relaxing",
+          "description": "Traveler wants an indoor cafe.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 3,
+          "result_count": 3,
+          "matching_tag_candidates": 5,
+          "eligible_matching_tag_candidates": 1,
+          "returned_tag_matches": 1,
+          "tag_match_fraction": 0.333333,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.8999999999999999,
+              "recommendation_reason": "Tags: cafe, relaxing; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.12,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.60; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional food stop",
+              "location_id": "32406cc1-9e84-52c7-b846-239c27a5ef12",
+              "recommendation_score": 0.049999999999999996,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.25; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "short_visit",
+          "description": "Only 30 minutes available at each stop.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 4,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "free_indoor",
+          "description": "Confirmed free indoor visits requested.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 1,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 5,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        },
+        {
+          "case": "nearby_photography",
+          "description": "Photography within one straight-line kilometre of a stated origin.",
+          "interface_scope": "engine_constraint_diagnostic",
+          "interaction_count": 0,
+          "candidate_count": 8,
+          "eligible_count": 4,
+          "result_count": 3,
+          "matching_tag_candidates": 2,
+          "eligible_matching_tag_candidates": 2,
+          "returned_tag_matches": 2,
+          "tag_match_fraction": 0.666667,
+          "top_has_requested_tag": true,
+          "ineligible_counts": {
+            "inactive": 1,
+            "unknown_upper_cost": 1,
+            "above_budget": 1,
+            "group_mismatch": 1
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": [
+            {
+              "name": "Fictional free park",
+              "location_id": "0f1750b2-676d-5997-b101-e52d328da235",
+              "recommendation_score": 1.0,
+              "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 1.00; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional heritage gallery",
+              "location_id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+              "recommendation_score": 0.9199999999999999,
+              "recommendation_reason": "Tags: photography; category: not specified; budget headroom: 0.60; group: solo; all requested hard constraints satisfied."
+            },
+            {
+              "name": "Fictional budget cafe",
+              "location_id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+              "recommendation_score": 0.09999999999999999,
+              "recommendation_reason": "Tags: no matches; category: not specified; budget headroom: 0.50; group: solo; all requested hard constraints satisfied."
+            }
+          ]
+        },
+        {
+          "case": "empty_catalog",
+          "description": "Catalog unavailable as an empty valid snapshot.",
+          "interface_scope": "onboarding_compatible",
+          "interaction_count": 0,
+          "candidate_count": 0,
+          "eligible_count": 0,
+          "result_count": 0,
+          "matching_tag_candidates": 0,
+          "eligible_matching_tag_candidates": 0,
+          "returned_tag_matches": 0,
+          "tag_match_fraction": null,
+          "top_has_requested_tag": null,
+          "ineligible_counts": {
+            "inactive": 0,
+            "unknown_upper_cost": 0,
+            "above_budget": 0,
+            "group_mismatch": 0
+          },
+          "checks": {
+            "expected_top": true,
+            "deterministic": true,
+            "no_model_hybrid_parity": true,
+            "eligible_only": true,
+            "unique_and_bounded": true
+          },
+          "passed": true,
+          "ranking": []
+        }
+      ],
+      "summary": {
+        "cases": 16,
+        "passed": 16,
+        "empty_cases": 3,
+        "fill_fraction": 0.729167,
+        "tagged_nonempty_cases": 12,
+        "top_with_tag_match": 11,
+        "top_name_counts": {
+          "Fictional budget cafe": 2,
+          "Fictional food stop": 2,
+          "Fictional free park": 6,
+          "Fictional friends cafe": 1,
+          "Fictional heritage gallery": 1,
+          "Fictional premium dining": 1
+        }
+      }
+    }
+  ],
+  "passed": true,
+  "limitations": [
+    "Scenario expectations are authored behavior checks, not organic relevance labels.",
+    "Tag overlap is a diagnostic proxy, not precision, recall or satisfaction.",
+    "Exclusion counts overlap and omit optional-constraint breakdowns.",
+    "No model artifact, training, retraining, provider or live API is used.",
+    "No-model hybrid parity verifies fallback only, not collaborative benefit.",
+    "Source fixture IDs are synthetic; fictional controls never replace source facts.",
+    "Existing #94 seeded serving evidence does not establish organic recommendation quality."
+  ]
+}
