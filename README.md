@@ -93,6 +93,9 @@ Persisted swipes, saves and ratings, owner-scoped history and safe verification:
 Validated recommendations for saved trips, budget allocation and model fallback:
 [trip recommendation API](docs/trip-recommendations-api.md).
 
+Cold-start discovery from saved onboarding tags, without a saved trip or model:
+[onboarding recommendation API](docs/onboarding-recommendations-api.md).
+
 Constraint-aware generated schedules, atomic persistence and replacement confirmation:
 [itinerary generation API](docs/itinerary-generation-api.md).
 
