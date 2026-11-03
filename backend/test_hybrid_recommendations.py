@@ -325,6 +325,27 @@ def test_hard_constraints_limits_and_empty_input(dataset, model):
     assert engine.recommend(request).items == []
 
 
+@pytest.mark.parametrize("raw", [float("nan"), float("inf"), float("-inf")])
+def test_nonfinite_prediction_uses_full_content_and_preserves_exclusions(dataset, model, monkeypatch, raw):
+    request = request_for(dataset)
+    first = content_recommend(request).items[0].location_id
+    request.preferences.excluded_location_ids = [first]
+    expected = content_recommend(request)
+    assert expected.items  # Do not allow an empty comparison to pass vacuously.
+    engine = HybridRecommender(model)
+    before = engine.model.model_dump_json()
+    monkeypatch.setattr("app.recommendations.collaborative.np.dot", lambda *args: raw)
+    result = engine.recommend(request)
+    assert [row.location_id for row in result.items] == [row.location_id for row in expected.items]
+    assert [row.recommendation_score for row in result.items] == pytest.approx(
+        [row.recommendation_score for row in expected.items], abs=1e-12,
+    )
+    assert any("invalid_model_score" in row.recommendation_reason for row in result.items)
+    assert first not in {row.location_id for row in result.items}
+    assert validate_response(request, result) == result
+    assert engine.model.model_dump_json() == before
+
+
 def test_leakage_rejected_and_held_out_not_in_inference(dataset):
     contaminated = copy.deepcopy(dataset)
     contaminated["training"]["interactions"].append(contaminated["held_out"][0])

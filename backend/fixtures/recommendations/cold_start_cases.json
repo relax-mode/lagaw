@@ -1,0 +1,632 @@
+{
+  "revision": "cold-start-v1",
+  "scenario_provenance": "Authored hypothetical travelers, not collected user labels",
+  "controlled_provenance": "All controlled locations, costs, access and coordinates are fictional",
+  "controlled_locations": [
+    {
+      "id": "0f1750b2-676d-5997-b101-e52d328da235",
+      "name": "Fictional free park",
+      "category": "attraction",
+      "vibe_tags": [
+        "nature",
+        "photography"
+      ],
+      "estimated_cost_min": "0",
+      "estimated_cost_max": "0",
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 45,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "outdoor",
+      "step_free_access": true
+    },
+    {
+      "id": "d0045c23-4bf1-59b0-9430-5da7649899a9",
+      "name": "Fictional budget cafe",
+      "category": "cafe",
+      "vibe_tags": [
+        "cafe",
+        "relaxing"
+      ],
+      "estimated_cost_min": "100",
+      "estimated_cost_max": "100",
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 40,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "indoor",
+      "step_free_access": true
+    },
+    {
+      "id": "272d232d-04c3-5fed-8bfa-145bef4bd52d",
+      "name": "Fictional heritage gallery",
+      "category": "attraction",
+      "vibe_tags": [
+        "heritage",
+        "photography"
+      ],
+      "estimated_cost_min": "80",
+      "estimated_cost_max": "80",
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 60,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "indoor",
+      "step_free_access": false
+    },
+    {
+      "id": "32406cc1-9e84-52c7-b846-239c27a5ef12",
+      "name": "Fictional food stop",
+      "category": "attraction",
+      "vibe_tags": [
+        "food"
+      ],
+      "estimated_cost_min": "150",
+      "estimated_cost_max": "150",
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 60,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "indoor",
+      "step_free_access": true
+    },
+    {
+      "id": "854389b2-7c4b-5d98-a845-c4f72e361ddc",
+      "name": "Fictional premium dining",
+      "category": "attraction",
+      "vibe_tags": [
+        "food",
+        "relaxing"
+      ],
+      "estimated_cost_min": "900",
+      "estimated_cost_max": "900",
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 90,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "indoor",
+      "step_free_access": true
+    },
+    {
+      "id": "3c642ebe-eeba-55e5-9574-fb93203f3fb9",
+      "name": "Fictional unknown-cost cafe",
+      "category": "cafe",
+      "vibe_tags": [
+        "cafe"
+      ],
+      "estimated_cost_min": null,
+      "estimated_cost_max": null,
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 30,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": null,
+      "step_free_access": null
+    },
+    {
+      "id": "cd6fa9c5-d04b-590d-9fcf-49520ec178cb",
+      "name": "Fictional inactive cafe",
+      "category": "cafe",
+      "vibe_tags": [
+        "cafe"
+      ],
+      "estimated_cost_min": "0",
+      "estimated_cost_max": "0",
+      "suitable_group_types": [
+        "solo",
+        "couple",
+        "family",
+        "friends",
+        "group"
+      ],
+      "typical_visit_duration": 20,
+      "is_active": false,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "indoor",
+      "step_free_access": true
+    },
+    {
+      "id": "f342ce01-b610-5660-b43f-424e8d970642",
+      "name": "Fictional friends cafe",
+      "category": "cafe",
+      "vibe_tags": [
+        "cafe",
+        "relaxing"
+      ],
+      "estimated_cost_min": "50",
+      "estimated_cost_max": "50",
+      "suitable_group_types": [
+        "friends"
+      ],
+      "typical_visit_duration": 30,
+      "is_active": true,
+      "coordinates": {
+        "latitude": 10.676,
+        "longitude": 122.95213
+      },
+      "setting": "indoor",
+      "step_free_access": true
+    }
+  ],
+  "cases": [
+    {
+      "id": "budget_cafe_solo",
+      "description": "Student exploring cafes alone; no prior swipes.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "0f9aa960-329c-5b4f-a51a-0b635761469f",
+        "preferred_tags": [
+          "cafe",
+          "relaxing"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional budget cafe",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "heritage_couple",
+      "description": "Couple seeking history and photography.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "95d2f191-1e0a-5690-b212-29158e0e5b5c",
+        "preferred_tags": [
+          "heritage",
+          "photography"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "couple",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional heritage gallery",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "family_nature",
+      "description": "Family seeking affordable nature stops.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "72d37bb8-997a-57cc-9c6b-40d091da5419",
+        "preferred_tags": [
+          "nature"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "family",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional free park",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "friends_cafe",
+      "description": "Friends seeking a cafe, with group eligibility respected.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "2a33d94b-4a62-5dcb-94ca-067322cef75e",
+        "preferred_tags": [
+          "cafe",
+          "relaxing"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "friends",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional friends cafe",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "food_budget",
+      "description": "Food interests with a modest visit ceiling.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "c673fb23-6f40-5222-83ad-df9c4aac0fe6",
+        "preferred_tags": [
+          "food"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional food stop",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "food_high_budget",
+      "description": "Same food interests with a higher ceiling; cheaper matches can win.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "e8540ebe-9283-5b3c-80ad-c9c0c2222654",
+        "preferred_tags": [
+          "food"
+        ],
+        "budget_min": "0",
+        "budget_max": "1200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional food stop",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "food_relaxing_high_budget",
+      "description": "Food and relaxing matter jointly to a higher-budget traveler.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "99c2776e-37a0-5f62-bdac-2d1130c7780c",
+        "preferred_tags": [
+          "food",
+          "relaxing"
+        ],
+        "budget_min": "0",
+        "budget_max": "1200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional premium dining",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "free_photography",
+      "description": "Photographer requesting confirmed free visits only.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "13f12262-55ce-50bf-8ac6-e750697b54fc",
+        "preferred_tags": [
+          "photography"
+        ],
+        "budget_min": "0",
+        "budget_max": "0",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional free park",
+        "source_catalog": null
+      }
+    },
+    {
+      "id": "no_tags",
+      "description": "Onboarding interests skipped; rank by budget headroom.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "e3a0dbcd-3b59-5886-8af5-fb2554c5ee60",
+        "preferred_tags": [],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional free park",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "very_low_budget_cafe",
+      "description": "Cafe interest but only PHP 50 per person per visit.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "0d2738a9-5884-5de0-8171-2e4d6d3f0d45",
+        "preferred_tags": [
+          "cafe"
+        ],
+        "budget_min": "0",
+        "budget_max": "50",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional free park",
+        "source_catalog": null
+      }
+    },
+    {
+      "id": "step_free_family",
+      "description": "Family explicitly requires verified step-free access.",
+      "interface_scope": "engine_constraint_diagnostic",
+      "preferences": {
+        "user_id": "816655ef-2bcc-5dc9-afe2-d6d7f89df74b",
+        "preferred_tags": [
+          "nature"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "family",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": true,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional free park",
+        "source_catalog": null
+      }
+    },
+    {
+      "id": "indoor_relaxing",
+      "description": "Traveler wants an indoor cafe.",
+      "interface_scope": "engine_constraint_diagnostic",
+      "preferences": {
+        "user_id": "dd040c13-c05c-5f48-aff0-db0daad73099",
+        "preferred_tags": [
+          "cafe",
+          "relaxing"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": "indoor",
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional budget cafe",
+        "source_catalog": null
+      }
+    },
+    {
+      "id": "short_visit",
+      "description": "Only 30 minutes available at each stop.",
+      "interface_scope": "engine_constraint_diagnostic",
+      "preferences": {
+        "user_id": "6c642e64-8c97-5736-b4b8-4d8bdc078d1d",
+        "preferred_tags": [
+          "cafe"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": 30,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": null,
+        "source_catalog": null
+      }
+    },
+    {
+      "id": "free_indoor",
+      "description": "Confirmed free indoor visits requested.",
+      "interface_scope": "engine_constraint_diagnostic",
+      "preferences": {
+        "user_id": "5606c8e9-ff05-5b35-a3d9-db5adb0515ae",
+        "preferred_tags": [
+          "heritage"
+        ],
+        "budget_min": "0",
+        "budget_max": "0",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": "indoor",
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": null,
+        "source_catalog": null
+      }
+    },
+    {
+      "id": "nearby_photography",
+      "description": "Photography within one straight-line kilometre of a stated origin.",
+      "interface_scope": "engine_constraint_diagnostic",
+      "preferences": {
+        "user_id": "9da6c6ff-0e37-5f12-8f89-fd3846ace9d2",
+        "preferred_tags": [
+          "photography"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": {
+          "latitude": 10.676,
+          "longitude": 122.95213
+        },
+        "max_distance_km": 1.0,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": "Fictional free park",
+        "source_catalog": "The Negros Museum"
+      }
+    },
+    {
+      "id": "empty_catalog",
+      "description": "Catalog unavailable as an empty valid snapshot.",
+      "interface_scope": "onboarding_compatible",
+      "preferences": {
+        "user_id": "b4a3e191-4357-51b6-bcae-b52ed2444d1d",
+        "preferred_tags": [
+          "cafe"
+        ],
+        "budget_min": "0",
+        "budget_max": "200",
+        "group_type": "solo",
+        "preferred_categories": [],
+        "setting": null,
+        "requires_step_free_access": false,
+        "max_visit_duration_minutes": null,
+        "origin": null,
+        "max_distance_km": null,
+        "excluded_location_ids": []
+      },
+      "limit": 3,
+      "expected_top": {
+        "controlled": null,
+        "source_catalog": null
+      }
+    }
+  ]
+}

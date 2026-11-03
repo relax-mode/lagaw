@@ -39,6 +39,8 @@ TEST_FILES = [
     "test_content_based.py",
     "test_hybrid_recommendations.py",
     "test_week3_evaluation.py",
+    "test_trip_recommendations.py",
+    "test_onboarding_recommendations.py",
 ]
 
 
