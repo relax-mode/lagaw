@@ -719,11 +719,16 @@ Pending: no consultation or retrospective notes were found in the reviewed GitHu
 
 
 
+
 ### November 3, 2026 — Issue #108: destination image Storage
 - **November 3, 2026** — On `feat/s4-08-destination-storage` based on `origin/main` `ed595ab`, inspected the existing nullable `locations.image_url` response contract, Supabase Storage configuration and source conventions. Prepared an additive restrictive `storage.objects` client-write policy migration with a disposable-CI guard, a development-only Storage API bucket/upload tool with offline dry run, approved-usage guard, 5 MiB JPEG/PNG/WebP validation, content-addressed locations path, public hash verification and no overwrite of curated image URLs. Documented development rollout, access checks, preservation and rollback in [the Storage guide](destination-image-storage.md). Seven focused offline workflow checks passed; backend Ruff passed. Full Windows non-DB regression: **929 passed, 2 failed, 106 deselected**; failures are pre-existing model-file permission tests expecting POSIX `0o600` instead of Windows `0o666`, not modified here. No real image uploaded; development bucket inventory, unauthorized/direct Storage denial and public retrieval remain unverified. No production changes, GitHub PR, approval or merge yet.
 
 ### November 3, 2026 — Issue #114: shared AI extraction safeguards
 - **November 3, 2026** — On `fix/s4-14-ai-rate-limits` from `origin/main` `ed595ab`, prepared authenticated profile-scoped extraction quotas via atomic PostgreSQL RPC and RLS-enabled counter table, with bounded defaults **5 per UTC minute / 40 per UTC day**. The endpoint reserves before DeepSeek, returns safe 429 with `Retry-After`, fails closed with safe 503 on quota infrastructure errors, counts failed provider attempts, and preserves the confirmation-only extraction contract. Added mocked endpoint/ownership/error tests, disposable-DB concurrency test proposal, configuration placeholders and [quota documentation](ai-extraction-quotas.md); provider credentials and requests were not used. Focused **90 passed**, Ruff passed; full Windows non-DB regression **932 passed, 2 failed, 108 deselected** with only the existing POSIX `0o600` assertions failing on Windows (`0o666`). Hosted development quota migration/concurrency validation and production approval remain pending; no production write or merge.
+
+
+### November 3, 2026 — Issue #116: backend liveness and readiness
+- **November 3, 2026** — On `fix/s4-16-backend-health-docs` from `origin/main` `ed595ab`, drafted public `GET /health` process liveness and `GET /ready` bounded, read-only PostgREST readiness (2-second timeout), with 503 generic fail-closed responses and no paid AI calls; sanitized `GET /locations` invalid-parameter 422 responses. Added OpenAPI/security and failure-case tests plus [health/API/architecture reference](backend-health-api.md). Focused **10 passed**, Ruff passed; full Windows non-DB regression **932 passed, 2 failed, 106 deselected** with only existing POSIX `0o600` expectations failing on Windows (`0o666`). No live deployed readiness evidence or production change; review and CI remain pending.
 
 
 ### November 3, 2026 — #112 authentication email provider evaluation
