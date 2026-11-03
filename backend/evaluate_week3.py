@@ -125,6 +125,10 @@ def run_extraction_case(case):
         ),
     ):
         app = create_app()
+        from app.ai_quota import QuotaDecision, get_quota_store
+        quota = Mock()
+        quota.consume.return_value = QuotaDecision(allowed=True, retry_after_seconds=0, exhausted_window=None)
+        app.dependency_overrides[get_quota_store] = lambda: quota
         saved = TripResponse(
             id="23000000-0000-4000-8000-000000000003",
             user_id=OWNER,
