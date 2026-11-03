@@ -44,7 +44,9 @@ def test_daily_cap_and_client_role_denial(rest, users):
     assert 0 < refused["retry_after_seconds"] <= 86400
 
     # The `users` fixture already validates disposable-only DB/PostgREST targets.
-    with psycopg.connect(os.environ["DATABASE_URL"]) as connection, connection.cursor() as cursor:
+    # CI supplies a SQLAlchemy URL (postgresql+psycopg://), not a libpq DSN.
+    dsn = os.environ["DATABASE_URL"].replace("postgresql+psycopg://", "postgresql://", 1)
+    with psycopg.connect(dsn) as connection, connection.cursor() as cursor:
         # Cursor is already open in the combined context manager.
         cursor.execute("""
                 select has_function_privilege(
