@@ -34,6 +34,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       database: ${{ steps.filter.outputs.database }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      audit: ${{ steps.filter.outputs.audit }}
 
     steps:
       - name: Checkout repository
@@ -61,6 +62,17 @@ jobs:
               - 'frontend/**'
               - 'package.json'
               - 'package-lock.json'
+              - '.github/workflows/ci.yml'
+            audit:
+              - 'backend/requirements*.txt'
+              - 'backend/requirements*.in'
+              - 'backend/pyproject.toml'
+              - 'backend/uv.lock'
+              - 'package.json'
+              - 'package-lock.json'
+              - '.github/dependabot.yml'
+              - '.github/security/**'
+              - 'scripts/audit_gate.py'
               - '.github/workflows/ci.yml'
 
   # Secret scanning runs on every pull request and push, never path-filtered, so
@@ -125,13 +137,21 @@ jobs:
           gitleaks detect --source . --config .gitleaks.toml --redact --no-banner \
             --log-opts="$log_opts"
 
-  # Dependency audit. pip-audit covers backend/requirements.txt and npm audit
+  # Dependency audit runs for dependency-related pull requests and every main
+  # push/manual run. Documentation-only PRs skip it, but gitleaks always runs.
+  # If the path classifier fails, audit runs instead of silently skipping.
+  # pip-audit covers backend/requirements.txt and npm audit
   # covers the root lockfile at the high threshold. The audit tools' own exit codes
   # are ignored because scripts/audit_gate.py decides: it blocks any finding that
   # is not in .github/security/audit-allowlist.json, and fails closed on unreadable
   # reports. Only advisory IDs and package names are printed. Nothing is uploaded.
   dependency-audit:
     name: Dependency audit - pip and npm
+    needs: changes
+    if: >-
+      always() && !cancelled() &&
+      (github.event_name != 'pull_request' || needs.changes.result != 'success' ||
+       needs.changes.outputs.audit == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
