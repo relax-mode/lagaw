@@ -1,0 +1,16 @@
+# Gitleaks configuration. The default rule set stays enabled; the allowlist below
+# is deliberately narrow (one file AND one literal) so no rule is disabled.
+title = "Lagaw gitleaks configuration"
+
+[extend]
+useDefault = true
+
+# Synthetic test fixture: backend/test_auth.py uses a deliberately wrong, obviously
+# fake bearer value ("wrong-synthetic-key-of-at-least-32-bytes") to prove that the
+# API rejects an incorrect signing key. It is not a credential. Both the path and
+# the literal must match, so the same string elsewhere is still reported.
+[[allowlists]]
+description = "Synthetic wrong-key fixture in backend auth tests"
+condition = "AND"
+paths = ['''^backend/test_auth\.py$''']
+regexes = ['''wrong-synthetic-key-of-at-least-32-bytes''']
