@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "description": "Accepted historical dependency-audit findings. Each entry must name the advisory ID, the package, a reason, and a review_by date (YYYY-MM-DD). The gate blocks any new finding not listed here, and blocks an entry whose review_by date has passed while its finding still exists. See docs/ci-security.md.",
+  "entries": [
+    {
+      "id": "GHSA-xjj6-f33q-929c",
+      "package": "undici",
+      "reason": "Transitive via wrangler 4.151.0 (deploy tooling, not shipped to users). Fix is wrangler 4.156.0, a non-major bump; tracked for the next dependency update.",
+      "review_by": "2026-12-31"
+    },
+    {
+      "id": "GHSA-4w7w-5xrc-9h26",
+      "package": "undici",
+      "reason": "Transitive via wrangler 4.151.0 (deploy tooling, not shipped to users). Fix is wrangler 4.156.0, a non-major bump; tracked for the next dependency update.",
+      "review_by": "2026-12-31"
+    },
+    {
+      "id": "GHSA-2m5v-pch6-74hx",
+      "package": "undici",
+      "reason": "Transitive via wrangler 4.151.0 (deploy tooling, not shipped to users). Fix is wrangler 4.156.0, a non-major bump; tracked for the next dependency update.",
+      "review_by": "2026-12-31"
+    },
+    {
+      "id": "GHSA-qrxm-fqhp-jwvm",
+      "package": "undici",
+      "reason": "Transitive via wrangler 4.151.0 (deploy tooling, not shipped to users). Fix is wrangler 4.156.0, a non-major bump; tracked for the next dependency update.",
+      "review_by": "2026-12-31"
+    }
+  ]
+}

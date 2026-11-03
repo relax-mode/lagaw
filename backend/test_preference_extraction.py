@@ -36,9 +36,13 @@ CASES = json.loads(
 
 
 def envelope(content=DEFAULT, finish="stop"):
+    return raw_envelope(json.dumps(content), finish)
+
+
+def raw_envelope(content, finish="stop"):
     return {
         "choices": [
-            {"finish_reason": finish, "message": {"content": json.dumps(content)}}
+            {"finish_reason": finish, "message": {"content": content}}
         ]
     }
 
@@ -230,16 +234,24 @@ def test_provider_http_failures_are_safe_and_leave_trip_unchanged(
     [
         (httpx.ReadTimeout("private provider details"), 504, "extraction_timeout"),
         (httpx.ConnectError("private provider details"), 503, "extraction_unavailable"),
+        (httpx.ConnectTimeout("private provider details"), 504, "extraction_timeout"),
+        (httpx.RemoteProtocolError("private provider details"), 503, "extraction_unavailable"),
+        (httpx.ReadError("private provider details"), 503, "extraction_unavailable"),
     ],
 )
 def test_transport_failures(api, error, status, code):
-    client, reply, _, store, _ = api
+    client, reply, calls, store, saved = api
+    before = client.get(f"/api/v1/trips/{saved.id}").json()
     reply.side_effect = error
     response = client.post(BASE, json={"prompt": "do-not-echo-me"})
     assert response.status_code == status
     assert response.json()["detail"]["code"] == code
+    assert response.json()["detail"]["manual_fallback"] is True
+    assert len(calls) == 1  # No automatic paid retry.
+    assert client.get(f"/api/v1/trips/{saved.id}").json() == before
     store.create_trip.assert_not_called()
     store.update_trip.assert_not_called()
+    store.delete_trip.assert_not_called()
     assert_safe(response)
 
 
@@ -248,6 +260,20 @@ def test_transport_failures(api, error, status, code):
     [
         {},
         {"choices": []},
+        None,
+        [],
+        {"choices": None},
+        {"choices": {}},
+        {"choices": "private provider details"},
+        {"choices": [None]},
+        {"choices": [{"message": {"content": json.dumps(DEFAULT)}}]},
+        {"choices": [{"finish_reason": "stop", "message": None}]},
+        {"choices": [{"finish_reason": "stop", "message": []}]},
+        *(raw_envelope(content) for content in (None, 123, True, [], {})),
+        envelope(None),
+        envelope([]),
+        b"<html>private provider details</html>",
+        b"\xff\xfe\xff",
         envelope(DEFAULT, "length"),
         envelope(DEFAULT, "content_filter"),
         envelope(DEFAULT | {"tags": ["unknown"]}),
@@ -261,12 +287,53 @@ def test_transport_failures(api, error, status, code):
     ],
 )
 def test_invalid_provider_output(api, body):
-    client, reply, _, _, _ = api
-    reply.return_value = httpx.Response(200, json=body)
+    client, reply, calls, store, saved = api
+    before = client.get(f"/api/v1/trips/{saved.id}").json()
+    reply.return_value = httpx.Response(
+        200, content=body if isinstance(body, bytes) else json.dumps(body),
+    )
     response = client.post(BASE, json={"prompt": "coffee"})
     assert response.status_code == 502
     assert response.json()["detail"]["code"] == "invalid_extraction_output"
+    assert response.json()["detail"]["manual_fallback"] is True
+    assert len(calls) == 1
+    assert client.get(f"/api/v1/trips/{saved.id}").json() == before
+    store.create_trip.assert_not_called()
+    store.update_trip.assert_not_called()
+    store.delete_trip.assert_not_called()
     assert_safe(response)
+
+
+@pytest.mark.parametrize("failure,status,code", [
+    (httpx.Response(503, text="private provider details"), 503, "extraction_unavailable"),
+    (httpx.Response(200, json=raw_envelope(None)), 502, "invalid_extraction_output"),
+    (httpx.RemoteProtocolError("private provider details"), 503, "extraction_unavailable"),
+])
+def test_failure_then_explicit_new_request_recovers_without_writes(api, failure, status, code):
+    client, reply, calls, store, saved = api
+    before = client.get(f"/api/v1/trips/{saved.id}").json()
+    explicit = {"budget_min": "0", "budget_max": "250", "preferred_tags": ["heritage"]}
+    payload = {"prompt": "do-not-echo-me", "explicit_preferences": explicit}
+    reply.side_effect = [failure, httpx.Response(200, json=envelope())]
+    failed = client.post(BASE, json=payload)
+    assert failed.status_code == status
+    assert failed.json()["detail"]["code"] == code
+    assert failed.json()["detail"]["manual_fallback"] is True
+    assert len(calls) == 1
+    assert_safe(failed)
+    assert client.get(f"/api/v1/trips/{saved.id}").json() == before
+    recovered = client.post(BASE, json=payload)  # Explicit subsequent action, not a retry loop.
+    assert recovered.status_code == 200
+    assert len(calls) == 2
+    draft = recovered.json()
+    assert draft["requires_confirmation"] is True
+    assert draft["preferences"]["preferred_tags"] == ["heritage"]
+    assert draft["preferences"]["budget_max"] == "250"
+    assert explicit == payload["explicit_preferences"]
+    assert client.get(f"/api/v1/trips/{saved.id}").json() == before
+    store.create_trip.assert_not_called()
+    store.update_trip.assert_not_called()
+    store.delete_trip.assert_not_called()
 
 
 @pytest.mark.parametrize(
