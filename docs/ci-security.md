@@ -87,3 +87,17 @@ Within run 40834627148 the `Set up Flutter` step took 22 s (CI frontend), 21 s (
 **Trade-off.** The SDK no longer follows stable automatically; bumping Flutter becomes an explicit one-line PR. Dependabot does not do this for us.
 
 **Not done.** Splitting the web builds out of the deploy jobs would remove more time from the critical path but changes deploy ordering, so it was not attempted in this PR.
+
+## 8. Dependency-audit PR path filter (November 3, 2026)
+
+**Problem.** The new `Dependency audit - pip and npm` job (introduced in #125) installs pip-audit and resolves dependency advisories on **every** pull request, even when only documentation changes. The existing backend/database/Flutter path filter skips app checks on docs-only PRs, so the audit job became the new critical path. It should remain mandatory on all `main` pushes and manual CI runs, while unrelated documentation edits can be checked by the continuously running secret scanner.
+
+**Change proposed.** Add an `audit` filter to the existing `Detect changed areas` job and gate `dependency-audit` on it for pull requests. Relevant paths are `backend/requirements*.txt`, `backend/requirements*.in`, `backend/pyproject.toml`, `backend/uv.lock`, `package.json`, `package-lock.json`, `.github/dependabot.yml`, `.github/security/**`, `scripts/audit_gate.py` and `.github/workflows/ci.yml`. On `main` pushes and manual runs, audit still runs. When path classification fails, audit is attempted rather than silently skipped; the failed classification check also blocks a protected PR. The independent `secret-scan` job remains **unconditional for every PR and push**.
+
+**Before evidence, docs-only PR:** [PR #145 / CI run 41586757937](https://github.com/relax-mode/lagaw/actions/runs/41586757937), November 3: successful run created 05:55:54 UTC, updated 05:56:27 UTC (**33 seconds wall time**). The dependency-audit job took **30 seconds** (05:55:56–05:56:26), while the secret scan took **7 seconds** and `Detect changed areas` took **5 seconds**. Backend/database/Flutter checks were skipped. This is a single run, not a median.
+
+**After evidence, controlled docs-only probe:** [PR #147 / CI run 41587355728](https://github.com/relax-mode/lagaw/actions/runs/41587355728), November 3, targeting the branch with the proposed workflow: successful run created 06:02:01 UTC, updated 06:02:11 UTC (**10 seconds wall time**). `Dependency audit - pip and npm` was **SKIPPED** by the path classifier; `Secret scan - gitleaks` **PASSED** in 5 seconds and `Detect changed areas` **PASSED** in 6 seconds. The probe changes one documentation file and will be closed **without merging**.
+
+**Measured comparison (single samples, not a weekly trend):** 33 seconds before → 10 seconds after, **23 seconds / approximately 70% less wall time** for a documentation-only PR. The runs have different code versions by design (base workflow vs proposed workflow) and may differ in runner queue time, so this is a controlled functional proof and a preliminary speed observation, **not** evidence of a sustained average or p90 improvement. Dependency-change PRs still run audit, as shown by the CI run on this workflow-change PR; `main` pushes and manual runs are unconditionally audited by the job expression. Measure more post-merge docs PRs before updating the weekly metric claims.
+
+**Trade-off.** A vulnerability disclosed after the last dependency change will be detected again on the next `main` push and in routine dependency updates, not on every documentation-only PR. Continuous secret scanning is unaffected.
