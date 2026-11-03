@@ -1,0 +1,88 @@
+{
+  "issue": 105,
+  "recorded_date": "2026-10-31",
+  "provenance": "PowerShell output supplied by Andrew; checker run inside Lagaw .venv. No independent backend or direct database credentials used by documenting agent.",
+  "test_result": {
+    "command": "python -m pytest -q backend/test_destination_coverage_audit.py",
+    "outcome": "passed",
+    "passed": 9,
+    "duration_seconds": 0.06,
+    "environment": "local venv",
+    "source": "user-supplied output (latest rerun after Ruff fixes)"
+  },
+  "lint_result": {
+    "command": "python -m ruff check . ../scripts/destination_coverage_audit.py",
+    "outcome": "passed",
+    "output": "All checks passed!",
+    "source": "user-supplied output from backend/"
+  },
+  "full_backend_regression": {
+    "command": "python -m pytest -q -m \"not db\"",
+    "passed": 762,
+    "failed": 2,
+    "deselected": 106,
+    "duration_seconds": 16.99,
+    "platform": "Windows",
+    "failure_files": ["backend/test_seed_and_train.py"],
+    "failure_description": "Two pre-existing #94 tests assert POSIX 0o600 file mode, but Windows reports 0o666; not modified as part of issue #105.",
+    "source": "user-supplied output before latest focused rerun"
+  },
+  "checks": [
+    {
+      "environment": "development",
+      "observed_at_utc": "2026-10-31T09:22:02+00:00",
+      "active_location_count": 10,
+      "field_counts": {
+        "bounded_cost": 1,
+        "category": 10,
+        "coordinate_pair": 6,
+        "field_complete_only": 1,
+        "identity_and_address": 10,
+        "opening_hours": 2,
+        "vibe_tags": 10,
+        "visit_duration": 10
+      },
+      "field_coverage_percent": {
+        "bounded_cost": 10,
+        "category": 100,
+        "coordinate_pair": 60,
+        "field_complete_only": 10,
+        "identity_and_address": 100,
+        "opening_hours": 20,
+        "vibe_tags": 100,
+        "visit_duration": 100
+      },
+      "scope": "Public API active destinations only; inactive/private records not measured",
+      "caveat": "Field presence does not verify freshness, rights, or itinerary feasibility."
+    },
+    {
+      "environment": "production",
+      "observed_at_utc": "2026-10-31T09:22:04+00:00",
+      "active_location_count": 10,
+      "field_counts": {
+        "bounded_cost": 1,
+        "category": 10,
+        "coordinate_pair": 6,
+        "field_complete_only": 1,
+        "identity_and_address": 10,
+        "opening_hours": 2,
+        "vibe_tags": 10,
+        "visit_duration": 10
+      },
+      "field_coverage_percent": {
+        "bounded_cost": 10,
+        "category": 100,
+        "coordinate_pair": 60,
+        "field_complete_only": 10,
+        "identity_and_address": 100,
+        "opening_hours": 20,
+        "vibe_tags": 100,
+        "visit_duration": 100
+      },
+      "scope": "Public API active destinations only; inactive/private records not measured",
+      "caveat": "Field presence does not verify freshness, rights, or itinerary feasibility."
+    }
+  ],
+  "production_side_effects": "None. Read-only HTTPS GET requests.",
+  "remaining": "Resolve or document two Windows-only permission assertion failures in an unrelated #94 suite; GitHub CI, teammate review, PR merge, and any separately approved inactive-location inventory remain pending."
+}
