@@ -93,6 +93,12 @@ Persisted swipes, saves and ratings, owner-scoped history and safe verification:
 Validated recommendations for saved trips, budget allocation and model fallback:
 [trip recommendation API](docs/trip-recommendations-api.md).
 
+Cold-start discovery from saved onboarding tags, without a saved trip or model:
+[onboarding recommendation API](docs/onboarding-recommendations-api.md).
+
+Realistic cold-start scenarios, catalog coverage and content-first/hybrid roadmap:
+[content-first evaluation](docs/content-first-evaluation.md).
+
 Constraint-aware generated schedules, atomic persistence and replacement confirmation:
 [itinerary generation API](docs/itinerary-generation-api.md).
 
@@ -104,6 +110,9 @@ Offline matrix factorization, hybrid scoring, artifacts and held-out comparison:
 
 Week 3 versioned extraction/model evaluation and one offline CI command:
 [evaluation suite and handoff](docs/week3-evaluation.md).
+
+AI-specific malformed output, outage, recovery and fallback guarantees:
+[failure coverage and technical limits](docs/ai-failure-coverage.md).
 
 ## Branch Strategy
 
