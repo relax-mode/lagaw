@@ -1,0 +1,60 @@
+{
+  "recorded_date": "2026-11-01",
+  "method": "Existing credential-free GET-only scripts/destination_coverage_audit.py; no hosted writes",
+  "observations": [
+    {
+      "active_location_count": 10,
+      "caveat": "Field presence does not verify freshness, rights, or itinerary feasibility.",
+      "environment": "development",
+      "field_counts": {
+        "bounded_cost": 1,
+        "category": 10,
+        "coordinate_pair": 6,
+        "field_complete_only": 1,
+        "identity_and_address": 10,
+        "opening_hours": 2,
+        "vibe_tags": 10,
+        "visit_duration": 10
+      },
+      "field_coverage_percent": {
+        "bounded_cost": 10,
+        "category": 100,
+        "coordinate_pair": 60,
+        "field_complete_only": 10,
+        "identity_and_address": 100,
+        "opening_hours": 20,
+        "vibe_tags": 100,
+        "visit_duration": 100
+      },
+      "observed_at_utc": "2026-11-01T07:08:34+00:00",
+      "scope": "Public API active destinations only; inactive/private records not measured"
+    },
+    {
+      "active_location_count": 10,
+      "caveat": "Field presence does not verify freshness, rights, or itinerary feasibility.",
+      "environment": "production",
+      "field_counts": {
+        "bounded_cost": 1,
+        "category": 10,
+        "coordinate_pair": 6,
+        "field_complete_only": 1,
+        "identity_and_address": 10,
+        "opening_hours": 2,
+        "vibe_tags": 10,
+        "visit_duration": 10
+      },
+      "field_coverage_percent": {
+        "bounded_cost": 10,
+        "category": 100,
+        "coordinate_pair": 60,
+        "field_complete_only": 10,
+        "identity_and_address": 100,
+        "opening_hours": 20,
+        "vibe_tags": 100,
+        "visit_duration": 100
+      },
+      "observed_at_utc": "2026-11-01T07:08:39+00:00",
+      "scope": "Public API active destinations only; inactive/private records not measured"
+    }
+  ]
+}

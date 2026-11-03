@@ -285,6 +285,25 @@ def test_model_exception_is_sanitized(harness, failure):
     assert result.status_code == 503 and "private-model" not in result.text
 
 
+def test_engine_error_does_not_poison_later_content_only_request(harness):
+    api, state = harness
+    before = deepcopy(state.trip)
+    failed_engine = Mock(side_effect=RuntimeError("private-model"))
+    state.engine = failed_engine
+    failed = api.post(URL, json=OPTIONS)
+    assert failed.status_code == 503
+    assert "private-model" not in failed.text
+    assert state.trip == before
+    failed_engine.assert_called_once()
+    state.engine = None  # Explicit next request with the existing no-model engine.
+    recovered = api.post(URL, json=OPTIONS)
+    assert recovered.status_code == 200
+    assert [row["location_id"] for row in recovered.json()["items"]] == [VENUE, SECOND]
+    assert all("cafe" in row["recommendation_reason"] for row in recovered.json()["items"])
+    assert state.trip == before
+    assert all(request.method == "GET" for request in state.requests)
+
+
 @pytest.mark.parametrize("change", ["inactive", "edited", "deleted", "left_swiped"])
 def test_live_database_state_is_rechecked_after_model(harness, change):
     api, state = harness
