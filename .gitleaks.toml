@@ -1,5 +1,5 @@
-# Gitleaks configuration. The default rule set stays enabled; the allowlist below
-# is deliberately narrow (one file AND one literal) so no rule is disabled.
+# Gitleaks configuration. The default rule set stays enabled. Allowlist only
+# individually verified false positives; no rule or file class is disabled.
 title = "Lagaw gitleaks configuration"
 
 [extend]
@@ -14,3 +14,14 @@ description = "Synthetic wrong-key fixture in backend auth tests"
 condition = "AND"
 paths = ['''^backend/test_auth\.py$''']
 regexes = ['''wrong-synthetic-key-of-at-least-32-bytes''']
+
+# Historical false positive (verified November 4, 2026): this commit contains
+# a public 36-character destination UUID in the SEED_IDS catalogue dictionary.
+# Match the single old commit, source path, and canonical UUID shape together;
+# do not suppress arbitrary generic-api-key findings or entire files.
+[[allowlists]]
+description = "Public seed destination UUID falsely flagged as generic API key"
+condition = "AND"
+commits = ["0f23f61bfbb4fbd87a3875763d430bdbe93df711"]
+paths = ['''^scripts/plan_destination_enrichment\.py$''']
+regexes = ['''[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}''']
