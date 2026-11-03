@@ -30,11 +30,14 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       # The provider key stays in Secret Manager; this calls the deployed staging
-      # API, which spends one extraction on the staging key.
+      # API, which spends one extraction on the staging key. The API accepts only
+      # Supabase sessions, so the check signs in as the dedicated smoke account.
       - name: Extract preferences through deployed staging
         env:
           STAGING_API_URL: https://lagaw-api-staging-i5kvldluga-as.a.run.app
-          STAGING_TRIP_DEMO_TOKEN: ${{ secrets.STAGING_TRIP_DEMO_TOKEN }}
+          SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
+          SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
+          SMOKE_SUPABASE_KEY: ${{ vars.SMOKE_SUPABASE_KEY }}
         run: |
           set -o pipefail
           python3 scripts/ai_live_smoke.py | tee -a "$GITHUB_STEP_SUMMARY"
