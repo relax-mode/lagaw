@@ -11,7 +11,7 @@ UNVERIFIED.
 
 ## Decision
 
-- Provider: **Resend**, selected by the team. Brevo is not being evaluated further.
+- Provider: **Resend**, selected by the team. Brevo is not being evaluated further under the current decision; see the [November 3, 2026 provider comparison and evidence limitations](auth-email-provider-evaluation.md) for both services' published limits, sender requirements and the unresolved domain blocker.
 - Why the sender must change: Supabase's built-in mailer caps auth email at about
   2 per hour per project and delivers only to team members (see
   [flutter-authentication.md](flutter-authentication.md#hosted-auth-settings)).
