@@ -781,3 +781,18 @@ deploys count individual API/Web jobs, not unique releases. Incidents INC-3
 and INC-4 remain documented separately, as INC-4's scheduled smoke is not
 part of Lagaw CI. See [the full-week report](pipeline-metrics.md#sprint-3-source-completed-week-queried-november-5-2026). This was backfilled
 *after* the reported consultation and is not claimed as a slide shown during it.
+
+### November 5, 2026 — #59 deployed AI-path evidence reconciled
+
+Reconciled the previously prepared consultation demo path against dated actual
+acceptance in [S3-10](evidence/trip-preference-extraction.md),
+[S3-08](evidence/trip-recommendations.md),
+[S3-09](evidence/itinerary-generation.md),
+[S3-11](evidence/trip-planning-ui.md), and
+[S3-13](evidence/ai-ci-cd-2026-10-26.md): staging Web/Android
+real extraction and review, ranked backend/Android recommendations, generated
+trip persistence and reopen, simulated AI 503 manual fallback, and mocked
+CI/evaluation. The [consultation evidence matrix](sprint-3-consultation.md#7-historical-ai-demo-readiness-evidence-reconciliation--november-5-2026)
+links the steps and their limitations. The independent checks do **not**
+prove a single combined live run or that the professor witnessed every stage.
+Actual Sprint 3 standups and a team retrospective remain undocumented.

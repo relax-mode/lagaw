@@ -130,3 +130,26 @@ a formal retrospective were **not supplied**. Do not infer they occurred.
 The earlier checklist above is **preparation**, not proof each step was
 performed live. Link completed corner-case tests and the Storage acceptance
 separately as they happen.
+
+## 7. Historical AI demo-readiness evidence reconciliation — November 5, 2026
+
+The consultation pack above was written before the application path was fully
+implemented. By November 5 the team had **separate, documented deployed
+acceptance evidence** supporting each stage of the planned live demonstration:
+
+| Planned stage / acceptance dimension | Actual dated evidence | Limitation |
+| --- | --- | --- |
+| Natural-language request -> backend structured output -> user-reviewed preferences | [S3-10 Flutter extraction evidence](evidence/trip-preference-extraction.md) records an Android trial and a **staging Web trial on October 29**, including a real API suggestion, review/apply and an account-scoped saved trip; [extraction API contract](preference-extraction-api.md) documents backend validation and confirmation. | The professor's reported demo did not identify which individual screens were shown. |
+| Ranked recommendations | [S3-08 API evidence](evidence/trip-recommendations.md) records authenticated **staging and production** responses from saved trips, including score, reason, and an empty match; [S3-11 Android evidence](evidence/trip-planning-ui.md) records ranking UI from staging on October 29. | Separate acceptance cases, not a single recorded consultation interaction. |
+| Generate persisted itinerary / reload | [S3-09 deployed itinerary evidence](evidence/itinerary-generation.md) records authenticated **staging and production** generation, persistence and reload with synthetic venues; [S3-11 Android evidence](evidence/trip-planning-ui.md) shows a generated plan and persistence after completely restarting the staging-connected app (shots 56_7 and 56_17). | Screenshots of a successful replacement and an Android generated plan from a manual-only trip were not captured. |
+| Controlled AI failure and manual fallback | [S3-13 staging failure drill](evidence/ai-ci-cd-2026-10-26.md) returned HTTP 503 `extraction_unavailable` with `manual_fallback: true` from a zero-traffic `aifail` revision on October 26; [S3-10 Android/Web fallback evidence](evidence/trip-preference-extraction.md) shows an offline network failure retaining input and permitting a manual save. | The 503 drill and manual-save UI were exercised separately, not recorded as one combined live user action. |
+| Backend AI response processing and deterministic evaluation | [S3-05 API contract](preference-extraction-api.md), [Week 3 evaluation](week3-evaluation.md) and [results](evidence/week3-results.md), plus [S3-13 AI pipeline evidence](evidence/ai-ci-cd-2026-10-26.md) linking passing CI and deliberate failure probes. | Fixtures and metrics are designed evaluation evidence, not measured organic recommendation quality. |
+| Mocked AI CI without paid calls | [Green CI run 40308275898](https://github.com/relax-mode/lagaw/actions/runs/40308275898) and failing probes [40307281405](https://github.com/relax-mode/lagaw/actions/runs/40307281405) and [40308048372](https://github.com/relax-mode/lagaw/actions/runs/40308048372) document no-provider-key mocked validation and the regression gate. | This proves CI behavior, not that the CI was discussed in consultation. |
+
+**Conclusion:** the end-to-end demo path was prepared and its steps had
+**independently verified deployed examples**. A single continuous staged run
+(request -> extraction -> recommendations -> generated persisted itinerary ->
+forced AI failure) was **not recorded**, and the professor's observed steps
+remain unspecified. Do not state that all stages were shown during the
+consultation. These evidence links establish **demo readiness and the evidence
+pack's coverage**, not an invented witnessed demonstration.
