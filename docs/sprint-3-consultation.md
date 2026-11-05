@@ -96,6 +96,20 @@ Record in the [sprint log](sprint-log.md), only after the session:
 - A retrospective: what went well, what did not, and one change for Sprint 4.
 - Re-planned items, with reasons.
 
+## 5a. Week 3 pipeline report completed after the consultation
+
+The Sprint 3 pipeline row, formerly partial as of October 30, was regenerated
+on November 5 from completed GitHub Actions metadata for the full October
+26–November 1 UTC window: **98 runs (94 success, 2 failed, 2 cancelled),
+97.9% success rate** (excluding cancelled runs), **1.1 min average PR pipeline,
+4.7 min average main pipeline, 27 successful production deployment jobs,
+6.3 min measured merge-to-deploy lead time (16 of 30 merges), zero failed
+main deploy jobs, no measured failed-deploy recovery time**. Nine deliberate
+probe runs are excluded. These are **post-consultation backfilled metrics**;
+they must not be represented as numbers shown to the instructor during the
+consultation. The dated source, metric definitions and incident caveats are in
+[pipeline-metrics.md](pipeline-metrics.md#sprint-3-source-completed-week-queried-november-5-2026).
+
 ## 6. Actual consultation outcome — user-reported November 5, 2026
 
 The team subsequently reported that its **Week 3 consultation occurred**, with a

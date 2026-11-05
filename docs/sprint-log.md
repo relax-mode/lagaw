@@ -767,3 +767,17 @@ actual release readiness [#121](https://github.com/relax-mode/lagaw/issues/121).
 These are action priorities, not claimed PASS results. Dated standups,
 retrospective, the full pipeline report and specific demo-path verification
 remain outstanding.
+
+### November 5, 2026 — Sprint 3 full-week pipeline metrics reconciled for #59
+
+Ran the existing `scripts/pipeline_metrics.py --since 2026-10-26 --until
+2026-11-01` with authenticated GitHub Actions metadata, including the entire
+Sprint 3 UTC window and excluding nine deliberately failing probe runs. The
+completed reading was **98 completed runs: 94 successful, 2 failed, 2
+cancelled; 97.9% success rate excluding cancellations; 1.1 min PR / 4.7 min
+main average; 27 production deploy jobs; 6.3 min measured lead time over
+16 of 30 merges; 0 failed main deployment jobs; recovery n/a**. Production
+deploys count individual API/Web jobs, not unique releases. Incidents INC-3
+and INC-4 remain documented separately, as INC-4's scheduled smoke is not
+part of Lagaw CI. See [the full-week report](pipeline-metrics.md#sprint-3-source-completed-week-queried-november-5-2026). This was backfilled
+*after* the reported consultation and is not claimed as a slide shown during it.
