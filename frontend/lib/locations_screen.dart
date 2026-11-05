@@ -6,9 +6,12 @@ import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
 import 'screens/trips_tab.dart';
 import 'services/api_service.dart';
+import 'services/discovery_interactions.dart';
 import 'services/trip_service.dart';
 import 'theme.dart';
 import 'widgets/bacolod_3d_badges.dart';
+import 'widgets/left_swipe_explainer.dart';
+import 'widgets/rating_dialog.dart';
 import 'widgets/tactile_motion.dart';
 
 enum AppTab { explore, swipe, spots, trips }
@@ -19,7 +22,10 @@ class LocationsScreen extends StatefulWidget {
   /// Injectable for tests; defaults to the live trip API. [S2-04]
   final TripService? tripService;
 
-  const LocationsScreen({super.key, this.tripService});
+  /// Injectable for tests; defaults to the live locations API.
+  final ApiService? apiService;
+
+  const LocationsScreen({super.key, this.tripService, this.apiService});
 
   @override
   State<LocationsScreen> createState() => _LocationsScreenState();
@@ -33,16 +39,31 @@ class _LocationsScreenState extends State<LocationsScreen> {
   bool _showOnlySaved = false;
 
   // Swipe Deck State
-  int _swipeIndex = 0;
   double _dragOffset = 0.0;
-  final Set<String> _savedIds = {
-    '1a3bca09-5532-5de6-8587-2440c4e5',
-    'f2ccf475-56ea-51a0-a003-70f66d9f85',
-  };
+
+  /// The latest swipe failure, shown under the card.
+  String? _swipeError;
 
   // [S1-04] Live API Fetching & State
-  final ApiService _apiService = ApiService();
+  late final ApiService _apiService = widget.apiService ?? ApiService();
   late final TripService _tripService = widget.tripService ?? TripService();
+
+  /// Real swipes, saves and ratings from the backend. [S4-10]
+  late final DiscoveryInteractions _interactions = DiscoveryInteractions(
+    _tripService,
+  )..addListener(_onInteractionsChanged);
+
+  void _onInteractionsChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Places the user liked or saved (and never passed).
+  Set<String> get _savedIds => _interactions.picks;
+
+  /// Locations not yet swiped, in catalog order.
+  List<LocationItem> get _deck => _availableLocations
+      .where((loc) => !_interactions.isSwiped(loc.id))
+      .toList();
   List<LocationItem> _locations = [];
   String _errorMessage = '';
   ApiViewState _apiState = ApiViewState.loading;
@@ -51,11 +72,13 @@ class _LocationsScreenState extends State<LocationsScreen> {
   void initState() {
     super.initState();
     _fetchLocations();
+    _interactions.load();
   }
 
   @override
   void dispose() {
-    _apiService.dispose();
+    if (widget.apiService == null) _apiService.dispose();
+    _interactions.dispose();
     if (widget.tripService == null) _tripService.dispose();
     super.dispose();
   }
@@ -186,26 +209,59 @@ class _LocationsScreenState extends State<LocationsScreen> {
     return list[idx];
   }
 
-  void _toggleSave(String id) {
-    setState(() {
-      if (_savedIds.contains(id)) {
-        _savedIds.remove(id);
-      } else {
-        _savedIds.add(id);
-      }
-    });
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void _handleSwipe(bool liked) {
-    if (_swipeIndex >= _availableLocations.length) return;
-    final current = _availableLocations[_swipeIndex];
-    setState(() {
-      if (liked) {
-        _savedIds.add(current.id);
-      }
-      _swipeIndex++;
-      _dragOffset = 0.0;
-    });
+  /// Saves are append-only (#52): a saved place stays saved.
+  Future<void> _save(String id) async {
+    if (_interactions.isSaved(id)) {
+      _showMessage('Already saved. Removing saved places isn’t available yet.');
+      return;
+    }
+    try {
+      await _interactions.save(id);
+    } on TripApiException catch (e) {
+      if (mounted) _showMessage(describeInteractionFailure(e));
+    }
+  }
+
+  Future<void> _rate(LocationItem spot) async {
+    final stars = await showDialog<int>(
+      context: context,
+      builder: (_) => RatingDialog(name: spot.name),
+    );
+    if (stars == null || !mounted) return;
+    try {
+      await _interactions.rate(spot.id, stars);
+    } on TripApiException catch (e) {
+      if (mounted) _showMessage(describeInteractionFailure(e));
+    }
+  }
+
+  /// Records the swipe; the card only leaves once the server confirms.
+  Future<void> _handleSwipe(bool liked) async {
+    final deck = _deck;
+    if (deck.isEmpty) return;
+    final current = deck.first;
+    if (_interactions.isBusy(current.id)) return;
+    if (!liked && !await confirmLeftSwipeOnce(context)) {
+      if (mounted) setState(() => _dragOffset = 0.0);
+      return;
+    }
+    setState(() => _swipeError = null);
+    try {
+      await _interactions.swipe(current.id, liked: liked);
+      if (mounted) setState(() => _dragOffset = 0.0);
+    } on TripApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _dragOffset = 0.0;
+        _swipeError = describeInteractionFailure(e);
+      });
+    }
   }
 
   void _viewSavedLocations() {
@@ -1356,7 +1412,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   Widget _buildCenterFanCard(LocationItem spot) {
-    final isSaved = _savedIds.contains(spot.id);
+    final isSaved = _interactions.isSaved(spot.id);
 
     return GlassContainer(
       borderRadius: 28,
@@ -1419,7 +1475,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                             ),
                           ),
                           TactilePressable(
-                            onTap: () => _toggleSave(spot.id),
+                            onTap: () => _save(spot.id),
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 260),
                               switchInCurve: Curves.elasticOut,
@@ -1518,12 +1574,22 @@ class _LocationsScreenState extends State<LocationsScreen> {
   // TAB 2: TINDER-STYLE INTERACTIVE SWIPE DECK WITH DRAG ANIMATION
   // ===========================================================================
   Widget _buildSwipeTab({required bool isWide}) {
+    // Swipes are recorded against real places only, never the offline list.
+    if (_apiState != ApiViewState.live || _locations.isEmpty) {
+      return _buildSwipePlacesState(isWide: isWide);
+    }
+    if (!_interactions.loaded) return _buildSwipeHistoryState(isWide: isWide);
+
     // Deck Complete State -> Show Fun Cohesive Itinerary Screen
-    if (_swipeIndex >= _availableLocations.length) {
+    final deck = _deck;
+    if (deck.isEmpty) {
       return _buildItineraryCompletionView(isWide: isWide);
     }
 
-    final spot = _availableLocations[_swipeIndex];
+    final spot = deck.first;
+    final busy = _interactions.isBusy(spot.id);
+    final rating = _interactions.ratingFor(spot.id);
+    final position = _availableLocations.length - deck.length + 1;
 
     return Center(
       child: ConstrainedBox(
@@ -1558,7 +1624,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${_swipeIndex + 1} / ${_availableLocations.length}',
+                    '$position / ${_availableLocations.length}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -1573,11 +1639,13 @@ class _LocationsScreenState extends State<LocationsScreen> {
             // Interactive Dragging Card with Like / Nope Stamps
             GestureDetector(
               onPanUpdate: (details) {
+                if (busy) return;
                 setState(() {
                   _dragOffset += details.delta.dx;
                 });
               },
               onPanEnd: (details) {
+                if (busy) return;
                 if (_dragOffset > 90 || details.velocity.pixelsPerSecond.dx > 400) {
                   _handleSwipe(true);
                 } else if (_dragOffset < -90 ||
@@ -1814,7 +1882,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Vector3DButton(
-                  onTap: () => _handleSwipe(false),
+                  key: const ValueKey('swipe-pass'),
+                  onTap: busy ? null : () => _handleSwipe(false),
                   backgroundColor: Colors.white,
                   shadowColor: const Color(0xFFFDA4AF),
                   borderColor: const Color(0xFFF43F5E),
@@ -1829,7 +1898,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 ),
                 const SizedBox(width: 28),
                 Vector3DButton(
-                  onTap: () => _handleSwipe(true),
+                  key: const ValueKey('swipe-like'),
+                  onTap: busy ? null : () => _handleSwipe(true),
                   backgroundColor: const Color(0xFF10B981),
                   shadowColor: const Color(0xFF047857),
                   borderColor: const Color(0xFF6EE7B7),
@@ -1844,7 +1914,178 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton.icon(
+                key: const ValueKey('swipe-rate'),
+                onPressed: busy ? null : () => _rate(spot),
+                icon: Icon(
+                  rating == null ? Icons.star_border_rounded : Icons.star_rounded,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  rating == null
+                      ? 'Been here? Rate it'
+                      : 'You rated it ${rating.toStringAsFixed(rating % 1 == 0 ? 0 : 1)} · Rate again',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+            if (busy)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 6),
+                  child: SizedBox(
+                    key: ValueKey('swipe-busy'),
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            if (_swipeError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Container(
+                  key: const ValueKey('swipe-error'),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFFECDD3), width: 2),
+                  ),
+                  child: Text(
+                    _swipeError!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.slateDark,
+                    ),
+                  ),
+                ),
+              ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwipePlacesState({required bool isWide}) {
+    final loading = _apiState == ApiViewState.loading;
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: isWide ? 460 : 430),
+        child: GlassContainer(
+          key: const ValueKey('swipe-places-state'),
+          borderRadius: 28,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (loading)
+                const CircularProgressIndicator()
+              else
+                const Icon(Icons.cloud_off_rounded,
+                    size: 36, color: Color(0xFFE11D48)),
+              const SizedBox(height: 12),
+              Text(
+                loading
+                    ? 'Loading places…'
+                    : 'Couldn’t load places to swipe. Check your connection '
+                        'and try again.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.slateDark,
+                ),
+              ),
+              if (!loading) ...[
+                const SizedBox(height: 12),
+                Vector3DButton(
+                  key: const ValueKey('swipe-places-retry'),
+                  onTap: _fetchLocations,
+                  backgroundColor: AppTheme.primaryBlue,
+                  shadowColor: const Color(0xFF1D4ED8),
+                  borderRadius: 20,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Before history is known the deck is hidden, so already-swiped places
+  /// are never shown (and recorded) twice.
+  Widget _buildSwipeHistoryState({required bool isWide}) {
+    final error = _interactions.loadError;
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: isWide ? 460 : 430),
+        child: GlassContainer(
+          key: const ValueKey('swipe-history-state'),
+          borderRadius: 28,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (error == null) ...[
+                const CircularProgressIndicator(),
+                const SizedBox(height: 14),
+                const Text(
+                  'Loading your swipes…',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.slateMuted,
+                  ),
+                ),
+              ] else ...[
+                const Icon(Icons.cloud_off_rounded,
+                    size: 36, color: Color(0xFFE11D48)),
+                const SizedBox(height: 10),
+                Text(
+                  'Couldn’t load your swipes. $error',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.slateDark,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Vector3DButton(
+                  key: const ValueKey('swipe-history-retry'),
+                  onTap: _interactions.loading ? null : _interactions.load,
+                  backgroundColor: AppTheme.primaryBlue,
+                  shadowColor: const Color(0xFF1D4ED8),
+                  borderRadius: 20,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -2041,15 +2282,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
             ),
             const SizedBox(height: 10),
             TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  _swipeIndex = 0;
-                  _dragOffset = 0.0;
-                });
-              },
-              icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white),
+              onPressed: () => setState(() => _activeTab = AppTab.spots),
+              icon: const Icon(Icons.explore_rounded, size: 16, color: Colors.white),
               label: const Text(
-                'Restart Swipe Deck',
+                'Browse all spots',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
@@ -2542,7 +2778,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Mobile Compact Spot Card
   Widget _buildMobileSpotCard(LocationItem item) {
-    final isSaved = _savedIds.contains(item.id);
+    final isSaved = _interactions.isSaved(item.id);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GlassContainer(
@@ -2584,7 +2820,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                         ),
                       ),
                       TactilePressable(
-                        onTap: () => _toggleSave(item.id),
+                        onTap: () => _save(item.id),
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 260),
                           switchInCurve: Curves.elasticOut,
@@ -2647,7 +2883,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Web Glassmorphic Spot Card
   Widget _buildWebSpotCard(LocationItem item) {
-    final isSaved = _savedIds.contains(item.id);
+    final isSaved = _interactions.isSaved(item.id);
     return SizedBox(
       width: 310,
       child: GlassContainer(
@@ -2698,7 +2934,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     top: 8,
                     right: 8,
                     child: TactilePressable(
-                      onTap: () => _toggleSave(item.id),
+                      onTap: () => _save(item.id),
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(

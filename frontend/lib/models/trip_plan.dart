@@ -151,4 +151,36 @@ enum InteractionType {
 
   final String value;
   const InteractionType(this.value);
+
+  static InteractionType? fromValue(String? value) {
+    for (final type in values) {
+      if (type.value == value) return type;
+    }
+    return null;
+  }
+}
+
+/// One stored #52 event from `GET /api/v1/interactions`.
+class InteractionEvent {
+  final String locationId;
+  final InteractionType type;
+  final double? rating;
+
+  const InteractionEvent({
+    required this.locationId,
+    required this.type,
+    this.rating,
+  });
+
+  /// Null for event types this client does not know.
+  static InteractionEvent? tryParse(Map<String, dynamic> json) {
+    final type = InteractionType.fromValue(json['interaction_type'] as String?);
+    final locationId = json['location_id'] as String?;
+    if (type == null || locationId == null) return null;
+    return InteractionEvent(
+      locationId: locationId,
+      type: type,
+      rating: parseOptionalMoney(json['rating_value']),
+    );
+  }
 }
