@@ -71,6 +71,16 @@ never sent, including as a fallback.
   `profile_link_required` show their own messages. Other 409s keep their trip
   meaning. A 503 keeps the session and offers retry.
 - **Sign-out:** tap the avatar in the header and choose **Sign out**.
+- **Password recovery (#149):** the sign-in screen offers **Forgot password?**
+  and calls Supabase `resetPasswordForEmail`, using the same project-matched,
+  allow-listed web redirect as signup. Whether an account exists is never
+  disclosed. When the recovery email link opens the web app, `supabase_flutter`
+  exchanges the callback for a session and emits `AuthChangeEvent.passwordRecovery`.
+  The auth gate then shows a **new password** and **confirm password** form,
+  validating both inputs before `updateUser(UserAttributes(password: ...))`.
+  Ordinary sign-in cannot open the recovery form. After a successful update,
+  the user deliberately signs out and signs in with the new password. Recovery
+  tokens, password values and inbox addresses are never recorded in evidence.
 
 ## Tests
 
@@ -80,6 +90,37 @@ refresh, expiry versus explicit sign-out, bearer tokens on trip and extraction
 calls, 401 refresh-and-retry, failed refresh with no loop, no request without a
 session, 403/409 auth codes, and the sign-in, sign-up (with and without
 confirmation), restore, sign-out and expiry-with-unsaved-input flows.
+
+## Password recovery manual verification (#149)
+
+**Staging:** as of November 3, 2026, the team reported that a password-recovery
+email was delivered to an authorized Gmail inbox through the new Brevo SMTP
+setup. Following the link previously opened the homepage with **no password
+update form** because the old Flutter app did not handle the SDK recovery
+event. The code change is independently tested offline but **not yet deployed or
+verified end-to-end**. The prior HTTP 200 from Supabase `/auth/v1/recover` only
+proved acceptance of the email request, not a working password change.
+
+After this PR is approved, merged and the staging web deploy completes:
+
+1. Open the **staging** Lagaw web app and select **Forgot password?**.
+2. Use an authorized, pre-existing staging account. Request a new link and
+   check its delivery in that mailbox, not an arbitrary unconsenting recipient.
+3. Follow the **newly issued** link on the staging domain. Verify that **Choose
+   a new password** appears instead of the homepage. If it does not, check the
+   staging Supabase **Authentication → URL Configuration** Site URL and Redirect
+   URLs against the project-specific staging domain in this document.
+4. Enter matching new passwords. Confirm the success screen appears, return to
+   sign-in, sign in with the **new password**, and verify the **old password**
+   no longer works. Do not paste either password, email-link URL, token, or a
+   screenshot containing link parameters into GitHub.
+5. Record dated PASS/FAIL and the staging deployment run (no personal data) in
+   #149. Then repeat a separately authorized test in **production** against
+   the production Supabase project and domain before closing production-only
+   acceptance. The staging result does not prove the production result.
+
+**Flutter-only fallback:** Android currently opens the project-matched deployed
+web app for recovery links. A native Android deep link is not yet configured.
 
 ## Remaining limitations and coordination
 
