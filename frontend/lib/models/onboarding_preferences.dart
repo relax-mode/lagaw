@@ -25,6 +25,13 @@ class OnboardingPreferences {
 
   bool get hasBudget => budgetMin != null && budgetMax != null;
 
+  /// Nothing saved yet: a first-time user.
+  bool get isUnset =>
+      preferredTags.isEmpty &&
+      budgetMin == null &&
+      budgetMax == null &&
+      travelStyle == null;
+
   /// The full-replacement PUT body: all four keys, always.
   Map<String, dynamic> toJson() => {
     'preferred_tags': preferredTags,

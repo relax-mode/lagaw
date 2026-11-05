@@ -9,6 +9,8 @@ import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
 import 'config.dart';
 import 'locations_screen.dart';
+import 'screens/onboarding/first_run_gate.dart';
+import 'services/discovery_service.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -98,7 +100,14 @@ class _LagawAppState extends State<LagawApp> {
           ? Scaffold(body: Center(child: Text(error)))
           : session == null
           ? const LocationsScreen()
-          : AuthGate(session: session, signedIn: () => const LocationsScreen()),
+          : AuthGate(
+              session: session,
+              signedIn: () => FirstRunGate(
+                accountKey: session.accountEmail ?? '',
+                service: DiscoveryService.new,
+                child: const LocationsScreen(),
+              ),
+            ),
     );
   }
 }

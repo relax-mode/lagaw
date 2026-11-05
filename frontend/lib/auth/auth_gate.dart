@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/onboarding/onboarding_flow.dart';
-import '../services/onboarding_repository.dart';
+import '../screens/onboarding/first_run_gate.dart';
 import '../theme.dart';
 import 'auth_session.dart';
 import 'password_reset_screen.dart';
@@ -144,20 +143,13 @@ Future<void> showAccountSheet(BuildContext context, AuthSession session) {
               ),
             ),
             const SizedBox(height: 16),
-            // Mock-backed until #104 connects /api/v1/me/preferences. [S4-01]
             FilledButton.tonalIcon(
               key: const ValueKey('open-onboarding'),
               icon: const Icon(Icons.tune_rounded),
               label: const Text('Travel preferences'),
               onPressed: () {
                 Navigator.of(sheetContext).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => OnboardingFlow(
-                      repository: MockOnboardingRepository.shared,
-                    ),
-                  ),
-                );
+                openTravelPreferences(context);
               },
             ),
             const SizedBox(height: 10),

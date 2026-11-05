@@ -39,12 +39,23 @@ const Map<String, ({String label, String blurb, IconData icon})> _styles = {
 
 /// First-time travel preference onboarding: interests, budget and travel
 /// style, then a review before saving. Uses [repository] for loading and
-/// saving; #101 runs it against a mock. Pops with the saved preferences.
-/// [S4-01]
+/// saving. Pops with the saved preferences, or replaces itself with
+/// [next] (e.g. recommendations) after saving. [S4-01, S4-04]
 class OnboardingFlow extends StatefulWidget {
   final OnboardingRepository repository;
 
-  const OnboardingFlow({super.key, required this.repository});
+  /// Shown after Done instead of popping.
+  final WidgetBuilder? next;
+
+  /// First-run only: offers "Skip for now" on the welcome step.
+  final bool allowSkip;
+
+  const OnboardingFlow({
+    super.key,
+    required this.repository,
+    this.next,
+    this.allowSkip = false,
+  });
 
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
@@ -293,6 +304,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       label: 'Get started',
       onTap: _next,
     ),
+    if (widget.allowSkip) ...[
+      const SizedBox(height: 8),
+      Center(
+        child: TextButton(
+          key: const ValueKey('onboarding-skip'),
+          onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: Colors.white),
+          child: const Text('Skip for now'),
+        ),
+      ),
+    ],
   ];
 
   List<Widget> _interests() => [
@@ -485,8 +507,16 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     const SizedBox(height: 16),
     _PrimaryButton(
       key: const ValueKey('onboarding-finish'),
-      label: 'Done',
-      onTap: () => Navigator.of(context).pop(_prefs),
+      label: widget.next == null ? 'Done' : 'See places for me',
+      onTap: () {
+        final next = widget.next;
+        if (next == null) {
+          Navigator.of(context).pop(_prefs);
+        } else {
+          Navigator.of(context)
+              .pushReplacement(MaterialPageRoute<void>(builder: next));
+        }
+      },
     ),
   ];
 }
