@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 import 'auth_session.dart';
+import 'password_reset_screen.dart';
 import 'sign_in_screen.dart';
 
 /// Shows sign-in until there is a session, then [signedIn]. An expired
@@ -18,6 +19,9 @@ class AuthGate extends StatelessWidget {
     return ListenableBuilder(
       listenable: session,
       builder: (context, _) {
+        if (session.passwordRecoveryPending) {
+          return PasswordResetScreen(session: session);
+        }
         if (!session.isSignedIn && !session.expired) {
           return SignInScreen(session: session);
         }

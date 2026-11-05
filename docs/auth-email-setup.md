@@ -1,10 +1,12 @@
-# Auth email setup: Resend SMTP for Supabase
+# Supabase Auth email setup — Brevo current, Resend archived
 
-Issues #112 (evaluate sender) and #113 (configure). Status: **PREPARED BUT BLOCKED BY
-SENDER-DOMAIN VERIFICATION.** The team has selected Resend. The checker script and
-this runbook are ready. Live configuration waits until the team owns a sending
-domain and verifies it in Resend. Until then Supabase keeps its built-in mailer, which
-sends 2 auth emails per hour per project.
+**Current status (November 5, 2026): Brevo is the team's active staging and production Supabase Auth email provider (user-confirmed).** Development signup-confirmation email delivery and account activation were observed earlier. After [PR #150](https://github.com/relax-mode/lagaw/pull/150) merged, an authorized tester confirms that staging recovery email, link, redirect, form and password change now work. The tester also confirms a separate production Brevo credential and Supabase setup, working production sign-in and a complete production password-recovery flow. These are user-reported live results, not independently inspected API settings. **The authorized tester also explicitly confirms that production signup confirmation works.**
+
+**Follow the [current Brevo verification and configuration runbook](auth-email-brevo-verification.md).** Do **not** run the Resend-specific `scripts/check_email_config.py apply` against Brevo; it writes a Resend SMTP host, username and key shape. Production **signup confirmation and password recovery** are both confirmed functional by the authorized tester. Supabase Management API configuration/log inspection remains blocked by the stored PAT (HTTP 401).
+
+## Archived October 30 Resend-only preparation
+
+The content below is a historical record, not a current configuration guide. Its statements that Resend is selected or that the built-in mailer is still in use are **superseded** by the November 5 status above.
 
 Sources were fetched on **October 30, 2026**. Anything not confirmed there is marked
 UNVERIFIED.

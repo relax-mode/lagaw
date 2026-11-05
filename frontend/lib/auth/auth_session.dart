@@ -17,6 +17,7 @@ class AuthSession extends ChangeNotifier {
   StreamSubscription<AuthChange>? _sub;
   bool _signingOut = false;
   bool _expired = false;
+  bool _passwordRecovery = false;
   Future<bool>? _refreshing;
 
   AuthSession(this.client) {
@@ -25,6 +26,9 @@ class AuthSession extends ChangeNotifier {
   }
 
   bool get isSignedIn => client.current != null;
+
+  /// Only a Supabase passwordRecovery event can open the password reset form.
+  bool get passwordRecoveryPending => _passwordRecovery && isSignedIn;
 
   /// The session ended without the user signing out.
   bool get expired => _expired;
@@ -40,7 +44,11 @@ class AuthSession extends ChangeNotifier {
     if (change == AuthChange.signedOut) {
       // An SDK sign-out we did not ask for means the refresh failed.
       if (!_signingOut && !_expired && _lastEmail != null) _expired = true;
+      _passwordRecovery = false;
     } else {
+      if (change == AuthChange.passwordRecovery && isSignedIn) {
+        _passwordRecovery = true;
+      }
       _expired = false;
       _lastEmail = email ?? _lastEmail;
     }
@@ -84,6 +92,18 @@ class AuthSession extends ChangeNotifier {
   Future<bool> signUp(String email, String password) =>
       client.signUp(email, password);
 
+  Future<void> requestPasswordReset(String email) =>
+      client.requestPasswordReset(email);
+
+  Future<void> updatePassword(String password) async {
+    if (!passwordRecoveryPending) {
+      throw const AuthFailure(
+        'Your recovery link has expired. Request a new one.',
+      );
+    }
+    await client.updatePassword(password);
+  }
+
   Future<void> signIn(String email, String password) async {
     await client.signIn(email, password);
     _expired = false;
@@ -98,6 +118,7 @@ class AuthSession extends ChangeNotifier {
     } finally {
       _signingOut = false;
       _expired = false;
+      _passwordRecovery = false;
       _lastEmail = null;
       notifyListeners();
     }
