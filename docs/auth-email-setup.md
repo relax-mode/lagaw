@@ -1,10 +1,12 @@
-# Auth email setup: Resend SMTP for Supabase
+# Supabase Auth email setup — Brevo current, Resend archived
 
-Issues #112 (evaluate sender) and #113 (configure). Status: **PREPARED BUT BLOCKED BY
-SENDER-DOMAIN VERIFICATION.** The team has selected Resend. The checker script and
-this runbook are ready. Live configuration waits until the team owns a sending
-domain and verifies it in Resend. Until then Supabase keeps its built-in mailer, which
-sends 2 auth emails per hour per project.
+**Current status (November 5, 2026): Brevo is the provider used for the team's development SMTP test.** The team reports successful delivery of a signup confirmation email to an authorized external recipient, and successful account confirmation. A staging Brevo recovery email also arrived November 3, but its link originally had no password-reset UI. [PR #150](https://github.com/relax-mode/lagaw/pull/150) merged a frontend fix on November 5; a fresh live password-change test and separate production sender verification remain outstanding.
+
+**Follow the [current Brevo verification and configuration runbook](auth-email-brevo-verification.md).** Do **not** run the Resend-specific `scripts/check_email_config.py apply` against Brevo; it writes a Resend SMTP host, username and key shape. Development delivery does not establish production acceptance.
+
+## Archived October 30 Resend-only preparation
+
+The content below is a historical record, not a current configuration guide. Its statements that Resend is selected or that the built-in mailer is still in use are **superseded** by the November 5 status above.
 
 Sources were fetched on **October 30, 2026**. Anything not confirmed there is marked
 UNVERIFIED.
