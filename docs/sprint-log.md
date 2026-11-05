@@ -938,3 +938,8 @@ is a different operation and was not triggered. See the
   - the recommendations screen with loading, empty, 409 Reload, 503 Try again and 422 states.
 - No automatic retries after uncertain writes. `flutter analyze` is clean, and `flutter test` passes 205 tests (17 new). Roel verified the deployed journey on the POCO Pad against staging: first-run routing for his account and a brand-new account, skip, a real save, recommendations, the empty state, validation, and no repeat routing on reopen. The airplane-mode screenshot was not captured; that case is covered by tests. Staging returns one priced place (the Negros Museum). See [evidence](evidence/onboarding-discovery.md).
 
+### November 6, 2026 — #106 candidate discovery triage
+
+- Audited the supplied 4,784-row discovery CSV offline and added a reproducible, fail-closed provisional triage; no destination is approved from CSV metadata. Checked operator pages for the museum, Forest Park, Orange Project and Arima. The museum's published schedules and fees still conflict; the priority destinations lack the field evidence and human approvals required for safe updates. See [triage evidence](evidence/destination-triage-s4-06-2026-11-06.md).
+- Read-only public coverage on November 5 at 17:33:14 UTC returned 10 active locations in each environment, with one syntactically complete row; there was no database write or production itinerary demonstration. Focused offline tests: 64 passed. Full Windows non-database suite: 1,103 passed, 2 pre-existing POSIX permission assertions failed, 108 deselected. Ruff passed. Full venue verification, reviewed changes and production authorization remain outstanding.
+

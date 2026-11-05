@@ -1,5 +1,7 @@
 # S4-06 — Destination catalogue enrichment, provenance and release gates
 
+**November 6 follow-up:** See the [candidate triage and fresh public coverage](evidence/destination-triage-s4-06-2026-11-06.md). The CSV remains unapproved; the museum conflict persists and no catalogue update or production itinerary has been verified.
+
 **Issue:** [#106](https://github.com/relax-mode/lagaw/issues/106)
 **Evidence checked:** 2026-10-31 (Asia/Manila)
 **State:** Implementation prepared for review; **zero source-approved updates, zero database writes, and no verified three-stop production itinerary**. Andrew ran the offline planner and focused tests on October 31: **26 passed in 0.05 s**. The initial Ruff check reported **FURB157 and SIM102** in the planner; both were corrected, and the final Ruff rerun reported **All checks passed**. GitHub CI and reviewed deployment remain pending.
