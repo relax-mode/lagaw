@@ -826,3 +826,28 @@ not independently prove those exact team-channel updates occurred. The team
 reported no standups. If no qualifying posts exist, record this as a process
 gap, not a completed standup requirement. The retrospective is separately
 pending.
+
+### November 5, 2026 — Sprint 3 post-consultation retrospective (#59)
+
+Following the reported Week 3 staging demo and professor feedback, the team
+representative **confirmed this written retrospective on November 5, 2026**:
+
+- **What went well:** the staging app could be demonstrated and work progressed
+  through team-reviewed GitHub PRs.
+- **What did not:** remaining application corner cases and destination-image
+  Storage setup required more attention; the team also did not keep the
+  requested structured async standup messages, using group chat/PR requests
+  for coordination instead.
+- **One process change for Sprint 4:** focus testing on corner cases, Storage
+  acceptance ([#108](https://github.com/relax-mode/lagaw/issues/108)), and
+  release readiness ([#121](https://github.com/relax-mode/lagaw/issues/121))
+  before the November 11 90%-completion target; use explicit done/next/blocker
+  team-channel summaries for upcoming sprint check-ins.
+
+The consultation’s exact occurrence date and individual screens demonstrated
+were not provided; this retrospective **was written after the consultation and
+confirmed on November 5**, not backdated as a meeting. The three PR-based
+checkpoints above document real progress, but they do not substitute for the
+course’s missing 2–3 async standup posts. The same retrospective and evidence
+limits are recorded in
+[the consultation pack](sprint-3-consultation.md#9-post-consultation-retrospective--confirmed-november-5-2026).

@@ -176,3 +176,28 @@ PR review requests are verifiable **partial progress evidence**, but the
 unprovided group-chat exchanges cannot be audited and are not assumed to meet
 the rubric. Therefore the corresponding original S3-14 standup checkbox is
 **still pending**. No scheduled meetings or standup attendance are claimed.
+
+## 9. Post-consultation retrospective — confirmed November 5, 2026
+
+The team representative reviewed and confirmed the following assessment on
+November 5, 2026, after reporting the Week 3 consultation. This is a
+**written retrospective**, not minutes from a separate retrospective meeting.
+
+- **What went well:** We demonstrated the staging application to the professor,
+  and the team coordinated development through independently reviewed PRs.
+- **What did not go well:** Some application corner cases had not yet been
+  resolved, and destination-image Storage was still a consultation follow-up.
+  Regular structured async standup posts were also not maintained, even though
+  GitHub PRs captured progress and reviewers.
+- **One change for Sprint 4:** Prioritize edge-case verification, completing
+  Storage acceptance and release readiness ahead of the **November 11, 2026**
+  target for a 90%-finished application; record done/next/blockers explicitly
+  in the team channel rather than relying on PR review requests alone.
+
+**Source boundary:** the professor requested corner-case handling, Storage
+setup and November 11 readiness, as reported by the team. The retrospective
+assessment above was **confirmed on November 5** by the team representative;
+no unrecorded meeting, verbatim instructor quotation or claimed completion
+percentage is implied. Related follow-ups remain [#108](https://github.com/relax-mode/lagaw/issues/108)
+(Storage) and [#121](https://github.com/relax-mode/lagaw/issues/121)
+(release readiness).
