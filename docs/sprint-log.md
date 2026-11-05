@@ -927,3 +927,14 @@ is a different operation and was not triggered. See the
   - Loading, validation, save failure with retry, load failure with retry, Back, and Edit from Review are all covered.
   - The temporary entry point is **Travel preferences** in the account sheet. Routing new users automatically waits for #104, because it needs the real `GET /me/preferences`.
 - `flutter analyze` is clean, and `flutter test` passes 173 tests (14 new in `test/onboarding_test.dart`). Roel verified all 16 Android checks on the POCO Pad (each step, every budget error, loading, forced save failure with retry, prefill on reopen, skip budget). Web follows the merge. See [evidence](evidence/onboarding-ui.md).
+
+### November 5, 2026 — #104 onboarding connected to personalized discovery
+
+- Started #104 on `feat/s4-04-onboarding-discovery` after #101 merged (PR #161). Its backend dependencies #102 and #103 are merged, and staging exposes `/api/v1/me/preferences` and `/api/v1/me/recommendations`, so the "Blocked" label is out of date.
+- **Decision (Roel):** the cold-start API requires `group_type` and a per-person, per-visit budget ceiling, and the #103 contract says the onboarding budget must not be reused for it. The "Picked for you" screen therefore **asks both with nothing preselected**, using quick choices (Free only, ₱200, ₱500, ₱1,000, Custom), instead of defaulting to Solo or ₱500. The reason: a silent default would hide places without explanation.
+- Built:
+  - real GET/PUT preferences, replacing the #101 mock in signed-in builds;
+  - first-run routing for accounts with no saved preferences, with Skip for now; a failed check never blocks the app;
+  - the recommendations screen with loading, empty, 409 Reload, 503 Try again and 422 states.
+- No automatic retries after uncertain writes. `flutter analyze` is clean, and `flutter test` passes 205 tests (17 new). Roel verified the deployed journey on the POCO Pad against staging: first-run routing for his account and a brand-new account, skip, a real save, recommendations, the empty state, validation, and no repeat routing on reopen. The airplane-mode screenshot was not captured; that case is covered by tests. Staging returns one priced place (the Negros Museum). See [evidence](evidence/onboarding-discovery.md).
+

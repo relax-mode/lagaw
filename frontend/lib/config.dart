@@ -30,6 +30,9 @@ class AppConfig {
   static String get locationsEndpoint => '$apiBaseUrl/locations';
   static String get tripsEndpoint => '$apiBaseUrl/api/v1/trips';
   static String get interactionsEndpoint => '$apiBaseUrl/api/v1/interactions';
+  static String get preferencesEndpoint => '$apiBaseUrl/api/v1/me/preferences';
+  static String get meRecommendationsEndpoint =>
+      '$apiBaseUrl/api/v1/me/recommendations';
   static String get preferenceExtractEndpoint =>
       '$apiBaseUrl/api/v1/preferences/extract';
 }
