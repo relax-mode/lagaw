@@ -1,0 +1,284 @@
+{
+  "schema_version": "1",
+  "issue": "#107",
+  "accessed_on": "2026-11-06",
+  "policy": {
+    "accepted_licenses": [
+      "CC0",
+      "Public domain (unconditional)",
+      "CC BY",
+      "CC BY-SA",
+      "Photographer permission (recorded in permission_record)"
+    ],
+    "excluded": [
+      "NC or ND licenses",
+      "licenses that could not be verified on the source page",
+      "government public-domain works with commercial-use conditions",
+      "identifiable people as the subject",
+      "prominent third-party logos",
+      "photos not clearly showing the venue"
+    ],
+    "sources_not_used": "Google Maps, Facebook, Instagram, TripAdvisor, blogs, news and stock sites without a verifiable license."
+  },
+  "locations": [
+    {
+      "location_id": "1a3bca09-5532-5de6-8587-2440c4e5830d",
+      "name": "San Sebastian Cathedral",
+      "status": "approved",
+      "image": {
+        "source": "Wikimedia Commons",
+        "title": "File:Bacolod Cathedral Facade.jpg",
+        "source_page_url": "https://commons.wikimedia.org/wiki/File:Bacolod_Cathedral_Facade.jpg",
+        "file_url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Bacolod_Cathedral_Facade.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "width": 4745,
+        "height": 3164,
+        "mime": "image/jpeg",
+        "sha1": "3d13e6fac07e1c96c73ac2934a395b4e0d91be88",
+        "photographer": "Rauxilian",
+        "uploader": "Rauxilian",
+        "date_taken": "Taken on 29 October 2024, 16:16:06 (acco",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "attribution_required": true,
+        "attribution_text": "Photo: Rauxilian / CC BY-SA 4.0 via Wikimedia Commons",
+        "share_alike": true,
+        "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed.",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Facade of the cathedral; people are small and incidental.",
+      "rejected_candidates": [
+        {
+          "title": "File:San Sebastian Cathedral Bacolod (Rizal Street, Bacolod, Negros Occidental; 10-31-2022).jpg",
+          "reason": "Usable (CC BY-SA 4.0) alternate; not selected."
+        }
+      ]
+    },
+    {
+      "location_id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+      "name": "The Negros Museum",
+      "status": "approved",
+      "image": {
+        "source": "Wikimedia Commons",
+        "title": "File:Negros Museum front (Gatuslao, Bacolod, Negros Occidental; 10-24-2022).jpg",
+        "source_page_url": "https://commons.wikimedia.org/wiki/File:Negros_Museum_front_(Gatuslao,_Bacolod,_Negros_Occidental;_10-24-2022).jpg",
+        "file_url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Negros_Museum_front_%28Gatuslao%2C_Bacolod%2C_Negros_Occidental%3B_10-24-2022%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "width": 3552,
+        "height": 2664,
+        "mime": "image/jpeg",
+        "sha1": "37d99c7d81cec29e1194f3f2ffb7974076b1c84f",
+        "photographer": "Patrickroque01",
+        "uploader": "Patrickroque01",
+        "date_taken": "2022-10-24",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "attribution_required": true,
+        "attribution_text": "Photo: Patrickroque01 / CC BY-SA 4.0 via Wikimedia Commons",
+        "share_alike": true,
+        "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed.",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Front of the museum with its sign; no people.",
+      "rejected_candidates": [
+        {
+          "title": "File:The Negros Museum, Bacolod City, Sep 2026 (1).jpg",
+          "reason": "Usable (CC BY-SA 4.0) alternate; not selected."
+        }
+      ]
+    },
+    {
+      "location_id": "b3783066-7484-5917-a09b-404974974880",
+      "name": "Negros Forest Park",
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-2-hornbill.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/negros-forest-park/RLSJR-2-hornbill.jpg",
+        "file_url": null,
+        "width": 3551,
+        "height": 2367,
+        "mime": "image/jpeg",
+        "sha1": "8ed7cac631dbf6fa2469e94f6fbf91047abf64ff",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-10-11",
+        "subject": "Hornbill in an aviary at Negros Forest Park",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at Negros Forest Park on 2026-10-11. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-06. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. No people or logos in the frame; no GPS data embedded.",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Team member's own photos, taken inside the park. No online photo with verifiable rights was found.",
+      "rejected_candidates": [],
+      "additional_images": [
+        {
+          "source": "Photographer permission",
+          "title": "RLSJR-1-leopard-cat.jpg",
+          "source_page_url": null,
+          "file_path": "docs/destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg",
+          "file_url": null,
+          "width": 1508,
+          "height": 1005,
+          "mime": "image/jpeg",
+          "sha1": "4505d56d87cfda8194a35b0251710ee989602400",
+          "photographer": "Roel Jr. S. Lumauag",
+          "uploader": null,
+          "date_taken": "2026-10-11",
+          "subject": "Leopard cat resting in its enclosure at Negros Forest Park",
+          "license": "Permission",
+          "license_url": null,
+          "attribution_required": true,
+          "attribution_text": "Photo: Roel Jr. S. Lumauag",
+          "share_alike": false,
+          "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at Negros Forest Park on 2026-10-11. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-06. It has not been published or licensed elsewhere.",
+          "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. No people or logos in the frame; no GPS data embedded.",
+          "accessed_on": "2026-11-06"
+        }
+      ]
+    },
+    {
+      "location_id": "d184610e-f8c9-584a-95a3-79809cd81c49",
+      "name": "Orange Project",
+      "status": "excluded",
+      "image": null,
+      "note": "No photograph of this venue found on Wikimedia Commons. No permission from the venue on record.",
+      "rejected_candidates": []
+    },
+    {
+      "location_id": "af80a358-d1ad-529f-84b3-ff1e591e041f",
+      "name": "Capitol Park and Lagoon",
+      "status": "approved",
+      "image": {
+        "source": "Wikimedia Commons",
+        "title": "File:Capitol Lagoon Bacolod City Philippines.jpg",
+        "source_page_url": "https://commons.wikimedia.org/wiki/File:Capitol_Lagoon_Bacolod_City_Philippines.jpg",
+        "file_url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Capitol_Lagoon_Bacolod_City_Philippines.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "width": 2048,
+        "height": 1536,
+        "mime": "image/jpeg",
+        "sha1": "eedae7bb7a5db272a12e8191a592b3ead52d1ca9",
+        "photographer": "Kguirnela",
+        "uploader": "Kguirnela",
+        "date_taken": "2009-11-21",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+        "attribution_required": true,
+        "attribution_text": "Photo: Kguirnela / CC BY-SA 3.0 via Wikimedia Commons",
+        "share_alike": true,
+        "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed.",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Lagoon with the Capitol behind it; no prominent logos or people.",
+      "rejected_candidates": [
+        {
+          "title": "File:Negros Occidental Capitol Park lagoon (Bacolod, Negros Occidental; 10-24-2022).jpg",
+          "reason": "Excluded: hotel logos (ARB, Seda) dominate the background."
+        },
+        {
+          "title": "File:Negros Occidental Capitol Park and Lagoon, Sep 2026 (1).jpg",
+          "reason": "Excluded: hotel logo (Seda) prominent."
+        }
+      ]
+    },
+    {
+      "location_id": "4618dfae-4a30-5917-85f1-94f216cf5b97",
+      "name": "Negros Occidental Provincial Capitol",
+      "status": "approved",
+      "image": {
+        "source": "Wikimedia Commons",
+        "title": "File:Negros Occidental Provincial Capitol, Sep 2026.jpg",
+        "source_page_url": "https://commons.wikimedia.org/wiki/File:Negros_Occidental_Provincial_Capitol,_Sep_2026.jpg",
+        "file_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Negros_Occidental_Provincial_Capitol%2C_Sep_2026.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "width": 3575,
+        "height": 2692,
+        "mime": "image/jpeg",
+        "sha1": "872cdc35927b108c6efcb98b0f032d3b86d4a9b3",
+        "photographer": "Ralff Nestor Nacor",
+        "uploader": "Ralffralff",
+        "date_taken": "2026-09-12 02:04:59",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "attribution_required": true,
+        "attribution_text": "Photo: Ralff Nestor Nacor / CC BY-SA 4.0 via Wikimedia Commons",
+        "share_alike": true,
+        "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed. The building is tagged PD-Philippines-FoP work on Commons; the photograph itself is CC BY-SA 4.0.",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Front facade; people only tiny in the distance.",
+      "rejected_candidates": [
+        {
+          "title": "File:Negros Occidental Provincial Capitol 2023-08-05.jpg",
+          "reason": "Excluded: two identifiable people seated front and center."
+        },
+        {
+          "title": "File:Provincial Capitol of Negros Occidental in Bacolod, Philippines.jpg",
+          "reason": "Excluded: one identifiable person centered at the entrance."
+        }
+      ]
+    },
+    {
+      "location_id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+      "name": "Cafetolyo Coffee Shop",
+      "status": "excluded",
+      "image": null,
+      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
+      "rejected_candidates": []
+    },
+    {
+      "location_id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
+      "name": "Arima Restaurant",
+      "status": "excluded",
+      "image": null,
+      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
+      "rejected_candidates": []
+    },
+    {
+      "location_id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
+      "name": "Panaad Park and Sports Complex",
+      "status": "approved",
+      "image": {
+        "source": "Wikimedia Commons",
+        "title": "File:Panaad Stadium.jpg",
+        "source_page_url": "https://commons.wikimedia.org/wiki/File:Panaad_Stadium.jpg",
+        "file_url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Panaad_Stadium.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+        "width": 800,
+        "height": 449,
+        "mime": "image/jpeg",
+        "sha1": "dc50b7df69c4183ee892a3f229758aeffe09525b",
+        "photographer": "Dominic Alojado",
+        "uploader": "Hariboneagle927",
+        "date_taken": "2010-12-22 05:49:07",
+        "license": "CC BY 2.0",
+        "license_url": "https://creativecommons.org/licenses/by/2.0",
+        "attribution_required": true,
+        "attribution_text": "Photo: Dominic Alojado / CC BY 2.0 via Wikimedia Commons",
+        "share_alike": false,
+        "restrictions": "Imported from Flickr; Commons FlickreviewR confirmed the CC BY 2.0 license (reviewed-pass). Credit the photographer and link the license. Low resolution (800x449).",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Panaad Stadium, the complex's main landmark; players are distant and not identifiable.",
+      "rejected_candidates": [
+        {
+          "title": "File:Panaad Stadium March 2023 renovated.jpg",
+          "reason": "Excluded: PD-PhilippinesGov. Government works carry no copyright, but exploiting them for profit needs prior approval (IP Code s.176); whether Lagaw counts as for-profit is uncertain."
+        },
+        {
+          "title": "File:2023 Panaad Stadium.jpg",
+          "reason": "Excluded: PD-PhilippinesGov, same uncertainty."
+        }
+      ]
+    },
+    {
+      "location_id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+      "name": "Calea Pastries & Coffee",
+      "status": "excluded",
+      "image": null,
+      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
+      "rejected_candidates": []
+    }
+  ]
+}
