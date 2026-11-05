@@ -1,5 +1,6 @@
 """#107: the destination image manifest only approves licensed, attributed images."""
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -13,7 +14,7 @@ SEED_SQL = (
 ).read_text("utf-8")
 
 ACCEPTED = re.compile(r"^(CC0|Public domain|CC BY(-SA)? \d\.\d)$")
-REQUIRED = (
+COMMONS_REQUIRED = (
     "source_page_url",
     "file_url",
     "photographer",
@@ -23,6 +24,22 @@ REQUIRED = (
     "restrictions",
     "accessed_on",
 )
+PERMISSION_REQUIRED = (
+    "file_path",
+    "sha1",
+    "photographer",
+    "date_taken",
+    "permission_record",
+    "attribution_text",
+    "restrictions",
+)
+
+
+def _approved_images():
+    for entry in MANIFEST["locations"]:
+        if entry["status"] == "approved":
+            for image in [entry["image"], *entry.get("additional_images", [])]:
+                yield entry["name"], image
 
 
 def test_every_seeded_location_is_listed_once():
@@ -32,14 +49,13 @@ def test_every_seeded_location_is_listed_once():
     assert set(listed) == seeded
 
 
-def test_approved_images_have_complete_attribution():
-    for entry in MANIFEST["locations"]:
-        if entry["status"] != "approved":
+def test_commons_images_have_complete_attribution():
+    for name, image in _approved_images():
+        if image["source"] != "Wikimedia Commons":
             continue
-        image = entry["image"]
-        missing = [key for key in REQUIRED if not image.get(key)]
-        assert not missing, f"{entry['name']}: missing {missing}"
-        assert ACCEPTED.match(image["license"]), entry["name"]
+        missing = [key for key in COMMONS_REQUIRED if not image.get(key)]
+        assert not missing, f"{name}: missing {missing}"
+        assert ACCEPTED.match(image["license"]), name
         assert "NC" not in image["license"] and "ND" not in image["license"]
         assert image["photographer"] in image["attribution_text"]
         assert image["license"] in image["attribution_text"]
@@ -48,6 +64,21 @@ def test_approved_images_have_complete_attribution():
         if image["license"] != "Public domain":
             assert image["license_url"].startswith("https://creativecommons.org/")
         assert image["share_alike"] == image["license"].startswith("CC BY-SA")
+
+
+def test_permission_images_are_recorded_and_match_their_files():
+    for name, image in _approved_images():
+        if image["source"] == "Wikimedia Commons":
+            continue
+        assert image["source"] == "Photographer permission", name
+        missing = [key for key in PERMISSION_REQUIRED if not image.get(key)]
+        assert not missing, f"{name}: missing {missing}"
+        assert image["license"] == "Permission"
+        assert image["photographer"] in image["attribution_text"]
+        assert image["photographer"] in image["permission_record"]
+        path = ROOT / image["file_path"]
+        assert path.is_file(), image["file_path"]
+        assert hashlib.sha1(path.read_bytes()).hexdigest() == image["sha1"], name
 
 
 def test_excluded_locations_explain_why_and_have_no_image():

@@ -8,14 +8,14 @@ Out of scope: storage policies, uploads and migrations.
 
 ## Result
 
-**5 of 10 locations have a usable image. 5 are excluded** because no image with
+**6 of 10 locations have a usable image. 4 are excluded** because no image with
 verifiable rights was found.
 
 | Location | Status | Image | Photographer | License | Notes |
 | --- | --- | --- | --- | --- | --- |
 | San Sebastian Cathedral | ✅ Approved | [Bacolod Cathedral Facade.jpg](https://commons.wikimedia.org/wiki/File:Bacolod_Cathedral_Facade.jpg) | Rauxilian | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Facade of the cathedral; people are small and incidental. |
 | The Negros Museum | ✅ Approved | [Negros Museum front (Gatuslao, Bacolod, Negros Occidental; 10-24-2022).jpg](https://commons.wikimedia.org/wiki/File:Negros_Museum_front_(Gatuslao,_Bacolod,_Negros_Occidental;_10-24-2022).jpg) | Patrickroque01 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Front of the museum with its sign; no people. |
-| Negros Forest Park | ❌ Excluded | — | — | — | No photograph of this venue found on Wikimedia Commons (searches returned unrelated forests). No permission from the operator on record. |
+| Negros Forest Park | ✅ Approved | [Hornbill](destination-images/negros-forest-park/RLSJR-2-hornbill.jpg) (+ [leopard cat](destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photos, taken 2026-10-11 inside the park. |
 | Orange Project | ❌ Excluded | — | — | — | No photograph of this venue found on Wikimedia Commons. No permission from the venue on record. |
 | Capitol Park and Lagoon | ✅ Approved | [Capitol Lagoon Bacolod City Philippines.jpg](https://commons.wikimedia.org/wiki/File:Capitol_Lagoon_Bacolod_City_Philippines.jpg) | Kguirnela | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | Lagoon with the Capitol behind it; no prominent logos or people. |
 | Negros Occidental Provincial Capitol | ✅ Approved | [Negros Occidental Provincial Capitol, Sep 2026.jpg](https://commons.wikimedia.org/wiki/File:Negros_Occidental_Provincial_Capitol,_Sep_2026.jpg) | Ralff Nestor Nacor | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Front facade; people only tiny in the distance. |
@@ -26,6 +26,7 @@ verifiable rights was found.
 
 ## Licensing rules applied
 
+- **Photographer permission:** a team member's own original photo. The photographer, date, and a written `permission_record` are required. The file is kept in [`destination-images/`](destination-images/) with its SHA-1, and its location metadata is checked. Credit: "Photo: <photographer>".
 - **Accepted:** CC0, unconditional public domain, CC BY, CC BY-SA, all verified on the file's Wikimedia Commons page through the Commons API (`extmetadata`, license templates and Flickr review status).
 - **Excluded:**
   - NC and ND licenses;
@@ -54,12 +55,12 @@ verifiable rights was found.
 - **Negros Occidental Provincial Capitol:** `Provincial Capitol of Negros Occidental in Bacolod, Philippines.jpg`: Excluded: one identifiable person centered at the entrance.
 - **Panaad Park and Sports Complex:** `Panaad Stadium March 2023 renovated.jpg`: Excluded: PD-PhilippinesGov. Government works carry no copyright, but exploiting them for profit needs prior approval (IP Code s.176); whether Lagaw counts as for-profit is uncertain.
 - **Panaad Park and Sports Complex:** `2023 Panaad Stadium.jpg`: Excluded: PD-PhilippinesGov, same uncertainty.
-- **Negros Forest Park, Orange Project, Cafetolyo, Arima, Calea:** Commons searches returned nothing showing these venues.
+- **Negros Forest Park, Orange Project, Cafetolyo, Arima, Calea:** Commons searches returned nothing showing these venues. Negros Forest Park is covered by Roel's own photos instead.
+- **Orange Project:** photos on immersion-art-leipzig.de come from an exhibition in Leipzig, Germany, not the Bacolod venue. They carry no license, and they show copyrighted artworks. Excluded; the venue will be asked directly.
 
 ## Follow-up
 
 - **Roel will take original photos** of the excluded venues himself, since no online photo with verifiable rights exists for them. Each will be added in a follow-up PR as a photographer-permission entry (credit, date, permission record), with no identifiable people and no third-party logos.
-- **Negros Forest Park:** two photos Roel took on 2026-10-11 (a leopard cat and a hornbill) are pending. Both carry a University of St. La Salle watermark from the school publication, so they need an unwatermarked original and confirmation of who holds the rights before use.
 - The excluded private venues (Orange Project, Cafetolyo, Arima, Calea) and Negros Forest Park could get photos with **written permission from the owner or operator**. A permission record would have to be added to the manifest before use.
 - Licenses can change on Commons. Recheck `source_page_url` before a production upload if it happens long after the access date.
 
@@ -67,7 +68,7 @@ verifiable rights was found.
 
 `backend/test_destination_image_manifest.py` (4 tests) runs in the backend CI suite. It checks that:
 - every seeded location appears exactly once;
-- approved images have all attribution fields and an accepted license (no NC or ND);
+- approved images (including `additional_images`) have all attribution fields and an accepted license (no NC or ND); permission entries have a photographer, date, permission record and a repository file whose SHA-1 matches;
 - the attribution text names the photographer and license;
 - excluded entries give a reason and no image;
 - rejected candidates give reasons.

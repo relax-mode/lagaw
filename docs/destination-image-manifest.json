@@ -7,7 +7,8 @@
       "CC0",
       "Public domain (unconditional)",
       "CC BY",
-      "CC BY-SA"
+      "CC BY-SA",
+      "Photographer permission (recorded in permission_record)"
     ],
     "excluded": [
       "NC or ND licenses",
@@ -87,10 +88,57 @@
     {
       "location_id": "b3783066-7484-5917-a09b-404974974880",
       "name": "Negros Forest Park",
-      "status": "excluded",
-      "image": null,
-      "note": "No photograph of this venue found on Wikimedia Commons (searches returned unrelated forests). No permission from the operator on record.",
-      "rejected_candidates": []
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-2-hornbill.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/negros-forest-park/RLSJR-2-hornbill.jpg",
+        "file_url": null,
+        "width": 3551,
+        "height": 2367,
+        "mime": "image/jpeg",
+        "sha1": "8ed7cac631dbf6fa2469e94f6fbf91047abf64ff",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-10-11",
+        "subject": "Hornbill in an aviary at Negros Forest Park",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at Negros Forest Park on 2026-10-11. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-06. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. No people or logos in the frame; no GPS data embedded.",
+        "accessed_on": "2026-11-06"
+      },
+      "note": "Team member's own photos, taken inside the park. No online photo with verifiable rights was found.",
+      "rejected_candidates": [],
+      "additional_images": [
+        {
+          "source": "Photographer permission",
+          "title": "RLSJR-1-leopard-cat.jpg",
+          "source_page_url": null,
+          "file_path": "docs/destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg",
+          "file_url": null,
+          "width": 1508,
+          "height": 1005,
+          "mime": "image/jpeg",
+          "sha1": "4505d56d87cfda8194a35b0251710ee989602400",
+          "photographer": "Roel Jr. S. Lumauag",
+          "uploader": null,
+          "date_taken": "2026-10-11",
+          "subject": "Leopard cat resting in its enclosure at Negros Forest Park",
+          "license": "Permission",
+          "license_url": null,
+          "attribution_required": true,
+          "attribution_text": "Photo: Roel Jr. S. Lumauag",
+          "share_alike": false,
+          "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at Negros Forest Park on 2026-10-11. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-06. It has not been published or licensed elsewhere.",
+          "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. No people or logos in the frame; no GPS data embedded.",
+          "accessed_on": "2026-11-06"
+        }
+      ]
     },
     {
       "location_id": "d184610e-f8c9-584a-95a3-79809cd81c49",

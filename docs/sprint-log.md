@@ -947,4 +947,5 @@ is a different operation and was not triggered. See the
   - Capitol and lagoon photos with identifiable people or dominant hotel logos were rejected for cleaner alternatives.
   - No social-media, map or blog photos were used.
 - Outputs: `docs/destination-image-manifest.json`, `docs/destination-image-sources.md`, and `backend/test_destination_image_manifest.py` (4 tests passing). Follow-up: owner permission for the private venues. #108 uploads and #109 displays, with attribution.
+- **Update (November 6):** Roel added his own photos of Negros Forest Park (a hornbill and a leopard cat, taken 2026-10-11), with the school watermark removed. They are not part of any publication. They are recorded as photographer-permission entries, so **6 of 10 locations are now covered**. Orange Project photos found online (a Leipzig exhibition page) were rejected: no license, a different venue, and copyrighted artworks. Roel plans to photograph the remaining venues himself.
 
