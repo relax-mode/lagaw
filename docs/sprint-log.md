@@ -938,3 +938,13 @@ is a different operation and was not triggered. See the
   - the recommendations screen with loading, empty, 409 Reload, 503 Try again and 422 states.
 - No automatic retries after uncertain writes. `flutter analyze` is clean, and `flutter test` passes 205 tests (17 new). Roel verified the deployed journey on the POCO Pad against staging: first-run routing for his account and a brand-new account, skip, a real save, recommendations, the empty state, validation, and no repeat routing on reopen. The airplane-mode screenshot was not captured; that case is covered by tests. Staging returns one priced place (the Negros Museum). See [evidence](evidence/onboarding-discovery.md).
 
+### November 6, 2026 — #107 destination image sources
+
+- Roel researched licensed photos for all 10 seeded locations on `docs/s4-07-image-sources`, using the Wikimedia Commons API (license metadata, license templates, Flickr review) and a visual check of each candidate.
+- Result: **5 approved** (San Sebastian Cathedral, The Negros Museum, Capitol Park and Lagoon, the Provincial Capitol, Panaad), all CC BY-SA or CC BY with named photographers. **5 excluded** (Negros Forest Park, Orange Project, Cafetolyo, Arima, Calea): no image with verifiable rights.
+- **Decisions:**
+  - Government public-domain Panaad photos were excluded, because IP Code §176 attaches a for-profit approval condition.
+  - Capitol and lagoon photos with identifiable people or dominant hotel logos were rejected for cleaner alternatives.
+  - No social-media, map or blog photos were used.
+- Outputs: `docs/destination-image-manifest.json`, `docs/destination-image-sources.md`, and `backend/test_destination_image_manifest.py` (4 tests passing). Follow-up: owner permission for the private venues. #108 uploads and #109 displays, with attribution.
+
