@@ -908,3 +908,10 @@ published. The earlier 401 caveat above describes the initial state and is
 **resolved** by this subsequent validation. Model-service rollback/deactivation
 is a different operation and was not triggered. See the
 [updated S3-17 evidence](evidence/s3-17-collaborative-serving.md) and [#158](https://github.com/relax-mode/lagaw/issues/158).
+
+### November 5, 2026 — S4-20 executed staging Cloud Run rollback drill
+
+- On an explicitly authorized, **staging-only** exercise for [issue #120](https://github.com/relax-mode/lagaw/issues/120), the operator inspected the live Cloud Run revision inventory, checked that candidate `lagaw-api-staging-00033-hvh` was ready, used a different image digest from the original serving `00035-xp9`, and confirmed no migration-file changes between their commit labels. Earlier [run 41314460309](https://github.com/relax-mode/lagaw/actions/runs/41314460309) was green.
+- A first dry-run-guarded traffic test switched `00035 → 00033 → 00035`; an accidental GET to a POST-only extraction path gave 405. The restoration safeguard returned staging to its original revision; the test method was corrected and the **whole drill was repeated**.
+- On the verified repeat, `00033-hvh` was observed at **100%** at 08:55:12 UTC, with staging locations HTTP **200**, unauthenticated Trips **401**, unauthenticated extraction POST **401** (no paid call), and staging Pages **200**. Explicit restoration to `00035-xp9` was observed at **100%** at 08:55:36 UTC; all four checks passed again by 08:55:38. Production `lagaw-api-00032-287` stayed at **100%** in read-only before/after checks through 08:55:41. Because newer zero-traffic staging canaries existed, `--to-latest` was deliberately **not** used.
+- [Timestamped S4-20 evidence](evidence/s4-20-staging-rollback-2026-11-05.md) and [updated runbook](rollback-runbook.md) distinguish traffic verification from authenticated end-user smoke; the latter and a Cloudflare Pages *deployment* rollback were not performed. No production/database/Pages deployment was modified during the drill.
