@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import DatabaseUnavailable, LocationDatabase, get_database
+from app.health import liveness, readiness
 from app.interactions import router as interactions_router
 from app.itinerary_generation import router as itinerary_generation_router
 from app.onboarding import router as onboarding_router
@@ -47,6 +48,11 @@ async def validation_error(request: Request, exc: RequestValidationError):
         # Omit submitted values and validator context, including tokens and NaN.
         return JSONResponse(status_code=422, content={"detail": [
             {"loc": error["loc"], "msg": error["msg"], "type": error["type"]}
+            for error in exc.errors()
+        ]})
+    if request.url.path == "/locations":
+        return JSONResponse(status_code=422, content={"detail": [
+            {"loc": error["loc"], "msg": "Invalid request parameter.", "type": error["type"]}
             for error in exc.errors()
         ]})
     return await request_validation_exception_handler(request, exc)
@@ -110,6 +116,16 @@ def create_app() -> FastAPI:
     )
     application.add_exception_handler(DatabaseUnavailable, database_unavailable)
     application.add_exception_handler(RequestValidationError, validation_error)
+    application.add_api_route(
+        "/health", liveness, methods=["GET"], tags=["operations"],
+        response_model=dict[str, str], description="Process liveness; no external dependencies.",
+    )
+    application.add_api_route(
+        "/ready", readiness, methods=["GET"], tags=["operations"],
+        response_model=dict[str, str],
+        responses={503: {"description": "Database readiness unavailable"}},
+        description="Read-only PostgREST readiness, bounded to 2 seconds.",
+    )
     application.include_router(trips_router)
     application.include_router(interactions_router)
     application.include_router(trip_items_router)

@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 with patch.dict(os.environ, {}, clear=True), patch("dotenv.load_dotenv"):
     from app.main import create_app
 
+from app.ai_quota import QuotaDecision, get_quota_store
 from app.preference_extraction import ExtractionResponse
 from app.preference_vocabulary import TravelTag
 from app.trip_schemas import TripResponse
@@ -65,6 +66,9 @@ def api(monkeypatch):
         patch("app.deepseek.load_dotenv"),
     ):
         app = create_app()
+        quota = Mock()
+        quota.consume.return_value = QuotaDecision(allowed=True, retry_after_seconds=0, exhausted_window=None)
+        app.dependency_overrides[get_quota_store] = lambda: quota
         # A fake existing saved trip: extraction has no store dependency to mutate it.
         saved = TripResponse(
             id="23000000-0000-4000-8000-000000000003",

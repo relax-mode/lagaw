@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal, Self
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -12,6 +12,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.ai_quota import QuotaStore, QuotaUnavailable, get_quota_store
 from app.deepseek import DeepSeekFailure, extract_preferences
 from app.deepseek import Preferences as ProviderPreferences
 from app.preference_vocabulary import BudgetLevel, Duration, Pace, TravelTag
@@ -188,8 +189,28 @@ def normalize_preferences(
 
 
 @router.post("/extract", response_model=ExtractionResponse)
-def extract_preference_draft(payload: ExtractionRequest, user_id: TripOwner):
-    """Extract a draft for confirmation; never create or modify a trip."""
+def extract_preference_draft(
+    payload: ExtractionRequest,
+    user_id: TripOwner,
+    quota: Annotated[QuotaStore, Depends(get_quota_store)],
+):
+    """Reserve shared quota before billable extraction; never persist the draft."""
+    try:
+        decision = quota.consume(user_id)
+    except QuotaUnavailable:
+        raise HTTPException(
+            503, detail={"code": "extraction_unavailable",
+                         "message": "Preference extraction is unavailable.",
+                         "manual_fallback": True},
+        ) from None
+    if not decision.allowed:
+        raise HTTPException(
+            429,
+            detail={"code": "extraction_quota_exceeded",
+                    "message": "Preference extraction limit reached. Try later.",
+                    "manual_fallback": True},
+            headers={"Retry-After": str(decision.retry_after_seconds)},
+        )
     try:
         extracted = extract_preferences(payload.prompt.strip())
         return normalize_preferences(extracted, payload.explicit_preferences)
