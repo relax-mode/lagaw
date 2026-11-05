@@ -1,8 +1,8 @@
 # Supabase Auth email setup — Brevo current, Resend archived
 
-**Current status (November 5, 2026): Brevo is the provider used for the team's development SMTP test.** The team reports successful delivery of a signup confirmation email to an authorized external recipient, and successful account confirmation. A staging Brevo recovery email also arrived November 3, but its link originally had no password-reset UI. [PR #150](https://github.com/relax-mode/lagaw/pull/150) merged a frontend fix on November 5; a fresh live password-change test and separate production sender verification remain outstanding.
+**Current status (November 5, 2026): Brevo is the team's active staging and production Supabase Auth email provider (user-confirmed).** Development signup-confirmation email delivery and account activation were observed earlier. After [PR #150](https://github.com/relax-mode/lagaw/pull/150) merged, an authorized tester confirms that staging recovery email, link, redirect, form and password change now work. The tester also confirms a separate production Brevo credential and Supabase setup, working production sign-in and a complete production password-recovery flow. These are user-reported live results, not independently inspected API settings. **A separate production new-account signup-confirmation email is not yet evidenced.**
 
-**Follow the [current Brevo verification and configuration runbook](auth-email-brevo-verification.md).** Do **not** run the Resend-specific `scripts/check_email_config.py apply` against Brevo; it writes a Resend SMTP host, username and key shape. Development delivery does not establish production acceptance.
+**Follow the [current Brevo verification and configuration runbook](auth-email-brevo-verification.md).** Do **not** run the Resend-specific `scripts/check_email_config.py apply` against Brevo; it writes a Resend SMTP host, username and key shape. Production recovery works per the authorized tester, but production **signup confirmation** remains a separate unverified acceptance step.
 
 ## Archived October 30 Resend-only preparation
 
