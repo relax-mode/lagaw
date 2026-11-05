@@ -9,7 +9,7 @@ import '../widgets/status_banner.dart';
 import 'auth_client.dart';
 import 'auth_session.dart';
 
-enum _Mode { signIn, signUp }
+enum _Mode { signIn, signUp, resetRequest }
 
 final RegExp _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
@@ -51,6 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Timer? _cooldownTimer;
 
   bool get _signingUp => _mode == _Mode.signUp;
+  bool get _requestingReset => _mode == _Mode.resetRequest;
   bool get _canSubmit => !_busy && _cooldown == 0;
 
   void _startCooldown(Duration wait) {
@@ -74,7 +75,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _switchMode() {
     setState(() {
-      _mode = _signingUp ? _Mode.signIn : _Mode.signUp;
+      _mode = _signingUp || _requestingReset ? _Mode.signIn : _Mode.signUp;
       _formKey = GlobalKey<FormState>();
       _error = null;
       _info = null;
@@ -82,6 +83,17 @@ class _SignInScreenState extends State<SignInScreen> {
       // An email limit on sign-up must not block signing in instead.
       _cooldownTimer?.cancel();
       _cooldown = 0;
+    });
+  }
+
+  void _showResetRequest() {
+    setState(() {
+      _mode = _Mode.resetRequest;
+      _formKey = GlobalKey<FormState>();
+      _error = null;
+      _info = null;
+      _password.clear();
+      _confirm.clear();
     });
   }
 
@@ -95,6 +107,17 @@ class _SignInScreenState extends State<SignInScreen> {
       _info = null;
     });
     try {
+      if (_requestingReset) {
+        await widget.session.requestPasswordReset(email);
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _info =
+              'If this email has a Lagaw account, a password reset '
+              'link will arrive shortly. Check your inbox and spam folder.';
+        });
+        return;
+      }
       if (_signingUp) {
         final signedIn = await widget.session.signUp(email, _password.text);
         if (!mounted) return;
@@ -125,7 +148,11 @@ class _SignInScreenState extends State<SignInScreen> {
         _busy = false;
         final wait = e.retryAfter;
         if (wait != null) _startCooldown(wait);
-        if (e.needsConfirmation) {
+        if (_requestingReset && e.retryAfter != null) {
+          _info =
+              'Please wait before requesting another reset email. '
+              'Check your inbox and spam folder first.';
+        } else if (e.needsConfirmation) {
           _info = e.message;
         } else {
           _error = e.message;
@@ -166,11 +193,15 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     final title = widget.reauthenticate
         ? 'Sign in again'
+        : _requestingReset
+        ? 'Reset your password'
         : _signingUp
         ? 'Create your account'
         : 'Welcome to Lagaw';
     final subtitle = widget.reauthenticate
         ? 'Your session expired. Your unsaved changes are kept.'
+        : _requestingReset
+        ? 'We will send a reset link to your email address.'
         : _signingUp
         ? 'Plan Bacolod trips that stay with your account.'
         : 'Sign in to plan and save your Bacolod trips.';
@@ -255,60 +286,69 @@ class _SignInScreenState extends State<SignInScreen> {
                                   enabled: !_busy,
                                   keyboardType: TextInputType.emailAddress,
                                   autofillHints: const [AutofillHints.email],
-                                  textInputAction: TextInputAction.next,
+                                  textInputAction: _requestingReset
+                                      ? TextInputAction.done
+                                      : TextInputAction.next,
+                                  onFieldSubmitted: _requestingReset
+                                      ? (_) => _submit()
+                                      : null,
                                   decoration: _decoration('Email'),
                                   validator: _validateEmail,
                                 ),
-                                const SizedBox(height: 14),
-                                TextFormField(
-                                  key: const ValueKey('auth-password'),
-                                  controller: _password,
-                                  enabled: !_busy,
-                                  obscureText: !_showPassword,
-                                  autofillHints: [
-                                    _signingUp
-                                        ? AutofillHints.newPassword
-                                        : AutofillHints.password,
-                                  ],
-                                  textInputAction: _signingUp
-                                      ? TextInputAction.next
-                                      : TextInputAction.done,
-                                  onFieldSubmitted: _signingUp
-                                      ? null
-                                      : (_) => _submit(),
-                                  decoration: _decoration(
-                                    'Password',
-                                    suffix: IconButton(
-                                      tooltip: _showPassword
-                                          ? 'Hide password'
-                                          : 'Show password',
-                                      icon: Icon(
-                                        _showPassword
-                                            ? Icons.visibility_off_rounded
-                                            : Icons.visibility_rounded,
-                                      ),
-                                      onPressed: () => setState(
-                                        () => _showPassword = !_showPassword,
-                                      ),
-                                    ),
-                                  ),
-                                  validator: _validatePassword,
-                                ),
-                                if (_signingUp) ...[
+                                if (!_requestingReset) ...[
                                   const SizedBox(height: 14),
                                   TextFormField(
-                                    key: const ValueKey('auth-confirm'),
-                                    controller: _confirm,
+                                    key: const ValueKey('auth-password'),
+                                    controller: _password,
                                     enabled: !_busy,
                                     obscureText: !_showPassword,
-                                    autofillHints: const [
-                                      AutofillHints.newPassword,
+                                    autofillHints: [
+                                      _signingUp
+                                          ? AutofillHints.newPassword
+                                          : AutofillHints.password,
                                     ],
-                                    textInputAction: TextInputAction.done,
-                                    onFieldSubmitted: (_) => _submit(),
-                                    decoration: _decoration('Confirm password'),
-                                    validator: _validateConfirm,
+                                    textInputAction: _signingUp
+                                        ? TextInputAction.next
+                                        : TextInputAction.done,
+                                    onFieldSubmitted: _signingUp
+                                        ? null
+                                        : (_) => _submit(),
+                                    decoration: _decoration(
+                                      'Password',
+                                      suffix: IconButton(
+                                        tooltip: _showPassword
+                                            ? 'Hide password'
+                                            : 'Show password',
+                                        icon: Icon(
+                                          _showPassword
+                                              ? Icons.visibility_off_rounded
+                                              : Icons.visibility_rounded,
+                                        ),
+                                        onPressed: () => setState(
+                                          () => _showPassword = !_showPassword,
+                                        ),
+                                      ),
+                                    ),
+                                    validator: _validatePassword,
                                   ),
+                                  if (_signingUp) ...[
+                                    const SizedBox(height: 14),
+                                    TextFormField(
+                                      key: const ValueKey('auth-confirm'),
+                                      controller: _confirm,
+                                      enabled: !_busy,
+                                      obscureText: !_showPassword,
+                                      autofillHints: const [
+                                        AutofillHints.newPassword,
+                                      ],
+                                      textInputAction: TextInputAction.done,
+                                      onFieldSubmitted: (_) => _submit(),
+                                      decoration: _decoration(
+                                        'Confirm password',
+                                      ),
+                                      validator: _validateConfirm,
+                                    ),
+                                  ],
                                 ],
                                 const SizedBox(height: 20),
                                 Vector3DButton(
@@ -338,12 +378,16 @@ class _SignInScreenState extends State<SignInScreen> {
                                       ],
                                       Text(
                                         _busy
-                                            ? (_signingUp
+                                            ? (_requestingReset
+                                                  ? 'Sending reset email…'
+                                                  : _signingUp
                                                   ? 'Creating account…'
                                                   : 'Signing in…')
                                             : _cooldown > 0
                                             ? 'Try again in ${_cooldown}s'
-                                            : (_signingUp
+                                            : (_requestingReset
+                                                  ? 'Send reset link'
+                                                  : _signingUp
                                                   ? 'Create account'
                                                   : 'Sign in'),
                                         style: const TextStyle(
@@ -362,11 +406,25 @@ class _SignInScreenState extends State<SignInScreen> {
                                     key: const ValueKey('auth-switch-mode'),
                                     onPressed: _busy ? null : _switchMode,
                                     child: Text(
-                                      _signingUp
+                                      _requestingReset
+                                          ? 'Back to sign in'
+                                          : _signingUp
                                           ? 'Already have an account? Sign in'
                                           : 'New to Lagaw? Create an account',
                                     ),
                                   ),
+                                  if (!_signingUp && !_requestingReset) ...[
+                                    const SizedBox(height: 4),
+                                    TextButton(
+                                      key: const ValueKey(
+                                        'auth-forgot-password',
+                                      ),
+                                      onPressed: _busy
+                                          ? null
+                                          : _showResetRequest,
+                                      child: const Text('Forgot password?'),
+                                    ),
+                                  ],
                                 ],
                               ],
                             ),

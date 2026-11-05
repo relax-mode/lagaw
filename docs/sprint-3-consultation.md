@@ -95,3 +95,109 @@ Record in the [sprint log](sprint-log.md), only after the session:
 - Instructor feedback, as given.
 - A retrospective: what went well, what did not, and one change for Sprint 4.
 - Re-planned items, with reasons.
+
+## 5a. Week 3 pipeline report completed after the consultation
+
+The Sprint 3 pipeline row, formerly partial as of October 30, was regenerated
+on November 5 from completed GitHub Actions metadata for the full October
+26–November 1 UTC window: **98 runs (94 success, 2 failed, 2 cancelled),
+97.9% success rate** (excluding cancelled runs), **1.1 min average PR pipeline,
+4.7 min average main pipeline, 27 successful production deployment jobs,
+6.3 min measured merge-to-deploy lead time (16 of 30 merges), zero failed
+main deploy jobs, no measured failed-deploy recovery time**. Nine deliberate
+probe runs are excluded. These are **post-consultation backfilled metrics**;
+they must not be represented as numbers shown to the instructor during the
+consultation. The dated source, metric definitions and incident caveats are in
+[pipeline-metrics.md](pipeline-metrics.md#sprint-3-source-completed-week-queried-november-5-2026).
+
+## 6. Actual consultation outcome — user-reported November 5, 2026
+
+The team subsequently reported that its **Week 3 consultation occurred**, with a
+**live demonstration of the staging Lagaw app**. The instructor's feedback was:
+
+1. **Address corner cases** in the application (which cases were not specified,
+   so this is a broad QA action rather than verified issue-specific acceptance).
+2. **Set up the Storage bucket** for destination images (tracked in Sprint 4
+   [#108](https://github.com/relax-mode/lagaw/issues/108)); implementation,
+   hosted setup and image acceptance must be evidenced separately.
+3. **Be ready for the November 11, 2026 deadline with a 90%-complete app**;
+   this is the instructor's target, not a verified completion percentage.
+
+**Evidence limits:** this report was supplied by a team member on November 5,
+2026. The exact consultation date, participants, demonstrated individual
+backend/AI workflows, the instructor's exact wording beyond this summary, and
+a formal retrospective were **not supplied**. Do not infer they occurred.
+The earlier checklist above is **preparation**, not proof each step was
+performed live. Link completed corner-case tests and the Storage acceptance
+separately as they happen.
+
+## 7. Historical AI demo-readiness evidence reconciliation — November 5, 2026
+
+The consultation pack above was written before the application path was fully
+implemented. By November 5 the team had **separate, documented deployed
+acceptance evidence** supporting each stage of the planned live demonstration:
+
+| Planned stage / acceptance dimension | Actual dated evidence | Limitation |
+| --- | --- | --- |
+| Natural-language request -> backend structured output -> user-reviewed preferences | [S3-10 Flutter extraction evidence](evidence/trip-preference-extraction.md) records an Android trial and a **staging Web trial on October 29**, including a real API suggestion, review/apply and an account-scoped saved trip; [extraction API contract](preference-extraction-api.md) documents backend validation and confirmation. | The professor's reported demo did not identify which individual screens were shown. |
+| Ranked recommendations | [S3-08 API evidence](evidence/trip-recommendations.md) records authenticated **staging and production** responses from saved trips, including score, reason, and an empty match; [S3-11 Android evidence](evidence/trip-planning-ui.md) records ranking UI from staging on October 29. | Separate acceptance cases, not a single recorded consultation interaction. |
+| Generate persisted itinerary / reload | [S3-09 deployed itinerary evidence](evidence/itinerary-generation.md) records authenticated **staging and production** generation, persistence and reload with synthetic venues; [S3-11 Android evidence](evidence/trip-planning-ui.md) shows a generated plan and persistence after completely restarting the staging-connected app (shots 56_7 and 56_17). | Screenshots of a successful replacement and an Android generated plan from a manual-only trip were not captured. |
+| Controlled AI failure and manual fallback | [S3-13 staging failure drill](evidence/ai-ci-cd-2026-10-26.md) returned HTTP 503 `extraction_unavailable` with `manual_fallback: true` from a zero-traffic `aifail` revision on October 26; [S3-10 Android/Web fallback evidence](evidence/trip-preference-extraction.md) shows an offline network failure retaining input and permitting a manual save. | The 503 drill and manual-save UI were exercised separately, not recorded as one combined live user action. |
+| Backend AI response processing and deterministic evaluation | [S3-05 API contract](preference-extraction-api.md), [Week 3 evaluation](week3-evaluation.md) and [results](evidence/week3-results.md), plus [S3-13 AI pipeline evidence](evidence/ai-ci-cd-2026-10-26.md) linking passing CI and deliberate failure probes. | Fixtures and metrics are designed evaluation evidence, not measured organic recommendation quality. |
+| Mocked AI CI without paid calls | [Green CI run 40308275898](https://github.com/relax-mode/lagaw/actions/runs/40308275898) and failing probes [40307281405](https://github.com/relax-mode/lagaw/actions/runs/40307281405) and [40308048372](https://github.com/relax-mode/lagaw/actions/runs/40308048372) document no-provider-key mocked validation and the regression gate. | This proves CI behavior, not that the CI was discussed in consultation. |
+
+**Conclusion:** the end-to-end demo path was prepared and its steps had
+**independently verified deployed examples**. A single continuous staged run
+(request -> extraction -> recommendations -> generated persisted itinerary ->
+forced AI failure) was **not recorded**, and the professor's observed steps
+remain unspecified. Do not state that all stages were shown during the
+consultation. These evidence links establish **demo readiness and the evidence
+pack's coverage**, not an invented witnessed demonstration.
+
+## 8. Sprint 3 team coordination — asynchronous updates, not standups
+
+The team reported on November 5 that **no formal Sprint 3 standup meetings
+were held**. Progress coordination happened in its group chat, and the GitHub
+PR review/request cycle was used as a repeatable status handoff. The group-chat
+messages were not supplied; do not quote or infer their contents.
+
+Three dated, GitHub-verifiable PR-based checkpoints provide the equivalent
+progress evidence for issue #59: [Oct 27, #77](https://github.com/relax-mode/lagaw/pull/77)
+(Kyle's CI promotion recovery and the blocked `main` deploy),
+[Oct 28, #89](https://github.com/relax-mode/lagaw/pull/89)
+(Andrew's itinerary generation, contract/migration acceptance pending), and
+[Oct 29, #99](https://github.com/relax-mode/lagaw/pull/99)
+(Roel's Flutter planner with staging Android validation, Web acceptance still
+pending). Their summaries record done/next/blockers with real review/merge
+links and dates in the [Sprint 3 log](sprint-log.md#november-5-2026--sprint-3-asynchronous-pr-reviews-as-team-status-updates-59).
+The original course requirement is for **2–3 asynchronous team-channel
+standup posts in the sprint**, each identifying done/next/blockers per person.
+PR review requests are verifiable **partial progress evidence**, but the
+unprovided group-chat exchanges cannot be audited and are not assumed to meet
+the rubric. Therefore the corresponding original S3-14 standup checkbox is
+**still pending**. No scheduled meetings or standup attendance are claimed.
+
+## 9. Post-consultation retrospective — confirmed November 5, 2026
+
+The team representative reviewed and confirmed the following assessment on
+November 5, 2026, after reporting the Week 3 consultation. This is a
+**written retrospective**, not minutes from a separate retrospective meeting.
+
+- **What went well:** We demonstrated the staging application to the professor,
+  and the team coordinated development through independently reviewed PRs.
+- **What did not go well:** Some application corner cases had not yet been
+  resolved, and destination-image Storage was still a consultation follow-up.
+  Regular structured async standup posts were also not maintained, even though
+  GitHub PRs captured progress and reviewers.
+- **One change for Sprint 4:** Prioritize edge-case verification, completing
+  Storage acceptance and release readiness ahead of the **November 11, 2026**
+  target for a 90%-finished application; record done/next/blockers explicitly
+  in the team channel rather than relying on PR review requests alone.
+
+**Source boundary:** the professor requested corner-case handling, Storage
+setup and November 11 readiness, as reported by the team. The retrospective
+assessment above was **confirmed on November 5** by the team representative;
+no unrecorded meeting, verbatim instructor quotation or claimed completion
+percentage is implied. Related follow-ups remain [#108](https://github.com/relax-mode/lagaw/issues/108)
+(Storage) and [#121](https://github.com/relax-mode/lagaw/issues/121)
+(release readiness).
