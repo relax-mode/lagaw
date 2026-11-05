@@ -162,11 +162,17 @@ contains the exact SHA-256 metadata, traffic revisions, full successful
 authenticated hybrid-vs-content comparisons, separate insufficient-history
 fallback responses and the zero-extra-events production manifest audit.
 
-**Important operations note:** The private production cleanup script ends in
-`ROLLBACK` and the model-off deployment resolver was verified, but a hosted
-Supabase SQL cleanup transaction was **not rehearsed**: the configured
-Management API PAT returned HTTP 401. Keep the seeded production demo fixtures
-and the private exact-ID manifest until an authorized operator can check the
-`events_beyond_manifest` query in a working SQL session and approve teardown.
-Do not delete a production artifact or its secret version while Cloud Run
-still mounts it.
+**Updated operations note — November 5, 2026:** The previous Management API
+PAT returned HTTP 401, but the operator rotated it. Read-only SQL against both
+Supabase projects now returns HTTP 201. The production-only exact-ID cleanup
+SQL was checked for the **35 private manifest identifiers**, zero events
+outside that manifest, the four expected table-specific deletes and an
+explicit terminating `ROLLBACK`. Its real hosted transaction **passed**, with
+`auth_users_left = 0` observed before the rollback and **identical** before/after
+aggregate counts: 5 Auth users, 5 profiles, 23 interactions and 2 trips.
+**No demo records were permanently deleted.** This rehearses synthetic data
+cleanup only; it does **not** mean the live model-service rollback has occurred.
+Keep the seeded demo fixtures intact while the model is still served, and
+do not delete a production artifact or its secret version while Cloud Run
+still mounts it. See [#158](https://github.com/relax-mode/lagaw/issues/158)
+and the [updated S3-17 evidence](evidence/s3-17-collaborative-serving.md).

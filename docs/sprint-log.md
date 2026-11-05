@@ -887,3 +887,24 @@ hosted cleanup SQL was **not** executed or misrepresented as rehearsed; the
 private ROLLBACK cleanup script and model-off redeploy runbook remain ready.
 See the [dated redacted S3-17 evidence](evidence/s3-17-collaborative-serving.md)
 for the complete verification and cleanup limitation.
+
+### November 5, 2026 — Supabase PAT rotation and S3-17 hosted cleanup rehearsal (#158)
+
+The initially rejected (401) Supabase Management API PAT was rotated by the
+operator. With the replacement token loaded only in the private operator
+shell, **staging and production read-only SQL calls each succeeded (HTTP 201)**.
+The production exact-ID cleanup SQL was statically checked against the private
+manifest (35 expected identifiers, four expected table-specific deletes,
+`BEGIN` and terminating `ROLLBACK`, no `COMMIT`). A production Management API
+aggregate query before execution returned **5 Auth users, 5 profiles, 23
+interaction events, 2 trips, zero interactions beyond the manifest**. The
+hosted production cleanup transaction returned HTTP 201; its final SELECT
+observed **`auth_users_left = 0` before `ROLLBACK`**, confirming the temporary
+delete path executed. An independent **post-rollback** SQL query returned
+**identical** counts. This is a **successful rollback-only cleanup rehearsal**,
+not actual deletion: all synthetic demo records remain for live model serving.
+No PAT value, Auth/profile/trip/event UUID, artifact factor or private SQL was
+published. The earlier 401 caveat above describes the initial state and is
+**resolved** by this subsequent validation. Model-service rollback/deactivation
+is a different operation and was not triggered. See the
+[updated S3-17 evidence](evidence/s3-17-collaborative-serving.md) and [#158](https://github.com/relax-mode/lagaw/issues/158).
