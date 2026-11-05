@@ -915,3 +915,15 @@ is a different operation and was not triggered. See the
 - A first dry-run-guarded traffic test switched `00035 → 00033 → 00035`; an accidental GET to a POST-only extraction path gave 405. The restoration safeguard returned staging to its original revision; the test method was corrected and the **whole drill was repeated**.
 - On the verified repeat, `00033-hvh` was observed at **100%** at 08:55:12 UTC, with staging locations HTTP **200**, unauthenticated Trips **401**, unauthenticated extraction POST **401** (no paid call), and staging Pages **200**. Explicit restoration to `00035-xp9` was observed at **100%** at 08:55:36 UTC; all four checks passed again by 08:55:38. Production `lagaw-api-00032-287` stayed at **100%** in read-only before/after checks through 08:55:41. Because newer zero-traffic staging canaries existed, `--to-latest` was deliberately **not** used.
 - [Timestamped S4-20 evidence](evidence/s4-20-staging-rollback-2026-11-05.md) and [updated runbook](rollback-runbook.md) distinguish traffic verification from authenticated end-user smoke; the latter and a Cloudflare Pages *deployment* rollback were not performed. No production/database/Pages deployment was modified during the drill.
+
+## Sprint 4 — Roel's frontend assignments
+
+### November 5, 2026 — #101 first-time travel preference onboarding UI
+
+- Roel took the Sprint 4 frontend issues (#101, #104, #110, #117, #149, #107, #109) and agreed to work on them one by one in that order. #104 is marked blocked, but its backend contracts (#102, #103) are merged, so it follows #101.
+- Built #101 on `feat/s4-01-onboarding-ui`:
+  - A four-step mocked onboarding flow: interests, budget, travel style, then review and save.
+  - The values follow Andrew's #102 contract (`docs/onboarding-preferences-api.md`): the six approved tags, an optional PHP min/max range with two decimals, and `slow`/`moderate`/`fast`. The saved shape is the exact four-key PUT body, so #104 only swaps the repository.
+  - Loading, validation, save failure with retry, load failure with retry, Back, and Edit from Review are all covered.
+  - The temporary entry point is **Travel preferences** in the account sheet. Routing new users automatically waits for #104, because it needs the real `GET /me/preferences`.
+- `flutter analyze` is clean, and `flutter test` passes 173 tests (14 new in `test/onboarding_test.dart`). Roel verified all 16 Android checks on the POCO Pad (each step, every budget error, loading, forced save failure with retry, prefill on reopen, skip budget). Web follows the merge. See [evidence](evidence/onboarding-ui.md).

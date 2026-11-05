@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../screens/onboarding/onboarding_flow.dart';
+import '../services/onboarding_repository.dart';
 import '../theme.dart';
 import 'auth_session.dart';
 import 'password_reset_screen.dart';
@@ -112,8 +114,8 @@ class SessionExpiredBanner extends StatelessWidget {
   }
 }
 
-/// Account sheet opened from the header avatar: who is signed in, and
-/// sign out.
+/// Account sheet opened from the header avatar: who is signed in, travel
+/// preferences, and sign out.
 Future<void> showAccountSheet(BuildContext context, AuthSession session) {
   return showModalBottomSheet<void>(
     context: context,
@@ -142,6 +144,23 @@ Future<void> showAccountSheet(BuildContext context, AuthSession session) {
               ),
             ),
             const SizedBox(height: 16),
+            // Mock-backed until #104 connects /api/v1/me/preferences. [S4-01]
+            FilledButton.tonalIcon(
+              key: const ValueKey('open-onboarding'),
+              icon: const Icon(Icons.tune_rounded),
+              label: const Text('Travel preferences'),
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => OnboardingFlow(
+                      repository: MockOnboardingRepository.shared,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
             OutlinedButton.icon(
               key: const ValueKey('sign-out'),
               icon: const Icon(Icons.logout_rounded),
