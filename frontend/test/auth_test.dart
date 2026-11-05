@@ -90,6 +90,9 @@ class FakeAuthClient implements AuthClient {
     _failIfQueued();
     final email = _current?.email;
     if (email == null) throw const AuthFailure('Recovery session expired.');
+    if (passwords[email] == password) {
+      throw describePasswordUpdateError('same_password', '422', '');
+    }
     lastUpdatedPassword = password;
     passwords[email] = password;
     _changes.add(AuthChange.signedIn);
@@ -225,6 +228,59 @@ void main() {
       expect(
         describeAuthError('invalid_credentials', '400', '').retryAfter,
         isNull,
+      );
+    });
+  });
+
+  group('Recovery password error messages', () {
+    for (final (code, status, expected) in [
+      ('same_password', '422', 'different'),
+      ('weak_password', '422', 'stronger'),
+      ('reauthentication_needed', '403', 'additional verification'),
+      ('session_not_found', '403', 'fresh password-reset'),
+      ('session_expired', '401', 'fresh password-reset'),
+      ('validation_failed', '422', 'rejected'),
+    ]) {
+      test('$code has a recovery-specific explanation', () {
+        final result = describePasswordUpdateError(
+          code,
+          status,
+          'Sensitive provider error with a token: secret-value',
+        );
+        expect(result.message, contains(expected));
+        expect(result.message, isNot(contains('secret-value')));
+        expect(result.message, isNot(contains('Sign-in failed')));
+      });
+    }
+
+    test('unrecognized safe code is identifiable without raw response', () {
+      final result = describePasswordUpdateError(
+        'undocumented_auth_code',
+        '400',
+        'Sensitive data not intended for the user',
+      );
+      expect(result.message, contains('error code: undocumented_auth_code'));
+      expect(result.message, isNot(contains('Sensitive data')));
+    });
+
+    test('unsafe code cannot be reflected in the error message', () {
+      final result = describePasswordUpdateError(
+        'bad-token: fake-secret',
+        '400',
+        'Sensitive data not intended for the user',
+      );
+      expect(result.message, isNot(contains('fake-secret')));
+      expect(result.message, isNot(contains('Sensitive data')));
+    });
+
+    test('expired authorization and provider outage are distinct', () {
+      expect(
+        describePasswordUpdateError(null, '401', '').message,
+        contains('no longer authorized'),
+      );
+      expect(
+        describePasswordUpdateError(null, '503', '').message,
+        contains('unavailable'),
       );
     });
   });
@@ -720,6 +776,24 @@ void main() {
       await fill(tester, 'auth-password', 'new-password-123');
       await tap(tester, 'auth-submit');
       expect(find.byKey(const ValueKey('unsaved-field')), findsOneWidget);
+    });
+
+    testWidgets('reusing current password explains why it was rejected', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      client.receivePasswordRecovery('a@example.com');
+      await tester.pumpAndSettle();
+      await fill(tester, 'reset-password', 'correct-pw');
+      await fill(tester, 'reset-confirm', 'correct-pw');
+      await tap(tester, 'reset-submit');
+      expect(find.textContaining('different from your current'), findsOneWidget);
+      expect(find.text('Choose a new password'), findsOneWidget);
+      expect(client.lastUpdatedPassword, isNull);
+      await fill(tester, 'reset-password', 'different-pw-123');
+      await fill(tester, 'reset-confirm', 'different-pw-123');
+      await tap(tester, 'reset-submit');
+      expect(find.text('Password updated'), findsOneWidget);
     });
 
     testWidgets('reset errors leave password form available', (tester) async {

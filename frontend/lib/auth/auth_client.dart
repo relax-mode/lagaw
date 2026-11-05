@@ -129,7 +129,7 @@ class SupabaseAuthClient implements AuthClient {
   @override
   Future<void> updatePassword(String password) => _guard(() async {
     await _auth.updateUser(sb.UserAttributes(password: password));
-  });
+  }, updatingPassword: true);
 
   @override
   Future<void> signOut() async {
@@ -151,21 +151,32 @@ class SupabaseAuthClient implements AuthClient {
     }
   }
 
-  Future<T> _guard<T>(Future<T> Function() action) async {
+  Future<T> _guard<T>(
+    Future<T> Function() action, {
+    bool updatingPassword = false,
+  }) async {
     try {
       return await action();
     } on AuthFailure {
       rethrow;
     } on sb.AuthException catch (e) {
-      throw describeAuthError(e.code, e.statusCode, e.message);
+      throw updatingPassword
+          ? describePasswordUpdateError(e.code, e.statusCode, e.message)
+          : describeAuthError(e.code, e.statusCode, e.message);
     } on TimeoutException {
-      throw const AuthFailure(
-        'The sign-in service took too long. Please try again.',
+      throw AuthFailure(
+        updatingPassword
+            ? 'The password update took too long. Check your connection and '
+                  'try again.'
+            : 'The sign-in service took too long. Please try again.',
       );
     } catch (_) {
-      throw const AuthFailure(
-        'Could not reach the sign-in service. Check your connection and try '
-        'again.',
+      throw AuthFailure(
+        updatingPassword
+            ? 'Could not reach the password update service. Check your '
+                  'connection and try again.'
+            : 'Could not reach the sign-in service. Check your connection and '
+                  'try again.',
       );
     }
   }
@@ -258,4 +269,76 @@ AuthFailure describeAuthError(String? code, String? status, String message) {
     );
   }
   return const AuthFailure('Sign-in failed. Please try again.');
+}
+
+/// Maps documented Supabase password-update errors without showing the raw
+/// provider message (which can contain account and policy details). Unlike
+/// ordinary sign-in, a recovery update has a valid short-lived auth session.
+/// Unknown provider *codes* are safe to display only when identifier-shaped;
+/// they let us debug failed recovery without exposing tokens or email links.
+AuthFailure describePasswordUpdateError(
+  String? code,
+  String? status,
+  String message,
+) {
+  switch (code) {
+    case 'same_password':
+      return const AuthFailure(
+        'Your new password must be different from your current password.',
+      );
+    case 'weak_password':
+      return const AuthFailure(
+        'This password does not meet the account security requirements. '
+        'Choose a stronger password and try again.',
+      );
+    case 'reauthentication_needed':
+      return const AuthFailure(
+        'Supabase requires additional verification before this password can '
+        'be changed. Contact the Lagaw team if this continues.',
+      );
+    case 'reauthentication_not_valid':
+      return const AuthFailure(
+        'The additional verification code is invalid or expired. '
+        'Request a new verification and try again.',
+      );
+    case 'session_expired' ||
+          'session_not_found' ||
+          'refresh_token_not_found' ||
+          'bad_jwt' ||
+          'otp_expired' ||
+          'flow_state_expired' ||
+          'flow_state_not_found':
+      return const AuthFailure(
+        'This recovery session has expired or is no longer valid. '
+        'Request a fresh password-reset email and open the newest link.',
+      );
+    case 'over_request_rate_limit':
+      return _requestLimit;
+    case 'validation_failed':
+      return const AuthFailure(
+        'The new password was rejected. Choose a different, stronger '
+        'password and try again.',
+      );
+  }
+  if (status == '429') return _requestLimit;
+  if (status == '401' || status == '403') {
+    return const AuthFailure(
+      'Your recovery session is no longer authorized. Request a fresh '
+      'password-reset email and open the newest link.',
+    );
+  }
+  if (status != null && status.startsWith('5')) {
+    return const AuthFailure(
+      'The password update service is unavailable. Please try again later.',
+    );
+  }
+  // The provider's error *code* is public and non-sensitive, but its raw
+  // message is not. No email, token, URL or response body is surfaced here.
+  final safeCode = code != null && RegExp(r'^[a-z][a-z0-9_]{0,63}$').hasMatch(code)
+      ? ' (error code: $code)'
+      : '';
+  return AuthFailure(
+    'The password could not be updated$safeCode. Try a different, stronger '
+    'password or request a fresh recovery link.',
+  );
 }
