@@ -858,3 +858,53 @@ limits are recorded in
 - **Staging password recovery:** The authorized tester reported Brevo email delivery, correct recovery link and redirect, working new-password form, and a successful password reset. An earlier failed submission produced HTTP **422** at the staging Supabase Auth `/auth/v1/user` endpoint with Lagaw's generic sign-in error; the tester later considered reuse of the same password the likely cause. **That error code was not captured**, and the successful later reset supersedes the earlier failure, not the missing diagnostics.
 - **Production Brevo SMTP and recovery:** The tester reports a dedicated Brevo credential was created for production and Supabase Auth configured; live **production sign-in and complete password recovery work**. This is human-observed success, not independently checked Supabase Management API or mailbox contents. No private key, reset link, inbox address, password or session token was stored in this record. The available Supabase management PATs returned HTTP **401** on read-only inspections, so provider settings and email quotas have not been independently inspected.
 - **Production signup confirmation, separately confirmed:** The tester explicitly confirmed that the production signup-confirmation flow works as well, not merely sign-in and recovery. This completes S4-13 functional email acceptance on user-observed evidence; no independently accessible Auth/provider logs were available. **Separate #149 follow-up:** Old-password rejection after reset was not explicitly provided. This remains a negative-case check to record without passwords. Recovery UI [PR #150](https://github.com/relax-mode/lagaw/pull/150) was reviewed/merged with green Flutter CI; the optional diagnostic-only [PR #159](https://github.com/relax-mode/lagaw/pull/159) remains separate. See [the Brevo runbook](auth-email-brevo-verification.md).
+
+### November 5, 2026 — S3-17 live hybrid recommender rollout completed
+
+[Implementation PR #95](https://github.com/relax-mode/lagaw/pull/95) was already
+reviewed and merged. Using separate staging and production Supabase credentials
+and private allowlisted demo accounts, the team confirmed **HTTP 200 `Hybrid:`
+for account A and `Content fallback (insufficient_history)` for account E in
+both environments**. For the identical saved-trip/content candidate, the
+content-only score **0.996** changed to hybrid **0.920360071763**, in both
+environments. Production trained **its own** `signed-svd-v1` model offline from
+5 seeded profiles and 23 interaction events (10 locations / 22 distinct pairs),
+pinned `MODEL_ARTIFACT:1` in Secret Manager, and passed full staging → production
+CI/CD [run 41991947345](https://github.com/relax-mode/lagaw/actions/runs/41991947345).
+Production 100%-traffic revision `lagaw-api-00032-287` logged the matching
+`status=present reason=loaded` training/file digests. **Staging retained its
+separate artifact**, verified on the actual 100%-traffic revision
+`lagaw-api-staging-00035-xp9`.
+
+The catalog currently has only one cost-known recommendable location, so the
+original same-response hybrid+fallback criterion is clarified to separate
+authenticated accounts A/E with identical options and a same-trip content
+baseline. This tests both intended paths without fabricating catalog facts.
+No organic users were trained on, nor private IDs/artifact contents committed.
+The read-only exact-manifest production audit passed with zero extra events.
+**Operational caveat:** the configured Supabase PAT was rejected with 401, so
+hosted cleanup SQL was **not** executed or misrepresented as rehearsed; the
+private ROLLBACK cleanup script and model-off redeploy runbook remain ready.
+See the [dated redacted S3-17 evidence](evidence/s3-17-collaborative-serving.md)
+for the complete verification and cleanup limitation.
+
+### November 5, 2026 — Supabase PAT rotation and S3-17 hosted cleanup rehearsal (#158)
+
+The initially rejected (401) Supabase Management API PAT was rotated by the
+operator. With the replacement token loaded only in the private operator
+shell, **staging and production read-only SQL calls each succeeded (HTTP 201)**.
+The production exact-ID cleanup SQL was statically checked against the private
+manifest (35 expected identifiers, four expected table-specific deletes,
+`BEGIN` and terminating `ROLLBACK`, no `COMMIT`). A production Management API
+aggregate query before execution returned **5 Auth users, 5 profiles, 23
+interaction events, 2 trips, zero interactions beyond the manifest**. The
+hosted production cleanup transaction returned HTTP 201; its final SELECT
+observed **`auth_users_left = 0` before `ROLLBACK`**, confirming the temporary
+delete path executed. An independent **post-rollback** SQL query returned
+**identical** counts. This is a **successful rollback-only cleanup rehearsal**,
+not actual deletion: all synthetic demo records remain for live model serving.
+No PAT value, Auth/profile/trip/event UUID, artifact factor or private SQL was
+published. The earlier 401 caveat above describes the initial state and is
+**resolved** by this subsequent validation. Model-service rollback/deactivation
+is a different operation and was not triggered. See the
+[updated S3-17 evidence](evidence/s3-17-collaborative-serving.md) and [#158](https://github.com/relax-mode/lagaw/issues/158).

@@ -151,3 +151,28 @@ is read-only and owner-scoped, and nothing trains during a request.
 
 See the sprint log for the dated record and the final inventory of secrets, IAM bindings,
 GitHub variables and Auth accounts, with removal commands.
+
+## November 5, 2026 — confirmed staging and production rollout
+
+Both environments now load separately trained, privately stored and pinned
+`real`-provenance models from seeded demo interactions; "real" does not imply
+organic user training. The [S3-17 acceptance record](evidence/s3-17-collaborative-serving.md)
+contains the exact SHA-256 metadata, traffic revisions, full successful
+[main workflow run 41991947345](https://github.com/relax-mode/lagaw/actions/runs/41991947345),
+authenticated hybrid-vs-content comparisons, separate insufficient-history
+fallback responses and the zero-extra-events production manifest audit.
+
+**Updated operations note — November 5, 2026:** The previous Management API
+PAT returned HTTP 401, but the operator rotated it. Read-only SQL against both
+Supabase projects now returns HTTP 201. The production-only exact-ID cleanup
+SQL was checked for the **35 private manifest identifiers**, zero events
+outside that manifest, the four expected table-specific deletes and an
+explicit terminating `ROLLBACK`. Its real hosted transaction **passed**, with
+`auth_users_left = 0` observed before the rollback and **identical** before/after
+aggregate counts: 5 Auth users, 5 profiles, 23 interactions and 2 trips.
+**No demo records were permanently deleted.** This rehearses synthetic data
+cleanup only; it does **not** mean the live model-service rollback has occurred.
+Keep the seeded demo fixtures intact while the model is still served, and
+do not delete a production artifact or its secret version while Cloud Run
+still mounts it. See [#158](https://github.com/relax-mode/lagaw/issues/158)
+and the [updated S3-17 evidence](evidence/s3-17-collaborative-serving.md).
