@@ -151,3 +151,22 @@ is read-only and owner-scoped, and nothing trains during a request.
 
 See the sprint log for the dated record and the final inventory of secrets, IAM bindings,
 GitHub variables and Auth accounts, with removal commands.
+
+## November 5, 2026 — confirmed staging and production rollout
+
+Both environments now load separately trained, privately stored and pinned
+`real`-provenance models from seeded demo interactions; "real" does not imply
+organic user training. The [S3-17 acceptance record](evidence/s3-17-collaborative-serving.md)
+contains the exact SHA-256 metadata, traffic revisions, full successful
+[main workflow run 41991947345](https://github.com/relax-mode/lagaw/actions/runs/41991947345),
+authenticated hybrid-vs-content comparisons, separate insufficient-history
+fallback responses and the zero-extra-events production manifest audit.
+
+**Important operations note:** The private production cleanup script ends in
+`ROLLBACK` and the model-off deployment resolver was verified, but a hosted
+Supabase SQL cleanup transaction was **not rehearsed**: the configured
+Management API PAT returned HTTP 401. Keep the seeded production demo fixtures
+and the private exact-ID manifest until an authorized operator can check the
+`events_beyond_manifest` query in a working SQL session and approve teardown.
+Do not delete a production artifact or its secret version while Cloud Run
+still mounts it.

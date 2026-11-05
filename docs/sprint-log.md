@@ -851,3 +851,32 @@ checkpoints above document real progress, but they do not substitute for the
 course’s missing 2–3 async standup posts. The same retrospective and evidence
 limits are recorded in
 [the consultation pack](sprint-3-consultation.md#9-post-consultation-retrospective--confirmed-november-5-2026).
+
+### November 5, 2026 — S3-17 live hybrid recommender rollout completed
+
+[Implementation PR #95](https://github.com/relax-mode/lagaw/pull/95) was already
+reviewed and merged. Using separate staging and production Supabase credentials
+and private allowlisted demo accounts, the team confirmed **HTTP 200 `Hybrid:`
+for account A and `Content fallback (insufficient_history)` for account E in
+both environments**. For the identical saved-trip/content candidate, the
+content-only score **0.996** changed to hybrid **0.920360071763**, in both
+environments. Production trained **its own** `signed-svd-v1` model offline from
+5 seeded profiles and 23 interaction events (10 locations / 22 distinct pairs),
+pinned `MODEL_ARTIFACT:1` in Secret Manager, and passed full staging → production
+CI/CD [run 41991947345](https://github.com/relax-mode/lagaw/actions/runs/41991947345).
+Production 100%-traffic revision `lagaw-api-00032-287` logged the matching
+`status=present reason=loaded` training/file digests. **Staging retained its
+separate artifact**, verified on the actual 100%-traffic revision
+`lagaw-api-staging-00035-xp9`.
+
+The catalog currently has only one cost-known recommendable location, so the
+original same-response hybrid+fallback criterion is clarified to separate
+authenticated accounts A/E with identical options and a same-trip content
+baseline. This tests both intended paths without fabricating catalog facts.
+No organic users were trained on, nor private IDs/artifact contents committed.
+The read-only exact-manifest production audit passed with zero extra events.
+**Operational caveat:** the configured Supabase PAT was rejected with 401, so
+hosted cleanup SQL was **not** executed or misrepresented as rehearsed; the
+private ROLLBACK cleanup script and model-off redeploy runbook remain ready.
+See the [dated redacted S3-17 evidence](evidence/s3-17-collaborative-serving.md)
+for the complete verification and cleanup limitation.
