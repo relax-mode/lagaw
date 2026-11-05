@@ -95,3 +95,24 @@ Record in the [sprint log](sprint-log.md), only after the session:
 - Instructor feedback, as given.
 - A retrospective: what went well, what did not, and one change for Sprint 4.
 - Re-planned items, with reasons.
+
+## 6. Actual consultation outcome — user-reported November 5, 2026
+
+The team subsequently reported that its **Week 3 consultation occurred**, with a
+**live demonstration of the staging Lagaw app**. The instructor's feedback was:
+
+1. **Address corner cases** in the application (which cases were not specified,
+   so this is a broad QA action rather than verified issue-specific acceptance).
+2. **Set up the Storage bucket** for destination images (tracked in Sprint 4
+   [#108](https://github.com/relax-mode/lagaw/issues/108)); implementation,
+   hosted setup and image acceptance must be evidenced separately.
+3. **Be ready for the November 11, 2026 deadline with a 90%-complete app**;
+   this is the instructor's target, not a verified completion percentage.
+
+**Evidence limits:** this report was supplied by a team member on November 5,
+2026. The exact consultation date, participants, demonstrated individual
+backend/AI workflows, the instructor's exact wording beyond this summary, and
+a formal retrospective were **not supplied**. Do not infer they occurred.
+The earlier checklist above is **preparation**, not proof each step was
+performed live. Link completed corner-case tests and the Storage acceptance
+separately as they happen.

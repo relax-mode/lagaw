@@ -750,3 +750,20 @@ Pending: no consultation or retrospective notes were found in the reviewed GitHu
 - **Live production checks:** Independent requests to the production API returned HTTP **200** for `GET /health`, `GET /ready`, `GET /openapi.json` and `GET /locations?limit=1`; OpenAPI included `/api/v1/preferences/extract`. An unauthenticated request to extraction returned **401**. These checks confirm accessible API surfaces, not comprehensive model behavior.
 - **Production quota acceptance and cleanup:** A dedicated, confirmed and profile-linked production QA account had **no existing current-UTC-day quota row**. The operator inserted a temporary daily test counter of **200** for this profile only (equal to the maximum permitted configured daily limit and above the default limit of 40). An authenticated call to `POST /api/v1/preferences/extract` returned **429**, `Retry-After: 20060`, error code `extraction_quota_exceeded` and `manual_fallback: true`. Because the backend rejects a denied quota before invoking DeepSeek, and separately tested code mocks verify provider-call suppression, this supports a non-billable rejection; provider billing was **not independently audited**. The temporary daily QA row was subsequently deleted, with the expected single row returned, restoring its prior absence. No QA credentials, tokens, email or private profile identifier are recorded here.
 - **Scope and follow-up:** Development/staging testing previously verified approved-image upload, direct anonymous upload denial, public image HTTP **200** and `locations.image_url` linking; **no production image upload or production image-URL linkage was tested**. Quotas limit attempts, not exact currency spend; the reported provider billing alert is not a hard cap. Evidence belongs on issues [#108](https://github.com/relax-mode/lagaw/issues/108), [#114](https://github.com/relax-mode/lagaw/issues/114) and [#116](https://github.com/relax-mode/lagaw/issues/116). Their closure and checklist updates remain separate issue-management actions after this documentation PR is reviewed and merged.
+
+### November 5, 2026 — Week 3 consultation feedback received for #59
+
+The team reported that its Week 3 consultation consisted of a **demonstration
+of the staging app**. The professor requested (1) handling application corner
+cases, (2) setting up the destination-image Storage bucket, and (3) a
+**90%-complete app by November 11, 2026**. This is the team's reported feedback
+(received Nov 5), not independent instructor verification. The exact event date
+and detailed demonstrated flows were not supplied. See the
+[Sprint 3 consultation outcome](sprint-3-consultation.md#6-actual-consultation-outcome--user-reported-november-5-2026)
+and [#59](https://github.com/relax-mode/lagaw/issues/59). Sprint 4 follow-ups:
+corner-case validation across Auth, itinerary, AI failures and persistence;
+Storage [#108](https://github.com/relax-mode/lagaw/issues/108) acceptance;
+actual release readiness [#121](https://github.com/relax-mode/lagaw/issues/121).
+These are action priorities, not claimed PASS results. Dated standups,
+retrospective, the full pipeline report and specific demo-path verification
+remain outstanding.
