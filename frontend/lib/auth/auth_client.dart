@@ -40,7 +40,7 @@ class AuthTokens {
   }
 }
 
-enum AuthChange { signedIn, refreshed, signedOut }
+enum AuthChange { signedIn, refreshed, signedOut, passwordRecovery }
 
 /// Email/password auth. The real implementation wraps Supabase; tests use a
 /// fake. Only the public project URL and anon key are ever configured.
@@ -53,6 +53,12 @@ abstract class AuthClient {
   Future<bool> signUp(String email, String password);
   Future<void> signIn(String email, String password);
   Future<void> signOut();
+
+  /// Request a recovery email without exposing whether an account exists.
+  Future<void> requestPasswordReset(String email);
+
+  /// Set a password only with the authenticated recovery session.
+  Future<void> updatePassword(String password);
 
   /// Refreshes through the SDK; returns false when the session is gone.
   Future<bool> refresh();
@@ -85,6 +91,7 @@ class SupabaseAuthClient implements AuthClient {
         (state) => switch (state.event) {
           sb.AuthChangeEvent.signedOut => AuthChange.signedOut,
           sb.AuthChangeEvent.tokenRefreshed => AuthChange.refreshed,
+          sb.AuthChangeEvent.passwordRecovery => AuthChange.passwordRecovery,
           _ =>
             state.session == null ? AuthChange.signedOut : AuthChange.signedIn,
         },
@@ -113,6 +120,16 @@ class SupabaseAuthClient implements AuthClient {
   @override
   Future<void> signIn(String email, String password) =>
       _guard(() => _auth.signInWithPassword(email: email, password: password));
+
+  @override
+  Future<void> requestPasswordReset(String email) => _guard(
+    () => _auth.resetPasswordForEmail(email, redirectTo: emailRedirectTo),
+  );
+
+  @override
+  Future<void> updatePassword(String password) => _guard(() async {
+    await _auth.updateUser(sb.UserAttributes(password: password));
+  });
 
   @override
   Future<void> signOut() async {

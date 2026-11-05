@@ -25,6 +25,8 @@ class FakeAuthClient implements AuthClient {
   int _serial = 0;
   AuthTokens? _current;
   AuthFailure? nextFailure;
+  String? lastResetEmail;
+  String? lastUpdatedPassword;
 
   FakeAuthClient([this._current]);
 
@@ -75,6 +77,27 @@ class FakeAuthClient implements AuthClient {
     }
     _current = _issue(email);
     _changes.add(AuthChange.signedIn);
+  }
+
+  @override
+  Future<void> requestPasswordReset(String email) async {
+    _failIfQueued();
+    lastResetEmail = email;
+  }
+
+  @override
+  Future<void> updatePassword(String password) async {
+    _failIfQueued();
+    final email = _current?.email;
+    if (email == null) throw const AuthFailure('Recovery session expired.');
+    lastUpdatedPassword = password;
+    passwords[email] = password;
+    _changes.add(AuthChange.signedIn);
+  }
+
+  void receivePasswordRecovery(String email) {
+    _current = _issue(email);
+    _changes.add(AuthChange.passwordRecovery);
   }
 
   @override
@@ -634,6 +657,96 @@ void main() {
       await fill(tester, 'auth-password', 'long-enough');
       await tap(tester, 'auth-submit');
       expect(find.textContaining('Confirm your email first'), findsOneWidget);
+    });
+
+    testWidgets('forgot password requests a link without disclosing account', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      await tap(tester, 'auth-forgot-password');
+      expect(find.text('Reset your password'), findsOneWidget);
+      expect(find.byKey(const ValueKey('auth-password')), findsNothing);
+      await fill(tester, 'auth-email', 'unknown@example.com');
+      await tap(tester, 'auth-submit');
+      expect(client.lastResetEmail, 'unknown@example.com');
+      expect(
+        find.textContaining('If this email has a Lagaw account'),
+        findsOneWidget,
+      );
+      await tap(tester, 'auth-switch-mode');
+      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+    });
+
+    testWidgets('reset request errors can be retried', (tester) async {
+      await pumpApp(tester);
+      await tap(tester, 'auth-forgot-password');
+      client.nextFailure = const AuthFailure('Unable to reach Supabase.');
+      await fill(tester, 'auth-email', 'a@example.com');
+      await tap(tester, 'auth-submit');
+      expect(find.text('Unable to reach Supabase.'), findsOneWidget);
+      expect(client.lastResetEmail, isNull);
+      await tap(tester, 'auth-submit');
+      expect(client.lastResetEmail, 'a@example.com');
+    });
+
+    testWidgets('recovery event opens password form, validates and updates', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      client.receivePasswordRecovery('a@example.com');
+      await tester.pumpAndSettle();
+      expect(find.text('Choose a new password'), findsOneWidget);
+      expect(find.byKey(const ValueKey('unsaved-field')), findsNothing);
+
+      await fill(tester, 'reset-password', 'short');
+      await fill(tester, 'reset-confirm', 'different');
+      await tap(tester, 'reset-submit');
+      expect(find.text('Use at least 8 characters.'), findsOneWidget);
+      expect(find.text('Passwords do not match.'), findsOneWidget);
+      expect(client.lastUpdatedPassword, isNull);
+
+      await fill(tester, 'reset-password', 'new-password-123');
+      await fill(tester, 'reset-confirm', 'new-password-123');
+      await tap(tester, 'reset-submit');
+      expect(find.text('Password updated'), findsOneWidget);
+      expect(client.lastUpdatedPassword, 'new-password-123');
+      await tap(tester, 'reset-return-sign-in');
+      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+
+      await fill(tester, 'auth-email', 'a@example.com');
+      await fill(tester, 'auth-password', 'correct-pw');
+      await tap(tester, 'auth-submit');
+      expect(find.text('Email or password is incorrect.'), findsOneWidget);
+      await fill(tester, 'auth-password', 'new-password-123');
+      await tap(tester, 'auth-submit');
+      expect(find.byKey(const ValueKey('unsaved-field')), findsOneWidget);
+    });
+
+    testWidgets('reset errors leave password form available', (tester) async {
+      await pumpApp(tester);
+      client.receivePasswordRecovery('a@example.com');
+      await tester.pumpAndSettle();
+      client.nextFailure = const AuthFailure('Recovery link expired.');
+      await fill(tester, 'reset-password', 'new-password-123');
+      await fill(tester, 'reset-confirm', 'new-password-123');
+      await tap(tester, 'reset-submit');
+      expect(find.text('Recovery link expired.'), findsOneWidget);
+      expect(find.text('Choose a new password'), findsOneWidget);
+      await tap(tester, 'reset-cancel');
+      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+    });
+
+    testWidgets('ordinary sign-in does not open a password reset form', (
+      tester,
+    ) async {
+      await session.signIn('a@example.com', 'correct-pw');
+      await pumpApp(tester);
+      expect(find.byKey(const ValueKey('reset-password')), findsNothing);
+      expect(find.byKey(const ValueKey('unsaved-field')), findsOneWidget);
+      await expectLater(
+        session.updatePassword('should-not-write'),
+        throwsA(isA<AuthFailure>()),
+      );
     });
 
     testWidgets('a rate limit holds submit until the wait is over', (
