@@ -764,9 +764,10 @@ and [#59](https://github.com/relax-mode/lagaw/issues/59). Sprint 4 follow-ups:
 corner-case validation across Auth, itinerary, AI failures and persistence;
 Storage [#108](https://github.com/relax-mode/lagaw/issues/108) acceptance;
 actual release readiness [#121](https://github.com/relax-mode/lagaw/issues/121).
-These are action priorities, not claimed PASS results. Dated standups,
-retrospective, the full pipeline report and specific demo-path verification
-remain outstanding.
+These are action priorities, not claimed PASS results. Formal standups were
+not held; the team instead used PR-review updates (see the retrospective
+record of that cadence below). Retrospective remains pending. Later entries
+reconcile the pipeline report and independent demo-path evidence.
 
 ### November 5, 2026 — Sprint 3 full-week pipeline metrics reconciled for #59
 
@@ -796,3 +797,32 @@ CI/evaluation. The [consultation evidence matrix](sprint-3-consultation.md#7-his
 links the steps and their limitations. The independent checks do **not**
 prove a single combined live run or that the professor witnessed every stage.
 Actual Sprint 3 standups and a team retrospective remain undocumented.
+
+### November 5, 2026 — Sprint 3 asynchronous PR reviews as team status updates (#59)
+
+The team clarified on November 5 that it **did not hold formal Sprint 3 standup
+meetings**. Instead, teammates coordinated in a group chat and routinely
+requested and provided GitHub PR reviews as work became ready. Group-chat text
+was not provided for inspection, so the dated records below are **independently
+verifiable PR descriptions, review approvals and merges**. They are three
+asynchronous progress checkpoints, not backdated standup minutes or verbatim
+chat excerpts. “Done”, “next” and “blocker” summarize the PR state when each
+review was requested; later merges do not retroactively erase those blockers.
+
+| Date (UTC) | PR / status update | Completed work reported at review | Next step and blocker recorded at review |
+| --- | --- | --- | --- |
+| **Oct 27** | Kyle, [PR #77](https://github.com/relax-mode/lagaw/pull/77), approved by Jay (`s2302663-del`) Oct 27 09:41 UTC and merged | Recovered the AI evaluation gate and production-promotion workflow from a stacked PR that had merged into the wrong base branch | **Next:** verify staging → production deployment run and record the incident resolution. **Blocker:** the earlier stacked merge left `main` without the AI gate/promotion until this recovery PR merged |
+| **Oct 28** | Andrew, [PR #89](https://github.com/relax-mode/lagaw/pull/89), approved by Kyle Oct 28 12:21 UTC and merged | Added constraint-aware itinerary generation with atomic persistence, offline/DB tests, and development verification | **Next:** obtain frontend contract confirmation, apply/review the production migration and verify deployment. **Blocker:** at PR opening those integration, production-migration and deployed-acceptance steps were outstanding |
+| **Oct 29** | Roel, [PR #99](https://github.com/relax-mode/lagaw/pull/99), approved by Kyle Oct 29 07:11 UTC and merged | Built Flutter ranked recommendations, interactions, itinerary generation and persistence UI; Android staging tests passed | **Next:** test staging Web after merge and add evidence for successful replacement. **Blocker/limitation:** sparse venue hours/cost coverage restricted generated results; successful replacement was not captured |
+
+These are **partial evidence of the team’s asynchronous coordination**, not
+retroactively invented formal standup posts. The course’s [official process
+rules](official-instructions.md#how-a-sprint-works) specifically ask
+for **2–3 asynchronous standups in the team channel**, with each person saying
+what they finished, what is next, and what blocks them. Since the group-chat
+messages have not been provided, the issue’s original standup checkbox remains
+**open**: PR descriptions, requests and approvals show progress handoffs but do
+not independently prove those exact team-channel updates occurred. The team
+reported no standups. If no qualifying posts exist, record this as a process
+gap, not a completed standup requirement. The retrospective is separately
+pending.

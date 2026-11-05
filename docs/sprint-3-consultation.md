@@ -153,3 +153,26 @@ forced AI failure) was **not recorded**, and the professor's observed steps
 remain unspecified. Do not state that all stages were shown during the
 consultation. These evidence links establish **demo readiness and the evidence
 pack's coverage**, not an invented witnessed demonstration.
+
+## 8. Sprint 3 team coordination — asynchronous updates, not standups
+
+The team reported on November 5 that **no formal Sprint 3 standup meetings
+were held**. Progress coordination happened in its group chat, and the GitHub
+PR review/request cycle was used as a repeatable status handoff. The group-chat
+messages were not supplied; do not quote or infer their contents.
+
+Three dated, GitHub-verifiable PR-based checkpoints provide the equivalent
+progress evidence for issue #59: [Oct 27, #77](https://github.com/relax-mode/lagaw/pull/77)
+(Kyle's CI promotion recovery and the blocked `main` deploy),
+[Oct 28, #89](https://github.com/relax-mode/lagaw/pull/89)
+(Andrew's itinerary generation, contract/migration acceptance pending), and
+[Oct 29, #99](https://github.com/relax-mode/lagaw/pull/99)
+(Roel's Flutter planner with staging Android validation, Web acceptance still
+pending). Their summaries record done/next/blockers with real review/merge
+links and dates in the [Sprint 3 log](sprint-log.md#november-5-2026--sprint-3-asynchronous-pr-reviews-as-team-status-updates-59).
+The original course requirement is for **2–3 asynchronous team-channel
+standup posts in the sprint**, each identifying done/next/blockers per person.
+PR review requests are verifiable **partial progress evidence**, but the
+unprovided group-chat exchanges cannot be audited and are not assumed to meet
+the rubric. Therefore the corresponding original S3-14 standup checkbox is
+**still pending**. No scheduled meetings or standup attendance are claimed.
