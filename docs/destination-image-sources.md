@@ -58,6 +58,8 @@ verifiable rights was found.
 
 ## Follow-up
 
+- **Roel will take original photos** of the excluded venues himself, since no online photo with verifiable rights exists for them. Each will be added in a follow-up PR as a photographer-permission entry (credit, date, permission record), with no identifiable people and no third-party logos.
+- **Negros Forest Park:** two photos Roel took on 2026-10-11 (a leopard cat and a hornbill) are pending. Both carry a University of St. La Salle watermark from the school publication, so they need an unwatermarked original and confirmation of who holds the rights before use.
 - The excluded private venues (Orange Project, Cafetolyo, Arima, Calea) and Negros Forest Park could get photos with **written permission from the owner or operator**. A permission record would have to be added to the manifest before use.
 - Licenses can change on Commons. Recheck `source_page_url` before a production upload if it happens long after the access date.
 
