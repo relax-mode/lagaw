@@ -170,7 +170,9 @@ It checks locations, Trip authentication and ownership, the extraction route (42
 
 ## Restoring the latest approved version
 
-`restore` routes traffic to `--to-latest`, which means the **newest ready revision**. After a rollback that is usually the failed one. Run it only when that revision is the approved fix and has passed health checks:
+**Prefer restoring the exact revision captured before the rollback.** A newer, zero-traffic canary may be the latest ready revision while the original service was deliberately pinned to an older one. The November 5 staging drill discovered this exact situation (original `00035-xp9`, newer `00038`–`00043` at 0%). Use `execute --to-revision <ORIGINAL>` with the same staging authorization and exact confirmation guards used for rollback. Confirm `100%` on the original revision and rerun smoke checks.
+
+`restore` routes traffic to `--to-latest`, which means the **newest ready revision** — **not necessarily the pre-rollback serving revision**. Only use it when that specific latest revision is the approved fix and has passed health checks:
 
 ```sh
 python scripts/rollback_helper.py restore --env staging --project "$GCP_PROJECT_ID" --region "$GCP_REGION"
@@ -217,9 +219,9 @@ Escalate to the project owner before any production rollback that changes schema
 
 ## Staging rollback drill record
 
-**Status: PENDING. No drill has been performed.** Fill rows only after a drill runs with explicit authorization. Leave values blank until then.
+**Cloud Run staging drill: EXECUTED 2026-11-05.** [Full timestamped evidence and limitations](evidence/s4-20-staging-rollback-2026-11-05.md). The team explicitly requested #120 execution; the authenticated operator used the guarded helper with a staging-only target and production read-only verification. The initial invalid-method smoke was corrected and the entire drill rerun.
 
-| Drill | UTC date | Revision from | Revision to | Traffic moved (UTC) | Smoke result | Restored to latest (UTC) | Operator | Evidence |
+| Drill | UTC date | Revision from | Revision to | Target serving at 100% (UTC) | Smoke result | Exact original restored at 100% (UTC) | Operator | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Cloud Run staging drill | not yet performed | | | | not yet performed | | | |
-| Pages staging drill | not yet performed | | | | not yet performed | | | |
+| Cloud Run staging traffic drill | 2026-11-05 | `00035-xp9` | `00033-hvh` | 08:55:12 | HTTP 200 locations; HTTP 401 unauthorized Trips and extraction POST; staging Pages HTTP 200 (before/during/after) | 08:55:36 (`00035-xp9`) | Authenticated Lagaw operator, user-authorized request | [S4-20 evidence](evidence/s4-20-staging-rollback-2026-11-05.md) |
+| Cloudflare Pages staging deployment drill | not performed | — | — | — | Staging Pages returned HTTP 200, but its deployment was not rolled back | — | — | Pages rollback path still unverified |

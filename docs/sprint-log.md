@@ -751,6 +751,171 @@ Pending: no consultation or retrospective notes were found in the reviewed GitHu
 - **Production quota acceptance and cleanup:** A dedicated, confirmed and profile-linked production QA account had **no existing current-UTC-day quota row**. The operator inserted a temporary daily test counter of **200** for this profile only (equal to the maximum permitted configured daily limit and above the default limit of 40). An authenticated call to `POST /api/v1/preferences/extract` returned **429**, `Retry-After: 20060`, error code `extraction_quota_exceeded` and `manual_fallback: true`. Because the backend rejects a denied quota before invoking DeepSeek, and separately tested code mocks verify provider-call suppression, this supports a non-billable rejection; provider billing was **not independently audited**. The temporary daily QA row was subsequently deleted, with the expected single row returned, restoring its prior absence. No QA credentials, tokens, email or private profile identifier are recorded here.
 - **Scope and follow-up:** Development/staging testing previously verified approved-image upload, direct anonymous upload denial, public image HTTP **200** and `locations.image_url` linking; **no production image upload or production image-URL linkage was tested**. Quotas limit attempts, not exact currency spend; the reported provider billing alert is not a hard cap. Evidence belongs on issues [#108](https://github.com/relax-mode/lagaw/issues/108), [#114](https://github.com/relax-mode/lagaw/issues/114) and [#116](https://github.com/relax-mode/lagaw/issues/116). Their closure and checklist updates remain separate issue-management actions after this documentation PR is reviewed and merged.
 
+### November 5, 2026 — Week 3 consultation feedback received for #59
+
+The team reported that its Week 3 consultation consisted of a **demonstration
+of the staging app**. The professor requested (1) handling application corner
+cases, (2) setting up the destination-image Storage bucket, and (3) a
+**90%-complete app by November 11, 2026**. This is the team's reported feedback
+(received Nov 5), not independent instructor verification. The exact event date
+and detailed demonstrated flows were not supplied. See the
+[Sprint 3 consultation outcome](sprint-3-consultation.md#6-actual-consultation-outcome--user-reported-november-5-2026)
+and [#59](https://github.com/relax-mode/lagaw/issues/59). Sprint 4 follow-ups:
+corner-case validation across Auth, itinerary, AI failures and persistence;
+Storage [#108](https://github.com/relax-mode/lagaw/issues/108) acceptance;
+actual release readiness [#121](https://github.com/relax-mode/lagaw/issues/121).
+These are action priorities, not claimed PASS results. Formal standups were
+not held; the team instead used PR-review updates (see the retrospective
+record of that cadence below). Retrospective remains pending. Later entries
+reconcile the pipeline report and independent demo-path evidence.
+
+### November 5, 2026 — Sprint 3 full-week pipeline metrics reconciled for #59
+
+Ran the existing `scripts/pipeline_metrics.py --since 2026-10-26 --until
+2026-11-01` with authenticated GitHub Actions metadata, including the entire
+Sprint 3 UTC window and excluding nine deliberately failing probe runs. The
+completed reading was **98 completed runs: 94 successful, 2 failed, 2
+cancelled; 97.9% success rate excluding cancellations; 1.1 min PR / 4.7 min
+main average; 27 production deploy jobs; 6.3 min measured lead time over
+16 of 30 merges; 0 failed main deployment jobs; recovery n/a**. Production
+deploys count individual API/Web jobs, not unique releases. Incidents INC-3
+and INC-4 remain documented separately, as INC-4's scheduled smoke is not
+part of Lagaw CI. See [the full-week report](pipeline-metrics.md#sprint-3-source-completed-week-queried-november-5-2026). This was backfilled
+*after* the reported consultation and is not claimed as a slide shown during it.
+
+### November 5, 2026 — #59 deployed AI-path evidence reconciled
+
+Reconciled the previously prepared consultation demo path against dated actual
+acceptance in [S3-10](evidence/trip-preference-extraction.md),
+[S3-08](evidence/trip-recommendations.md),
+[S3-09](evidence/itinerary-generation.md),
+[S3-11](evidence/trip-planning-ui.md), and
+[S3-13](evidence/ai-ci-cd-2026-10-26.md): staging Web/Android
+real extraction and review, ranked backend/Android recommendations, generated
+trip persistence and reopen, simulated AI 503 manual fallback, and mocked
+CI/evaluation. The [consultation evidence matrix](sprint-3-consultation.md#7-historical-ai-demo-readiness-evidence-reconciliation--november-5-2026)
+links the steps and their limitations. The independent checks do **not**
+prove a single combined live run or that the professor witnessed every stage.
+Actual Sprint 3 standups and a team retrospective remain undocumented.
+
+### November 5, 2026 — Sprint 3 asynchronous PR reviews as team status updates (#59)
+
+The team clarified on November 5 that it **did not hold formal Sprint 3 standup
+meetings**. Instead, teammates coordinated in a group chat and routinely
+requested and provided GitHub PR reviews as work became ready. Group-chat text
+was not provided for inspection, so the dated records below are **independently
+verifiable PR descriptions, review approvals and merges**. They are three
+asynchronous progress checkpoints, not backdated standup minutes or verbatim
+chat excerpts. “Done”, “next” and “blocker” summarize the PR state when each
+review was requested; later merges do not retroactively erase those blockers.
+
+| Date (UTC) | PR / status update | Completed work reported at review | Next step and blocker recorded at review |
+| --- | --- | --- | --- |
+| **Oct 27** | Kyle, [PR #77](https://github.com/relax-mode/lagaw/pull/77), approved by Jay (`s2302663-del`) Oct 27 09:41 UTC and merged | Recovered the AI evaluation gate and production-promotion workflow from a stacked PR that had merged into the wrong base branch | **Next:** verify staging → production deployment run and record the incident resolution. **Blocker:** the earlier stacked merge left `main` without the AI gate/promotion until this recovery PR merged |
+| **Oct 28** | Andrew, [PR #89](https://github.com/relax-mode/lagaw/pull/89), approved by Kyle Oct 28 12:21 UTC and merged | Added constraint-aware itinerary generation with atomic persistence, offline/DB tests, and development verification | **Next:** obtain frontend contract confirmation, apply/review the production migration and verify deployment. **Blocker:** at PR opening those integration, production-migration and deployed-acceptance steps were outstanding |
+| **Oct 29** | Roel, [PR #99](https://github.com/relax-mode/lagaw/pull/99), approved by Kyle Oct 29 07:11 UTC and merged | Built Flutter ranked recommendations, interactions, itinerary generation and persistence UI; Android staging tests passed | **Next:** test staging Web after merge and add evidence for successful replacement. **Blocker/limitation:** sparse venue hours/cost coverage restricted generated results; successful replacement was not captured |
+
+These are **partial evidence of the team’s asynchronous coordination**, not
+retroactively invented formal standup posts. The course’s [official process
+rules](official-instructions.md#how-a-sprint-works) specifically ask
+for **2–3 asynchronous standups in the team channel**, with each person saying
+what they finished, what is next, and what blocks them. Since the group-chat
+messages have not been provided, the issue’s original standup checkbox remains
+**open**: PR descriptions, requests and approvals show progress handoffs but do
+not independently prove those exact team-channel updates occurred. The team
+reported no standups. If no qualifying posts exist, record this as a process
+gap, not a completed standup requirement. The retrospective is separately
+pending.
+
+### November 5, 2026 — Sprint 3 post-consultation retrospective (#59)
+
+Following the reported Week 3 staging demo and professor feedback, the team
+representative **confirmed this written retrospective on November 5, 2026**:
+
+- **What went well:** the staging app could be demonstrated and work progressed
+  through team-reviewed GitHub PRs.
+- **What did not:** remaining application corner cases and destination-image
+  Storage setup required more attention; the team also did not keep the
+  requested structured async standup messages, using group chat/PR requests
+  for coordination instead.
+- **One process change for Sprint 4:** focus testing on corner cases, Storage
+  acceptance ([#108](https://github.com/relax-mode/lagaw/issues/108)), and
+  release readiness ([#121](https://github.com/relax-mode/lagaw/issues/121))
+  before the November 11 90%-completion target; use explicit done/next/blocker
+  team-channel summaries for upcoming sprint check-ins.
+
+The consultation’s exact occurrence date and individual screens demonstrated
+were not provided; this retrospective **was written after the consultation and
+confirmed on November 5**, not backdated as a meeting. The three PR-based
+checkpoints above document real progress, but they do not substitute for the
+course’s missing 2–3 async standup posts. The same retrospective and evidence
+limits are recorded in
+[the consultation pack](sprint-3-consultation.md#9-post-consultation-retrospective--confirmed-november-5-2026).
+
+### November 5, 2026 — S4-13 Brevo SMTP and live password recovery follow-up
+
+- **Development signup confirmation:** The team previously reported that a Brevo-sent confirmation email reached an authorized external inbox and the user successfully confirmed that account; this was not independently audited through the Management API.
+- **Staging password recovery:** The authorized tester reported Brevo email delivery, correct recovery link and redirect, working new-password form, and a successful password reset. An earlier failed submission produced HTTP **422** at the staging Supabase Auth `/auth/v1/user` endpoint with Lagaw's generic sign-in error; the tester later considered reuse of the same password the likely cause. **That error code was not captured**, and the successful later reset supersedes the earlier failure, not the missing diagnostics.
+- **Production Brevo SMTP and recovery:** The tester reports a dedicated Brevo credential was created for production and Supabase Auth configured; live **production sign-in and complete password recovery work**. This is human-observed success, not independently checked Supabase Management API or mailbox contents. No private key, reset link, inbox address, password or session token was stored in this record. The available Supabase management PATs returned HTTP **401** on read-only inspections, so provider settings and email quotas have not been independently inspected.
+- **Production signup confirmation, separately confirmed:** The tester explicitly confirmed that the production signup-confirmation flow works as well, not merely sign-in and recovery. This completes S4-13 functional email acceptance on user-observed evidence; no independently accessible Auth/provider logs were available. **Separate #149 follow-up:** Old-password rejection after reset was not explicitly provided. This remains a negative-case check to record without passwords. Recovery UI [PR #150](https://github.com/relax-mode/lagaw/pull/150) was reviewed/merged with green Flutter CI; the optional diagnostic-only [PR #159](https://github.com/relax-mode/lagaw/pull/159) remains separate. See [the Brevo runbook](auth-email-brevo-verification.md).
+
+### November 5, 2026 — S3-17 live hybrid recommender rollout completed
+
+[Implementation PR #95](https://github.com/relax-mode/lagaw/pull/95) was already
+reviewed and merged. Using separate staging and production Supabase credentials
+and private allowlisted demo accounts, the team confirmed **HTTP 200 `Hybrid:`
+for account A and `Content fallback (insufficient_history)` for account E in
+both environments**. For the identical saved-trip/content candidate, the
+content-only score **0.996** changed to hybrid **0.920360071763**, in both
+environments. Production trained **its own** `signed-svd-v1` model offline from
+5 seeded profiles and 23 interaction events (10 locations / 22 distinct pairs),
+pinned `MODEL_ARTIFACT:1` in Secret Manager, and passed full staging → production
+CI/CD [run 41991947345](https://github.com/relax-mode/lagaw/actions/runs/41991947345).
+Production 100%-traffic revision `lagaw-api-00032-287` logged the matching
+`status=present reason=loaded` training/file digests. **Staging retained its
+separate artifact**, verified on the actual 100%-traffic revision
+`lagaw-api-staging-00035-xp9`.
+
+The catalog currently has only one cost-known recommendable location, so the
+original same-response hybrid+fallback criterion is clarified to separate
+authenticated accounts A/E with identical options and a same-trip content
+baseline. This tests both intended paths without fabricating catalog facts.
+No organic users were trained on, nor private IDs/artifact contents committed.
+The read-only exact-manifest production audit passed with zero extra events.
+**Operational caveat:** the configured Supabase PAT was rejected with 401, so
+hosted cleanup SQL was **not** executed or misrepresented as rehearsed; the
+private ROLLBACK cleanup script and model-off redeploy runbook remain ready.
+See the [dated redacted S3-17 evidence](evidence/s3-17-collaborative-serving.md)
+for the complete verification and cleanup limitation.
+
+### November 5, 2026 — Supabase PAT rotation and S3-17 hosted cleanup rehearsal (#158)
+
+The initially rejected (401) Supabase Management API PAT was rotated by the
+operator. With the replacement token loaded only in the private operator
+shell, **staging and production read-only SQL calls each succeeded (HTTP 201)**.
+The production exact-ID cleanup SQL was statically checked against the private
+manifest (35 expected identifiers, four expected table-specific deletes,
+`BEGIN` and terminating `ROLLBACK`, no `COMMIT`). A production Management API
+aggregate query before execution returned **5 Auth users, 5 profiles, 23
+interaction events, 2 trips, zero interactions beyond the manifest**. The
+hosted production cleanup transaction returned HTTP 201; its final SELECT
+observed **`auth_users_left = 0` before `ROLLBACK`**, confirming the temporary
+delete path executed. An independent **post-rollback** SQL query returned
+**identical** counts. This is a **successful rollback-only cleanup rehearsal**,
+not actual deletion: all synthetic demo records remain for live model serving.
+No PAT value, Auth/profile/trip/event UUID, artifact factor or private SQL was
+published. The earlier 401 caveat above describes the initial state and is
+**resolved** by this subsequent validation. Model-service rollback/deactivation
+is a different operation and was not triggered. See the
+[updated S3-17 evidence](evidence/s3-17-collaborative-serving.md) and [#158](https://github.com/relax-mode/lagaw/issues/158).
+
+### November 5, 2026 — S4-20 executed staging Cloud Run rollback drill
+
+- On an explicitly authorized, **staging-only** exercise for [issue #120](https://github.com/relax-mode/lagaw/issues/120), the operator inspected the live Cloud Run revision inventory, checked that candidate `lagaw-api-staging-00033-hvh` was ready, used a different image digest from the original serving `00035-xp9`, and confirmed no migration-file changes between their commit labels. Earlier [run 41314460309](https://github.com/relax-mode/lagaw/actions/runs/41314460309) was green.
+- A first dry-run-guarded traffic test switched `00035 → 00033 → 00035`; an accidental GET to a POST-only extraction path gave 405. The restoration safeguard returned staging to its original revision; the test method was corrected and the **whole drill was repeated**.
+- On the verified repeat, `00033-hvh` was observed at **100%** at 08:55:12 UTC, with staging locations HTTP **200**, unauthenticated Trips **401**, unauthenticated extraction POST **401** (no paid call), and staging Pages **200**. Explicit restoration to `00035-xp9` was observed at **100%** at 08:55:36 UTC; all four checks passed again by 08:55:38. Production `lagaw-api-00032-287` stayed at **100%** in read-only before/after checks through 08:55:41. Because newer zero-traffic staging canaries existed, `--to-latest` was deliberately **not** used.
+- [Timestamped S4-20 evidence](evidence/s4-20-staging-rollback-2026-11-05.md) and [updated runbook](rollback-runbook.md) distinguish traffic verification from authenticated end-user smoke; the latter and a Cloudflare Pages *deployment* rollback were not performed. No production/database/Pages deployment was modified during the drill.
+
 ## Sprint 4 — Roel's frontend assignments
 
 ### November 5, 2026 — #101 first-time travel preference onboarding UI

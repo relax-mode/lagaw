@@ -15,12 +15,51 @@ Generated from the GitHub Actions API with `python scripts/pipeline_metrics.py -
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Sprint 1 (Oct 12–18) | 4.5 | 1.9 | 96.8 | 2 | 4.2 | 0 | n/a | First CI pipeline and Cloudflare Pages deploys (Cloud Run was deployed by a separate workflow). The Android APK build made PR runs slow (median 239 s). |
 | Sprint 2 (Oct 19–25) | 1.6 | 2.2 | 96.6 | 3 | 1.9 (3 of 22 merges) | 2 (staging, [INC-1](incident-log.md#inc-1-staging-cloudflare-credential-rejected)) | 863.9 | Removed the APK build (#35); pip cache in the DB job; staging environment; production deploys made manual (#44), which is why only 3 of 22 merges reached production. |
-| Sprint 3 (Oct 26–Nov 1), **PARTIAL**: data through Oct 29, 07:24 UTC | 1.2 | 4.9 | 97.5 | 23 | 6.9 (12 of 24 merges) | 0 | n/a (no failed deploy on `main` in the window) | Path-filtered PR checks and pipeline hardening (#31, below); production promotion and AI checks (#58). |
+| Sprint 3 (Oct 26–Nov 1), **full window** (queried Nov 5) | 1.1 | 4.7 | 97.9 | 27 deployment jobs | 6.3 (16 of 30 merges) | 0 | n/a (no failed main deploy jobs) | Path-filtered PR checks (#31), production promotion, automated AI checks (#58); also see [INC-3](incident-log.md#inc-3-production-drifted-behind-main) and [INC-4](incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401). |
 | Sprint 4 | | | | | | | | pending |
 
-Fill the Sprint 3 row from the script output before the Sprint 3 consultation, and record the remaining weeks as they happen. The Sprint 3 figures below come from the command in [Sprint 3 source](#sprint-3-source-partial). Runs after Oct 29 07:24 UTC were not yet available when the script ran on Oct 30, so the row must be regenerated for the full week before it is final.
+The Sprint 3 row was regenerated on November 5 using completed GitHub Actions runs across the entire October 26–November 1 UTC window. See the [completed-week source](#sprint-3-source-completed-week-queried-november-5-2026). The Oct 30 partial reading remains below strictly as a dated historical snapshot, not the final Sprint 3 totals.
 
-### Sprint 3 source (PARTIAL)
+### Sprint 3 source (completed week, queried November 5, 2026)
+
+Command run from the repository root via authenticated `CyGray` GitHub CLI
+on November 5, 2026:
+
+```sh
+python3 scripts/pipeline_metrics.py --since 2026-10-26 --until 2026-11-01
+```
+
+The script queries the `Lagaw CI` (`ci.yml`) workflow by **run creation**
+date for October 26 through November 1 (UTC). It includes only completed
+runs, excludes nine deliberate `test/ci-proof-*` probe runs, and excludes
+cancelled runs from its success-rate denominator. The unmodified output was:
+
+```text
+## Lagaw CI, 2026-10-26 to 2026-11-01 (UTC)
+
+| Avg PR pipeline time (min) | Main pipeline time (min) | Pipeline success rate (%) | Production deploys | Avg lead time, merge to live (min) | Failed deploys | Time to recover (min) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1.1 | 4.7 | 97.9 | 27 | 6.3 | 0 | n/a |
+
+- Runs: 98 completed (94 success, 2 failure, 2 cancelled; cancelled runs are excluded from the success rate).
+- Excluded 9 deliberate probe run(s) on `test/ci-proof-*` branches (intentional failures).
+- PR wall time (successful): median 60 s, p90 112 s, mean 68 s (n=62).
+- Main push wall time (successful): median 272 s, p90 429 s, mean 282 s (n=29).
+- Merged PRs with a measured production deploy: 16 of 30.
+```
+
+**Interpretation:** `27` counts successful individual production **deployment
+jobs**, not unique releases or deployments grouped by commit; API and web jobs
+can both count within one workflow. Lead time covers only the 16 of 30 merges
+with a measured production deploy. Zero failed deploys is limited to the
+script's **main runs** and does not mean no problems occurred during the week:
+INC-3 records production drift, and INC-4 records a scheduled AI smoke failure
+outside `Lagaw CI`. This supersedes the partial Oct 30 sample without erasing
+its date and original rationale. The source is the `gh` run/job API; no secrets,
+PR descriptions or customer data were read. Re-run this command to reproduce
+or confirm the API reporting window.
+
+### Sprint 3 source (PARTIAL; historical Oct 30 snapshot)
 
 Command, run on Oct 30, 2026 (about 12:40 UTC), from the repository root with an authenticated `gh` CLI:
 

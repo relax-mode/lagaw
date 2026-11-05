@@ -1,5 +1,15 @@
 # Supabase Auth email provider evaluation — November 3, 2026
 
+> **November 5 superseding update:** The Resend choice below remains as historical
+> evaluation evidence but is **no longer the active provider choice**. The team
+> subsequently configured **Brevo** and confirmed an external-recipient development
+> signup-confirmation email. A staging Brevo password-recovery message also arrived
+> November 3, but its link failed to show a password-change UI. The frontend fix was
+> merged in [PR #150](https://github.com/relax-mode/lagaw/pull/150). A fresh deployed
+> recovery/password-change test and **production** SMTP/signup/recovery verification
+> still remain under [#113](https://github.com/relax-mode/lagaw/issues/113).
+> See the [current Brevo runbook](auth-email-brevo-verification.md).
+
 **Issue:** [#112](https://github.com/relax-mode/lagaw/issues/112) (provider decision). **Implementation follow-up:** [#113](https://github.com/relax-mode/lagaw/issues/113).
 
 **Decision:** Retain **Resend** as the team's chosen SMTP provider, as previously recorded in [the setup runbook](auth-email-setup.md). This is a *provider-selection decision*, not evidence that a working custom sender has been configured. **Neither staging nor production has verified custom SMTP delivery.** The team has no controlled sending domain, so Resend's general-recipient delivery prerequisite is still unmet.
