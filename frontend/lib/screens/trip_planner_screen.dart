@@ -7,6 +7,7 @@ import '../theme.dart';
 import '../utils/trip_format.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/destination_tile.dart';
+import '../widgets/rating_dialog.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/tactile_motion.dart';
 import '../widgets/trip_card.dart';
@@ -228,7 +229,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
   Future<void> _rate(TripRecommendation rec) async {
     final stars = await showDialog<int>(
       context: context,
-      builder: (context) => _RatingDialog(name: rec.location.name),
+      builder: (context) => RatingDialog(name: rec.location.name),
     );
     if (stars != null && mounted) {
       await _interact(rec, InteractionType.rating, rating: stars);
@@ -722,55 +723,6 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
         visualDensity: VisualDensity.compact,
         foregroundColor: AppTheme.primaryBlue,
       ),
-    );
-  }
-}
-
-class _RatingDialog extends StatefulWidget {
-  final String name;
-
-  const _RatingDialog({required this.name});
-
-  @override
-  State<_RatingDialog> createState() => _RatingDialogState();
-}
-
-class _RatingDialogState extends State<_RatingDialog> {
-  int _stars = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Rate ${widget.name}'),
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 1; i <= 5; i++)
-            IconButton(
-              key: ValueKey('rating-star-$i'),
-              tooltip: '$i star${i == 1 ? '' : 's'}',
-              onPressed: () => setState(() => _stars = i),
-              icon: Icon(
-                i <= _stars ? Icons.star_rounded : Icons.star_border_rounded,
-                color: const Color(0xFFF59E0B),
-                size: 32,
-              ),
-            ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          key: const ValueKey('rating-submit'),
-          onPressed: _stars == 0
-              ? null
-              : () => Navigator.of(context).pop(_stars),
-          child: const Text('Rate'),
-        ),
-      ],
     );
   }
 }

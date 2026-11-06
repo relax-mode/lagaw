@@ -325,7 +325,34 @@ class TripService {
         statusCode: 503,
       );
     }
+    if (response.statusCode == 422) {
+      throw const TripApiException(
+        'That place couldn’t be recorded. Reload the places and try again.',
+        statusCode: 422,
+      );
+    }
     throw _errorFor(response);
+  }
+
+  /// Every interaction the signed-in user has recorded, oldest first, read
+  /// page by page from `GET /api/v1/interactions` (#52). [S4-10]
+  Future<List<InteractionEvent>> listInteractions({int pageSize = 100}) async {
+    final events = <InteractionEvent>[];
+    for (var offset = 0; ; offset += pageSize) {
+      final uri = Uri.parse(AppConfig.interactionsEndpoint).replace(
+        queryParameters: {'limit': '$pageSize', 'offset': '$offset'},
+      );
+      final response = await _send(() => _client.get(uri, headers: _headers));
+      if (response.statusCode != 200) throw _errorFor(response);
+      final items =
+          (jsonDecode(response.body) as Map<String, dynamic>)['items']
+              as List<dynamic>;
+      for (final item in items) {
+        final event = InteractionEvent.tryParse(item as Map<String, dynamic>);
+        if (event != null) events.add(event);
+      }
+      if (items.length < pageSize) return events;
+    }
   }
 
   String _itemsUrl(String tripId) =>

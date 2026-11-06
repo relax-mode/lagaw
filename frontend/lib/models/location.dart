@@ -75,7 +75,7 @@ class LocationItem {
 /// Seeded Bacolod locations matching Supabase table [S1-02]
 const List<LocationItem> kBacolodLocations = [
   LocationItem(
-    id: '1a3bca09-5532-5de6-8587-2440c4e5',
+    id: '1a3bca09-5532-5de6-8587-2440c4e5830d',
     name: 'San Sebastian Cathedral',
     description:
         'A historic coral-stone Catholic cathedral in the heart of downtown Bacolod.',
@@ -90,7 +90,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF78350F), Color(0xFFC2410C)],
   ),
   LocationItem(
-    id: 'f2ccf475-56ea-51a0-a003-70f66d9f85',
+    id: 'f2ccf475-56ea-51a0-a003-70f66d9f852a',
     name: 'Calea Pastries & Coffee',
     description:
         'Iconic Bacolod pastry and dessert café famous for mudpie and imported chocolate cakes.',
@@ -105,7 +105,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF4C0519), Color(0xFF78350F)],
   ),
   LocationItem(
-    id: 'd184610e-f8c9-584a-95a3-79809cd81',
+    id: 'd184610e-f8c9-584a-95a3-79809cd81c49',
     name: 'Orange Project',
     description:
         'A contemporary art gallery and creative hub within Mandalagan Art District.',
@@ -120,7 +120,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFFEA580C), Color(0xFF9F1239)],
   ),
   LocationItem(
-    id: 'af80a358-d1ad-529f-84b3-ff1e591e04',
+    id: 'af80a358-d1ad-529f-84b3-ff1e591e041f',
     name: 'Capitol Park and Lagoon',
     description:
         'Scenic public park surrounding a tranquil lagoon with twin water buffalo sculptures.',
@@ -135,7 +135,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF065F46), Color(0xFF155E75)],
   ),
   LocationItem(
-    id: 'a752a30a-1859-503d-8a77-8cd59097',
+    id: 'a752a30a-1859-503d-8a77-8cd59097ac1d',
     name: 'Cafetolyo Coffee Shop',
     description:
         'Cozy neighborhood coffee and light-refreshment stop ideal for slow afternoons.',
@@ -150,7 +150,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF292524), Color(0xFF451A03)],
   ),
   LocationItem(
-    id: '61bf94ab-6ec0-5ec3-8451-b575ee061',
+    id: '61bf94ab-6ec0-5ec3-8451-b575ee06169e',
     name: 'The Negros Museum',
     description:
         'Curated museum of Negros history, sugar heritage, folk toys, and local contemporary art.',
@@ -165,7 +165,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF1E293B), Color(0xFF1E1B4B)],
   ),
   LocationItem(
-    id: '4618dfae-4a30-5917-85f1-94f216cf5b',
+    id: '4618dfae-4a30-5917-85f1-94f216cf5b97',
     name: 'Negros Occidental Provincial Capitol',
     description:
         'Beaux-Arts neoclassical seat of the provincial government overlooking the Lagoon.',
@@ -180,7 +180,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF0C4A6E), Color(0xFF1E3A8A)],
   ),
   LocationItem(
-    id: 'b3783066-7484-5917-a09b-40497497',
+    id: 'b3783066-7484-5917-a09b-404974974880',
     name: 'Negros Forest Park',
     description:
         'Conservation center and wildlife sanctuary protecting endangered Negros endemic species.',
@@ -195,7 +195,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF14532D), Color(0xFF134E4A)],
   ),
   LocationItem(
-    id: 'ee2c8f6e-7a15-5081-b8a3-b43d48d5a',
+    id: 'ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c',
     name: 'Panaad Park and Sports Complex',
     description:
         'Lush eucalyptus-lined park showcasing replica pavilions from every Negros town.',
@@ -210,7 +210,7 @@ const List<LocationItem> kBacolodLocations = [
     gradientColors: [Color(0xFF134E4A), Color(0xFF166534)],
   ),
   LocationItem(
-    id: 'f52c28a6-cf76-5efa-b0a3-d04f8b1579',
+    id: 'f52c28a6-cf76-5efa-b0a3-d04f8b15794c',
     name: 'Arima Restaurant',
     description:
         'Refined all-day dining at Park Inn serving elevated Negrense comfort classics.',

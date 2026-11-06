@@ -949,3 +949,14 @@ is a different operation and was not triggered. See the
 - Outputs: `docs/destination-image-manifest.json`, `docs/destination-image-sources.md`, and `backend/test_destination_image_manifest.py` (4 tests passing). Follow-up: owner permission for the private venues. #108 uploads and #109 displays, with attribution.
 - **Update (November 6):** Roel added his own photos of Negros Forest Park (a hornbill and a leopard cat, taken 2026-10-11), with the school watermark removed. They are not part of any publication. They are recorded as photographer-permission entries, so **6 of 10 locations are now covered**. Orange Project photos found online (a Leipzig exhibition page) were rejected: no license, a different venue, and copyrighted artworks. Roel plans to photograph the remaining venues himself.
 
+### November 6, 2026 — #110 persist discovery swipes, saves and ratings
+
+- #107 merged (PR #163). Roel started #110 on `feat/s4-10-discovery-interactions`.
+- Found that the home swipe deck was local-only: it started with two hardcoded, truncated "saved" IDs, counted a right swipe as a save, allowed an un-save the API doesn't support, and had no rating.
+- Wired swipes, saves and ratings to `POST /api/v1/interactions`, reusing the #56 client, with one event per action, an in-flight lock and no automatic retries. State is restored from all pages of `GET /api/v1/interactions`.
+- **Decision (Roel):** instead of confirming every left swipe (a permanent exclusion), show a one-time explainer per device.
+- Saved hearts can't be un-saved, because the API is append-only. `flutter analyze` is clean, and `flutter test` passes 220 tests (15 new).
+- Device verification on the POCO Pad against staging (Claude drove the Pad over adb; Roel signed in to Account B): all 15 checks passed, including state restored after a force-close, offline failure without duplicates, and per-account separation.
+- Device testing found that a failed locations load silently fell back to a built-in list with truncated IDs. Fixed: the deck now requires live places, the IDs were corrected, and a regression test was added.
+- Noted for #117: a network drop during token refresh shows "session expired". See [evidence](evidence/discovery-interactions.md).
+
