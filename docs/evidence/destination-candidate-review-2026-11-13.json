@@ -1,0 +1,292 @@
+{
+  "checked_on": "2026-11-13",
+  "issue": 106,
+  "status": "research_only_not_approved_for_import",
+  "input": "supabase/data/bacolod_travel_candidates_enriched.csv",
+  "coverage": {
+    "rows": 4784,
+    "rows_with_hours": 20,
+    "rows_with_entry_fee_max": 0,
+    "rows_with_estimated_spend_max": 0,
+    "rows_with_visit_duration": 0
+  },
+  "strongest_candidate": {
+    "name": "Bantug Lake Ranch",
+    "source_id": "overture:8a0dd733-21f5-4097-adf4-b454eaac8e69",
+    "csv_category": "resort",
+    "csv_coordinates": [
+      10.67252783,
+      123.06146399
+    ],
+    "csv_coordinate_status": "unverified_scraped_feature",
+    "operator_linked_map_coordinates": [
+      10.6709331,
+      123.0601605
+    ],
+    "coordinate_difference_metres": 227.4,
+    "map_url": "https://maps.app.goo.gl/Ldz92SwFeii2A1Zz8",
+    "map_status": "operator_linked_place_pin_not_field_verified_entrance",
+    "published_admission_php": {
+      "regular_adult": 75,
+      "student_senior_pwd": 60
+    },
+    "rate_page_stated_update": "2026-07-01",
+    "published_amenity_hours": {
+      "monday": [
+        [
+          "08:30",
+          "17:30"
+        ]
+      ],
+      "tuesday": [],
+      "wednesday": [
+        [
+          "08:30",
+          "17:30"
+        ]
+      ],
+      "thursday": [
+        [
+          "08:30",
+          "17:30"
+        ]
+      ],
+      "friday": [
+        [
+          "08:30",
+          "17:30"
+        ]
+      ],
+      "saturday": [
+        [
+          "08:30",
+          "18:00"
+        ]
+      ],
+      "sunday": [
+        [
+          "08:30",
+          "18:00"
+        ]
+      ]
+    },
+    "holiday_rule": "Site lists holidays 08:30-18:00; precedence against Tuesday closure is not established. Avoid holiday dates until clarified.",
+    "activity_hours_note": "Paid activities start at 09:00. Do not use amenity opening time for activity availability.",
+    "cost_scope": "PHP 75 is published regular adult admission only, not total expenditure. Optional meals, rides, swimming, table rentals and transportation are separate.",
+    "proposed_visit_minutes": 90,
+    "duration_basis": "editorial estimate for sightseeing; excludes queues/travel; not operator-published or measured",
+    "sources": [
+      "https://bantuglakeranch.com/rates/",
+      "https://bantuglakeranch.com/experiences/",
+      "https://bantuglakeranch.com/day-trip-policies/",
+      "https://bantuglakeranch.com/"
+    ],
+    "remaining_checks": [
+      "Review the operator-linked pin for routing entrance suitability; do not silently replace the CSV pin.",
+      "Confirm applicability on the chosen date and ordinary admission-only access without mandatory rental.",
+      "Keep discounted eligibility separate; use regular adult admission for an unspecified adult.",
+      "Review sources and approve the proposed record before any import.",
+      "Do not ingest optional horseback prices: the rates and day-trip pages reverse two horseback amounts.",
+      "Search also surfaced unrelated casino content on the venue domain; this is a source-integrity concern, not proof the rates page is false. Cross-check through the venue official social account or a dated reply before production approval."
+    ],
+    "conclusion": "Strong research candidate with published admission and weekly hours; not a production-ready record or proof of a three-stop itinerary."
+  },
+  "backup": {
+    "name": "Orange Project",
+    "source_id": "overture:1fcfaf18-ee2f-4d78-8567-cb060bd1287c",
+    "status": "not_ready",
+    "sources": [
+      "https://orangeproject.ph/about/",
+      "https://www.mcadmanila.org.ph/wp-content/uploads/2023/09/A-State-in-a-State_Online-Brochure_ver2-1.pdf"
+    ],
+    "findings": "CSV OSM hours agree with a historical 2023 exhibition-organizer brochure. Current general admission policy and schedule still need evidence; free admission to a specific past event is not a general free-entry policy."
+  },
+  "actions": "No CSV edits, catalogue imports, database writes, operator contacts or deployed itinerary checks.",
+  "additional_candidates": [
+    {
+      "csv_record": {
+        "source_id": "overture:15c4777f-7326-4124-8c78-2ec6fab8f35b",
+        "name": "Caribbean Waterpark and Resotel",
+        "category": "hotel",
+        "latitude": "10.64944455",
+        "longitude": "122.93729344",
+        "address": "Goldenfield West Side"
+      },
+      "rank": 1,
+      "status": "strong_published_evidence_pending_review",
+      "published_hours": "Daily 08:00-20:00",
+      "published_cost_php": {
+        "adult_above_3_feet_weekday": 200,
+        "adult_above_3_feet_weekend": 250
+      },
+      "cost_scope": "Entrance and swimming day pass; food, seating rentals and lockers separate. No inferred free entry. Holiday pricing not resolved.",
+      "proposed_duration_minutes": 120,
+      "duration_basis": "editorial swim-visit estimate, not operator timing",
+      "sources": [
+        "https://caribbean-waterpark.com/",
+        "https://caribbean-waterpark.com/rates/",
+        "https://caribbean-waterpark.com/contact/"
+      ],
+      "freshness": "Checked 2026-11-13; no explicit tariff effective date seen. Footer year is not a rate-update date.",
+      "remaining": [
+        "CSV has three competing Caribbean records with different pins. Goldenfield West Side entry selected only as an identity candidate, not a verified entrance.",
+        "Check entrance location, date-specific tariff and whether seating rental is mandatory.",
+        "Height-based tariff includes ambiguity at exactly 3 feet; do not generalize child pricing.",
+        "Website-linked Facebook page could not be inspected due an access block."
+      ]
+    },
+    {
+      "csv_record": {
+        "source_id": "overture:93ec7740-a6e9-46ca-9c8c-91b63c82129c",
+        "name": "Museum Negrense de La Salle",
+        "category": "museum",
+        "latitude": "10.6787",
+        "longitude": "122.9625",
+        "address": "University of Street"
+      },
+      "rank": 2,
+      "status": "strong_directory_evidence_pending_access_confirmation",
+      "published_hours": "Monday-Friday 08:00-12:00 and 13:30-17:00; Saturday-Sunday closed",
+      "published_admission_php": 0,
+      "zero_cost_basis": "Museum Foundation of the Philippines museum directory explicitly labels Free Admission; not inferred from absence of a price.",
+      "sources": [
+        "https://www.visitmuseums.ph/listings/museo-de-la-salle-bacolod",
+        "https://www.usls.edu.ph/overviews/Museo-De-La-Salle-Bacolod"
+      ],
+      "source_roles": "MFPI directory supports hours/free admission; university operator page supports identity and direct museum contact, but does not independently state the schedule or admission policy.",
+      "freshness": "Both checked 2026-11-13; directory listing effective/update date not stated.",
+      "proposed_duration_minutes": 60,
+      "duration_basis": "editorial museum visit estimate",
+      "directory_linked_place_pin": [
+        10.6787652,
+        122.961685
+      ],
+      "pin_status": "Recovered from directory map redirect; full map fetch failed; not an entrance verification.",
+      "remaining": [
+        "Confirm non-student campus entry, walk-in/appointment requirements, holiday closures and general free-admission applicability.",
+        "Resolve malformed CSV address University of Street and review gate versus museum pin.",
+        "Do not schedule across the lunch closure."
+      ]
+    },
+    {
+      "csv_record": {
+        "source_id": "overture:d3e64fa0-af54-4470-9107-9f2e86e148f0",
+        "name": "Jojo Vito Designs Gallery",
+        "category": "art_gallery",
+        "latitude": "10.66020257",
+        "longitude": "122.94330623",
+        "address": "Araneta Ave"
+      },
+      "rank": 3,
+      "status": "owner_published_historical_evidence_needs_refresh",
+      "published_hours": "Monday-Saturday 09:00-17:00 in owner-authored article",
+      "published_admission_php": 0,
+      "zero_cost_basis": "Jojo Vito owner-authored article explicitly says no entrance fees. Historical claim only.",
+      "sources": [
+        "https://thehappytrip.com/2020/01/philippine-holidays-things-to-do/",
+        "https://thehappytrip.com/2015/04/happy-trippers-from-manila-at-jojo-vito-designs-gallery/amp/",
+        "https://thehappytrip.com/2026/03/bacolod-during-summer-bacolodnons-guide-to-what-to-do/amp/"
+      ],
+      "freshness": "Old source URL and historical holiday content; freshly fetched is not freshly published. 2026 owner-site article supports activity existence, not current free entry/hours.",
+      "proposed_duration_minutes": 45,
+      "duration_basis": "editorial browsing visit only; excludes mask-painting activity",
+      "remaining": [
+        "Refresh general admission and hours; older owner post starts at 08:30 rather than 09:00.",
+        "Resolve exact entrance at 119 Alunan Avenue/Kapitana Dicang versus CSV Araneta Avenue.",
+        "Mask painting and purchases are separate costs; no current painting tariff verified.",
+        "Sunday not safely established by owner article listing Monday-Saturday."
+      ]
+    },
+    {
+      "csv_record": {
+        "source_id": "overture:edf8f8f8-d1c9-4d94-855a-c1ba1c6b1fd4",
+        "name": "Timezone Ayala Malls Capitol Central",
+        "category": "amusement_park",
+        "latitude": "10.677087",
+        "longitude": "122.950054",
+        "address": "4th Floor, Ayala Malls Capitol Central, Gatuslao Street"
+      },
+      "rank": 4,
+      "status": "hours_supported_cost_model_needs_review",
+      "published_hours": "Daily 10:00-21:00",
+      "sources": [
+        "https://www.timezonegames.com/en-ph/locations/visayas/timezone-ayala-malls-capitol-central/",
+        "https://www.timezonegames.com/en-ph/powercards/"
+      ],
+      "published_payment_terms": "Red Powercard minimum load PHP 200; new card starts at PHP 20 below PHP 500 purchase; purchases PHP 500+ include a free card.",
+      "cost_scope": "Prepaid game credit purchase, not admission or a guaranteed duration of play. Starting-at card fee does not establish a PHP 220 upper bound.",
+      "possible_defined_spend_php": 500,
+      "possible_defined_spend_basis": "Optional editorial choice of one PHP 500 load with included card; no additional reload. Not a venue-published typical visit cost or unlimited games.",
+      "proposed_duration_minutes": 60,
+      "duration_basis": "editorial visit estimate; not guaranteed by load amount",
+      "operator_linked_place_pin": [
+        10.6770868,
+        122.9500539
+      ],
+      "pin_status": "Recovered from operator map redirect; matches CSV place coordinates closely; mall access point still needs review.",
+      "remaining": [
+        "Review whether the catalogue cost schema can represent a selected prepaid play budget without calling it admission.",
+        "No fixed-duration package or minimum guaranteed gameplay was verified.",
+        "Exclude expired August/September 2026 deals from November planning."
+      ]
+    }
+  ],
+  "screened_out_this_round": [
+    {
+      "name": "Resorts Negrense",
+      "reason": "Only weak/undated or old tariff evidence found; visitor hours unresolved. Hotel check-in/check-out times are not attraction hours."
+    },
+    {
+      "name": "Palmas del Mar",
+      "reason": "No sufficiently current combined operator admission/hour evidence established in this review."
+    },
+    {
+      "name": "Green Label Cafe",
+      "reason": "Hours differ from CSV and no current source-backed bounded meal cost was established; aggregator average price is not a menu-derived upper bound."
+    }
+  ],
+  "existing_venue_source_recheck": [
+    {
+      "name": "The Negros Museum",
+      "sources": [
+        "https://www.ncfiph.org/the-negros-museum/museum-tours/",
+        "https://negrosmuseum.wixsite.com/negrosmuseum/museum-hours"
+      ],
+      "checked_on": "2026-11-13",
+      "result": "Foundation page and legacy branded page still disagree on schedule and fees. Manifest approval remains false."
+    },
+    {
+      "name": "Negros Forest Park",
+      "sources": [
+        "https://www.talarak.org/negros-forest-park"
+      ],
+      "checked_on": "2026-11-13",
+      "result": "Operator page confirms public conservation venue and South Capitol Road location; no visitor timetable or tariff established from page."
+    },
+    {
+      "name": "Orange Project",
+      "sources": [
+        "https://orangeproject.ph/about/",
+        "https://goo.gl/maps/7KesC3F4L4x1t6rP6"
+      ],
+      "checked_on": "2026-11-13",
+      "result": "Operator page gives identity/address and linked map pin (10.695533,122.9598475) recovered from redirect. Full map fetch failed. No general admission policy established; not an approved coordinate update."
+    },
+    {
+      "name": "Arima Restaurant",
+      "sources": [
+        "https://www.radissonhotels.com/en-us/hotels/park-inn-bacolod/restaurants-and-bars/arima-restaurant"
+      ],
+      "checked_on": "2026-11-13",
+      "result": "Operator confirms daily 06:00-22:00, agreeing with saved hours. No current bounded meal cost was established."
+    },
+    {
+      "name": "Capitol Park and Lagoon",
+      "sources": [
+        "https://www.negros-occ.gov.ph/news/pre-valentines-day-at-the-capitol/"
+      ],
+      "checked_on": "2026-11-13",
+      "result": "2026 authority event report confirms use of park, not general visitor hours or admission. Website footer office hours and free event snacks are not evidence of park hours/free entry."
+    }
+  ]
+}
