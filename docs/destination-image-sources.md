@@ -72,3 +72,50 @@ verifiable rights was found.
 - the attribution text names the photographer and license;
 - excluded entries give a reason and no image;
 - rejected candidates give reasons.
+
+## Upload pack for #108 (added for #109)
+
+Every approved photo has an **upload-ready file** in [`destination-images/`](destination-images/), recorded in the manifest as `upload_file` with its `upload_sha256`. The #108 script names each Storage object by that SHA-256, so the app can tell exactly which file a URL points to (see `frontend/assets/image_credits.json`).
+
+- Wikimedia Commons originals were downloaded from `file_url` and checked against the reviewed SHA-1. Three were larger than 2048 px (the Cathedral original is 6.6 MB, over the 5 MiB bucket limit), so they were resized and the change is recorded in `upload_modification` as CC BY-SA requires. Lagoon and Panaad are byte-identical to the originals.
+- Roel's photos are uploaded as committed.
+- **Upload these exact files.** A different copy gets a different SHA-256, and the app will show the "No photo yet" placeholder instead.
+
+| Location | Use | Upload file |
+| --- | --- | --- |
+| San Sebastian Cathedral | main | `destination-images/san-sebastian-cathedral/commons-san-sebastian-cathedral.jpg` |
+| The Negros Museum | main | `destination-images/negros-museum/commons-negros-museum.jpg` |
+| Negros Forest Park | main | `destination-images/negros-forest-park/RLSJR-2-hornbill.jpg` |
+|  | extra | `destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg` |
+| Orange Project | main | `destination-images/orange-project/RLSJR-3-orange-project-exterior.jpg` |
+| Capitol Park and Lagoon | main | `destination-images/capitol-park-lagoon/commons-capitol-park-lagoon.jpg` |
+| Negros Occidental Provincial Capitol | main | `destination-images/provincial-capitol/commons-provincial-capitol.jpg` |
+| Cafetolyo Coffee Shop | main | `destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg` |
+|  | extra | `destination-images/cafetolyo/RLSJR-10-cafetolyo-seating.jpg` |
+| Arima Restaurant | main | `destination-images/arima/RLSJR-5-arima-entrance.jpg` |
+|  | extra | `destination-images/arima/RLSJR-6-arima-sign.jpg` |
+| Panaad Park and Sports Complex | main | `destination-images/panaad/commons-panaad.jpg` |
+| Calea Pastries & Coffee | main | `destination-images/calea/RLSJR-9-calea-entrance.jpg` |
+|  | extra | `destination-images/calea/RLSJR-8-calea-cakes.jpg` |
+
+Dry run first (no writes), on development only, as described in [destination-image-storage.md](destination-image-storage.md); then rerun each with `--execute --approved-usage --link-location`:
+
+```bash
+python scripts/destination_images.py --file docs/destination-images/san-sebastian-cathedral/commons-san-sebastian-cathedral.jpg --location-id 1a3bca09-5532-5de6-8587-2440c4e5830d
+python scripts/destination_images.py --file docs/destination-images/negros-museum/commons-negros-museum.jpg --location-id 61bf94ab-6ec0-5ec3-8451-b575ee06169e
+python scripts/destination_images.py --file docs/destination-images/negros-forest-park/RLSJR-2-hornbill.jpg --location-id b3783066-7484-5917-a09b-404974974880
+python scripts/destination_images.py --file docs/destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg --location-id b3783066-7484-5917-a09b-404974974880
+python scripts/destination_images.py --file docs/destination-images/orange-project/RLSJR-3-orange-project-exterior.jpg --location-id d184610e-f8c9-584a-95a3-79809cd81c49
+python scripts/destination_images.py --file docs/destination-images/capitol-park-lagoon/commons-capitol-park-lagoon.jpg --location-id af80a358-d1ad-529f-84b3-ff1e591e041f
+python scripts/destination_images.py --file docs/destination-images/provincial-capitol/commons-provincial-capitol.jpg --location-id 4618dfae-4a30-5917-85f1-94f216cf5b97
+python scripts/destination_images.py --file docs/destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg --location-id a752a30a-1859-503d-8a77-8cd59097ac1d
+python scripts/destination_images.py --file docs/destination-images/cafetolyo/RLSJR-10-cafetolyo-seating.jpg --location-id a752a30a-1859-503d-8a77-8cd59097ac1d
+python scripts/destination_images.py --file docs/destination-images/arima/RLSJR-5-arima-entrance.jpg --location-id f52c28a6-cf76-5efa-b0a3-d04f8b15794c
+python scripts/destination_images.py --file docs/destination-images/arima/RLSJR-6-arima-sign.jpg --location-id f52c28a6-cf76-5efa-b0a3-d04f8b15794c
+python scripts/destination_images.py --file docs/destination-images/panaad/commons-panaad.jpg --location-id ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c
+python scripts/destination_images.py --file docs/destination-images/calea/RLSJR-9-calea-entrance.jpg --location-id f2ccf475-56ea-51a0-a003-70f66d9f852a
+python scripts/destination_images.py --file docs/destination-images/calea/RLSJR-8-calea-cakes.jpg --location-id f2ccf475-56ea-51a0-a003-70f66d9f852a
+```
+
+The script links `image_url` only when it is empty, so only each location's **main** photo becomes `image_url`. Extras are uploaded for later use. Staging's San Sebastian Cathedral row currently points to the Negros Museum test image from #108; clear that `image_url` first so the cathedral photo can be linked. The app already refuses to show the mislinked photo.
+

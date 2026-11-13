@@ -111,19 +111,12 @@ void main() {
       );
     });
 
-    testWidgets('a real photo is loaded from its URL', (tester) async {
+    testWidgets('a photo without an approved credit is not shown', (
+      tester,
+    ) async {
       await pump(tester, _place(image: 'https://example.com/calea.jpg'));
-      final image = tester.widget<Image>(find.byType(Image));
-      expect(
-        (image.image as NetworkImage).url,
-        'https://example.com/calea.jpg',
-      );
-    });
-
-    testWidgets('a photo that fails to load says so', (tester) async {
-      await pump(tester, _place(image: 'https://example.com/missing.jpg'));
-      await tester.pumpAndSettle();
-      expect(find.text('Photo unavailable'), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('No photo yet'), findsOneWidget);
     });
   });
 }

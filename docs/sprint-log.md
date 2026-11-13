@@ -990,3 +990,12 @@ is a different operation and was not triggered. See the
 - Found during device testing: staging's San Sebastian Cathedral `image_url` shows the Negros Museum (left over from the #108 test upload; production is unaffected), which is reported for the #108 owner. The launcher icon was still Flutter's default; at Roel's request it is now the Lagaw logo at all densities, with no metadata.
 - **Decision (Roel):** the production check is handed to the release owner (#121, CyGray), who has the production publishable key and a production account. #117 stays open until it is confirmed. See [evidence](evidence/release-build-honest-ui.md).
 
+### November 14, 2026 — #109 real destination images in Flutter
+
+- Roel started #109 on `feat/s4-09-destination-images`, stacked on #174 (#117) and the unmerged venue-photos branch, so all 10 approved locations are available.
+- **Design:** the app shows a photo only when the file's SHA-256 (which the #108 script puts in the Storage path) is approved for that same location in a bundled credits asset generated from the #107 manifest. This came out of device testing for #117, where staging linked the Negros Museum photo to San Sebastian Cathedral.
+- Built a credit chip and credit sheet (attribution, changes, links to the original and the license), loading and failure placeholders, and decoding near display size.
+- Prepared an upload pack: Commons originals were verified against the reviewed SHA-1, the three over 2048 px were resized for the 5 MiB bucket (change recorded), and each upload file's SHA-256 is in the manifest.
+- `flutter test` passes 239 tests and `pytest -m "not db"` passes 1108. On Roel's Infinix (release build, staging), the mislinked cathedral photo is now refused.
+- Pending: uploads by the #108 owner, then deployed photo-and-credit screenshots. See [evidence](evidence/destination-images-ui.md).
+
