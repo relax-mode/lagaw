@@ -970,6 +970,16 @@ is a different operation and was not triggered. See the
 
 - Publication: pushed `docs/s4-06-catalogue-verification`; GitHub integration refused both PR creation and #106 comment with HTTP 403 (`Resource not accessible by integration`). Local `gh` is unavailable. Added a comparison link and copy-ready PR description/issue comment to the handoff; no PR, posted comment, reviewer approval, CI result or merge is claimed. Earlier local sprint-log edits are restored after committing the scoped work and retained in the named stash.
 
+### November 14, 2026 — #107 follow-up: Roel's venue photos
+
+- Roel photographed **Orange Project, Cafetolyo, Arima and Calea** on 2026-11-07 (eleven iPhone photos). Seven were used and four left out:
+  - left out: the crowded Calea dining area (too many close, identifiable diners); a Calea storefront where cropping out passers-by left too little of the building; a menu close-up with prices that would go stale; a frame dominated by a dress-code sign;
+  - **shop name blurred** (Roel's request, instead of cropping): the neighbouring shop's sign, standing banner and door poster in the full Orange Project exterior;
+  - **faces blurred** (Roel's request): every diner in the full Calea entrance photo, and two seated customers in the Cafetolyo seating photo, which is now used as an extra image.
+- The originals carried **GPS coordinates**. The committed copies are resized to at most 2048 px and have all metadata removed (verified).
+- They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **all 10 locations now have a licensed or permitted image**.
+- Andrew mentioned deleting 3 locations. As of this entry, `main`, the staging API and the production API all still list 10, so the manifest still covers all 10.
+
 ### November 14, 2026 — #117 Android release build and honest UI states
 
 - Roel started #117 on `fix/s4-17-release-build-honest-ui` and audited `main`. Verified: release APKs had **no INTERNET permission** (debug/profile only), the identity was `com.example.frontend`, release signing used the debug key, a release build without `API_BASE_URL` called localhost, and the UI showed hardcoded match scores, "Free" for unknown prices, a default "60 mins", Unsplash stock photos, hardcoded weather, a silent sample-data fallback, and "session expired" when the network dropped during a token refresh.
