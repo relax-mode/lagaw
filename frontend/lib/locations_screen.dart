@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
-import 'config.dart';
 import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
 import 'screens/trips_tab.dart';
@@ -10,6 +10,7 @@ import 'services/discovery_interactions.dart';
 import 'services/trip_service.dart';
 import 'theme.dart';
 import 'widgets/bacolod_3d_badges.dart';
+import 'widgets/destination_photo.dart';
 import 'widgets/left_swipe_explainer.dart';
 import 'widgets/rating_dialog.dart';
 import 'widgets/tactile_motion.dart';
@@ -65,7 +66,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
       .where((loc) => !_interactions.isSwiped(loc.id))
       .toList();
   List<LocationItem> _locations = [];
-  String _errorMessage = '';
   ApiViewState _apiState = ApiViewState.loading;
 
   @override
@@ -86,7 +86,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
   Future<void> _fetchLocations() async {
     setState(() {
       _apiState = ApiViewState.loading;
-      _errorMessage = '';
     });
 
     try {
@@ -104,17 +103,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = e.toString();
         _apiState = ApiViewState.error;
       });
     }
-  }
-
-  void _useFallbackLocations() {
-    setState(() {
-      _locations = List.of(kBacolodLocations);
-      _apiState = ApiViewState.live;
-    });
   }
 
   /// Opens trip creation; lands on My Trips once a trip is saved. [S2-04]
@@ -131,8 +122,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   List<LocationItem> get _availableLocations {
-    if (_apiState == ApiViewState.empty) return const [];
-    return _locations.isNotEmpty ? _locations : kBacolodLocations;
+    // Only live API places; never built-in sample data. [S4-17]
+    return _apiState == ApiViewState.live ? _locations : const [];
   }
 
   static const List<Map<String, String>> _categories = [
@@ -203,7 +194,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
   LocationItem _getCarouselItem(int offset) {
     final list =
         _filteredLocations.isNotEmpty ? _filteredLocations : _availableLocations;
-    if (list.isEmpty) return kBacolodLocations.first;
     final rawIndex = (_featuredIndex + offset) % list.length;
     final idx = (rawIndex + list.length) % list.length;
     return list[idx];
@@ -652,7 +642,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                       SizedBox(width: 3),
                       Flexible(
                         child: Text(
-                          'Bacolod City • 28° Sunny',
+                          'Bacolod City',
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 10,
@@ -895,9 +885,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
   // TAB 1: LANDING & 3-CARD FANNED EXPLORER
   // ===========================================================================
   Widget _buildLandingTab({required bool isWide}) {
-    final leftSpot = _getCarouselItem(-1);
-    final centerSpot = _getCarouselItem(0);
-    final rightSpot = _getCarouselItem(1);
+    final hasPlaces = _availableLocations.isNotEmpty;
+    final leftSpot = hasPlaces ? _getCarouselItem(-1) : null;
+    final centerSpot = hasPlaces ? _getCarouselItem(0) : null;
+    final rightSpot = hasPlaces ? _getCarouselItem(1) : null;
 
     return Column(
       children: [
@@ -917,38 +908,41 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 flex: 5,
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 280,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.translate(
-                            offset: const Offset(-88, 12),
-                            child: Transform.rotate(
-                              angle: -0.20,
-                              child: TactilePressable(
-                                onTap: () => setState(() => _featuredIndex--),
-                                child: _buildSideFanCard(leftSpot),
+                    if (hasPlaces)
+                      SizedBox(
+                        height: 280,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Transform.translate(
+                              offset: const Offset(-88, 12),
+                              child: Transform.rotate(
+                                angle: -0.20,
+                                child: TactilePressable(
+                                  onTap: () => setState(() => _featuredIndex--),
+                                  child: _buildSideFanCard(leftSpot!),
+                                ),
                               ),
                             ),
-                          ),
-                          Transform.translate(
-                            offset: const Offset(88, 12),
-                            child: Transform.rotate(
-                              angle: 0.20,
-                              child: TactilePressable(
-                                onTap: () => setState(() => _featuredIndex++),
-                                child: _buildSideFanCard(rightSpot),
+                            Transform.translate(
+                              offset: const Offset(88, 12),
+                              child: Transform.rotate(
+                                angle: 0.20,
+                                child: TactilePressable(
+                                  onTap: () => setState(() => _featuredIndex++),
+                                  child: _buildSideFanCard(rightSpot!),
+                                ),
                               ),
                             ),
-                          ),
-                          TactilePageSwitcher(
-                            pageKey: centerSpot.id,
-                            child: _buildCenterFanCard(centerSpot),
-                          ),
-                        ],
-                      ),
-                    ),
+                            TactilePageSwitcher(
+                              pageKey: centerSpot!.id,
+                              child: _buildCenterFanCard(centerSpot),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      _buildLandingPlacesState(height: 280),
                     const SizedBox(height: 16),
                     Vector3DButton(
                       onTap: () => setState(() => _activeTab = AppTab.swipe),
@@ -1078,38 +1072,41 @@ class _LocationsScreenState extends State<LocationsScreen> {
           )
         else ...[
           // Mobile Layout: Stacked 3-Card Carousel + CTA + Bento Stats
-          SizedBox(
-            height: 268,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Transform.translate(
-                  offset: const Offset(-78, 12),
-                  child: Transform.rotate(
-                    angle: -0.20,
-                    child: TactilePressable(
-                      onTap: () => setState(() => _featuredIndex--),
-                      child: _buildSideFanCard(leftSpot),
+          if (hasPlaces)
+            SizedBox(
+              height: 268,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Transform.translate(
+                    offset: const Offset(-78, 12),
+                    child: Transform.rotate(
+                      angle: -0.20,
+                      child: TactilePressable(
+                        onTap: () => setState(() => _featuredIndex--),
+                        child: _buildSideFanCard(leftSpot!),
+                      ),
                     ),
                   ),
-                ),
-                Transform.translate(
-                  offset: const Offset(78, 12),
-                  child: Transform.rotate(
-                    angle: 0.20,
-                    child: TactilePressable(
-                      onTap: () => setState(() => _featuredIndex++),
-                      child: _buildSideFanCard(rightSpot),
+                  Transform.translate(
+                    offset: const Offset(78, 12),
+                    child: Transform.rotate(
+                      angle: 0.20,
+                      child: TactilePressable(
+                        onTap: () => setState(() => _featuredIndex++),
+                        child: _buildSideFanCard(rightSpot!),
+                      ),
                     ),
                   ),
-                ),
-                TactilePageSwitcher(
-                  pageKey: centerSpot.id,
-                  child: _buildCenterFanCard(centerSpot),
-                ),
-              ],
-            ),
-          ),
+                  TactilePageSwitcher(
+                    pageKey: centerSpot!.id,
+                    child: _buildCenterFanCard(centerSpot),
+                  ),
+                ],
+              ),
+            )
+          else
+            _buildLandingPlacesState(height: 268),
           const SizedBox(height: 14),
           Vector3DButton(
             onTap: () => setState(() => _activeTab = AppTab.swipe),
@@ -1238,6 +1235,69 @@ class _LocationsScreenState extends State<LocationsScreen> {
     );
   }
 
+  /// Shown instead of the home carousel until live places exist. [S4-17]
+  Widget _buildLandingPlacesState({required double height}) {
+    final loading = _apiState == ApiViewState.loading;
+    final empty = _apiState == ApiViewState.empty ||
+        (_apiState == ApiViewState.live && _locations.isEmpty);
+    return SizedBox(
+      key: const ValueKey('landing-places-state'),
+      height: height,
+      child: Center(
+        child: GlassContainer(
+          borderRadius: 28,
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (loading)
+                const CircularProgressIndicator()
+              else
+                Icon(
+                  empty ? Icons.travel_explore_rounded : Icons.cloud_off_rounded,
+                  size: 36,
+                  color: empty ? AppTheme.primaryBlue : const Color(0xFFE11D48),
+                ),
+              const SizedBox(height: 12),
+              Text(
+                loading
+                    ? 'Loading Bacolod places…'
+                    : empty
+                        ? 'No places to show yet.'
+                        : 'Lagaw couldn’t reach its server. Check your '
+                            'internet connection and try again.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.slateDark,
+                ),
+              ),
+              if (!loading) ...[
+                const SizedBox(height: 12),
+                Vector3DButton(
+                  key: const ValueKey('landing-places-retry'),
+                  onTap: _fetchLocations,
+                  backgroundColor: AppTheme.primaryBlue,
+                  shadowColor: const Color(0xFF1D4ED8),
+                  borderRadius: 20,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBentoStats({required bool isWide}) {
     return Row(
       children: [
@@ -1320,7 +1380,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Trip Matches',
+                          'Liked & saved',
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
@@ -1383,12 +1443,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      spot.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          Container(color: spot.gradientColors.first),
-                    ),
+                    DestinationPhoto(location: spot, compact: true),
                     Container(color: const Color(0x44000000)),
                   ],
                 ),
@@ -1431,15 +1486,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      spot.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: spot.gradientColors),
-                        ),
-                      ),
-                    ),
+                    DestinationPhoto(location: spot),
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
@@ -1555,7 +1602,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     ),
                   ),
                 Text(
-                  '${spot.matchScore}%',
+                  spot.costRange,
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
@@ -1677,12 +1724,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
-                                    Image.network(
-                                      spot.imageUrl,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => Container(
-                                          color: spot.gradientColors.first),
-                                    ),
+                                    DestinationPhoto(location: spot),
                                     Container(
                                       decoration: const BoxDecoration(
                                         gradient: LinearGradient(
@@ -1715,25 +1757,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                             ),
                                             child: Text(
                                               spot.category.toUpperCase(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w900,
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF10B981),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Text(
-                                              '${spot.matchScore}% Match',
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 10,
@@ -2374,6 +2397,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
                       ),
                     ),
                   ),
+                // Developer-only state switcher; hidden in release. [S4-17]
+                if (!kReleaseMode)
                 PopupMenuButton<ApiViewState>(
                   initialValue: _apiState,
                   onSelected: (st) {
@@ -2509,7 +2534,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   ),
                   const SizedBox(height: 14),
                   const Text(
-                    'Unable to Reach Bacolod Locations',
+                    'Can’t load Bacolod places',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
@@ -2519,9 +2544,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _errorMessage.isNotEmpty
-                        ? 'Backend connection error.\nEndpoint: ${AppConfig.locationsEndpoint}'
-                        : 'Could not connect to ${AppConfig.locationsEndpoint}. Please make sure the FastAPI server is running.',
+                    'Lagaw couldn’t reach its server. Check your internet '
+                    'connection and try again.',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
@@ -2561,38 +2585,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                 fontWeight: FontWeight.w900,
                                 fontSize: 14,
                                 color: AppTheme.slateDark,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Vector3DButton(
-                        onTap: _useFallbackLocations,
-                        backgroundColor: const Color(0xFFFEF3C7),
-                        shadowColor: const Color(0xFFD97706),
-                        borderColor: const Color(0xFFFDE68A),
-                        borderRadius: 24,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        depth: 3.5,
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.explore_rounded,
-                              size: 18,
-                              color: Color(0xFF92400E),
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Use Sample Spots',
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14,
-                                color: Color(0xFF92400E),
                               ),
                             ),
                           ],
@@ -2788,16 +2780,11 @@ class _LocationsScreenState extends State<LocationsScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: Image.network(
-                item.imageUrl,
+              child: DestinationPhoto(
+                location: item,
                 width: 74,
                 height: 74,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  width: 74,
-                  height: 74,
-                  color: item.gradientColors.first,
-                ),
+                compact: true,
               ),
             ),
             const SizedBox(width: 12),
@@ -2896,17 +2883,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
               borderRadius: BorderRadius.circular(16),
               child: Stack(
                 children: [
-                  Image.network(
-                    item.imageUrl,
+                  DestinationPhoto(
+                    location: item,
                     height: 140,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      height: 140,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: item.gradientColors),
-                      ),
-                    ),
                   ),
                   Positioned(
                     top: 8,

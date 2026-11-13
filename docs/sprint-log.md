@@ -969,3 +969,12 @@ is a different operation and was not triggered. See the
 - Validation: `.venv/Scripts/python.exe -m pytest -q backend/test_destination_enrichment.py backend/test_destination_coverage_audit.py` returned **35 passed in 0.09 s**; focused Ruff checks passed. Existing offline planner reports four blocked candidates, zero approved updates and zero writes. Evidence JSON parsing and `git diff --check` passed. PR publication and CI results are recorded separately on GitHub.
 
 - Publication: pushed `docs/s4-06-catalogue-verification`; GitHub integration refused both PR creation and #106 comment with HTTP 403 (`Resource not accessible by integration`). Local `gh` is unavailable. Added a comparison link and copy-ready PR description/issue comment to the handoff; no PR, posted comment, reviewer approval, CI result or merge is claimed. Earlier local sprint-log edits are restored after committing the scoped work and retained in the named stash.
+
+### November 14, 2026 — #117 Android release build and honest UI states
+
+- Roel started #117 on `fix/s4-17-release-build-honest-ui` and audited `main`. Verified: release APKs had **no INTERNET permission** (debug/profile only), the identity was `com.example.frontend`, release signing used the debug key, a release build without `API_BASE_URL` called localhost, and the UI showed hardcoded match scores, "Free" for unknown prices, a default "60 mins", Unsplash stock photos, hardcoded weather, a silent sample-data fallback, and "session expired" when the network dropped during a token refresh.
+- **Decisions (Roel):** app ID **`com.lagaw.bacolod`**; **remove sample spots** so only live data is shown.
+- Fixed all of the above. Release signing reads a git-ignored `key.properties`; the keystore stays with the release owner (#121). Release builds without a server configuration show a clear error. Unknown values stay unknown, there are no stock photos, and a network failure during refresh no longer signs the user out.
+- `flutter analyze` is clean, and `flutter test` passes 231 tests. A release APK (built against staging) reports `com.lagaw.bacolod`, `INTERNET` and the label "Lagaw".
+- Pending: a production-pointed release build (the production publishable key isn't in Roel's `.env`; it still holds `.env.example` placeholders), device screenshots, and a real keystore (#121). See [evidence](evidence/release-build-honest-ui.md).
+

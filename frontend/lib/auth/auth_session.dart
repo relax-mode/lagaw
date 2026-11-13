@@ -66,9 +66,11 @@ class AuthSession extends ChangeNotifier {
     return client.current?.accessToken;
   }
 
-  /// Called after a 401: refresh once (concurrent callers share it). On
-  /// failure the session is marked [expired] and false is returned; never
-  /// loops and never falls back to another credential.
+  /// Called after a 401: refresh once (concurrent callers share it). When the
+  /// server rejects the session it is marked [expired] and false is
+  /// returned; when the server can't be reached [AuthUnreachable] is thrown
+  /// and the session is kept. Never loops or falls back to another
+  /// credential.
   Future<bool> recoverFromUnauthorized() => _refreshOnce();
 
   Future<bool> _refreshOnce() {

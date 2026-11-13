@@ -24,6 +24,9 @@ class AppConfig {
     'AUTH_REDIRECT_URL',
   );
 
+  /// Whether this build was given an API address at all.
+  static const bool apiBaseUrlProvided = bool.hasEnvironment('API_BASE_URL');
+
   static bool get authEnabled =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
@@ -35,4 +38,20 @@ class AppConfig {
       '$apiBaseUrl/api/v1/me/recommendations';
   static String get preferenceExtractEndpoint =>
       '$apiBaseUrl/api/v1/preferences/extract';
+}
+
+/// A release build must be told which API and Supabase project to use;
+/// otherwise it would silently call localhost from a phone. Null when the
+/// build is fine. [S4-17]
+String? releaseConfigError({
+  required bool isRelease,
+  required bool apiBaseUrlProvided,
+  required bool authEnabled,
+}) {
+  if (!isRelease) return null;
+  if (!apiBaseUrlProvided || !authEnabled) {
+    return 'This build of Lagaw is not configured with a server. Rebuild it '
+        'with API_BASE_URL, SUPABASE_URL and SUPABASE_ANON_KEY.';
+  }
+  return null;
 }

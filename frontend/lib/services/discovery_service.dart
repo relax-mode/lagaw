@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../auth/api_credentials.dart';
+import '../auth/auth_client.dart';
 import '../auth/auth_session.dart';
 import '../config.dart';
 import '../models/onboarding_preferences.dart';
@@ -177,6 +178,22 @@ class DiscoveryService implements OnboardingRepository {
     Duration timeout = _timeout,
     required String onTimeout,
   }) async {
+    // A refresh that can't reach Supabase is not an expired session.
+    try {
+      return await _sendAuthorized(request, timeout, onTimeout);
+    } on AuthUnreachable {
+      throw const DiscoveryApiException(
+        'Could not reach the Lagaw server. Check your connection and try '
+        'again.',
+      );
+    }
+  }
+
+  Future<http.Response> _sendAuthorized(
+    Future<http.Response> Function() request,
+    Duration timeout,
+    String onTimeout,
+  ) async {
     final token = await _auth.token();
     if (token == null) {
       throw const DiscoveryApiException(
