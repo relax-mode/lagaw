@@ -8,7 +8,7 @@ Out of scope: storage policies, uploads and migrations.
 
 ## Result
 
-**9 of 10 locations have a usable image. 1 is excluded** because no image with
+**All 10 locations have a usable image** because no image with
 verifiable rights was found.
 
 | Location | Status | Image | Photographer | License | Notes |
@@ -22,7 +22,7 @@ verifiable rights was found.
 | Cafetolyo Coffee Shop | ✅ Approved | [Counter](destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Arima Restaurant | ✅ Approved | [Entrance](destination-images/arima/RLSJR-5-arima-entrance.jpg) (+ [sign](destination-images/arima/RLSJR-6-arima-sign.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Panaad Park and Sports Complex | ✅ Approved | [Panaad Stadium.jpg](https://commons.wikimedia.org/wiki/File:Panaad_Stadium.jpg) | Dominic Alojado | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0) | Panaad Stadium, the complex's main landmark; players are distant and not identifiable. |
-| Calea Pastries & Coffee | ❌ Excluded | — | — | — | Private business; no photograph found on Wikimedia Commons and no permission from the owner on record. |
+| Calea Pastries & Coffee | ✅ Approved | [Storefront](destination-images/calea/RLSJR-7-calea-storefront.jpg) (cropped above passers-by; + [cakes](destination-images/calea/RLSJR-8-calea-cakes.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 
 ## Licensing rules applied
 
@@ -43,7 +43,7 @@ verifiable rights was found.
 - **Show the credit with the image**, using the manifest's `attribution_text` (for example "Photo: Rauxilian / CC BY-SA 4.0 via Wikimedia Commons"), with links to `source_page_url` and `license_url`. All approved images require attribution.
 - **Share-alike** (`share_alike: true`): if an image is cropped or edited, the edited version must stay under the same license and be marked as changed. Plain resizing for display is fine, with the credit kept.
 - Download the original from `file_url`. Its `sha1` is recorded so #108 can confirm the file is the one that was reviewed.
-- **Excluded locations keep `image_url = null`.** #109 must show an honest fallback, not a stand-in photo of another place.
+- **Any location without an approved image keeps `image_url = null`** (none today, but places added later start that way). #109 must show an honest fallback, not a stand-in photo of another place.
 
 ## Candidates considered and rejected
 
@@ -56,13 +56,12 @@ verifiable rights was found.
 - **Panaad Park and Sports Complex:** `Panaad Stadium March 2023 renovated.jpg`: Excluded: PD-PhilippinesGov. Government works carry no copyright, but exploiting them for profit needs prior approval (IP Code s.176); whether Lagaw counts as for-profit is uncertain.
 - **Panaad Park and Sports Complex:** `2023 Panaad Stadium.jpg`: Excluded: PD-PhilippinesGov, same uncertainty.
 - **Negros Forest Park, Orange Project, Cafetolyo, Arima, Calea:** Commons searches returned nothing showing these venues. Negros Forest Park is covered by Roel's own photos instead.
-- **Orange Project:** photos on immersion-art-leipzig.de come from an exhibition in Leipzig, Germany, not the Bacolod venue. They carry no license, and they show copyrighted artworks. Excluded; the venue will be asked directly.
+- **Orange Project:** photos on immersion-art-leipzig.de come from an exhibition in Leipzig, Germany, not the Bacolod venue. They carry no license, and they show copyrighted artworks. Rejected; Roel's own exterior photo is used instead.
 
 ## Follow-up
 
-- **Roel photographed Orange Project, Cafetolyo and Arima himself on 2026-11-07** (added 2026-11-14). Three of his seven shots were not used: one had people seated close in the foreground, one was a close-up of a menu whose prices would go stale, and one was dominated by a dress-code sign. The Orange Project photo was cropped to exclude a wall of third-party photographs and a neighbouring shop's sign.
-- **Calea Pastries & Coffee** is still excluded. Roel plans to photograph it.
-- Calea could also get a photo with **written permission from the owner**. A permission record would have to be added to the manifest before use.
+- **Roel photographed Orange Project, Cafetolyo, Arima and Calea himself on 2026-11-07** (added 2026-11-14). Six of his photos are used and four were left out: two with identifiable people (Cafetolyo seating, the crowded Calea dining area), one menu close-up whose prices would go stale, and one dominated by a dress-code sign.
+- Two photos were cropped: Orange Project to its facade (excluding a wall of third-party photographs and a neighbouring shop's sign), and the Calea storefront to above the passers-by.
 - Licenses can change on Commons. Recheck `source_page_url` before a production upload if it happens long after the access date.
 
 ## Automated check

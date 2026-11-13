@@ -391,10 +391,63 @@
     {
       "location_id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
       "name": "Calea Pastries & Coffee",
-      "status": "excluded",
-      "image": null,
-      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
-      "rejected_candidates": []
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-7-calea-storefront.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/calea/RLSJR-7-calea-storefront.jpg",
+        "file_url": null,
+        "width": 2048,
+        "height": 853,
+        "mime": "image/jpeg",
+        "sha1": "28c237f9c4d0d87968982524cb55d0c0c49ae77f",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-11-07",
+        "subject": "Calea sign and arched entrance on 15th Street",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed; cropped above the passers-by so no people are in the frame. No identifiable people as the subject.",
+        "accessed_on": "2026-11-14"
+      },
+      "note": "Team member's own photo, taken at the venue on 2026-11-07. No online photo with verifiable rights was found.",
+      "rejected_candidates": [
+        {
+          "title": "IMG_1226.jpeg",
+          "source": "Photographer permission",
+          "reason": "Not used: a crowded dining area with many identifiable diners."
+        }
+      ],
+      "additional_images": [
+        {
+          "source": "Photographer permission",
+          "title": "RLSJR-8-calea-cakes.jpg",
+          "source_page_url": null,
+          "file_path": "docs/destination-images/calea/RLSJR-8-calea-cakes.jpg",
+          "file_url": null,
+          "width": 2048,
+          "height": 1536,
+          "mime": "image/jpeg",
+          "sha1": "c4cbbb81988254c6a9977f527979a3cb4fea4394",
+          "photographer": "Roel Jr. S. Lumauag",
+          "uploader": null,
+          "date_taken": "2026-11-07",
+          "subject": "Cake display at Calea",
+          "license": "Permission",
+          "license_url": null,
+          "attribution_required": true,
+          "attribution_text": "Photo: Roel Jr. S. Lumauag",
+          "share_alike": false,
+          "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+          "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed. No identifiable people as the subject.",
+          "accessed_on": "2026-11-14"
+        }
+      ]
     }
   ]
 }

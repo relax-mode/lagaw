@@ -972,10 +972,9 @@ is a different operation and was not triggered. See the
 
 ### November 14, 2026 — #107 follow-up: Roel's venue photos
 
-- Roel photographed **Orange Project, Cafetolyo and Arima** on 2026-11-07 (seven iPhone photos). Four were used and three left out:
-  - left out: people seated close in the foreground; a menu close-up with prices that would go stale; a frame dominated by a dress-code sign;
-  - the Orange Project photo was cropped to the facade, excluding a wall of third-party photographs and a neighbouring shop's sign.
+- Roel photographed **Orange Project, Cafetolyo, Arima and Calea** on 2026-11-07 (ten iPhone photos). Six were used and four left out:
+  - left out: two with identifiable people (Cafetolyo seating, the crowded Calea dining area); a menu close-up with prices that would go stale; a frame dominated by a dress-code sign;
+  - cropped: Orange Project to its facade (excluding a wall of third-party photographs and a neighbouring shop's sign), and the Calea storefront to above the passers-by.
 - The originals carried **GPS coordinates**. The committed copies are resized to at most 2048 px and have all metadata removed (verified).
-- They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **9 of 10 locations are now covered**. Calea Pastries & Coffee is still excluded; Roel plans to photograph it.
+- They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **all 10 locations now have a licensed or permitted image**.
 - Andrew mentioned deleting 3 locations. As of this entry, `main`, the staging API and the production API all still list 10, so the manifest still covers all 10.
-
