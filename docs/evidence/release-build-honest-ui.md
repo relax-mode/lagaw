@@ -67,9 +67,31 @@ Production build command (values come from the shell, never committed):
 flutter build apk --release --dart-define=API_BASE_URL=https://lagaw-api-i5kvldluga-as.a.run.app --dart-define=SUPABASE_URL=https://zjnuqqtbapbpudsjbpif.supabase.co --dart-define=SUPABASE_ANON_KEY="$PROD_SUPABASE_ANON_KEY"
 ```
 
+## Device (Infinix X6850, Android 16, release APK against staging, 2026-11-14)
+
+A release build was installed as a new app (`com.lagaw.bacolod`). Roel signed in with his staging account; Claude drove the phone over adb.
+Screenshots: [`img/release-build-android/`](img/release-build-android/).
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [117_1](img/release-build-android/117_1.jpg) | Home after sign-in: 10 live places; Arima shows the "No photo yet" placeholder and "Price unknown"; no match %; the stat is "Liked & saved" | Pass |
+| [117_2](img/release-build-android/117_2.jpg) | Spots: every unknown price says "Price unknown", never a default "Free"; no developer state switcher in the release build | Pass |
+| [117_3](img/release-build-android/117_3.jpg) | Spots: the Negros Museum shows its real price, ₱70 – ₱100; places without photos show category icons | Pass |
+| [117_4](img/release-build-android/117_4.jpg) | Swipe history timed out: the deck is hidden with "The server took too long to respond" and Retry, instead of guessing | Pass |
+| [117_5](img/release-build-android/117_5.jpg) | Swipe card after Retry: no "92% Match" badge; "Budget: Price unknown"; category icon instead of a stock photo | Pass |
+| [117_6](img/release-build-android/117_6.jpg) | Offline after a full restart: still signed in; "Lagaw couldn't reach its server" with Retry; 0 places, with no sample data | Pass |
+| [117_7](img/release-build-android/117_7.jpg) | Trips offline: "Could not reach the Lagaw server" with Retry, not "session expired" | Pass |
+| [117_8](img/release-build-android/117_8.jpg) | Android App info: "Lagaw" 1.0.0. `dumpsys package com.lagaw.bacolod` lists `android.permission.INTERNET` | Pass |
+
+**Notes from device testing**
+- **Staging timeouts:** the first home load and the first swipe-history load each exceeded the 6 s client timeout, then succeeded on Retry. This is consistent with staging Cloud Run cold starts; both failures were shown honestly.
+- **Wrong photo in staging data (outside #117):** staging's San Sebastian Cathedral row has an `image_url` that shows **the Negros Museum** (its "Negros MUSEUM" sign is visible), left over from the #108 storage test upload. Production has no image URLs. It needs a data correction by the #108 owner, ideally replaced with the cathedral photo from the #107 manifest.
+- **App icon:** the release app still uses Flutter's default icon. Branding the launcher icon is not listed in #117's tasks; noted for #121.
+- **Offline token refresh:** a forced refresh can't be triggered on demand on a device (tokens last about an hour). The "no connection during refresh is not expiry" behavior is covered by `test/auth_test.dart`, and the offline screens above show the signed-in state is kept.
+
 ## Pending
 
-- [ ] Release APK against **production**: needs the production publishable key in `.env`, and a production test account.
-- [ ] Device screenshots: home, swipe card with real price and no score, "No photo yet", offline error with Retry, and offline refresh not signing out.
+- [x] Device screenshots (release APK against staging, above).
+- [ ] **Release APK against production: handed to the release owner (#121, CyGray)**, who holds the production publishable key and a production account. Build command above.
 - [ ] A real release keystore (#121, CyGray).
 - [ ] PR review and CI.

@@ -976,5 +976,7 @@ is a different operation and was not triggered. See the
 - **Decisions (Roel):** app ID **`com.lagaw.bacolod`**; **remove sample spots** so only live data is shown.
 - Fixed all of the above. Release signing reads a git-ignored `key.properties`; the keystore stays with the release owner (#121). Release builds without a server configuration show a clear error. Unknown values stay unknown, there are no stock photos, and a network failure during refresh no longer signs the user out.
 - `flutter analyze` is clean, and `flutter test` passes 231 tests. A release APK (built against staging) reports `com.lagaw.bacolod`, `INTERNET` and the label "Lagaw".
-- Pending: a production-pointed release build (the production publishable key isn't in Roel's `.env`; it still holds `.env.example` placeholders), device screenshots, and a real keystore (#121). See [evidence](evidence/release-build-honest-ui.md).
+- Verified the release APK (against staging) on Roel's Infinix X6850 (Android 16). All 8 checks passed: real places, "Price unknown" and "No photo yet", no fake match %, honest timeout and offline errors with Retry, still signed in while offline, and the "Lagaw" app identity with INTERNET.
+- Found during device testing: staging's San Sebastian Cathedral `image_url` shows the Negros Museum (left over from the #108 test upload; production is unaffected), and the launcher icon is still Flutter's default. Both are outside #117 and were reported.
+- **Decision (Roel):** the production check is handed to the release owner (#121, CyGray), who has the production publishable key and a production account. #117 stays open until it is confirmed. See [evidence](evidence/release-build-honest-ui.md).
 
