@@ -394,25 +394,25 @@
       "status": "approved",
       "image": {
         "source": "Photographer permission",
-        "title": "RLSJR-7-calea-storefront.jpg",
+        "title": "RLSJR-9-calea-entrance.jpg",
         "source_page_url": null,
-        "file_path": "docs/destination-images/calea/RLSJR-7-calea-storefront.jpg",
+        "file_path": "docs/destination-images/calea/RLSJR-9-calea-entrance.jpg",
         "file_url": null,
         "width": 2048,
-        "height": 853,
+        "height": 1077,
         "mime": "image/jpeg",
-        "sha1": "28c237f9c4d0d87968982524cb55d0c0c49ae77f",
+        "sha1": "335f13b177cb29a2b9a7e4d57b252c80ef223482",
         "photographer": "Roel Jr. S. Lumauag",
         "uploader": null,
         "date_taken": "2026-11-07",
-        "subject": "Calea sign and arched entrance on 15th Street",
+        "subject": "Calea lit sign, glass front and arched interior on 15th Street",
         "license": "Permission",
         "license_url": null,
         "attribution_required": true,
         "attribution_text": "Photo: Roel Jr. S. Lumauag",
         "share_alike": false,
         "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
-        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed; cropped above the passers-by so no people are in the frame. No identifiable people as the subject.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed; lightly cropped above the dining tables so no diners are in the frame. No identifiable people as the subject.",
         "accessed_on": "2026-11-14"
       },
       "note": "Team member's own photo, taken at the venue on 2026-11-07. No online photo with verifiable rights was found.",
@@ -421,6 +421,11 @@
           "title": "IMG_1226.jpeg",
           "source": "Photographer permission",
           "reason": "Not used: a crowded dining area with many identifiable diners."
+        },
+        {
+          "title": "IMG_1228.jpeg",
+          "source": "Photographer permission",
+          "reason": "Not used: passers-by in the foreground; cropping them out left too little of the storefront."
         }
       ],
       "additional_images": [
