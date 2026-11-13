@@ -23,7 +23,7 @@ Branch: `fix/s4-17-release-build-honest-ui`.
 ## What changed
 
 **Release build**
-- `INTERNET` permission in the main manifest; label **"Lagaw"**.
+- `INTERNET` permission in the main manifest; label **"Lagaw"**; the Lagaw logo as the launcher icon.
 - App identity **`com.lagaw.bacolod`** (`applicationId` and `namespace`; `MainActivity` moved), chosen by Roel.
 - Release signing reads a private, git-ignored `android/key.properties`. Without one, it falls back to the debug key, which is labeled in the build file as test-only. The keystore belongs to the release owner (#121) and is never committed.
 - `releaseConfigError`: a release build without `API_BASE_URL` and Supabase settings shows "This build of Lagaw is not configured with a server" instead of calling localhost.
@@ -81,12 +81,12 @@ Screenshots: [`img/release-build-android/`](img/release-build-android/).
 | [117_5](img/release-build-android/117_5.jpg) | Swipe card after Retry: no "92% Match" badge; "Budget: Price unknown"; category icon instead of a stock photo | Pass |
 | [117_6](img/release-build-android/117_6.jpg) | Offline after a full restart: still signed in; "Lagaw couldn't reach its server" with Retry; 0 places, with no sample data | Pass |
 | [117_7](img/release-build-android/117_7.jpg) | Trips offline: "Could not reach the Lagaw server" with Retry, not "session expired" | Pass |
-| [117_8](img/release-build-android/117_8.jpg) | Android App info: "Lagaw" 1.0.0. `dumpsys package com.lagaw.bacolod` lists `android.permission.INTERNET` | Pass |
+| [117_8](img/release-build-android/117_8.jpg) | Android App info: the Lagaw logo, "Lagaw" 1.0.0. `dumpsys package com.lagaw.bacolod` lists `android.permission.INTERNET` | Pass |
 
 **Notes from device testing**
 - **Staging timeouts:** the first home load and the first swipe-history load each exceeded the 6 s client timeout, then succeeded on Retry. This is consistent with staging Cloud Run cold starts; both failures were shown honestly.
 - **Wrong photo in staging data (outside #117):** staging's San Sebastian Cathedral row has an `image_url` that shows **the Negros Museum** (its "Negros MUSEUM" sign is visible), left over from the #108 storage test upload. Production has no image URLs. It needs a data correction by the #108 owner, ideally replaced with the cathedral photo from the #107 manifest.
-- **App icon:** the release app still uses Flutter's default icon. Branding the launcher icon is not listed in #117's tasks; noted for #121.
+- **App icon:** the release app initially showed Flutter's default icon. At Roel's request, the launcher icon is now the Lagaw logo at all five densities (`mipmap-*/ic_launcher.png`, 48–192 px). The files contain only image data: no source file name, color profile, timestamp or other metadata.
 - **Offline token refresh:** a forced refresh can't be triggered on demand on a device (tokens last about an hour). The "no connection during refresh is not expiry" behavior is covered by `test/auth_test.dart`, and the offline screens above show the signed-in state is kept.
 
 ## Pending
