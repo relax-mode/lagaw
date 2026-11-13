@@ -8,7 +8,7 @@ Out of scope: storage policies, uploads and migrations.
 
 ## Result
 
-**6 of 10 locations have a usable image. 4 are excluded** because no image with
+**9 of 10 locations have a usable image. 1 is excluded** because no image with
 verifiable rights was found.
 
 | Location | Status | Image | Photographer | License | Notes |
@@ -16,17 +16,17 @@ verifiable rights was found.
 | San Sebastian Cathedral | ✅ Approved | [Bacolod Cathedral Facade.jpg](https://commons.wikimedia.org/wiki/File:Bacolod_Cathedral_Facade.jpg) | Rauxilian | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Facade of the cathedral; people are small and incidental. |
 | The Negros Museum | ✅ Approved | [Negros Museum front (Gatuslao, Bacolod, Negros Occidental; 10-24-2022).jpg](https://commons.wikimedia.org/wiki/File:Negros_Museum_front_(Gatuslao,_Bacolod,_Negros_Occidental;_10-24-2022).jpg) | Patrickroque01 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Front of the museum with its sign; no people. |
 | Negros Forest Park | ✅ Approved | [Hornbill](destination-images/negros-forest-park/RLSJR-2-hornbill.jpg) (+ [leopard cat](destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photos, taken 2026-10-11 inside the park. |
-| Orange Project | ❌ Excluded | — | — | — | No photograph of this venue found on Wikimedia Commons. No permission from the venue on record. |
+| Orange Project | ✅ Approved | [Exterior](destination-images/orange-project/RLSJR-3-orange-project-exterior.jpg) (cropped to the facade) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Capitol Park and Lagoon | ✅ Approved | [Capitol Lagoon Bacolod City Philippines.jpg](https://commons.wikimedia.org/wiki/File:Capitol_Lagoon_Bacolod_City_Philippines.jpg) | Kguirnela | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | Lagoon with the Capitol behind it; no prominent logos or people. |
 | Negros Occidental Provincial Capitol | ✅ Approved | [Negros Occidental Provincial Capitol, Sep 2026.jpg](https://commons.wikimedia.org/wiki/File:Negros_Occidental_Provincial_Capitol,_Sep_2026.jpg) | Ralff Nestor Nacor | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Front facade; people only tiny in the distance. |
-| Cafetolyo Coffee Shop | ❌ Excluded | — | — | — | Private business; no photograph found on Wikimedia Commons and no permission from the owner on record. |
-| Arima Restaurant | ❌ Excluded | — | — | — | Private business; no photograph found on Wikimedia Commons and no permission from the owner on record. |
+| Cafetolyo Coffee Shop | ✅ Approved | [Counter](destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
+| Arima Restaurant | ✅ Approved | [Entrance](destination-images/arima/RLSJR-5-arima-entrance.jpg) (+ [sign](destination-images/arima/RLSJR-6-arima-sign.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Panaad Park and Sports Complex | ✅ Approved | [Panaad Stadium.jpg](https://commons.wikimedia.org/wiki/File:Panaad_Stadium.jpg) | Dominic Alojado | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0) | Panaad Stadium, the complex's main landmark; players are distant and not identifiable. |
 | Calea Pastries & Coffee | ❌ Excluded | — | — | — | Private business; no photograph found on Wikimedia Commons and no permission from the owner on record. |
 
 ## Licensing rules applied
 
-- **Photographer permission:** a team member's own original photo. The photographer, date, and a written `permission_record` are required. The file is kept in [`destination-images/`](destination-images/) with its SHA-1, and its location metadata is checked. Credit: "Photo: <photographer>".
+- **Photographer permission:** a team member's own original photo. The photographer, date, and a written `permission_record` are required. The file is kept in [`destination-images/`](destination-images/) with its SHA-1, and all embedded metadata (including GPS location) is removed before it is committed. Credit: "Photo: <photographer>".
 - **Accepted:** CC0, unconditional public domain, CC BY, CC BY-SA, all verified on the file's Wikimedia Commons page through the Commons API (`extmetadata`, license templates and Flickr review status).
 - **Excluded:**
   - NC and ND licenses;
@@ -60,8 +60,9 @@ verifiable rights was found.
 
 ## Follow-up
 
-- **Roel will take original photos** of the excluded venues himself, since no online photo with verifiable rights exists for them. Each will be added in a follow-up PR as a photographer-permission entry (credit, date, permission record), with no identifiable people and no third-party logos.
-- The excluded private venues (Orange Project, Cafetolyo, Arima, Calea) and Negros Forest Park could get photos with **written permission from the owner or operator**. A permission record would have to be added to the manifest before use.
+- **Roel photographed Orange Project, Cafetolyo and Arima himself on 2026-11-07** (added 2026-11-14). Three of his seven shots were not used: one had people seated close in the foreground, one was a close-up of a menu whose prices would go stale, and one was dominated by a dress-code sign. The Orange Project photo was cropped to exclude a wall of third-party photographs and a neighbouring shop's sign.
+- **Calea Pastries & Coffee** is still excluded. Roel plans to photograph it.
+- Calea could also get a photo with **written permission from the owner**. A permission record would have to be added to the manifest before use.
 - Licenses can change on Commons. Recheck `source_page_url` before a production upload if it happens long after the access date.
 
 ## Automated check

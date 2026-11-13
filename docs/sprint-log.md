@@ -969,3 +969,13 @@ is a different operation and was not triggered. See the
 - Validation: `.venv/Scripts/python.exe -m pytest -q backend/test_destination_enrichment.py backend/test_destination_coverage_audit.py` returned **35 passed in 0.09 s**; focused Ruff checks passed. Existing offline planner reports four blocked candidates, zero approved updates and zero writes. Evidence JSON parsing and `git diff --check` passed. PR publication and CI results are recorded separately on GitHub.
 
 - Publication: pushed `docs/s4-06-catalogue-verification`; GitHub integration refused both PR creation and #106 comment with HTTP 403 (`Resource not accessible by integration`). Local `gh` is unavailable. Added a comparison link and copy-ready PR description/issue comment to the handoff; no PR, posted comment, reviewer approval, CI result or merge is claimed. Earlier local sprint-log edits are restored after committing the scoped work and retained in the named stash.
+
+### November 14, 2026 — #107 follow-up: Roel's venue photos
+
+- Roel photographed **Orange Project, Cafetolyo and Arima** on 2026-11-07 (seven iPhone photos). Four were used and three left out:
+  - left out: people seated close in the foreground; a menu close-up with prices that would go stale; a frame dominated by a dress-code sign;
+  - the Orange Project photo was cropped to the facade, excluding a wall of third-party photographs and a neighbouring shop's sign.
+- The originals carried **GPS coordinates**. The committed copies are resized to at most 2048 px and have all metadata removed (verified).
+- They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **9 of 10 locations are now covered**. Calea Pastries & Coffee is still excluded; Roel plans to photograph it.
+- Andrew mentioned deleting 3 locations. As of this entry, `main`, the staging API and the production API all still list 10, so the manifest still covers all 10.
+
