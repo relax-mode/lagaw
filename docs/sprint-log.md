@@ -974,7 +974,7 @@ is a different operation and was not triggered. See the
 
 - Roel photographed **Orange Project, Cafetolyo, Arima and Calea** on 2026-11-07 (eleven iPhone photos). Seven were used and four left out:
   - left out: the crowded Calea dining area (too many close, identifiable diners); a Calea storefront where cropping out passers-by left too little of the building; a menu close-up with prices that would go stale; a frame dominated by a dress-code sign;
-  - cropped: Orange Project to its facade (excluding a wall of third-party photographs and a neighbouring shop's sign), 
+  - cropped: Orange Project to its facade (excluding a wall of third-party photographs and a neighbouring shop's sign);
   - **faces blurred** (Roel's request): every diner in the full Calea entrance photo, and two seated customers in the Cafetolyo seating photo, which is now used as an extra image.
 - The originals carried **GPS coordinates**. The committed copies are resized to at most 2048 px and have all metadata removed (verified).
 - They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **all 10 locations now have a licensed or permitted image**.
