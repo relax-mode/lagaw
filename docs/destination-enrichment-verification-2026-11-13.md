@@ -119,3 +119,39 @@ catalogue enrichment is deployed or authorize automatic issue closure.
   values and rejection of stale edits. No live database rerun test is claimed.
 - Evidence JSON validation and whitespace checks passed. PR CI is reported on
   GitHub separately; local success is not deployed acceptance evidence.
+
+## Publication handoff
+
+Branch: `docs/s4-06-catalogue-verification`. Git push succeeded. The connected
+GitHub integration returned HTTP 403, `Resource not accessible by integration`,
+for both PR creation and the #106 update comment. No local GitHub CLI is installed.
+No PR or comment was created and no PR CI result is claimed.
+
+[Open the PR comparison](https://github.com/relax-mode/lagaw/compare/main...docs/s4-06-catalogue-verification?expand=1).
+Suggested title: **docs(data): verify catalogue gaps and record #106 release blockers**.
+
+Copy-ready PR description:
+
+> Refs #106. Records a fresh development-first and production-second public
+> catalogue audit: ten active destinations per environment, only one with all
+> scheduling fields populated, and unresolved source conflicts. Adds the dated
+> snapshot, candidate/source review, exact existing-record gaps and concrete
+> verification questions. Corrects the stale PR #130 implementation status.
+>
+> Validation: 35 focused tests pass; Ruff, JSON parsing and whitespace checks
+> pass. The offline planner still reports four blocked candidates, zero approved
+> updates and zero writes. No `.env` access, catalogue changes or deployed
+> three-stop itinerary. Alternatives remain conditional; development verification
+> must precede production changes. Please review the documented blocker; do not
+> automatically close #106 or treat this as deployed enrichment.
+
+Copy-ready #106 update comment:
+
+> Branch `docs/s4-06-catalogue-verification` contains the November 13 live audit
+> and verification handoff. Development was checked before production using
+> credential-free GETs only. Both expose ten active records but only one
+> field-complete candidate, with factual conflicts unresolved. 35 focused tests
+> and Ruff pass. No `.env` edits or hosted writes. Dated operator replies or visit
+> notes are needed before approving catalogue changes; alternatives are not yet
+> imported. See `docs/destination-enrichment-verification-2026-11-13.md` and link
+> the PR here once opened. #106 remains open pending review/acceptance.
