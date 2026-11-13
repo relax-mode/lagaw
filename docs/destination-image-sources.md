@@ -19,14 +19,14 @@ verifiable rights was found.
 | Orange Project | ✅ Approved | [Exterior](destination-images/orange-project/RLSJR-3-orange-project-exterior.jpg) (cropped to the facade) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Capitol Park and Lagoon | ✅ Approved | [Capitol Lagoon Bacolod City Philippines.jpg](https://commons.wikimedia.org/wiki/File:Capitol_Lagoon_Bacolod_City_Philippines.jpg) | Kguirnela | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | Lagoon with the Capitol behind it; no prominent logos or people. |
 | Negros Occidental Provincial Capitol | ✅ Approved | [Negros Occidental Provincial Capitol, Sep 2026.jpg](https://commons.wikimedia.org/wiki/File:Negros_Occidental_Provincial_Capitol,_Sep_2026.jpg) | Ralff Nestor Nacor | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | Front facade; people only tiny in the distance. |
-| Cafetolyo Coffee Shop | ✅ Approved | [Counter](destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
+| Cafetolyo Coffee Shop | ✅ Approved | [Counter](destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg) (+ [seating](destination-images/cafetolyo/RLSJR-10-cafetolyo-seating.jpg), faces blurred) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Arima Restaurant | ✅ Approved | [Entrance](destination-images/arima/RLSJR-5-arima-entrance.jpg) (+ [sign](destination-images/arima/RLSJR-6-arima-sign.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 | Panaad Park and Sports Complex | ✅ Approved | [Panaad Stadium.jpg](https://commons.wikimedia.org/wiki/File:Panaad_Stadium.jpg) | Dominic Alojado | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0) | Panaad Stadium, the complex's main landmark; players are distant and not identifiable. |
-| Calea Pastries & Coffee | ✅ Approved | [Entrance](destination-images/calea/RLSJR-9-calea-entrance.jpg) (lightly cropped above the diners; + [cakes](destination-images/calea/RLSJR-8-calea-cakes.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
+| Calea Pastries & Coffee | ✅ Approved | [Entrance](destination-images/calea/RLSJR-9-calea-entrance.jpg) (full frame, diners' faces blurred; + [cakes](destination-images/calea/RLSJR-8-calea-cakes.jpg)) | Roel Jr. S. Lumauag | Photographer permission | Team member's own photo, taken 2026-11-07; metadata (including GPS) removed. |
 
 ## Licensing rules applied
 
-- **Photographer permission:** a team member's own original photo. The photographer, date, and a written `permission_record` are required. The file is kept in [`destination-images/`](destination-images/) with its SHA-1, and all embedded metadata (including GPS location) is removed before it is committed. Credit: "Photo: <photographer>".
+- **Photographer permission:** a team member's own original photo. The photographer, date, and a written `permission_record` are required. The file is kept in [`destination-images/`](destination-images/) with its SHA-1, and all embedded metadata (including GPS location) is removed before it is committed. Any visible face of a person who did not consent (including side profiles) is blurred heavily enough to be unrecognizable. Credit: "Photo: <photographer>".
 - **Accepted:** CC0, unconditional public domain, CC BY, CC BY-SA, all verified on the file's Wikimedia Commons page through the Commons API (`extmetadata`, license templates and Flickr review status).
 - **Excluded:**
   - NC and ND licenses;
@@ -60,8 +60,8 @@ verifiable rights was found.
 
 ## Follow-up
 
-- **Roel photographed Orange Project, Cafetolyo, Arima and Calea himself on 2026-11-07** (added 2026-11-14). Six of his photos are used and five were left out: two with identifiable people (Cafetolyo seating, the crowded Calea dining area), a Calea storefront where cropping out passers-by left too little of the building, a menu close-up whose prices would go stale, and one dominated by a dress-code sign.
-- Two photos were cropped: Orange Project to its facade (excluding a wall of third-party photographs and a neighbouring shop's sign), and the Calea entrance lightly above the dining tables, so diners seen in side profile are out of frame.
+- **Roel photographed Orange Project, Cafetolyo, Arima and Calea himself on 2026-11-07** (added 2026-11-14). Seven of his photos are used and four were left out: the crowded Calea dining area (too many close, identifiable diners), a Calea storefront where cropping out passers-by left too little of the building, a menu close-up whose prices would go stale, and one dominated by a dress-code sign.
+- Two photos were cropped: Orange Project to its facade (excluding a wall of third-party photographs and a neighbouring shop's sign), Faces are blurred in two: every diner in the Calea entrance photo, and two seated customers in the Cafetolyo seating photo.
 - Licenses can change on Commons. Recheck `source_page_url` before a production upload if it happens long after the access date.
 
 ## Automated check
