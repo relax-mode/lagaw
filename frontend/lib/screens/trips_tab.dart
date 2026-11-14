@@ -116,66 +116,68 @@ class _TripsTabState extends State<TripsTab> {
     }
   }
 
+  String get _countLabel => _loading && _trips.isEmpty
+      ? 'Loading your trips…'
+      : _hasMore
+      ? '${_trips.length}+ saved trips'
+      : _trips.length == 1
+      ? '1 saved trip'
+      : '${_trips.length} saved trips';
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Centered like "Explore Bacolod" on Spots. [home v3]
+        const Text(
+          'My Trips',
+          key: ValueKey('trips-title'),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 40,
+            height: 1,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1.4,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Color(0x40104AA0),
+                blurRadius: 22,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _countLabel,
+          key: const ValueKey('trips-count'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xEBFFFFFF),
+          ),
+        ),
+        const SizedBox(height: 18),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'My Trips',
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontWeight: FontWeight.w900,
-                      fontSize: 26,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    _loading
-                        ? 'Loading your trips…'
-                        : _hasMore
-                        ? '${_trips.length}+ saved trips'
-                        : _trips.length == 1
-                        ? '1 saved trip'
-                        : '${_trips.length} saved trips',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12.5,
-                      color: Color(0xE6FFFFFF),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Vector3DButton(
-              key: const ValueKey('trips-refresh'),
-              onTap: _loading ? null : _load,
-              backgroundColor: Colors.white,
-              shadowColor: const Color(0xFFCBD5E1),
-              borderColor: const Color(0xFFE2E8F0),
-              borderRadius: 18,
-              padding: const EdgeInsets.all(9),
-              depth: 3,
-              child: const Icon(
-                Icons.refresh_rounded,
-                size: 20,
-                color: AppTheme.slateDark,
-              ),
-            ),
-            const SizedBox(width: 10),
             _PlanTripButton(
               key: const ValueKey('trips-create'),
               onTap: _create,
             ),
+            const SizedBox(width: 10),
+            _RoundButton(
+              key: const ValueKey('trips-refresh'),
+              label: 'Refresh trips',
+              icon: Icons.refresh_rounded,
+              onTap: _loading ? null : _load,
+            ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 22),
         if (_notice != null) ...[
           StatusBanner(
             key: const ValueKey('trips-notice'),
@@ -215,24 +217,10 @@ class _TripsTabState extends State<TripsTab> {
         ] else if (_trips.isNotEmpty && _hasMore) ...[
           SizedBox(height: widget.isWide ? 18 : 6),
           Center(
-            child: Vector3DButton(
+            child: _SoftPillButton(
               key: const ValueKey('trips-load-more'),
+              label: _loadingMore ? 'Loading…' : 'Load more',
               onTap: _loadingMore ? null : _loadMore,
-              backgroundColor: Colors.white,
-              shadowColor: const Color(0xFFCBD5E1),
-              borderColor: const Color(0xFFE2E8F0),
-              borderRadius: 22,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              depth: 3,
-              child: Text(
-                _loadingMore ? 'Loading…' : 'Load more',
-                style: const TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13.5,
-                  color: AppTheme.slateDark,
-                ),
-              ),
             ),
           ),
         ],
@@ -273,6 +261,7 @@ class _TripsTabState extends State<TripsTab> {
   }
 }
 
+/// The orange pill used for the main action across the v3 screens.
 class _PlanTripButton extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -280,30 +269,90 @@ class _PlanTripButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Vector3DButton(
-      onTap: onTap,
-      backgroundColor: const Color(0xFFEA580C),
-      shadowColor: const Color(0xFF9A3412),
-      borderColor: const Color(0xFFFDBA74),
-      borderRadius: 22,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-      depth: 3.5,
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.add_rounded, size: 18, color: Colors.white),
-          SizedBox(width: 4),
-          Text(
-            'New trip',
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontWeight: FontWeight.w900,
-              fontSize: 13,
-              color: Colors.white,
-            ),
-          ),
-        ],
+    return FilledButton.icon(
+      onPressed: onTap,
+      style: FilledButton.styleFrom(
+        backgroundColor: const Color(0xFFF2620F),
+        foregroundColor: Colors.white,
+        shape: const StadiumBorder(),
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
       ),
+      icon: const Icon(Icons.add_rounded, size: 20),
+      label: const Text('Plan a new trip'),
+    );
+  }
+}
+
+/// A white circle with an icon, like the greeting pill's buttons.
+class _RoundButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _RoundButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xF5FFFFFF),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x330F1B2D),
+                blurRadius: 20,
+                offset: Offset(0, 8),
+                spreadRadius: -10,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            size: 21,
+            color: onTap == null ? AppTheme.slateMuted : AppTheme.slateDark,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SoftPillButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+
+  const _SoftPillButton({super.key, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: const Color(0xF5FFFFFF),
+        foregroundColor: AppTheme.slateDark,
+        side: BorderSide.none,
+        shape: const StadiumBorder(),
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+      ),
+      child: Text(label),
     );
   }
 }
@@ -316,40 +365,53 @@ class _EmptyTrips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FadeSlideIn(
-      child: GlassContainer(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x4D0F285A),
+              blurRadius: 30,
+              offset: Offset(0, 16),
+              spreadRadius: -16,
+            ),
+          ],
+        ),
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF7ED),
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFF3EA),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFFED7AA), width: 2),
               ),
               child: const Icon(
                 Icons.luggage_rounded,
                 size: 30,
-                color: Color(0xFFEA580C),
+                color: Color(0xFFF2620F),
               ),
             ),
             const SizedBox(height: 14),
             const Text(
               'No trips yet',
               style: TextStyle(
-                fontFamily: 'Outfit',
                 fontWeight: FontWeight.w900,
-                fontSize: 18,
+                fontSize: 22,
+                letterSpacing: -0.4,
                 color: AppTheme.slateDark,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             const Text(
               'Plan your first Bacolod lagaw: dates, budget and vibes.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                height: 1.4,
                 color: AppTheme.slateMuted,
               ),
             ),

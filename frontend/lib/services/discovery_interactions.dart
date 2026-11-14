@@ -75,10 +75,27 @@ class DiscoveryInteractions extends ChangeNotifier {
     }
   }
 
-  Future<void> swipe(String id, {required bool liked}) => _record(
-    id,
-    liked ? InteractionType.rightSwipe : InteractionType.leftSwipe,
-  );
+  /// Optimistic: the place leaves the deck at once and the event is sent
+  /// in the background. If sending fails the swipe is undone (the place
+  /// returns) and the [TripApiException] is rethrown so the caller can say
+  /// why. Still sent once; never retried automatically. [home v3]
+  Future<void> swipe(String id, {required bool liked}) async {
+    if (_busy.contains(id) || isSwiped(id)) return;
+    final set = liked ? _liked : _passed;
+    final type = liked ? InteractionType.rightSwipe : InteractionType.leftSwipe;
+    _busy.add(id);
+    set.add(id);
+    notifyListeners();
+    try {
+      await _service.recordInteraction(id, type);
+    } on TripApiException {
+      set.remove(id);
+      rethrow;
+    } finally {
+      _busy.remove(id);
+      notifyListeners();
+    }
+  }
 
   /// Already-saved places are not saved again.
   Future<void> save(String id) async {
@@ -89,8 +106,8 @@ class DiscoveryInteractions extends ChangeNotifier {
   Future<void> rate(String id, int stars) =>
       _record(id, InteractionType.rating, rating: stars.toDouble());
 
-  /// Sends one event. Throws [TripApiException] on failure; local state
-  /// changes only after the server confirms.
+  /// Sends one event (saves and ratings). Throws [TripApiException] on
+  /// failure; local state changes only after the server confirms.
   Future<void> _record(
     String id,
     InteractionType type, {

@@ -4,18 +4,26 @@ import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
 import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
+import 'screens/home/home_view.dart';
+import 'screens/spots/spots_view.dart';
+import 'screens/swipe/swipe_deck.dart';
+import 'screens/onboarding/first_run_gate.dart' show preferencesRepository;
+import 'widgets/floating_elements.dart';
 import 'screens/trips_tab.dart';
+import 'screens/you_tab.dart';
 import 'services/api_service.dart';
 import 'services/discovery_interactions.dart';
 import 'services/trip_service.dart';
 import 'theme.dart';
 import 'widgets/bacolod_3d_badges.dart';
 import 'widgets/destination_photo.dart';
+import 'widgets/greeting_pill.dart';
+import 'widgets/lagaw_nav_bar.dart';
 import 'widgets/left_swipe_explainer.dart';
 import 'widgets/rating_dialog.dart';
 import 'widgets/tactile_motion.dart';
 
-enum AppTab { explore, swipe, spots, trips }
+enum AppTab { explore, swipe, spots, trips, you }
 
 enum ApiViewState { live, loading, empty, error }
 
@@ -40,7 +48,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
   bool _showOnlySaved = false;
 
   // Swipe Deck State
-  double _dragOffset = 0.0;
 
   /// The latest swipe failure, shown under the card.
   String? _swipeError;
@@ -238,17 +245,14 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final current = deck.first;
     if (_interactions.isBusy(current.id)) return;
     if (!liked && !await confirmLeftSwipeOnce(context)) {
-      if (mounted) setState(() => _dragOffset = 0.0);
       return;
     }
     setState(() => _swipeError = null);
     try {
       await _interactions.swipe(current.id, liked: liked);
-      if (mounted) setState(() => _dragOffset = 0.0);
     } on TripApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _dragOffset = 0.0;
         _swipeError = describeInteractionFailure(e);
       });
     }
@@ -400,29 +404,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   child: Coffee3DBadge(size: 120),
                 ),
               ),
-            ] else ...[
-              // Mobile festive ambient accents (non-blocking edge accents)
-              const Positioned(
-                top: 72,
-                right: -8,
-                child: IgnorePointer(
-                  child: MassKara3DBadge(size: 68),
-                ),
-              ),
-              const Positioned(
-                top: 290,
-                left: -12,
-                child: IgnorePointer(
-                  child: Piaya3DBadge(size: 60),
-                ),
-              ),
-              const Positioned(
-                bottom: 120,
-                right: -10,
-                child: IgnorePointer(
-                  child: Inasal3DBadge(size: 66),
-                ),
-              ),
             ],
 
             // 3. Main Center Content Container
@@ -432,6 +413,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   constraints: BoxConstraints(maxWidth: contentMaxWidth),
                   child: Stack(
                     children: [
+                      // One element layer for every phone tab, so elements
+                      // glide between pages instead of popping.
+                      if (!isWide)
+                        Positioned.fill(
+                          top: 8,
+                          child: FloatingElements(
+                            placements: _elementsFor(_activeTab),
+                          ),
+                        ),
                       Column(
                         children: [
                           const SizedBox(height: 8),
@@ -439,38 +429,92 @@ class _LocationsScreenState extends State<LocationsScreen> {
                             duration: TactileMotion.tab,
                             curve: TactileMotion.curve,
                             alignment: Alignment.topCenter,
-                            child: _activeTab == AppTab.explore
+                            child: _activeTab == AppTab.explore && isWide
                                 ? Padding(
                                     padding: const EdgeInsets.only(bottom: 10),
                                     child: _buildLagawHero(isWide: isWide),
                                   )
                                 : const SizedBox(width: double.infinity),
                           ),
-                          _buildTopGlassHeader(isWide: isWide),
+                          if (isWide) _buildTopGlassHeader(isWide: isWide),
+                          // Pages cross-fade while the elements float to
+                          // their new spots, instead of snapping. [home v3]
                           Expanded(
-                            child: SingleChildScrollView(
-                              padding: EdgeInsets.fromLTRB(
-                                isWide ? 32 : 20,
-                                14,
-                                isWide ? 32 : 20,
-                                isWide ? 40 : 110,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 280),
+                              switchInCurve: Curves.easeOut,
+                              switchOutCurve: Curves.easeIn,
+                              layoutBuilder: (current, previous) => Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  for (final p in previous)
+                                    IgnorePointer(child: p),
+                                  ?current,
+                                ],
                               ),
-                              child: TactilePageSwitcher(
-                                pageKey: (_activeTab, _showOnlySaved),
-                                child: _buildActiveTabContent(isWide: isWide),
+                              child: KeyedSubtree(
+                                // One key per phone tab: each page (with its
+                                // own header) fades as a whole.
+                                key: ValueKey(
+                                  isWide ? 'page' : _activeTab.name,
+                                ),
+                                child: !isWide && _activeTab == AppTab.explore
+                                    ? _buildHomeV3()
+                                    : !isWide && _activeTab == AppTab.spots
+                                    ? _buildSpotsV3()
+                                    : Column(
+                                        children: [
+                                          // You has its own avatar hero
+                                          // instead of the pill.
+                                          if (!isWide &&
+                                              _activeTab != AppTab.you)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 8,
+                                                bottom: 4,
+                                              ),
+                                              child: Center(
+                                                child: _buildGreetingPill(),
+                                              ),
+                                            ),
+                                          Expanded(
+                                            child: SingleChildScrollView(
+                                              padding: EdgeInsets.fromLTRB(
+                                                isWide ? 32 : 20,
+                                                14,
+                                                isWide ? 32 : 20,
+                                                isWide ? 40 : 110,
+                                              ),
+                                              child: TactilePageSwitcher(
+                                                pageKey: (
+                                                  _activeTab,
+                                                  _showOnlySaved,
+                                                ),
+                                                child: _buildActiveTabContent(
+                                                  isWide: isWide,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                               ),
                             ),
                           ),
                         ],
                       ),
 
-                      // Bottom Floating Glass Dock (Mobile only)
+                      // v3 floating nav with the swipe button (mobile only)
                       if (!isWide)
                         Positioned(
-                          left: 20,
-                          right: 20,
-                          bottom: 16,
-                          child: _buildBottomGlassDock(),
+                          left: 18,
+                          right: 18,
+                          bottom: _navBottom,
+                          child: LagawNavBar(
+                            active: _navDestination,
+                            onSelect: _selectDestination,
+                            onSwipe: _openSwipeMenu,
+                          ),
                         ),
                     ],
                   ),
@@ -480,6 +524,133 @@ class _LocationsScreenState extends State<LocationsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  static const double _navBottom = 16;
+
+  NavDestination? get _navDestination => switch (_activeTab) {
+        AppTab.explore => NavDestination.home,
+        AppTab.spots => NavDestination.spots,
+        AppTab.trips => NavDestination.trips,
+        AppTab.you => NavDestination.you,
+        AppTab.swipe => null,
+      };
+
+  void _selectDestination(NavDestination d) {
+    setState(() {
+      _showOnlySaved = false;
+      _activeTab = switch (d) {
+        NavDestination.home => AppTab.explore,
+        NavDestination.spots => AppTab.spots,
+        NavDestination.trips => AppTab.trips,
+        NavDestination.you => AppTab.you,
+      };
+    });
+  }
+
+  /// The nav's swipe button: Start matching or Plan a trip. [home v3]
+  Future<void> _openSwipeMenu() async {
+    final choice = await showSwipeMenu(
+      context,
+      bottomInset: MediaQuery.paddingOf(context).bottom + _navBottom,
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case SwipeMenuChoice.startMatching:
+        setState(() {
+          _showOnlySaved = false;
+          _activeTab = AppTab.swipe;
+        });
+      case SwipeMenuChoice.planTrip:
+        await _planTrip();
+    }
+  }
+
+  /// The v3 header for phone tabs without their own (Trips, You, Swipe).
+  Widget _buildGreetingPill() => GreetingPill(
+        avatarLetter: _avatarLetter,
+        likedCount: _savedIds.length,
+        onSearch: () => setState(() {
+          _showOnlySaved = false;
+          _activeTab = AppTab.spots;
+        }),
+        onSaved: _viewSavedLocations,
+        onAccount: () => setState(() => _activeTab = AppTab.you),
+      );
+
+  /// Each tab's own set of floating elements.
+  List<ElementPlacement> _elementsFor(AppTab tab) => switch (tab) {
+        AppTab.explore => ElementPlacement.home,
+        AppTab.spots => ElementPlacement.spots,
+        AppTab.trips => ElementPlacement.trips,
+        AppTab.you => ElementPlacement.you,
+        AppTab.swipe => ElementPlacement.swipe,
+      };
+
+  PlaceActions get _placeActions => PlaceActions(
+        isSaved: _interactions.isSaved,
+        isBusy: _interactions.isBusy,
+        ratingFor: _interactions.ratingFor,
+        onSave: (place) => _save(place.id),
+        onRate: _rate,
+        changes: _interactions,
+      );
+
+  Widget _buildSpotsV3() {
+    final live = _availableLocations;
+    return SpotsView(
+      showElements: false,
+      avatarLetter: _avatarLetter,
+      likedCount: _savedIds.length,
+      onSaved: _viewSavedLocations,
+      onAccount: () => setState(() => _activeTab = AppTab.you),
+      places: live.isEmpty ? const [] : _filteredLocations,
+      categories: [
+        for (final c in HomeCategory.fromLocations(live)) c.id,
+      ],
+      selectedCategory: _selectedCategory,
+      query: _searchQuery,
+      onQuery: (q) => setState(() => _searchQuery = q),
+      onCategory: (id) => setState(() => _selectedCategory = id),
+      savedOnly: _showOnlySaved,
+      onExitSaved: () => setState(() {
+        _showOnlySaved = false;
+        _selectedCategory = 'all';
+        _searchQuery = '';
+      }),
+      isSaved: _interactions.isSaved,
+      isBusy: _interactions.isBusy,
+      ratingFor: _interactions.ratingFor,
+      changes: _interactions,
+      onSave: (place) => _save(place.id),
+      onRate: _rate,
+      placesState:
+          live.isEmpty ? _buildLandingPlacesState(height: 260) : null,
+    );
+  }
+
+  Widget _buildHomeV3() {
+    final places = _availableLocations;
+    return HomeView(
+      showElements: false,
+      avatarLetter: _avatarLetter,
+      spotCount: places.length,
+      likedCount: _savedIds.length,
+      categories: HomeCategory.fromLocations(places),
+      placesState: places.isEmpty ? _buildLandingPlacesState(height: 290) : null,
+      onSearch: () => setState(() {
+        _showOnlySaved = false;
+        _activeTab = AppTab.spots;
+      }),
+      onSaved: _viewSavedLocations,
+      onAccount: () => setState(() => _activeTab = AppTab.you),
+      onSeeCategory: (id) => setState(() {
+        _showOnlySaved = false;
+        _searchQuery = '';
+        _selectedCategory = id;
+        _activeTab = AppTab.spots;
+      }),
     );
   }
 
@@ -654,7 +825,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     ],
                   ),
                   Text(
-                    isWide ? 'Bacolod City — City of Smiles' : 'Maayong Aga, Roel!',
+                    isWide
+                        ? 'Bacolod City — City of Smiles'
+                        : hiligaynonGreeting(DateTime.now()).replaceAll(',', '!'),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
@@ -698,7 +871,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
               const SizedBox(width: 8),
             ],
 
-            // 3D Swipe Deck Icon Button
+            // 3D Swipe Deck Icon Button (wide only; phones use the nav)
+            if (isWide) ...[
             Vector3DButton(
               onTap: () => setState(() => _activeTab = AppTab.swipe),
               backgroundColor: _activeTab == AppTab.swipe
@@ -722,6 +896,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
               ),
             ),
             const SizedBox(width: 8),
+            ],
 
             // 3D Search Button
             Vector3DButton(
@@ -876,6 +1051,21 @@ class _LocationsScreenState extends State<LocationsScreen> {
         return _buildSwipeTab(isWide: isWide);
       case AppTab.spots:
         return _buildSpotsDirectoryTab(isWide: isWide);
+      case AppTab.you:
+        return YouTab(
+          session: AuthSession.current,
+          likedCount: _savedIds.length,
+          onOpenSaved: _viewSavedLocations,
+          picks: _availableLocations
+              .where((l) => _savedIds.contains(l.id))
+              .toList(),
+          actions: _placeActions,
+          preferences: preferencesRepository,
+          onExplore: () => setState(() {
+            _showOnlySaved = false;
+            _activeTab = AppTab.spots;
+          }),
+        );
       case AppTab.trips:
         return TripsTab(service: _tripService, isWide: isWide);
     }
@@ -1634,365 +1824,21 @@ class _LocationsScreenState extends State<LocationsScreen> {
     }
 
     final spot = deck.first;
-    final busy = _interactions.isBusy(spot.id);
-    final rating = _interactions.ratingFor(spot.id);
     final position = _availableLocations.length - deck.length + 1;
 
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: isWide ? 460 : 430),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Swipe Your Vibe',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      'Drag right to like • Drag left to pass',
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0x40FFFFFF),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '$position / ${_availableLocations.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Interactive Dragging Card with Like / Nope Stamps
-            GestureDetector(
-              onPanUpdate: (details) {
-                if (busy) return;
-                setState(() {
-                  _dragOffset += details.delta.dx;
-                });
-              },
-              onPanEnd: (details) {
-                if (busy) return;
-                if (_dragOffset > 90 || details.velocity.pixelsPerSecond.dx > 400) {
-                  _handleSwipe(true);
-                } else if (_dragOffset < -90 ||
-                    details.velocity.pixelsPerSecond.dx < -400) {
-                  _handleSwipe(false);
-                } else {
-                  setState(() {
-                    _dragOffset = 0.0;
-                  });
-                }
-              },
-              child: Transform.translate(
-                offset: Offset(_dragOffset, 0),
-                child: Transform.rotate(
-                  angle: _dragOffset * 0.0009,
-                  child: Stack(
-                    children: [
-                      GlassContainer(
-                        borderRadius: 28,
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(22),
-                              child: SizedBox(
-                                height: isWide ? 260 : 230,
-                                width: double.infinity,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    DestinationPhoto(location: spot),
-                                    Container(
-                                      decoration: const BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Color(0x22000000),
-                                            Color(0xCC000000)
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 12,
-                                      left: 12,
-                                      right: 12,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0x55FFFFFF),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Text(
-                                              spot.category.toUpperCase(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w900,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 12,
-                                      left: 12,
-                                      right: 12,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            spot.name,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w900,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            spot.address,
-                                            style: const TextStyle(
-                                              color: Color(0xEEFFFFFF),
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              spot.description,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppTheme.slateDark,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Budget: ${spot.costRange}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF047857),
-                                  ),
-                                ),
-                                Text(
-                                  'Typical visit: ${spot.duration}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0369A1),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Centered Swipe Feedback Indicator (Noticeable yet clean & balanced)
-                      if (_dragOffset.abs() > 15)
-                        Positioned.fill(
-                          child: Center(
-                            child: Opacity(
-                              opacity: ((_dragOffset.abs() - 15) / 80).clamp(0.0, 0.92),
-                              child: Transform.scale(
-                                scale: (0.88 + (_dragOffset.abs() / 320)).clamp(0.88, 1.12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 22,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _dragOffset > 0
-                                        ? const Color(0xEE10B981)
-                                        : const Color(0xEEF43F5E),
-                                    borderRadius: BorderRadius.circular(28),
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: _dragOffset > 0
-                                            ? const Color(0x5510B981)
-                                            : const Color(0x55F43F5E),
-                                        blurRadius: 20,
-                                        spreadRadius: 2,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        _dragOffset > 0
-                                            ? Icons.favorite_rounded
-                                            : Icons.close_rounded,
-                                        color: Colors.white,
-                                        size: 26,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        _dragOffset > 0 ? 'LIKE' : 'PASS',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 18,
-                                          letterSpacing: 1.4,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // Action Buttons (3D Vector Illustration style)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Vector3DButton(
-                  key: const ValueKey('swipe-pass'),
-                  onTap: busy ? null : () => _handleSwipe(false),
-                  backgroundColor: Colors.white,
-                  shadowColor: const Color(0xFFFDA4AF),
-                  borderColor: const Color(0xFFF43F5E),
-                  borderRadius: 34,
-                  padding: const EdgeInsets.all(16),
-                  depth: 5.0,
-                  child: const Icon(
-                    Icons.close_rounded,
-                    size: 32,
-                    color: Color(0xFFF43F5E),
-                  ),
-                ),
-                const SizedBox(width: 28),
-                Vector3DButton(
-                  key: const ValueKey('swipe-like'),
-                  onTap: busy ? null : () => _handleSwipe(true),
-                  backgroundColor: const Color(0xFF10B981),
-                  shadowColor: const Color(0xFF047857),
-                  borderColor: const Color(0xFF6EE7B7),
-                  borderRadius: 34,
-                  padding: const EdgeInsets.all(16),
-                  depth: 5.0,
-                  child: const Icon(
-                    Icons.favorite_rounded,
-                    size: 32,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton.icon(
-                key: const ValueKey('swipe-rate'),
-                onPressed: busy ? null : () => _rate(spot),
-                icon: Icon(
-                  rating == null ? Icons.star_border_rounded : Icons.star_rounded,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  rating == null
-                      ? 'Been here? Rate it'
-                      : 'You rated it ${rating.toStringAsFixed(rating % 1 == 0 ? 0 : 1)} · Rate again',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-            if (busy)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: SizedBox(
-                    key: ValueKey('swipe-busy'),
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            if (_swipeError != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Container(
-                  key: const ValueKey('swipe-error'),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF1F2),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFFECDD3), width: 2),
-                  ),
-                  child: Text(
-                    _swipeError!,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.slateDark,
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        child: SwipeDeck(
+          spot: spot,
+          upNext: deck.skip(1).take(2).toList(),
+          position: position,
+          total: _availableLocations.length,
+          busy: _interactions.isBusy(spot.id),
+          rating: _interactions.ratingFor(spot.id),
+          error: _swipeError,
+          onSwipe: _handleSwipe,
+          onRate: () => _rate(spot),
         ),
       ),
     );
@@ -3008,124 +2854,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
     );
   }
 
-  /// Bottom Floating 3D Vector Navigation Dock (Used on mobile/narrow viewports)
-  Widget _buildBottomGlassDock() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(36),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 2.2),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0xFFCBD5E1),
-                  offset: Offset(0, 4),
-                  blurRadius: 0,
-                ),
-                BoxShadow(
-                  color: Color(0x220F172A),
-                  blurRadius: 16,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavPillButton(
-                  icon: Icons.explore_rounded,
-                  label: 'Home',
-                  tab: AppTab.explore,
-                ),
-                _buildNavPillButton(
-                  icon: Icons.layers_rounded,
-                  label: 'Spots',
-                  tab: AppTab.spots,
-                ),
-                _buildNavPillButton(
-                  icon: Icons.luggage_rounded,
-                  label: 'Trips',
-                  tab: AppTab.trips,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Vector3DButton(
-          onTap: () => setState(() => _activeTab = AppTab.swipe),
-          backgroundColor: _activeTab == AppTab.swipe
-              ? const Color(0xFFF43F5E)
-              : const Color(0xFFF59E0B),
-          shadowColor: _activeTab == AppTab.swipe
-              ? const Color(0xFF9F1239)
-              : const Color(0xFFB45309),
-          borderColor: Colors.white,
-          borderRadius: 26,
-          padding: const EdgeInsets.all(13),
-          depth: 4.0,
-          child: const Icon(
-            Icons.style_rounded,
-            color: Colors.white,
-            size: 22,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavPillButton({
-    required IconData icon,
-    required String label,
-    required AppTab tab,
-  }) {
-    final isActive = _activeTab == tab && !_showOnlySaved;
-    // Three pills share the dock; shrink rather than overflow on tiny phones.
-    final pill = Vector3DButton(
-      onTap: () => setState(() {
-        _showOnlySaved = false;
-        _activeTab = tab;
-      }),
-      backgroundColor: isActive
-          ? (tab == AppTab.explore ? const Color(0xFF0F172A) : const Color(0xFF2563EB))
-          : Colors.white,
-      shadowColor: isActive
-          ? (tab == AppTab.explore ? const Color(0xFF020617) : const Color(0xFF1D4ED8))
-          : const Color(0xFFE2E8F0),
-      borderColor: isActive
-          ? Colors.transparent
-          : const Color(0xFFF1F5F9),
-      borderRadius: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      depth: 3.0,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isActive ? Colors.white : AppTheme.slateDark,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Outfit',
-              color: isActive ? Colors.white : AppTheme.slateDark,
-            ),
-          ),
-        ],
-      ),
-    );
-    return Flexible(
-      child: FittedBox(fit: BoxFit.scaleDown, child: pill),
-    );
-  }
 }
 
 /// Clips to the child's box grown by [horizontal] and [vertical] pixels, so

@@ -6,7 +6,7 @@ import '../../services/onboarding_repository.dart';
 import 'discovery_screen.dart';
 import 'onboarding_flow.dart';
 
-/// Opens travel preferences. Signed-in builds use the real #102/#103 APIs
+/// Opens travel preferences as a pop-up over the blurred app. Signed-in builds use the real #102/#103 APIs
 /// and continue to recommendations; builds without Supabase use the mock.
 /// [S4-04]
 Future<void> openTravelPreferences(
@@ -23,16 +23,17 @@ Future<void> openTravelPreferences(
   } else {
     repository = MockOnboardingRepository.shared;
   }
-  return Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => OnboardingFlow(
-        repository: repository,
-        next: next,
-        allowSkip: allowSkip,
-      ),
-    ),
+  return showPreferencesPopup<void>(
+    context,
+    OnboardingFlow(repository: repository, next: next, allowSkip: allowSkip),
   );
 }
+
+/// Where this build reads and saves travel preferences: the real API when
+/// signed in, otherwise the in-app mock. [home v3]
+OnboardingRepository preferencesRepository() => AppConfig.authEnabled
+    ? DiscoveryService()
+    : MockOnboardingRepository.shared;
 
 /// Sends a signed-in user with no saved preferences to onboarding once per
 /// app run. If the check fails the app opens normally; preferences stay
