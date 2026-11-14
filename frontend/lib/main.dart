@@ -16,8 +16,12 @@ import 'theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AuthSession? session;
-  String? configError;
-  if (AppConfig.authEnabled) {
+  String? configError = releaseConfigError(
+    isRelease: kReleaseMode,
+    apiBaseUrlProvided: AppConfig.apiBaseUrlProvided,
+    authEnabled: AppConfig.authEnabled,
+  );
+  if (configError == null && AppConfig.authEnabled) {
     if (!isPublicSupabaseKey(AppConfig.supabaseAnonKey)) {
       configError =
           'This build has a server-only Supabase key. Rebuild it with the '

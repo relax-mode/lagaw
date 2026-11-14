@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../auth/api_credentials.dart';
+import '../auth/auth_client.dart';
 import '../auth/auth_session.dart';
 import '../config.dart';
 import '../models/trip.dart';
@@ -339,9 +340,9 @@ class TripService {
   Future<List<InteractionEvent>> listInteractions({int pageSize = 100}) async {
     final events = <InteractionEvent>[];
     for (var offset = 0; ; offset += pageSize) {
-      final uri = Uri.parse(AppConfig.interactionsEndpoint).replace(
-        queryParameters: {'limit': '$pageSize', 'offset': '$offset'},
-      );
+      final uri = Uri.parse(
+        AppConfig.interactionsEndpoint,
+      ).replace(queryParameters: {'limit': '$pageSize', 'offset': '$offset'});
       final response = await _send(() => _client.get(uri, headers: _headers));
       if (response.statusCode != 200) throw _errorFor(response);
       final items =
@@ -402,9 +403,24 @@ class TripService {
   /// Sends with the current bearer token. A 401 means authentication failed
   /// before the operation ran, so after one successful session refresh the
   /// request is retried once (the #79 contract); it never loops.
+  /// A token refresh that can't reach Supabase is a connection problem,
+  /// not an expired session. [S4-17]
   Future<http.Response> _send(
     Future<http.Response> Function() request, {
     Duration timeout = _timeout,
+  }) async {
+    try {
+      return await _sendAuthorized(request, timeout: timeout);
+    } on AuthUnreachable {
+      throw const TripApiException(
+        'Could not reach the Lagaw server. Check your connection and try again.',
+      );
+    }
+  }
+
+  Future<http.Response> _sendAuthorized(
+    Future<http.Response> Function() request, {
+    required Duration timeout,
   }) async {
     final token = await _auth.token();
     if (token == null) {

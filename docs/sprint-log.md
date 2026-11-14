@@ -979,3 +979,14 @@ is a different operation and was not triggered. See the
 - The originals carried **GPS coordinates**. The committed copies are resized to at most 2048 px and have all metadata removed (verified).
 - They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **all 10 locations now have a licensed or permitted image**.
 - Andrew mentioned deleting 3 locations. As of this entry, `main`, the staging API and the production API all still list 10, so the manifest still covers all 10.
+
+### November 14, 2026 — #117 Android release build and honest UI states
+
+- Roel started #117 on `fix/s4-17-release-build-honest-ui` and audited `main`. Verified: release APKs had **no INTERNET permission** (debug/profile only), the identity was `com.example.frontend`, release signing used the debug key, a release build without `API_BASE_URL` called localhost, and the UI showed hardcoded match scores, "Free" for unknown prices, a default "60 mins", Unsplash stock photos, hardcoded weather, a silent sample-data fallback, and "session expired" when the network dropped during a token refresh.
+- **Decisions (Roel):** app ID **`com.lagaw.bacolod`**; **remove sample spots** so only live data is shown.
+- Fixed all of the above. Release signing reads a git-ignored `key.properties`; the keystore stays with the release owner (#121). Release builds without a server configuration show a clear error. Unknown values stay unknown, there are no stock photos, and a network failure during refresh no longer signs the user out.
+- `flutter analyze` is clean, and `flutter test` passes 231 tests. A release APK (built against staging) reports `com.lagaw.bacolod`, `INTERNET` and the label "Lagaw".
+- Verified the release APK (against staging) on Roel's Infinix X6850 (Android 16). All 8 checks passed: real places, "Price unknown" and "No photo yet", no fake match %, honest timeout and offline errors with Retry, still signed in while offline, and the "Lagaw" app identity with INTERNET.
+- Found during device testing: staging's San Sebastian Cathedral `image_url` shows the Negros Museum (left over from the #108 test upload; production is unaffected), which is reported for the #108 owner. The launcher icon was still Flutter's default; at Roel's request it is now the Lagaw logo at all densities, with no metadata.
+- **Decision (Roel):** the production check is handed to the release owner (#121, CyGray), who has the production publishable key and a production account. #117 stays open until it is confirmed. See [evidence](evidence/release-build-honest-ui.md).
+
