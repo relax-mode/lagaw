@@ -151,4 +151,39 @@ void main() {
       expect(find.text('Photo unavailable'), findsOneWidget);
     });
   });
+
+  testWidgets('cards can move the credit to a top corner', (tester) async {
+    Future<Rect> chipRect(CreditCorner corner) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: DestinationPhoto(
+                location: _place(_cathedral, _url(_cathedral, _sha)),
+                credits: _credits,
+                compact: true,
+                creditCorner: corner,
+              ),
+            ),
+          ),
+        ),
+      );
+      return tester.getRect(
+        find.byKey(ValueKey('photo-credit-${_sha.substring(0, 12)}')),
+      );
+    }
+
+    final bottom = await chipRect(CreditCorner.bottomLeft);
+    // The 300 x 300 photo is centered on the screen.
+    final center = tester.getCenter(find.byType(DestinationPhoto));
+    final topLeft = await chipRect(CreditCorner.topLeft);
+    final topRight = await chipRect(CreditCorner.topRight);
+    expect(bottom.bottom, greaterThan(center.dy));
+    expect(topLeft.top, lessThan(center.dy));
+    expect(topLeft.left, lessThan(center.dx));
+    expect(topRight.top, lessThan(center.dy));
+    expect(topRight.right, greaterThan(center.dx));
+  });
 }

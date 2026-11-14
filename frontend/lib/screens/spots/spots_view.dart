@@ -580,7 +580,12 @@ class _PlacePhoto extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        DestinationPhoto(location: place, compact: !large),
+        // Heart and × sit top-right, the name bottom-left: credit top-left.
+        DestinationPhoto(
+          location: place,
+          compact: !large,
+          creditCorner: CreditCorner.topLeft,
+        ),
         IgnorePointer(
           child: DecoratedBox(
             decoration: BoxDecoration(

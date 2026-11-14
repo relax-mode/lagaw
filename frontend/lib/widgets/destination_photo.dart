@@ -10,6 +10,9 @@ import '../theme.dart';
 /// is shown only when its file is approved for this place in the #107
 /// manifest, so unlicensed or mislinked images are never displayed. Also
 /// used while loading and when the image fails. [S4-17, S4-09]
+/// Where the photo credit sits, so card titles and fades never cover it.
+enum CreditCorner { bottomLeft, topLeft, topRight }
+
 class DestinationPhoto extends StatelessWidget {
   final LocationItem location;
   final double? width;
@@ -21,6 +24,9 @@ class DestinationPhoto extends StatelessWidget {
   /// Test hook; defaults to [ImageCredits.instance].
   final ImageCredits? credits;
 
+  /// Cards with a title at the bottom move the credit to a top corner.
+  final CreditCorner creditCorner;
+
   const DestinationPhoto({
     super.key,
     required this.location,
@@ -28,6 +34,7 @@ class DestinationPhoto extends StatelessWidget {
     this.height,
     this.compact = false,
     this.credits,
+    this.creditCorner = CreditCorner.bottomLeft,
   });
 
   @override
@@ -59,12 +66,30 @@ class DestinationPhoto extends StatelessWidget {
                 progress == null ? child : _placeholder(),
             errorBuilder: (_, _, _) => _placeholder(label: 'Photo unavailable'),
           ),
-          Positioned(
-            left: 6,
-            bottom: 6,
-            right: compact ? null : 6,
-            child: _CreditChip(credit: credit, compact: compact),
-          ),
+          switch (creditCorner) {
+            CreditCorner.bottomLeft => Positioned(
+              left: 6,
+              bottom: 6,
+              right: compact ? null : 6,
+              child: _CreditChip(credit: credit, compact: compact),
+            ),
+            CreditCorner.topLeft => Positioned(
+              left: 10,
+              top: 10,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 240),
+                child: _CreditChip(credit: credit, compact: compact),
+              ),
+            ),
+            CreditCorner.topRight => Positioned(
+              right: 10,
+              top: 10,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: _CreditChip(credit: credit, compact: compact),
+              ),
+            ),
+          },
         ],
       ),
     );
@@ -170,10 +195,19 @@ class _CreditChip extends StatelessWidget {
 Future<void> showPhotoCredit(BuildContext context, ImageCredit credit) {
   return showModalBottomSheet<void>(
     context: context,
+    // Above any pop-up card, full width, like the app's other sheets.
+    useRootNavigator: true,
+    showDragHandle: true,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
     builder: (sheetContext) => SafeArea(
-      child: Padding(
+      child: Container(
         key: const ValueKey('photo-credit-sheet'),
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+        // M3 sheets shrink to their content; credits read better full width.
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(22, 0, 22, 18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

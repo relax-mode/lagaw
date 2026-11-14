@@ -999,6 +999,14 @@ is a different operation and was not triggered. See the
 - `flutter test` passes 239 tests and `pytest -m "not db"` passes 1108. On Roel's Infinix (release build, staging), the mislinked cathedral photo is now refused.
 - Pending: uploads by the #108 owner, then deployed photo-and-credit screenshots. See [evidence](evidence/destination-images-ui.md).
 
+### November 14, 2026 — #109 photos uploaded to staging
+
+- **Credential handoff:** Andrew gave Roel the staging Supabase service-role key for the #109 upload. Roel holds it in his git-ignored `.env`. Andrew first sent production keys (a secret key and a service-role key). They were spotted before any use, because the service-role key names its project, and removed. Andrew was asked to rotate the production keys, since they were shared over chat.
+- Cleared staging's mislinked San Sebastian Cathedral `image_url` (the Negros Museum test image from #108).
+- Uploaded all 14 approved photos to staging and linked the 10 main ones. The script verified every public copy by SHA-256, and every link matches the app's approved credits.
+- Checked on Roel's Infinix: real photos with credits on Home, Spots, the open card and the credit sheet. The credit chip had been hidden under card titles on Spots and swipe cards, so it moved to a top corner, and the credit sheet is now full width. `flutter test` passes 273 tests. See [evidence](evidence/destination-images-ui.md).
+- #109 can close. A production upload is left for the production release.
+
 ### November 14, 2026 — Home redesign v3
 
 - Roel asked for a cleaner, less cramped home screen that keeps Lagaw's vibe. Using the Impeccable design skill (a design review only, since the screen is native), Claude critiqued the current home and produced three mockups from Roel's references. Roel chose v3 and directed each change:

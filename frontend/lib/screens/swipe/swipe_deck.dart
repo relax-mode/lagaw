@@ -292,7 +292,12 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    DestinationPhoto(location: spot),
+                    // The category chip is top-left, the panel at the
+                    // bottom: credit top-right.
+                    DestinationPhoto(
+                      location: spot,
+                      creditCorner: CreditCorner.topRight,
+                    ),
                     _Fade(color: spot.gradientColors.first),
                     Positioned(
                       top: 14,
