@@ -9,12 +9,14 @@ import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
 import 'config.dart';
 import 'locations_screen.dart';
+import 'models/image_credits.dart';
 import 'screens/onboarding/first_run_gate.dart';
 import 'services/discovery_service.dart';
 import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ImageCredits.load();
   AuthSession? session;
   String? configError = releaseConfigError(
     isRelease: kReleaseMode,

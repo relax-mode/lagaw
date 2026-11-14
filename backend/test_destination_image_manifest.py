@@ -100,3 +100,27 @@ def test_rejected_candidates_give_reasons():
                 assert candidate["title"].startswith("File:")
             assert candidate["title"].strip()
             assert candidate["reason"].strip()
+
+
+def test_upload_files_match_their_fingerprints_and_fit_storage():
+    for name, image in _approved_images():
+        path = ROOT / image["upload_file"]
+        assert path.is_file(), f"{name}: {image['upload_file']}"
+        data = path.read_bytes()
+        assert len(data) <= 5 * 1024 * 1024, f"{name}: over the 5 MiB bucket limit"
+        assert hashlib.sha256(data).hexdigest() == image["upload_sha256"], name
+        assert path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+
+
+def test_flutter_credits_asset_is_generated_from_the_manifest():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "build_image_credits", ROOT / "scripts/build_image_credits.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    asset = ROOT / "frontend/assets/image_credits.json"
+    assert asset.read_text("utf-8") == module.render(MANIFEST), (
+        "Run python scripts/build_image_credits.py"
+    )
