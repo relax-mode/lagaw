@@ -156,7 +156,8 @@ class _SwipeDeckState extends State<SwipeDeck>
             ),
           ],
         ),
-        const SizedBox(height: 22),
+        // Clear room so the tilted back cards never touch the subtitle.
+        const SizedBox(height: 52),
         Padding(
           // Inset so the whole card reads smaller, not just shorter.
           padding: const EdgeInsets.symmetric(horizontal: 10),

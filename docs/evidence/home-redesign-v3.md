@@ -142,4 +142,4 @@ Roel asked for the swipe page to match the other pages, with the title centered 
 | [swipe_v3](img/home-v3-android/swipe_v3.jpg) | Centered title and count, smaller stacked cards, frosted panel with ×, ☆ and Like | Pass |
 | Drag recording (frames reviewed, not committed) | Partial right drag: tilt, LIKE stamp, back card leans in, springs back; no swipe sent (still 2/10) | Pass |
 
-Follow-up (Roel): the cards are smaller, then sized to the area Roel marked (1.08 × the screen width tall, 360–440 pt, with a 10 pt side inset), so the card ends just above the nav. "Been here? Rate it" is gone. Rating is now a star button between × and Like, which shows your stars once you rate (for example ★ 4).
+Follow-up (Roel): the cards are smaller, then sized to the area Roel marked (1.08 × the screen width tall, 360–440 pt, with a 10 pt side inset), so the card ends just above the nav. The deck then moved 30 pt lower (52 pt gap under the subtitle), so the tilted back cards no longer touch "Drag right to like". "Been here? Rate it" is gone. Rating is now a star button between × and Like, which shows your stars once you rate (for example ★ 4).
