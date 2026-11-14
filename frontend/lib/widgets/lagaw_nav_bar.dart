@@ -9,7 +9,6 @@ enum NavDestination { home, spots, trips, you }
 enum SwipeMenuChoice { startMatching, planTrip }
 
 const _orange = Color(0xFFF2620F);
-const _orangeDeep = Color(0xFFB9430A);
 const _navHeight = 66.0;
 
 /// How far the swipe button rises above the bar: enough to read as the
@@ -106,15 +105,22 @@ class LagawNavBar extends StatelessWidget {
   }
 }
 
-/// The orange swipe card button, or the dark close button when [open].
+/// The swipe button in the app-logo style: a blue tile holding the yellow
+/// mascot card. [openness] 0 is the closed nav button (the card stands
+/// straight, alone); 1 is the open menu, where the glass back card has fanned
+/// out behind and the yellow card tilts, matching the Lagaw logo. [home v3]
 class SwipeOrb extends StatelessWidget {
   final VoidCallback onTap;
-  final bool open;
+  final double openness;
 
-  const SwipeOrb({super.key, required this.onTap, this.open = false});
+  const SwipeOrb({super.key, required this.onTap, this.openness = 0});
+
+  static const _blueDeep = Color(0xFF1C5FC4);
 
   @override
   Widget build(BuildContext context) {
+    final t = openness.clamp(0.0, 1.0);
+    final open = t >= 0.5;
     return Semantics(
       button: true,
       label: open ? 'Close' : 'Swipe options',
@@ -123,35 +129,67 @@ class SwipeOrb extends StatelessWidget {
         child: Container(
           width: 62,
           height: 62,
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 4),
-            gradient: open
-                ? null
-                : const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFF9A3D), _orange],
-                  ),
-            color: open ? AppTheme.slateDark : null,
-            boxShadow: [
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2E7FEA), Color(0xFF7EBEFF)],
+            ),
+            boxShadow: const [
+              BoxShadow(color: _blueDeep, offset: Offset(0, 5)),
               BoxShadow(
-                color: open ? Colors.black : _orangeDeep,
-                offset: const Offset(0, 5),
-              ),
-              BoxShadow(
-                color: open ? const Color(0x80000000) : const Color(0x99B9430A),
+                color: Color(0x8C1C5FC4),
                 blurRadius: 22,
-                offset: const Offset(0, 14),
+                offset: Offset(0, 14),
                 spreadRadius: -8,
               ),
             ],
           ),
-          child: Icon(
-            open ? Icons.close_rounded : Icons.style_rounded,
-            color: Colors.white,
-            size: 26,
+          child: ClipOval(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Glass back card: hidden behind the yellow card when closed,
+                // fans out to the right as the menu opens.
+                Opacity(
+                  opacity: Curves.easeOut.transform((t * 1.6).clamp(0.0, 1.0)),
+                  child: Transform.translate(
+                    offset: Offset(7 * t, -2 * t),
+                    child: Transform.rotate(
+                      angle: 0.26 * t,
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: 26,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: const Color(0xD9D6E9FF),
+                          borderRadius: BorderRadius.circular(7),
+                          border: Border.all(
+                            color: const Color(0x99FFFFFF),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Yellow mascot card: straight when closed, tilts as it opens.
+                Transform.translate(
+                  offset: Offset(-3 * t, 2 + 1.5 * t),
+                  child: Transform.rotate(
+                    angle: -0.12 * t,
+                    alignment: Alignment.bottomCenter,
+                    child: Image.asset(
+                      'assets/brand/swipe_card.png',
+                      height: 38,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -172,7 +210,7 @@ Future<SwipeMenuChoice?> showSwipeMenu(
     barrierDismissible: true,
     barrierLabel: 'Close swipe options',
     barrierColor: Colors.transparent,
-    transitionDuration: Duration(milliseconds: reduce ? 150 : 280),
+    transitionDuration: Duration(milliseconds: reduce ? 150 : 380),
     pageBuilder: (context, _, _) =>
         _SwipeMenu(bottomInset: bottomInset, reduce: reduce),
   );
@@ -288,21 +326,17 @@ class _SwipeMenu extends StatelessWidget {
           right: 0,
           bottom: bottomInset + _navHeight - 62 + _orbLift,
           child: Center(
-            // The card rolls one full turn and becomes the close button;
-            // closing rolls it back. Reduced motion: no roll.
+            // The cards open into the Lagaw logo; closing folds them back.
+            // Reduced motion: no fan, it shows the open logo directly.
             child: AnimatedBuilder(
               animation: animation,
-              builder: (context, _) {
-                final t = Curves.easeOutCubic.transform(animation.value);
-                return Transform.rotate(
-                  angle: reduce ? 0 : (t - 1) * 2 * 3.141592653589793,
-                  child: SwipeOrb(
-                    key: const ValueKey('swipe-menu-close'),
-                    open: reduce || t >= 0.5,
-                    onTap: close,
-                  ),
-                );
-              },
+              builder: (context, _) => SwipeOrb(
+                key: const ValueKey('swipe-menu-close'),
+                openness: reduce
+                    ? 1
+                    : Curves.easeInOutCubic.transform(animation.value),
+                onTap: close,
+              ),
             ),
           ),
         ),

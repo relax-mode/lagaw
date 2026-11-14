@@ -66,6 +66,8 @@ flutter:
     - assets/image_credits.json
     # Bacolod 3D elements for the home screen (Roel's set, graded to the sky).
     - assets/elements/
+    # Lagaw mascot card for the swipe button (redrawn from the app logo).
+    - assets/brand/
 
   # Outfit, SIL Open Font License 1.1 (assets/fonts/OFL.txt).
   fonts:

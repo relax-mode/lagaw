@@ -20,7 +20,7 @@ The old phone home stacked eight bands: the wordmark and tagline, a header with 
 - **"See N … →" pill** under the card follows the carousel ("See 3 parks", "See 1 place to eat") and opens Spots with that filter.
 - **Nav:** Home · Spots · raised orange **swipe button** · Trips · **You**. The old dock, the separate orange button and the header's duplicate swipe button are removed on phones.
 - **Swipe menu:** tapping the button dims and blurs the screen and shows "What do you feel like?" with **Start matching** and **Plan a trip**.
-  - The options rise from the button with a quick spring (about 280 ms, staggered). The orange card **rolls one full turn** into a dark × on the exact spot of the button, with space between it and the options. Tapping outside, × or back closes it, rolling back.
+  - The swipe button is in the **app-logo style**: a blue tile with the yellow mascot card, redrawn as vector art from the logo, standing straight. Tapping it **opens the cards**: the glass back card fans out and the yellow card tilts into the logo pose (about 380 ms, eased), on the button's exact spot. The options rise above it with space between. Tapping outside, the logo button or back closes it, folding the cards back. With reduced motion, it shows the open logo with no fan.
   - With reduce motion on, it only fades.
 - **You tab:** the account email, Travel preferences, Liked and saved, and Sign out. These already existed, but were hidden behind the avatar.
 - **Font:** Outfit is bundled at weights 400–900 (`assets/fonts`, SIL Open Font License 1.1, license file included) and is now the app's default font.
@@ -55,7 +55,7 @@ The swipe-deck tests now open the deck through the nav menu. The test that asser
 | [v3_4](img/home-v3-android/v3_4.jpg) | Start matching opens the swipe deck | Pass |
 | [v3_5](img/home-v3-android/v3_5.jpg) | "See 3 parks →" opens Spots with exactly the 3 parks; header "Maayong hapon!", no duplicate swipe button | Pass |
 | [v3_6](img/home-v3-android/v3_6.jpg) | You tab: account, Travel preferences, Liked and saved, Sign out | Pass |
-| [v3_7](img/home-v3-android/v3_7_roll.jpg) | Frames from a screen recording: the orange card **rolls a full turn** into the dark ×, which lands on the button's spot, while the options rise with space above the × | Pass |
+| [v3_7](img/home-v3-android/v3_7_open.jpg) | Frames from a screen recording: the straight yellow mascot card **opens** as the glass back card fans out behind it, settling into the Lagaw logo pose at the button's spot (the doubled eyes mid-motion are recorder frame blending) | Pass |
 
 **Notes**
 - No photos are uploaded to staging yet (#109), so the category covers show the honest "No photo yet" placeholder. They switch to the licensed photos with credits once the upload is done.
