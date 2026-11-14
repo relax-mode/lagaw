@@ -6,6 +6,7 @@ import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
 import 'screens/home/home_view.dart';
 import 'screens/spots/spots_view.dart';
+import 'screens/swipe/swipe_deck.dart';
 import 'screens/onboarding/first_run_gate.dart' show preferencesRepository;
 import 'widgets/floating_elements.dart';
 import 'screens/trips_tab.dart';
@@ -47,7 +48,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
   bool _showOnlySaved = false;
 
   // Swipe Deck State
-  double _dragOffset = 0.0;
 
   /// The latest swipe failure, shown under the card.
   String? _swipeError;
@@ -245,17 +245,14 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final current = deck.first;
     if (_interactions.isBusy(current.id)) return;
     if (!liked && !await confirmLeftSwipeOnce(context)) {
-      if (mounted) setState(() => _dragOffset = 0.0);
       return;
     }
     setState(() => _swipeError = null);
     try {
       await _interactions.swipe(current.id, liked: liked);
-      if (mounted) setState(() => _dragOffset = 0.0);
     } on TripApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _dragOffset = 0.0;
         _swipeError = describeInteractionFailure(e);
       });
     }
@@ -1791,365 +1788,21 @@ class _LocationsScreenState extends State<LocationsScreen> {
     }
 
     final spot = deck.first;
-    final busy = _interactions.isBusy(spot.id);
-    final rating = _interactions.ratingFor(spot.id);
     final position = _availableLocations.length - deck.length + 1;
 
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: isWide ? 460 : 430),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Swipe Your Vibe',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      'Drag right to like • Drag left to pass',
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0x40FFFFFF),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '$position / ${_availableLocations.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Interactive Dragging Card with Like / Nope Stamps
-            GestureDetector(
-              onPanUpdate: (details) {
-                if (busy) return;
-                setState(() {
-                  _dragOffset += details.delta.dx;
-                });
-              },
-              onPanEnd: (details) {
-                if (busy) return;
-                if (_dragOffset > 90 || details.velocity.pixelsPerSecond.dx > 400) {
-                  _handleSwipe(true);
-                } else if (_dragOffset < -90 ||
-                    details.velocity.pixelsPerSecond.dx < -400) {
-                  _handleSwipe(false);
-                } else {
-                  setState(() {
-                    _dragOffset = 0.0;
-                  });
-                }
-              },
-              child: Transform.translate(
-                offset: Offset(_dragOffset, 0),
-                child: Transform.rotate(
-                  angle: _dragOffset * 0.0009,
-                  child: Stack(
-                    children: [
-                      GlassContainer(
-                        borderRadius: 28,
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(22),
-                              child: SizedBox(
-                                height: isWide ? 260 : 230,
-                                width: double.infinity,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    DestinationPhoto(location: spot),
-                                    Container(
-                                      decoration: const BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Color(0x22000000),
-                                            Color(0xCC000000)
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 12,
-                                      left: 12,
-                                      right: 12,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0x55FFFFFF),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Text(
-                                              spot.category.toUpperCase(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w900,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 12,
-                                      left: 12,
-                                      right: 12,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            spot.name,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w900,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            spot.address,
-                                            style: const TextStyle(
-                                              color: Color(0xEEFFFFFF),
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              spot.description,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppTheme.slateDark,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Budget: ${spot.costRange}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF047857),
-                                  ),
-                                ),
-                                Text(
-                                  'Typical visit: ${spot.duration}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0369A1),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Centered Swipe Feedback Indicator (Noticeable yet clean & balanced)
-                      if (_dragOffset.abs() > 15)
-                        Positioned.fill(
-                          child: Center(
-                            child: Opacity(
-                              opacity: ((_dragOffset.abs() - 15) / 80).clamp(0.0, 0.92),
-                              child: Transform.scale(
-                                scale: (0.88 + (_dragOffset.abs() / 320)).clamp(0.88, 1.12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 22,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _dragOffset > 0
-                                        ? const Color(0xEE10B981)
-                                        : const Color(0xEEF43F5E),
-                                    borderRadius: BorderRadius.circular(28),
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: _dragOffset > 0
-                                            ? const Color(0x5510B981)
-                                            : const Color(0x55F43F5E),
-                                        blurRadius: 20,
-                                        spreadRadius: 2,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        _dragOffset > 0
-                                            ? Icons.favorite_rounded
-                                            : Icons.close_rounded,
-                                        color: Colors.white,
-                                        size: 26,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        _dragOffset > 0 ? 'LIKE' : 'PASS',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 18,
-                                          letterSpacing: 1.4,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // Action Buttons (3D Vector Illustration style)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Vector3DButton(
-                  key: const ValueKey('swipe-pass'),
-                  onTap: busy ? null : () => _handleSwipe(false),
-                  backgroundColor: Colors.white,
-                  shadowColor: const Color(0xFFFDA4AF),
-                  borderColor: const Color(0xFFF43F5E),
-                  borderRadius: 34,
-                  padding: const EdgeInsets.all(16),
-                  depth: 5.0,
-                  child: const Icon(
-                    Icons.close_rounded,
-                    size: 32,
-                    color: Color(0xFFF43F5E),
-                  ),
-                ),
-                const SizedBox(width: 28),
-                Vector3DButton(
-                  key: const ValueKey('swipe-like'),
-                  onTap: busy ? null : () => _handleSwipe(true),
-                  backgroundColor: const Color(0xFF10B981),
-                  shadowColor: const Color(0xFF047857),
-                  borderColor: const Color(0xFF6EE7B7),
-                  borderRadius: 34,
-                  padding: const EdgeInsets.all(16),
-                  depth: 5.0,
-                  child: const Icon(
-                    Icons.favorite_rounded,
-                    size: 32,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton.icon(
-                key: const ValueKey('swipe-rate'),
-                onPressed: busy ? null : () => _rate(spot),
-                icon: Icon(
-                  rating == null ? Icons.star_border_rounded : Icons.star_rounded,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  rating == null
-                      ? 'Been here? Rate it'
-                      : 'You rated it ${rating.toStringAsFixed(rating % 1 == 0 ? 0 : 1)} · Rate again',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-            if (busy)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 6),
-                  child: SizedBox(
-                    key: ValueKey('swipe-busy'),
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            if (_swipeError != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Container(
-                  key: const ValueKey('swipe-error'),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF1F2),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFFECDD3), width: 2),
-                  ),
-                  child: Text(
-                    _swipeError!,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.slateDark,
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        child: SwipeDeck(
+          spot: spot,
+          upNext: deck.skip(1).take(2).toList(),
+          position: position,
+          total: _availableLocations.length,
+          busy: _interactions.isBusy(spot.id),
+          rating: _interactions.ratingFor(spot.id),
+          error: _swipeError,
+          onSwipe: _handleSwipe,
+          onRate: () => _rate(spot),
         ),
       ),
     );

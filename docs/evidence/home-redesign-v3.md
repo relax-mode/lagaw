@@ -126,3 +126,18 @@ The swipe-deck tests now open the deck through the nav menu. The test that asser
 | Pencil | Shows "Changing your photo is coming soon." | Pass |
 
 Not checked on the phone: the Picked for you screen, because reaching it means saving preferences on account B; it is covered by the widget tests.
+
+### Round: Swipe your vibe redesign
+
+Roel asked for the swipe page to match the other pages, with the title centered and cards like his reference.
+
+- **Centered title:** "Swipe your vibe", with "Drag right to like · left to pass" and the count (for example 2 / 10) in a glass pill.
+- **Card:** a full-photo card with a white rim. The next two places sit tilted behind it like a stack of photos, and the one right behind leans in as you drag.
+- **Frosted panel on the card:** the area, the name, two lines of description, glass tags (price, visit length, two vibe tags), a glass × (pass) and an orange Like button.
+- **Dragging:** the card tilts and dips, the color warms toward Like or Pass, and a LIKE or PASS stamp fades in. Short drags spring back. A new top card settles in from the stack.
+- **Unchanged:** swipes are still recorded only after the server confirms, the first pass still explains itself, and Rate stays under the card.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [swipe_v3](img/home-v3-android/swipe_v3.jpg) | Centered title and count, stacked cards, frosted panel with × and Like | Pass |
+| Drag recording (frames reviewed, not committed) | Partial right drag: tilt, LIKE stamp, back card leans in, springs back; no swipe sent (still 2/10) | Pass |
