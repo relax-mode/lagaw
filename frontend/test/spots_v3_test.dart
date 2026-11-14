@@ -104,16 +104,20 @@ void main() {
     expect(events, ['category:cafe', 'query:lag', 'query:']);
   });
 
-  testWidgets('a card shows name, category and price, then expands', (
+  testWidgets('a card pops up a uniform expanded card over a blur', (
     tester,
   ) async {
     await pump(tester);
     expect(find.text('Capitol Park and Lagoon'), findsOneWidget);
     expect(find.text('Parks · Price unknown'), findsNWidgets(2));
     expect(find.byKey(const ValueKey('spot-details-a')), findsNothing);
+    final cardA = tester.getRect(find.byKey(const ValueKey('spot-a')));
+    final cardC = tester.getRect(find.byKey(const ValueKey('spot-c')));
 
     await tester.tap(find.byKey(const ValueKey('spot-toggle-a')));
     await _step(tester);
+    expect(find.byKey(const ValueKey('spot-popup-backdrop')), findsOneWidget);
+    expect(find.byType(BackdropFilter), findsWidgets);
     expect(find.byKey(const ValueKey('spot-details-a')), findsOneWidget);
     expect(find.text('Capitol Park and Lagoon description.'), findsOneWidget);
     expect(
@@ -122,23 +126,46 @@ void main() {
     );
     expect(find.text('45 mins'), findsOneWidget);
     expect(find.text('#heritage'), findsOneWidget);
+    // The grid underneath never moves.
+    expect(tester.getRect(find.byKey(const ValueKey('spot-a'))), cardA);
+    expect(tester.getRect(find.byKey(const ValueKey('spot-c'))), cardC);
+    final sizeA = tester.getSize(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('spot-details-a')),
+            matching: find.byType(Positioned),
+          )
+          .first,
+    );
 
     await tester.tap(find.byKey(const ValueKey('spot-save-a')));
     await tester.tap(find.byKey(const ValueKey('spot-rate-a')));
     expect(events, ['save:a', 'rate:a']);
 
-    // Opening another card closes the first.
-    await tester.tap(find.byKey(const ValueKey('spot-toggle-c')));
+    await tester.tap(find.byKey(const ValueKey('spot-popup-close')));
     await _step(tester);
     expect(find.byKey(const ValueKey('spot-details-a')), findsNothing);
-    expect(find.byKey(const ValueKey('spot-details-c')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('spot-less-c')));
+    // Every place opens at the same size.
+    await tester.tap(find.byKey(const ValueKey('spot-toggle-c')));
+    await _step(tester);
+    final sizeC = tester.getSize(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('spot-details-c')),
+            matching: find.byType(Positioned),
+          )
+          .first,
+    );
+    expect(sizeC, sizeA);
+
+    // Tapping the blurred background closes it too.
+    await tester.tapAt(const Offset(6, 6));
     await _step(tester);
     expect(find.byKey(const ValueKey('spot-details-c')), findsNothing);
   });
 
-  testWidgets('the heart saves without expanding', (tester) async {
+  testWidgets('the heart saves without opening the card', (tester) async {
     await pump(tester, saved: {'b'});
     await tester.tap(find.byKey(const ValueKey('spot-heart-a')));
     await _step(tester);

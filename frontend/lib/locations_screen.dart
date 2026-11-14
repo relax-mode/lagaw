@@ -557,6 +557,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
       isSaved: _interactions.isSaved,
       isBusy: _interactions.isBusy,
       ratingFor: _interactions.ratingFor,
+      changes: _interactions,
       onSave: (place) => _save(place.id),
       onRate: _rate,
       placesState:

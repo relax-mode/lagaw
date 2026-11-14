@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../../models/location.dart';
@@ -39,6 +41,10 @@ class SpotsView extends StatefulWidget {
   /// Shown instead of the cards while places load or fail.
   final Widget? placesState;
 
+  /// Notifies when saves, ratings or busy states change, so an open card
+  /// stays current.
+  final Listenable? changes;
+
   const SpotsView({
     super.key,
     required this.avatarLetter,
@@ -59,6 +65,7 @@ class SpotsView extends StatefulWidget {
     required this.onSave,
     required this.onRate,
     this.placesState,
+    this.changes,
   });
 
   @override
@@ -71,7 +78,7 @@ class _SpotsViewState extends State<SpotsView> {
   );
   final FocusNode _searchFocus = FocusNode();
   final Map<String, GlobalKey> _chipKeys = {};
-  String? _expanded;
+  final Map<String, GlobalKey> _cardKeys = {};
 
   @override
   void initState() {
@@ -85,9 +92,6 @@ class _SpotsViewState extends State<SpotsView> {
     if (widget.query != _search.text) _search.text = widget.query;
     if (old.selectedCategory != widget.selectedCategory) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _revealChip());
-    }
-    if (_expanded != null && !widget.places.any((p) => p.id == _expanded)) {
-      _expanded = null;
     }
   }
 
@@ -110,8 +114,29 @@ class _SpotsViewState extends State<SpotsView> {
     );
   }
 
-  void _toggle(String id) {
-    setState(() => _expanded = _expanded == id ? null : id);
+  /// Lifts the card out of its spot into the centered expanded card.
+  void _open(LocationItem place) {
+    final box =
+        _cardKeys[place.id]?.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final origin = box.localToGlobal(Offset.zero) & box.size;
+    showPlacePopup(
+      context,
+      place: place,
+      origin: origin,
+      changes: widget.changes,
+      details: () => _PlaceDetails(
+        place: place,
+        saved: widget.isSaved(place.id),
+        busy: widget.isBusy(place.id),
+        rating: widget.ratingFor(place.id),
+        onSave: () => widget.onSave(place),
+        onRate: () => widget.onRate(place),
+      ),
+      saved: () => widget.isSaved(place.id),
+      busy: () => widget.isBusy(place.id),
+      onSave: () => widget.onSave(place),
+    );
   }
 
   @override
@@ -351,16 +376,13 @@ class _SpotsViewState extends State<SpotsView> {
           children: [
             for (final place in widget.places)
               _PlaceCard(
-                key: ValueKey('spot-${place.id}'),
+                key: _cardKeys.putIfAbsent(place.id, GlobalKey.new),
                 place: place,
-                width: _expanded == place.id ? box.maxWidth : half,
-                expanded: _expanded == place.id,
+                width: half,
                 saved: widget.isSaved(place.id),
                 busy: widget.isBusy(place.id),
-                rating: widget.ratingFor(place.id),
-                onToggle: () => _toggle(place.id),
+                onOpen: () => _open(place),
                 onSave: () => widget.onSave(place),
-                onRate: () => widget.onRate(place),
               ),
           ],
         );
@@ -412,153 +434,391 @@ class _SpotsViewState extends State<SpotsView> {
   }
 }
 
-/// A place as a photo card with a color fade; tapping expands it in place
-/// to show the description, details, and Save / Rate. [home v3]
-class _PlaceCard extends StatelessWidget {
+/// The photo with its category-colored fade, name, category · price and
+/// heart; shared by the grid card and the expanded card. [home v3]
+class _PlacePhoto extends StatelessWidget {
   final LocationItem place;
-  final double width;
-  final bool expanded;
+  final bool large;
   final bool saved;
   final bool busy;
-  final double? rating;
-  final VoidCallback onToggle;
   final VoidCallback onSave;
-  final VoidCallback onRate;
 
-  const _PlaceCard({
-    super.key,
+  const _PlacePhoto({
     required this.place,
-    required this.width,
-    required this.expanded,
+    required this.large,
     required this.saved,
     required this.busy,
-    required this.rating,
-    required this.onToggle,
     required this.onSave,
-    required this.onRate,
   });
-
-  /// The category color, deepened, for the bottom fade.
-  Color get _fade =>
-      Color.lerp(place.gradientColors.first, const Color(0xFF0B1424), 0.35)!;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOutCubic,
-      width: width,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x4D0F285A),
-            blurRadius: 26,
-            offset: Offset(0, 14),
-            spreadRadius: -14,
+    final fade = Color.lerp(
+      place.gradientColors.first,
+      const Color(0xFF0B1424),
+      0.35,
+    )!;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DestinationPhoto(location: place, compact: !large),
+        IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.35, 1],
+                colors: [fade.withValues(alpha: 0), fade],
+              ),
+            ),
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: AnimatedSize(
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeInOutCubic,
-          alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GestureDetector(
-                key: ValueKey('spot-toggle-${place.id}'),
-                onTap: onToggle,
-                child: SizedBox(
-                  height: expanded ? 210 : 232,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      DestinationPhoto(location: place, compact: !expanded),
-                      IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              stops: const [0.35, 1],
-                              colors: [_fade.withValues(alpha: 0), _fade],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: _HeartButton(
-                          key: ValueKey('spot-heart-${place.id}'),
-                          saved: saved,
-                          busy: busy,
-                          onTap: onSave,
-                        ),
-                      ),
-                      Positioned(
-                        left: 14,
-                        right: 14,
-                        bottom: 14,
-                        child: IgnorePointer(child: _caption()),
-                      ),
+        ),
+        Positioned(
+          top: 10,
+          right: large ? 54 : 10,
+          child: _HeartButton(
+            key: ValueKey('spot-heart-${place.id}${large ? '-open' : ''}'),
+            saved: saved,
+            busy: busy,
+            onTap: onSave,
+          ),
+        ),
+        Positioned(
+          left: 14,
+          right: 14,
+          bottom: 14,
+          child: IgnorePointer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  place.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: large ? 24 : 16,
+                    height: 1.1,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(color: Color(0x55000000), blurRadius: 8),
                     ],
                   ),
                 ),
-              ),
-              // Details join once the card is wide enough for them, so
-              // nothing squeezes while the width animates.
-              if (expanded)
-                LayoutBuilder(
-                  builder: (context, box) => box.maxWidth < 280
-                      ? const SizedBox(width: double.infinity)
-                      : _details(),
+                const SizedBox(height: 4),
+                Text(
+                  '${HomeCategory.labelFor(place.category)} · ${place.costRange}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xE6FFFFFF),
+                  ),
                 ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _caption() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          place.name,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: expanded ? 22 : 16,
-            height: 1.1,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-            shadows: const [Shadow(color: Color(0x55000000), blurRadius: 8)],
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '${HomeCategory.labelFor(place.category)} · ${place.costRange}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: Color(0xE6FFFFFF),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _details() {
+/// A place in the grid. It never changes size; tapping lifts it into the
+/// expanded pop-up, so the other cards stay where they are. [home v3]
+class _PlaceCard extends StatelessWidget {
+  final LocationItem place;
+  final double width;
+  final bool saved;
+  final bool busy;
+  final VoidCallback onOpen;
+  final VoidCallback onSave;
+
+  const _PlaceCard({
+    super.key,
+    required this.place,
+    required this.width,
+    required this.saved,
+    required this.busy,
+    required this.onOpen,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      key: ValueKey('spot-toggle-${place.id}'),
+      onTap: onOpen,
+      child: Container(
+        key: ValueKey('spot-${place.id}'),
+        width: width,
+        height: 232,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x4D0F285A),
+              blurRadius: 26,
+              offset: Offset(0, 14),
+              spreadRadius: -14,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: _PlacePhoto(
+            place: place,
+            large: false,
+            saved: saved,
+            busy: busy,
+            onSave: onSave,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opens [place] as a pop-up: the background blurs and dims (like the swipe
+/// menu) while the card grows from [origin], its spot in the grid, into one
+/// centered size used for every place. Closing shrinks it back. [home v3]
+Future<void> showPlacePopup(
+  BuildContext context, {
+  required LocationItem place,
+  required Rect origin,
+  required Widget Function() details,
+  required bool Function() saved,
+  required bool Function() busy,
+  required VoidCallback onSave,
+  Listenable? changes,
+}) {
+  final reduce = MediaQuery.disableAnimationsOf(context);
+  return showGeneralDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'Close ${place.name}',
+    barrierColor: Colors.transparent,
+    transitionDuration: Duration(milliseconds: reduce ? 150 : 420),
+    pageBuilder: (context, animation, _) => _PlacePopup(
+      place: place,
+      origin: origin,
+      animation: animation,
+      reduce: reduce,
+      details: details,
+      saved: saved,
+      busy: busy,
+      onSave: onSave,
+      changes: changes,
+    ),
+  );
+}
+
+class _PlacePopup extends StatelessWidget {
+  final LocationItem place;
+  final Rect origin;
+  final Animation<double> animation;
+  final bool reduce;
+  final Widget Function() details;
+  final bool Function() saved;
+  final bool Function() busy;
+  final VoidCallback onSave;
+  final Listenable? changes;
+
+  const _PlacePopup({
+    required this.place,
+    required this.origin,
+    required this.animation,
+    required this.reduce,
+    required this.details,
+    required this.saved,
+    required this.busy,
+    required this.onSave,
+    required this.changes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final screen = MediaQuery.sizeOf(context);
+    final pad = MediaQuery.paddingOf(context);
+    // One expanded size for every place.
+    final width = (screen.width - 32).clamp(0.0, 420.0);
+    final height = (screen.height - pad.vertical - 72).clamp(0.0, 590.0);
+    final target = Rect.fromLTWH(
+      (screen.width - width) / 2,
+      pad.top + (screen.height - pad.vertical - height) / 2,
+      width,
+      height,
+    );
+    final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+    final grow = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeInOutCubic,
+      reverseCurve: Curves.easeInOutCubic.flipped,
+    );
+    void close() => Navigator.of(context).pop();
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            key: const ValueKey('spot-popup-backdrop'),
+            onTap: close,
+            child: FadeTransition(
+              opacity: fade,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: const ColoredBox(color: Color(0x590A1830)),
+              ),
+            ),
+          ),
+        ),
+        AnimatedBuilder(
+          animation: grow,
+          builder: (context, _) {
+            final t = reduce ? 1.0 : grow.value;
+            final rect = Rect.lerp(origin, target, t)!;
+            final photoHeight = 232 + (290 - 232) * t;
+            return Positioned.fromRect(
+              rect: rect,
+              child: Opacity(
+                opacity: reduce ? fade.value : 1,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24 + 4 * t),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.lerp(
+                            const Color(0x4D0F285A),
+                            const Color(0x8C000000),
+                            t,
+                          )!,
+                          blurRadius: 26 + 14 * t,
+                          offset: Offset(0, 14 + 8 * t),
+                          spreadRadius: -14,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24 + 4 * t),
+                      child: ListenableBuilder(
+                        listenable: changes ?? const AlwaysStoppedAnimation(0),
+                        builder: (context, _) => Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(
+                              height: photoHeight.clamp(0, rect.height),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  _PlacePhoto(
+                                    place: place,
+                                    large: t > 0.5,
+                                    saved: saved(),
+                                    busy: busy(),
+                                    onSave: onSave,
+                                  ),
+                                  Positioned(
+                                    top: 10,
+                                    right: 10,
+                                    child: Opacity(
+                                      opacity: Interval(0.5, 1).transform(t),
+                                      child: _CloseButton(onTap: close),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Opacity(
+                                opacity: Interval(0.6, 1).transform(t),
+                                // Details only once the card is wide enough,
+                                // so nothing squeezes mid-animation.
+                                child: rect.width < 280
+                                    ? const SizedBox.shrink()
+                                    : SingleChildScrollView(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          18,
+                                          16,
+                                          18,
+                                          18,
+                                        ),
+                                        child: details(),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _CloseButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _CloseButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Close',
+      child: GestureDetector(
+        key: const ValueKey('spot-popup-close'),
+        onTap: onTap,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xEBFFFFFF),
+          ),
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.close_rounded,
+            size: 19,
+            color: AppTheme.slateDark,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Everything about a place, below the photo in the expanded card.
+class _PlaceDetails extends StatelessWidget {
+  final LocationItem place;
+  final bool saved;
+  final bool busy;
+  final double? rating;
+  final VoidCallback onSave;
+  final VoidCallback onRate;
+
+  const _PlaceDetails({
+    required this.place,
+    required this.saved,
+    required this.busy,
+    required this.rating,
+    required this.onSave,
+    required this.onRate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     Widget info(IconData icon, String text) => Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -580,106 +840,99 @@ class _PlaceCard extends StatelessWidget {
       ),
     );
 
-    return Padding(
+    return Column(
       key: ValueKey('spot-details-${place.id}'),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (place.description.isNotEmpty) ...[
-            Text(
-              place.description,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.45,
-                color: Color(0xFF334155),
-              ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (place.description.isNotEmpty) ...[
+          Text(
+            place.description,
+            style: const TextStyle(
+              fontSize: 14.5,
+              height: 1.45,
+              color: Color(0xFF334155),
             ),
-            const SizedBox(height: 12),
-          ],
-          if (place.vibeTags.isNotEmpty) ...[
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final tag in place.vibeTags)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '#$tag',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1D4ED8),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-          ],
-          info(Icons.place_outlined, place.address),
-          info(Icons.schedule_rounded, place.duration),
-          info(Icons.payments_outlined, place.costRange),
-          if (rating != null)
-            info(
-              Icons.star_rounded,
-              'You rated it ${rating!.toStringAsFixed(rating! % 1 == 0 ? 0 : 1)}',
-            ),
-          const SizedBox(height: 6),
-          Row(
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (place.vibeTags.isNotEmpty) ...[
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              Expanded(
-                child: FilledButton.icon(
-                  key: ValueKey('spot-save-${place.id}'),
-                  onPressed: busy ? null : onSave,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: saved
-                        ? const Color(0xFFFFEDD5)
-                        : const Color(0xFFF2620F),
-                    foregroundColor: saved
-                        ? const Color(0xFFC2410C)
-                        : Colors.white,
-                    shape: const StadiumBorder(),
+              for (final tag in place.vibeTags)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
                   ),
-                  icon: Icon(
-                    saved
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    size: 18,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  label: Text(saved ? 'Saved' : 'Save'),
+                  child: Text(
+                    '#$tag',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1D4ED8),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: ValueKey('spot-rate-${place.id}'),
-                  onPressed: busy ? null : onRate,
-                  style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
-                  icon: const Icon(Icons.star_border_rounded, size: 18),
-                  label: Text(rating == null ? 'Rate' : 'Rate again'),
-                ),
-              ),
             ],
           ),
-          Center(
-            child: TextButton.icon(
-              key: ValueKey('spot-less-${place.id}'),
-              onPressed: onToggle,
-              icon: const Icon(Icons.keyboard_arrow_up_rounded),
-              label: const Text('Show less'),
-            ),
-          ),
+          const SizedBox(height: 14),
         ],
-      ),
+        info(Icons.place_outlined, place.address),
+        info(Icons.schedule_rounded, place.duration),
+        info(Icons.payments_outlined, place.costRange),
+        if (rating != null)
+          info(
+            Icons.star_rounded,
+            'You rated it ${rating!.toStringAsFixed(rating! % 1 == 0 ? 0 : 1)}',
+          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton.icon(
+                key: ValueKey('spot-save-${place.id}'),
+                onPressed: busy ? null : onSave,
+                style: FilledButton.styleFrom(
+                  backgroundColor: saved
+                      ? const Color(0xFFFFEDD5)
+                      : const Color(0xFFF2620F),
+                  foregroundColor: saved
+                      ? const Color(0xFFC2410C)
+                      : Colors.white,
+                  shape: const StadiumBorder(),
+                  minimumSize: const Size.fromHeight(46),
+                ),
+                icon: Icon(
+                  saved
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  size: 18,
+                ),
+                label: Text(saved ? 'Saved' : 'Save'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton.icon(
+                key: ValueKey('spot-rate-${place.id}'),
+                onPressed: busy ? null : onRate,
+                style: OutlinedButton.styleFrom(
+                  shape: const StadiumBorder(),
+                  minimumSize: const Size.fromHeight(46),
+                ),
+                icon: const Icon(Icons.star_border_rounded, size: 18),
+                label: Text(rating == null ? 'Rate' : 'Rate again'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

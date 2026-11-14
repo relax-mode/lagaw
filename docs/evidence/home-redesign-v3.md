@@ -39,6 +39,15 @@ The old phone home stacked eight bands: the wordmark and tagline, a header with 
 | [spots_2](img/home-v3-android/spots_2.jpg) | Arima expanded in place: larger title, description, tags, address | Pass |
 | [spots_3](img/home-v3-android/spots_3.jpg) | Expanded details: 75 mins, Price unknown, Save, Rate, Show less | Pass |
 
+### Feedback round: cards pop up instead of expanding in place
+
+Roel found the in-place expansion odd, because it pushed the other cards around. Tapping a card now **pops it up** in the same style as the swipe menu: the background blurs and dims, and the card grows smoothly from its spot in the grid (about 420 ms, ease-in-out) into one centered card that is **the same size for every place**. The grid underneath never moves. The photo grows, the × fades in, then the details fade in (description, tags, address, visit length, price, rating, Save and Rate). Close it with the ×, by tapping the blurred background, or with Back; it shrinks back into its spot. Save updates live inside the open card. Under reduced motion it only fades.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [spots_4](img/home-v3-android/spots_4.jpg) | Calea popped up over the blurred grid: photo, name, details, Save, Rate, × | Pass |
+| Screen recording (frames reviewed, not committed) | Card grows from its grid spot and shrinks back on close; the grid stays in place; tapping Save turned the heart and button to Saved live (undone afterwards) | Pass |
+
 ## Automated checks
 
 | Check | Result |
