@@ -72,6 +72,12 @@ void main() {
     await pump(tester);
     await tester.tap(find.byKey(const ValueKey('swipe-like')));
     await tester.tap(find.byKey(const ValueKey('swipe-pass')));
+    // Rating is the star between Pass and Like.
+    final pass = tester.getCenter(find.byKey(const ValueKey('swipe-pass')));
+    final star = tester.getCenter(find.byKey(const ValueKey('swipe-rate')));
+    final like = tester.getCenter(find.byKey(const ValueKey('swipe-like')));
+    expect(pass.dx < star.dx && star.dx < like.dx, isTrue);
+    expect(find.text('Been here? Rate it'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('swipe-rate')));
     expect(events, ['like', 'pass', 'rate']);
   });

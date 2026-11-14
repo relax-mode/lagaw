@@ -98,7 +98,7 @@ class _SwipeDeckState extends State<SwipeDeck>
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final cardHeight = (w * 1.2).clamp(400.0, 500.0);
+    final cardHeight = (w * 0.98).clamp(340.0, 410.0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -157,53 +157,33 @@ class _SwipeDeckState extends State<SwipeDeck>
           ],
         ),
         const SizedBox(height: 22),
-        SizedBox(
-          height: cardHeight + 26,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.bottomCenter,
-            children: [
-              // The next places, tilted behind like a stack of photos.
-              for (final (i, next)
-                  in widget.upNext.take(2).indexed.toList()
-                    ..sort((a, b) => b.$1.compareTo(a.$1)))
-                _BackCard(
-                  key: ValueKey('swipe-next-${next.id}'),
-                  place: next,
-                  height: cardHeight,
-                  depth: i + 1,
-                  // The card behind leans in as you drag the top one away.
-                  lift: i == 0 ? (_drag.abs() / 160).clamp(0.0, 1.0) : 0,
-                ),
-              _frontCard(cardHeight),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Center(
-          child: TextButton.icon(
-            key: const ValueKey('swipe-rate'),
-            onPressed: widget.busy ? null : widget.onRate,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              textStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            icon: Icon(
-              widget.rating == null
-                  ? Icons.star_border_rounded
-                  : Icons.star_rounded,
-              size: 20,
-            ),
-            label: Text(
-              widget.rating == null
-                  ? 'Been here? Rate it'
-                  : 'You rated it ${widget.rating!.toStringAsFixed(widget.rating! % 1 == 0 ? 0 : 1)} · Rate again',
+        Padding(
+          // Inset so the whole card reads smaller, not just shorter.
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: SizedBox(
+            height: cardHeight + 26,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.bottomCenter,
+              children: [
+                // The next places, tilted behind like a stack of photos.
+                for (final (i, next)
+                    in widget.upNext.take(2).indexed.toList()
+                      ..sort((a, b) => b.$1.compareTo(a.$1)))
+                  _BackCard(
+                    key: ValueKey('swipe-next-${next.id}'),
+                    place: next,
+                    height: cardHeight,
+                    depth: i + 1,
+                    // The card behind leans in as you drag the top one away.
+                    lift: i == 0 ? (_drag.abs() / 160).clamp(0.0, 1.0) : 0,
+                  ),
+                _frontCard(cardHeight),
+              ],
             ),
           ),
         ),
+        const SizedBox(height: 6),
         if (widget.error != null)
           Container(
             key: const ValueKey('swipe-error'),
@@ -305,8 +285,10 @@ class _SwipeDeckState extends State<SwipeDeck>
                       child: _InfoPanel(
                         spot: spot,
                         busy: widget.busy,
+                        rating: widget.rating,
                         onPass: () => _swipe(false),
                         onLike: () => _swipe(true),
+                        onRate: widget.onRate,
                       ),
                     ),
                     // Drag feedback: the card warms toward Like or Pass.
@@ -405,14 +387,18 @@ class _Glass extends StatelessWidget {
 class _InfoPanel extends StatelessWidget {
   final LocationItem spot;
   final bool busy;
+  final double? rating;
   final VoidCallback onPass;
   final VoidCallback onLike;
+  final VoidCallback onRate;
 
   const _InfoPanel({
     required this.spot,
     required this.busy,
+    required this.rating,
     required this.onPass,
     required this.onLike,
+    required this.onRate,
   });
 
   @override
@@ -489,27 +475,50 @@ class _InfoPanel extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Semantics(
-                button: true,
+              _square(
+                key: const ValueKey('swipe-pass'),
                 label: 'Pass',
-                child: GestureDetector(
-                  key: const ValueKey('swipe-pass'),
-                  onTap: busy ? null : onPass,
-                  child: Container(
-                    width: 54,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: const Color(0x33FFFFFF),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0x66FFFFFF)),
-                    ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      size: 24,
-                      color: Colors.white,
-                    ),
-                  ),
+                onTap: busy ? null : onPass,
+                child: const Icon(
+                  Icons.close_rounded,
+                  size: 24,
+                  color: Colors.white,
                 ),
+              ),
+              const SizedBox(width: 8),
+              // Been here? Rate it. Shows your stars once rated.
+              _square(
+                key: const ValueKey('swipe-rate'),
+                label: rating == null
+                    ? 'Rate this place'
+                    : 'You rated it ${_stars(rating!)}. Rate again',
+                onTap: busy ? null : onRate,
+                child: rating == null
+                    ? const Icon(
+                        Icons.star_border_rounded,
+                        size: 24,
+                        color: Colors.white,
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 20,
+                            color: Color(0xFFFFD166),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            _stars(rating!),
+                            key: const ValueKey('swipe-rating'),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -548,6 +557,36 @@ class _InfoPanel extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  static String _stars(double r) => r.toStringAsFixed(r % 1 == 0 ? 0 : 1);
+
+  Widget _square({
+    required Key key,
+    required String label,
+    required VoidCallback? onTap,
+    required Widget child,
+  }) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        key: key,
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 52),
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0x33FFFFFF),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0x66FFFFFF)),
+          ),
+          child: child,
+        ),
       ),
     );
   }

@@ -339,7 +339,14 @@ void main() {
       await tapKey(tester, 'rating-submit');
 
       expect(jsonDecode(backend.posts.single.body)['rating_value'], 4.0);
-      expect(find.text('You rated it 4 · Rate again'), findsOneWidget);
+      // The star button now shows the rating.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('swipe-rate')),
+          matching: find.text('4'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a failed history load blocks the deck with Retry', (
