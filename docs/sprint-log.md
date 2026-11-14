@@ -989,6 +989,7 @@ is a different operation and was not triggered. See the
 - Verified the release APK (against staging) on Roel's Infinix X6850 (Android 16). All 8 checks passed: real places, "Price unknown" and "No photo yet", no fake match %, honest timeout and offline errors with Retry, still signed in while offline, and the "Lagaw" app identity with INTERNET.
 - Found during device testing: staging's San Sebastian Cathedral `image_url` shows the Negros Museum (left over from the #108 test upload; production is unaffected), which is reported for the #108 owner. The launcher icon was still Flutter's default; at Roel's request it is now the Lagaw logo at all densities, with no metadata.
 - **Decision (Roel):** the production check is handed to the release owner (#121, CyGray), who has the production publishable key and a production account. #117 stays open until it is confirmed. See [evidence](evidence/release-build-honest-ui.md).
+- **November 15, 2026 — production check (CyGray):** built the release APK from `main` @ `0ff79bf` with the production API, Supabase URL and publishable key (Flutter 3.47.8, matching CI). `aapt dump badging` reports `com.lagaw.bacolod`, versionName `1.0.0`, `INTERNET` and the label "Lagaw". Installed on a phone (2511FPC34G) and signed in with a production account: Home loaded from production ("10 spots to explore") with "No photo yet" and no match %, and the Arima Restaurant detail showed "Price unknown" and no match %. The APK used the debug signing config because this machine has no `key.properties`; the real upload keystore is still needed for v1.0.0 (#121). Closed #117 after the team meeting recorded below.
 
 ### November 14, 2026 — #109 real destination images in Flutter
 
@@ -1024,3 +1025,34 @@ is a different operation and was not triggered. See the
 - **Feedback round (Roel):** swipe cards were resized to the area Roel marked on a screenshot, and rating moved from the "Been here? Rate it" link to a star button between Pass and Like that shows the stars once rated. `flutter test` passes 270 tests; verified on the Infinix.
 - **Feedback round (Roel):** swipes no longer show a loading state. They are optimistic: the card flies off and the next place shows at once while the swipe saves in the background; a failed save undoes the swipe and shows why. Still sent once, never retried automatically. `flutter test` passes 271 tests (1 new); verified on the Infinix, where the check recorded a like on Capitol Park for account B.
 - **Feedback round (Roel):** Swipe your vibe now has floating elements around its card. Moving between tabs is smoother: elements glide one after another in a slight arc, elements changing sides drift out and back in from the edges, and pages cross-fade instead of snapping. `flutter test` passes 272 tests; verified on the Infinix with screen recordings.
+
+### November 14–15, 2026 — Team meeting: system QA, v3 UI, and demo video roles
+
+- **When:** 9:00 PM Saturday, November 14 to 12:20 PM Sunday, November 15, 2026 (Asia/Singapore). Recorded by Kyle (CyGray) from the team's meeting notes. Attendees: Jeff, Andrew, Kyle and Roel (the whole team). The demo video is due today, November 15.
+- **Focus:** manual QA of the deployed system, Roel's push of the v3 UI, identifying issues, and assigning the demo video.
+
+**QA findings** (all open unless noted; none is recorded as fixed):
+
+- Sign in: working as intended.
+- Onboarding: works well, but the recommendation screen after onboarding is a dead end and feels odd. Proposed: remove it, or go straight to matching or Home.
+- Spots have no photos, which is an important gap. Andrew owns the destination list and Roel owns the pictures. Status: waiting for Andrew's upload to the storage bucket; Roel only needs to confirm they render in the app.
+- Swipe card layout: the card shows the spot's look ("chura"), price range and primary tag; the action buttons sit outside it. Make the top section more compact (for example, remove the top bar and animate out the "Swipe your vibe" header). Center the cards visually, accounting for the animations and container.
+- Tapping a card should open the Spot Info modal.
+- Trip creation: choosing "Slow" as the pace, then Plan with AI, highlights "Moderate" instead. The preference is not saved or reflected; the same happens with people going and similar fields.
+- Text fixes: "plan with AI" on the Plan with AI page and "plan a trip" on the Plan a trip screen have a lowercase "p"; the Plan a trip subheading contains an em dash; the "Describe your trip" section uses a different font.
+- Catalogue: Andrew adds metadata for the current 10 destinations and adds 10 more.
+
+**Demo video** (Part 1 to 8 of the course checklist). Materials: [team Drive folder](https://drive.google.com/drive/folders/1iX_TqWex11pZz6is73KHjOHGaeRbnth2), the instructions, assignments and script Google Doc ("AI Report Video - Lagaw | Relax Mode"), and the Canva presentation (https://canva.link/186ihbs6erj3tsb), which is still blank. The finished video goes in the Drive folder.
+
+| Part | Presenter |
+| --- | --- |
+| 1. Introduction and progress | Kyle (introduction); Jeff (major features and remaining tasks) |
+| 2. System walkthrough | Roel (sign-in and onboarding, discovery, trip create, read and update); Kyle (recommendations and itinerary, trip delete, frontend/backend/validation) |
+| 3. Hosting | Andrew (database and backend); Kyle (frontend on Cloudflare) |
+| 4. AI/LLM integration | Jeff |
+| 5. Tests and evaluations | Roel (frontend); Andrew (backend); Jeff (AI); Kyle (automated tests) |
+| 6. DevOps configuration and rules | Kyle |
+| 7. End-to-end DevOps demonstration | Kyle |
+| 8. Final progress summary | Kyle |
+
+- **Decision:** #117 is closed after the production check recorded above.
