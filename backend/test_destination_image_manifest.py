@@ -92,5 +92,11 @@ def test_excluded_locations_explain_why_and_have_no_image():
 def test_rejected_candidates_give_reasons():
     for entry in MANIFEST["locations"]:
         for candidate in entry["rejected_candidates"]:
-            assert candidate["title"].startswith("File:")
+            assert candidate["source"] in {
+                "Wikimedia Commons",
+                "Photographer permission",
+            }
+            if candidate["source"] == "Wikimedia Commons":
+                assert candidate["title"].startswith("File:")
+            assert candidate["title"].strip()
             assert candidate["reason"].strip()
