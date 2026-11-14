@@ -49,9 +49,17 @@ class SwipeDeck extends StatefulWidget {
   State<SwipeDeck> createState() => _SwipeDeckState();
 }
 
-class _SwipeDeckState extends State<SwipeDeck>
-    with SingleTickerProviderStateMixin {
+class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   double _drag = 0;
+
+  /// The card is flying off; ignore further swipes until the deck moves.
+  bool _flying = false;
+
+  /// Throws the card off the side before the next one shows.
+  late final AnimationController _fly = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+  );
 
   /// Springs the card back when a drag isn't far enough.
   late final AnimationController _settle = AnimationController(
@@ -74,19 +82,45 @@ class _SwipeDeckState extends State<SwipeDeck>
   @override
   void didUpdateWidget(SwipeDeck old) {
     super.didUpdateWidget(old);
-    if (old.spot.id != widget.spot.id) _drag = 0;
+    if (old.spot.id != widget.spot.id) {
+      _drag = 0;
+      _flying = false;
+    }
   }
 
   @override
   void dispose() {
     _settle.dispose();
+    _fly.dispose();
     super.dispose();
   }
 
+  /// Flies the card off, then records the swipe. The deck moves on right
+  /// away; if the swipe is cancelled or fails, the card springs back.
   Future<void> _swipe(bool liked) async {
-    if (widget.busy) return;
+    if (widget.busy || _flying) return;
+    _flying = true;
+    _settle.stop();
+    final id = widget.spot.id;
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    final from = _drag;
+    final to = (liked ? 1 : -1) * MediaQuery.sizeOf(context).width * 1.3;
+    if (!reduce) {
+      void tick() => setState(
+        () => _drag = from + (to - from) * Curves.easeIn.transform(_fly.value),
+      );
+      _fly.addListener(tick);
+      await _fly.forward(from: 0);
+      _fly.removeListener(tick);
+    }
+    if (!mounted) return;
     await widget.onSwipe(liked);
-    if (mounted) _springBack();
+    if (!mounted) return;
+    if (widget.spot.id == id) {
+      // Cancelled (the pass explainer) or failed: bring it back.
+      _flying = false;
+      _springBack();
+    }
   }
 
   void _springBack() {

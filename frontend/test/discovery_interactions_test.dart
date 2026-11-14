@@ -180,6 +180,25 @@ void main() {
       expect(state.isBusy('a'), isFalse);
     });
 
+    test('a swipe leaves the deck at once and returns if it fails', () async {
+      final backend = _Backend()
+        ..holdPosts = Completer<void>()
+        ..postResults.add(503);
+      final state = DiscoveryInteractions(backend.service());
+      await state.load();
+
+      final pending = state.swipe('a', liked: true);
+      // No waiting on the server: the place is already swiped.
+      expect(state.isSwiped('a'), isTrue);
+      expect(state.picks, contains('a'));
+
+      backend.holdPosts!.complete();
+      await expectLater(pending, throwsA(isA<TripApiException>()));
+      expect(state.isSwiped('a'), isFalse);
+      expect(state.picks, isEmpty);
+      expect(backend.posts, hasLength(1));
+    });
+
     test('a failed write changes nothing and is not retried', () async {
       final backend = _Backend()..postResults.addAll([503, 0]);
       final state = DiscoveryInteractions(backend.service());
@@ -282,7 +301,7 @@ void main() {
       expect(find.text('2 / 3'), findsOneWidget);
     });
 
-    testWidgets('a like is recorded once and advances after the server', (
+    testWidgets('a like is recorded once and the deck moves on', (
       tester,
     ) async {
       final backend = await pumpDeck(tester);

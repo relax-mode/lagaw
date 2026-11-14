@@ -70,8 +70,12 @@ void main() {
 
   testWidgets('buttons like, pass and rate', (tester) async {
     await pump(tester);
+    // Each swipe flies the card off first (and it springs back here,
+    // since this deck never moves on).
     await tester.tap(find.byKey(const ValueKey('swipe-like')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('swipe-pass')));
+    await tester.pumpAndSettle();
     // Rating is the star between Pass and Like.
     final pass = tester.getCenter(find.byKey(const ValueKey('swipe-pass')));
     final star = tester.getCenter(find.byKey(const ValueKey('swipe-rate')));

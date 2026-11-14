@@ -143,3 +143,9 @@ Roel asked for the swipe page to match the other pages, with the title centered 
 | Drag recording (frames reviewed, not committed) | Partial right drag: tilt, LIKE stamp, back card leans in, springs back; no swipe sent (still 2/10) | Pass |
 
 Follow-up (Roel): the cards are smaller, then sized to the area Roel marked (1.08 × the screen width tall, 360–440 pt, with a 10 pt side inset), so the card ends just above the nav. The deck then moved 30 pt lower (52 pt gap under the subtitle), so the tilted back cards no longer touch "Drag right to like". "Been here? Rate it" is gone. Rating is now a star button between × and Like, which shows your stars once you rate (for example ★ 4).
+
+Follow-up (Roel): no more waiting on Like. Swipes are now **optimistic**: the card flies off (220 ms) and the next place shows at once while the swipe is sent in the background. If sending fails, the swipe is undone, the place comes back to the top, and the error explains why (a response that never arrived still says it may have been recorded). The swipe is still sent once and never retried automatically. Saves and ratings still wait for the server.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [swipe_instant_frames](img/home-v3-android/swipe_instant_frames.jpg) | 30 fps: Like on Capitol Park flies the card off with the LIKE stamp; Negros Forest Park (6 / 10) shows straight after, with no "Saving…" | Pass |
