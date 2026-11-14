@@ -98,7 +98,7 @@ class _SwipeDeckState extends State<SwipeDeck>
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final cardHeight = (w * 0.98).clamp(340.0, 410.0);
+    final cardHeight = (w * 1.08).clamp(360.0, 440.0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -159,7 +159,7 @@ class _SwipeDeckState extends State<SwipeDeck>
         const SizedBox(height: 22),
         Padding(
           // Inset so the whole card reads smaller, not just shorter.
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: SizedBox(
             height: cardHeight + 26,
             child: Stack(
