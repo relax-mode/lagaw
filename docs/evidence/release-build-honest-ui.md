@@ -89,9 +89,19 @@ Screenshots: [`img/release-build-android/`](img/release-build-android/).
 - **App icon:** the release app initially showed Flutter's default icon. At Roel's request, the launcher icon is now the Lagaw logo at all five densities (`mipmap-*/ic_launcher.png`, 48–192 px). The files contain only image data: no source file name, color profile, timestamp or other metadata.
 - **Offline token refresh:** a forced refresh can't be triggered on demand on a device (tokens last about an hour). The "no connection during refresh is not expiry" behavior is covered by `test/auth_test.dart`, and the offline screens above show the signed-in state is kept.
 
+## Production (Infinix X6850, release APK against production, 2026-11-15)
+
+Roel ran the production check himself, with the production **publishable** key CyGray shared. It is the public client key every installed app carries; it sits in Roel's git-ignored `.env` as `PROD_SUPABASE_ANON_KEY` and was never printed. Before building, it was confirmed against production's public auth settings (200 on production, 401 on staging). The build used the command above. `aapt dump badging` shows `com.lagaw.bacolod`, version 1.0.0, `android.permission.INTERNET`, and the label "Lagaw". The app was installed fresh (app data cleared), and Roel signed in with his own production account. The build includes the home-redesign UI from `feat/home-redesign-v3`; the #117 behavior is the same.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [117_9](img/release-build-android/117_9_prod_home.jpg) | Production home after sign-in: "10 spots to explore" from the production API; first-run preferences loaded first (the welcome card appeared); no stock photos ("No photo yet": production has no images) | Pass |
+| [117_10](img/release-build-android/117_10_prod_spots.jpg) | Production Spots: "Showing 10 places", every unknown price says "Price unknown", no match % | Pass |
+| [117_11](img/release-build-android/117_11_prod_swipe.jpg) | Production swipe deck: swipe history loaded for the new account (1 / 10), "Price unknown", no match score | Pass |
+
 ## Pending
 
 - [x] Device screenshots (release APK against staging, above).
-- [ ] **Release APK against production: handed to the release owner (#121, CyGray)**, who holds the production publishable key and a production account. Build command above.
-- [ ] A real release keystore (#121, CyGray).
-- [ ] PR review and CI.
+- [x] **Release APK against production:** done by Roel on 2026-11-15 (above).
+- [x] PR review and CI (PR #174, merged).
+- [ ] A real release keystore. This belongs to the v1.0.0 release (#121, CyGray), not #117: the production check above used the debug signing fallback.

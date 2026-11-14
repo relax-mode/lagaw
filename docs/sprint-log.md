@@ -1007,6 +1007,13 @@ is a different operation and was not triggered. See the
 - Checked on Roel's Infinix: real photos with credits on Home, Spots, the open card and the credit sheet. The credit chip had been hidden under card titles on Spots and swipe cards, so it moved to a top corner, and the credit sheet is now full width. `flutter test` passes 273 tests. See [evidence](evidence/destination-images-ui.md).
 - #109 can close. A production upload is left for the production release.
 
+### November 15, 2026 — #117 production check
+
+- **Credential handoff:** CyGray gave Roel the production Supabase **publishable** key (the public client key) for the #117 production check. Roel holds it in his git-ignored `.env`.
+- Roel built the release APK against production. It shows `com.lagaw.bacolod`, version 1.0.0, internet permission and the label "Lagaw". It was installed fresh on the Infinix, and Roel signed in with his own production account.
+- Production loaded 10 places, the user's preferences and the swipe history, with "Price unknown" for unknown prices and no match score. This meets the last #117 acceptance criterion, so #117 can close. See [evidence](evidence/release-build-honest-ui.md).
+- The real release keystore stays with the v1.0.0 release (#121, CyGray).
+
 ### November 14, 2026 — Home redesign v3
 
 - Roel asked for a cleaner, less cramped home screen that keeps Lagaw's vibe. Using the Impeccable design skill (a design review only, since the screen is native), Claude critiqued the current home and produced three mockups from Roel's references. Roel chose v3 and directed each change:
