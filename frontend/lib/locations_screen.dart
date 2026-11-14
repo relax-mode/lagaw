@@ -6,6 +6,8 @@ import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
 import 'screens/home/home_view.dart';
 import 'screens/spots/spots_view.dart';
+import 'screens/onboarding/first_run_gate.dart' show preferencesRepository;
+import 'widgets/floating_elements.dart';
 import 'screens/trips_tab.dart';
 import 'screens/you_tab.dart';
 import 'services/api_service.dart';
@@ -414,6 +416,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   constraints: BoxConstraints(maxWidth: contentMaxWidth),
                   child: Stack(
                     children: [
+                      // One element layer for every phone tab, so elements
+                      // glide between pages instead of popping.
+                      if (!isWide)
+                        Positioned.fill(
+                          top: 8,
+                          child: FloatingElements(
+                            placements: _elementsFor(_activeTab),
+                          ),
+                        ),
                       Column(
                         children: [
                           const SizedBox(height: 8),
@@ -430,8 +441,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           ),
                           if (isWide)
                             _buildTopGlassHeader(isWide: isWide)
+                          // You has its own avatar hero instead of the pill.
                           else if (_activeTab != AppTab.explore &&
-                              _activeTab != AppTab.spots)
+                              _activeTab != AppTab.spots &&
+                              _activeTab != AppTab.you)
                             Padding(
                               padding: const EdgeInsets.only(top: 8, bottom: 4),
                               child: Center(child: _buildGreetingPill()),
@@ -533,9 +546,28 @@ class _LocationsScreenState extends State<LocationsScreen> {
         onAccount: () => setState(() => _activeTab = AppTab.you),
       );
 
+  /// Each tab's own set of floating elements.
+  List<ElementPlacement> _elementsFor(AppTab tab) => switch (tab) {
+        AppTab.explore => ElementPlacement.home,
+        AppTab.spots => ElementPlacement.spots,
+        AppTab.trips => ElementPlacement.trips,
+        AppTab.you => ElementPlacement.you,
+        AppTab.swipe => const [],
+      };
+
+  PlaceActions get _placeActions => PlaceActions(
+        isSaved: _interactions.isSaved,
+        isBusy: _interactions.isBusy,
+        ratingFor: _interactions.ratingFor,
+        onSave: (place) => _save(place.id),
+        onRate: _rate,
+        changes: _interactions,
+      );
+
   Widget _buildSpotsV3() {
     final live = _availableLocations;
     return SpotsView(
+      showElements: false,
       avatarLetter: _avatarLetter,
       likedCount: _savedIds.length,
       onSaved: _viewSavedLocations,
@@ -568,6 +600,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   Widget _buildHomeV3() {
     final places = _availableLocations;
     return HomeView(
+      showElements: false,
       avatarLetter: _avatarLetter,
       spotCount: places.length,
       likedCount: _savedIds.length,
@@ -990,6 +1023,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
           session: AuthSession.current,
           likedCount: _savedIds.length,
           onOpenSaved: _viewSavedLocations,
+          picks: _availableLocations
+              .where((l) => _savedIds.contains(l.id))
+              .toList(),
+          actions: _placeActions,
+          preferences: preferencesRepository,
+          onExplore: () => setState(() {
+            _showOnlySaved = false;
+            _activeTab = AppTab.spots;
+          }),
         );
       case AppTab.trips:
         return TripsTab(service: _tripService, isWide: isWide);

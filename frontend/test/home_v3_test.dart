@@ -272,7 +272,7 @@ void main() {
       ),
     );
     expect(find.text('Not signed in'), findsOneWidget);
-    expect(find.text('2 places'), findsOneWidget);
+    expect(find.text('2 places liked and saved'), findsOneWidget);
     expect(find.byKey(const ValueKey('you-sign-out')), findsNothing);
     await tester.tap(find.byKey(const ValueKey('you-saved')));
     expect(opened, isTrue);

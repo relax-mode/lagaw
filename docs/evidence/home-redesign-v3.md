@@ -108,3 +108,21 @@ The swipe-deck tests now open the deck through the nav menu. The test that asser
 - No photos are uploaded to staging yet (#109), so the category covers show the honest "No photo yet" placeholder. They switch to the licensed photos with credits once the upload is done.
 - Staging's first request after idling sometimes times out; Retry works, which is the honest error state from #117.
 - Minor: after "See 3 parks", the selected Parks chip is scrolled just out of view in the Spots chip row.
+
+### Round: smoother pop-up, Trips, You, Picked for you, per-page elements
+
+- **Spots pop-up morph:** now a container transform. The frame grows from the card's grid spot with Material's emphasized easing (520 ms open, 400 ms close). The grid card fades out early and the full card fades in, laid out once at its final size and scaled with the frame, so no text reflows and nothing switches size halfway. The grid card hides while it is lifted, one frame after the pop-up draws, so there is never a frame with neither.
+- **Trips:** "My Trips" and the count are centered like Spots, with an orange "Plan a new trip" pill and a round refresh button. Trips are white cards with a sky date tile (month and day), title, status, "N days · dates", and soft pills for budget, transport and group.
+- **You:** a profile hero like the reference. A big avatar with a white ring and a pencil (shows "Changing your photo is coming soon."; uploads aren't built), a name from the email, liked-and-saved count, and interest chips. Below are the travel preferences in full (interests, budget, pace, with Edit), or a "Take travel preferences" button if not set. Liked and saved shows the first two picks as Spots cards (tapping one opens the same pop-up) with "See all N" to Your picks.
+- **Picked for you** (after travel preferences): sky page with the sun and still elements, centered title, a white card with orange pill choices, an orange search button, and white recommendation cards (photo, name, category · price, reason, match %). Same API calls and validation as before.
+- **Per-page elements:** one shared element layer for the phone tabs: Home (all four), Spots (inasal, piaya), Trips (carabao, masskara), You (all four around the avatar like stickers), swipe (none). Switching tabs glides each element to its new spot over 720 ms; elements not on the next page shrink and fade, new ones grow in. The bob stops on pages with none and under reduced motion.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [spots_morph_frames](img/home-v3-android/spots_morph_frames.jpg) | 30 fps frames: Cafetolyo grows from its grid spot into the centered card over the blur, no empty slot, no jump | Pass |
+| [trips_v3](img/home-v3-android/trips_v3.jpg) | Centered My Trips, 3 saved trips, Plan a new trip, refresh, three white trip cards with date tiles | Pass |
+| [you_1](img/home-v3-android/you_1.jpg) | Avatar with pencil, stickers around it, name, liked count, Take travel preferences, Calea pick, See all 1 (email blurred) | Pass |
+| Tab recording (frames reviewed, not committed) | Spots → Trips → You: elements glide between sets | Pass |
+| Pencil | Shows "Changing your photo is coming soon." | Pass |
+
+Not checked on the phone: the Picked for you screen, because reaching it means saving preferences on account B; it is covered by the widget tests.

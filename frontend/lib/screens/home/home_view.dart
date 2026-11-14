@@ -97,6 +97,9 @@ class HomeView extends StatefulWidget {
 
   /// Shown instead of the carousel while places load or fail.
   final Widget? placesState;
+
+  /// Off when the app draws one shared element layer for every tab.
+  final bool showElements;
   final VoidCallback onSearch;
   final VoidCallback onSaved;
   final VoidCallback onAccount;
@@ -116,6 +119,7 @@ class HomeView extends StatefulWidget {
     required this.onAccount,
     required this.onSeeCategory,
     this.placesState,
+    this.showElements = true,
     this.clock = DateTime.now,
   });
 
@@ -158,9 +162,10 @@ class _HomeViewState extends State<HomeView> {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        const Positioned.fill(
-          child: FloatingElements(placements: ElementPlacement.home),
-        ),
+        if (widget.showElements)
+          const Positioned.fill(
+            child: FloatingElements(placements: ElementPlacement.home),
+          ),
         SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 120),
           child: Column(

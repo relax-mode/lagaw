@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/location.dart';
@@ -11,7 +12,7 @@ import '../home/home_view.dart' show HomeCategory;
 
 /// The v3 Spots page: the same greeting pill and floating elements as home,
 /// a glass search, category chips built from the real data, and places as
-/// photo cards that expand in place to show everything. [home v3]
+/// photo cards that pop up to show everything. [home v3]
 class SpotsView extends StatefulWidget {
   final String avatarLetter;
   final int likedCount;
@@ -41,6 +42,9 @@ class SpotsView extends StatefulWidget {
   /// Shown instead of the cards while places load or fail.
   final Widget? placesState;
 
+  /// Off when the app draws one shared element layer for every tab.
+  final bool showElements;
+
   /// Notifies when saves, ratings or busy states change, so an open card
   /// stays current.
   final Listenable? changes;
@@ -66,6 +70,7 @@ class SpotsView extends StatefulWidget {
     required this.onRate,
     this.placesState,
     this.changes,
+    this.showElements = true,
   });
 
   @override
@@ -79,6 +84,11 @@ class _SpotsViewState extends State<SpotsView> {
   final FocusNode _searchFocus = FocusNode();
   final Map<String, GlobalKey> _chipKeys = {};
   final Map<String, GlobalKey> _cardKeys = {};
+
+  /// The card lifted into the pop-up; hidden in the grid meanwhile so the
+  /// morph reads as one card moving, not a copy.
+  final ValueNotifier<String?> _lifted = ValueNotifier(null);
+  bool _opening = false;
 
   @override
   void initState() {
@@ -99,6 +109,7 @@ class _SpotsViewState extends State<SpotsView> {
   void dispose() {
     _search.dispose();
     _searchFocus.dispose();
+    _lifted.dispose();
     super.dispose();
   }
 
@@ -115,12 +126,18 @@ class _SpotsViewState extends State<SpotsView> {
   }
 
   /// Lifts the card out of its spot into the centered expanded card.
-  void _open(LocationItem place) {
+  Future<void> _open(LocationItem place) async {
     final box =
         _cardKeys[place.id]?.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize) return;
+    if (box == null || !box.hasSize || _opening) return;
+    _opening = true;
     final origin = box.localToGlobal(Offset.zero) & box.size;
-    showPlacePopup(
+    // Hide the grid card once the pop-up has drawn its first frame, so
+    // there is never a frame with neither.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _lifted.value = place.id;
+    });
+    await showPlacePopup(
       context,
       place: place,
       origin: origin,
@@ -137,6 +154,8 @@ class _SpotsViewState extends State<SpotsView> {
       busy: () => widget.isBusy(place.id),
       onSave: () => widget.onSave(place),
     );
+    _opening = false;
+    if (mounted) _lifted.value = null;
   }
 
   @override
@@ -145,9 +164,10 @@ class _SpotsViewState extends State<SpotsView> {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        const Positioned.fill(
-          child: FloatingElements(placements: ElementPlacement.spots),
-        ),
+        if (widget.showElements)
+          const Positioned.fill(
+            child: FloatingElements(placements: ElementPlacement.spots),
+          ),
         SingleChildScrollView(
           key: const ValueKey('spots-scroll'),
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 120),
@@ -385,6 +405,7 @@ class _SpotsViewState extends State<SpotsView> {
                 busy: widget.isBusy(place.id),
                 onOpen: () => _open(place),
                 onSave: () => widget.onSave(place),
+                lifted: _lifted,
               ),
           ],
         );
@@ -432,6 +453,102 @@ class _SpotsViewState extends State<SpotsView> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// What a place card can do, so pages other than Spots (e.g. You) can show
+/// the same cards and pop-up. [home v3]
+class PlaceActions {
+  final bool Function(String id) isSaved;
+  final bool Function(String id) isBusy;
+  final double? Function(String id) ratingFor;
+  final ValueChanged<LocationItem> onSave;
+  final ValueChanged<LocationItem> onRate;
+  final Listenable? changes;
+
+  const PlaceActions({
+    required this.isSaved,
+    required this.isBusy,
+    required this.ratingFor,
+    required this.onSave,
+    required this.onRate,
+    this.changes,
+  });
+}
+
+/// A Spots photo card for use outside Spots: same look, and tapping it
+/// opens the same pop-up from where it sits. [home v3]
+class PlacePickCard extends StatefulWidget {
+  final LocationItem place;
+  final double width;
+  final PlaceActions actions;
+
+  const PlacePickCard({
+    super.key,
+    required this.place,
+    required this.width,
+    required this.actions,
+  });
+
+  @override
+  State<PlacePickCard> createState() => _PlacePickCardState();
+}
+
+class _PlacePickCardState extends State<PlacePickCard> {
+  final ValueNotifier<String?> _lifted = ValueNotifier(null);
+  bool _opening = false;
+
+  @override
+  void dispose() {
+    _lifted.dispose();
+    super.dispose();
+  }
+
+  Future<void> _open() async {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize || _opening) return;
+    _opening = true;
+    final place = widget.place;
+    final a = widget.actions;
+    // Hide the grid card once the pop-up has drawn its first frame, so
+    // there is never a frame with neither.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _lifted.value = place.id;
+    });
+    await showPlacePopup(
+      context,
+      place: place,
+      origin: box.localToGlobal(Offset.zero) & box.size,
+      changes: a.changes,
+      details: () => _PlaceDetails(
+        place: place,
+        saved: a.isSaved(place.id),
+        busy: a.isBusy(place.id),
+        rating: a.ratingFor(place.id),
+        onSave: () => a.onSave(place),
+        onRate: () => a.onRate(place),
+      ),
+      saved: () => a.isSaved(place.id),
+      busy: () => a.isBusy(place.id),
+      onSave: () => a.onSave(place),
+    );
+    _opening = false;
+    if (mounted) _lifted.value = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final a = widget.actions;
+    final place = widget.place;
+    return _PlaceCard(
+      place: place,
+      width: widget.width,
+      saved: a.isSaved(place.id),
+      busy: a.isBusy(place.id),
+      onOpen: _open,
+      onSave: () => a.onSave(place),
+      lifted: _lifted,
     );
   }
 }
@@ -541,6 +658,7 @@ class _PlaceCard extends StatelessWidget {
   final bool busy;
   final VoidCallback onOpen;
   final VoidCallback onSave;
+  final ValueListenable<String?> lifted;
 
   const _PlaceCard({
     super.key,
@@ -550,10 +668,20 @@ class _PlaceCard extends StatelessWidget {
     required this.busy,
     required this.onOpen,
     required this.onSave,
+    required this.lifted,
   });
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: lifted,
+      builder: (context, id, child) =>
+          Opacity(opacity: id == place.id ? 0 : 1, child: child),
+      child: _card(),
+    );
+  }
+
+  Widget _card() {
     return GestureDetector(
       key: ValueKey('spot-toggle-${place.id}'),
       onTap: onOpen,
@@ -587,9 +715,12 @@ class _PlaceCard extends StatelessWidget {
   }
 }
 
-/// Opens [place] as a pop-up: the background blurs and dims (like the swipe
-/// menu) while the card grows from [origin], its spot in the grid, into one
-/// centered size used for every place. Closing shrinks it back. [home v3]
+/// Opens [place] as a pop-up with a container-transform morph: the
+/// background blurs and dims (like the swipe menu) while the card's frame
+/// grows from [origin], its spot in the grid, into one centered size used
+/// for every place. The grid card fades out as the full card fades in,
+/// already laid out at its final size, so nothing reflows or jumps.
+/// Closing runs it back into the grid. [home v3]
 Future<void> showPlacePopup(
   BuildContext context, {
   required LocationItem place,
@@ -601,25 +732,33 @@ Future<void> showPlacePopup(
   Listenable? changes,
 }) {
   final reduce = MediaQuery.disableAnimationsOf(context);
-  return showGeneralDialog<void>(
-    context: context,
-    barrierDismissible: true,
-    barrierLabel: 'Close ${place.name}',
-    barrierColor: Colors.transparent,
-    transitionDuration: Duration(milliseconds: reduce ? 150 : 420),
-    pageBuilder: (context, animation, _) => _PlacePopup(
-      place: place,
-      origin: origin,
-      animation: animation,
-      reduce: reduce,
-      details: details,
-      saved: saved,
-      busy: busy,
-      onSave: onSave,
-      changes: changes,
+  return Navigator.of(context, rootNavigator: true).push<void>(
+    PageRouteBuilder<void>(
+      opaque: false,
+      barrierDismissible: true,
+      barrierLabel: 'Close ${place.name}',
+      barrierColor: Colors.transparent,
+      transitionDuration: Duration(milliseconds: reduce ? 150 : 520),
+      reverseTransitionDuration: Duration(milliseconds: reduce ? 150 : 400),
+      pageBuilder: (context, animation, _) => _PlacePopup(
+        place: place,
+        origin: origin,
+        animation: animation,
+        reduce: reduce,
+        details: details,
+        saved: saved,
+        busy: busy,
+        onSave: onSave,
+        changes: changes,
+      ),
     ),
   );
 }
+
+/// Material's emphasized curves: a quick start that settles slowly, and a
+/// gentle lift-off on the way back.
+const _emphasized = Cubic(0.2, 0, 0, 1);
+const _emphasizedBack = Cubic(0.3, 0, 0.8, 0.15);
 
 class _PlacePopup extends StatelessWidget {
   final LocationItem place;
@@ -660,10 +799,62 @@ class _PlacePopup extends StatelessWidget {
     final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
     final grow = CurvedAnimation(
       parent: animation,
-      curve: Curves.easeInOutCubic,
-      reverseCurve: Curves.easeInOutCubic.flipped,
+      curve: _emphasized,
+      reverseCurve: _emphasizedBack.flipped,
     );
     void close() => Navigator.of(context).pop();
+
+    // The full card, built once at its final size.
+    final full = SizedBox(
+      width: target.width,
+      height: target.height,
+      child: ListenableBuilder(
+        listenable: changes ?? const AlwaysStoppedAnimation(0),
+        builder: (context, _) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: 290,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _PlacePhoto(
+                    place: place,
+                    large: true,
+                    saved: saved(),
+                    busy: busy(),
+                    onSave: onSave,
+                  ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: _CloseButton(onTap: close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                child: details(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    // The grid card as it looked, at its own size.
+    final small = SizedBox(
+      width: origin.width,
+      height: origin.height,
+      child: _PlacePhoto(
+        place: place,
+        large: false,
+        saved: saved(),
+        busy: busy(),
+        onSave: onSave,
+      ),
+    );
 
     return Stack(
       children: [
@@ -674,7 +865,7 @@ class _PlacePopup extends StatelessWidget {
             child: FadeTransition(
               opacity: fade,
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                 child: const ColoredBox(color: Color(0x590A1830)),
               ),
             ),
@@ -685,81 +876,60 @@ class _PlacePopup extends StatelessWidget {
           builder: (context, _) {
             final t = reduce ? 1.0 : grow.value;
             final rect = Rect.lerp(origin, target, t)!;
-            final photoHeight = 232 + (290 - 232) * t;
+            final radius = BorderRadius.circular(24 + 4 * t);
+            // The grid card fades out early; the full card fades in a beat
+            // later. Both scale with the frame's width, so neither reflows.
+            final smallOpacity = reduce
+                ? 0.0
+                : 1 - const Interval(0, 0.35).transform(t);
+            final fullOpacity = reduce
+                ? fade.value
+                : const Interval(0.15, 0.6).transform(t);
             return Positioned.fromRect(
               rect: rect,
-              child: Opacity(
-                opacity: reduce ? fade.value : 1,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24 + 4 * t),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.lerp(
-                            const Color(0x4D0F285A),
-                            const Color(0x8C000000),
-                            t,
-                          )!,
-                          blurRadius: 26 + 14 * t,
-                          offset: Offset(0, 14 + 8 * t),
-                          spreadRadius: -14,
+              child: Material(
+                type: MaterialType.transparency,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Color.lerp(
+                      place.gradientColors.first,
+                      Colors.white,
+                      const Interval(0.1, 0.5).transform(t),
+                    ),
+                    borderRadius: radius,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.lerp(
+                          const Color(0x4D0F285A),
+                          const Color(0x8C000000),
+                          t,
+                        )!,
+                        blurRadius: 26 + 14 * t,
+                        offset: Offset(0, 14 + 8 * t),
+                        spreadRadius: -14,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: radius,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (smallOpacity > 0)
+                          IgnorePointer(
+                            child: Opacity(
+                              opacity: smallOpacity,
+                              child: _ScaledToWidth(
+                                width: rect.width,
+                                child: small,
+                              ),
+                            ),
+                          ),
+                        Opacity(
+                          opacity: fullOpacity,
+                          child: _ScaledToWidth(width: rect.width, child: full),
                         ),
                       ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24 + 4 * t),
-                      child: ListenableBuilder(
-                        listenable: changes ?? const AlwaysStoppedAnimation(0),
-                        builder: (context, _) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SizedBox(
-                              height: photoHeight.clamp(0, rect.height),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  _PlacePhoto(
-                                    place: place,
-                                    large: t > 0.5,
-                                    saved: saved(),
-                                    busy: busy(),
-                                    onSave: onSave,
-                                  ),
-                                  Positioned(
-                                    top: 10,
-                                    right: 10,
-                                    child: Opacity(
-                                      opacity: Interval(0.5, 1).transform(t),
-                                      child: _CloseButton(onTap: close),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Opacity(
-                                opacity: Interval(0.6, 1).transform(t),
-                                // Details only once the card is wide enough,
-                                // so nothing squeezes mid-animation.
-                                child: rect.width < 280
-                                    ? const SizedBox.shrink()
-                                    : SingleChildScrollView(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          18,
-                                          16,
-                                          18,
-                                          18,
-                                        ),
-                                        child: details(),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
                 ),
@@ -768,6 +938,33 @@ class _PlacePopup extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// Lays [child] out at its own fixed size and scales it to [width], pinned
+/// to the top, so the morph never reflows its text.
+class _ScaledToWidth extends StatelessWidget {
+  final double width;
+  final SizedBox child;
+
+  const _ScaledToWidth({required this.width, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final w = child.width!;
+    final h = child.height!;
+    return OverflowBox(
+      alignment: Alignment.topCenter,
+      minWidth: w,
+      maxWidth: w,
+      minHeight: h,
+      maxHeight: h,
+      child: Transform.scale(
+        scale: w == 0 ? 1 : width / w,
+        alignment: Alignment.topCenter,
+        child: child,
+      ),
     );
   }
 }

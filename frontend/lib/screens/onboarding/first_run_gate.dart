@@ -29,6 +29,12 @@ Future<void> openTravelPreferences(
   );
 }
 
+/// Where this build reads and saves travel preferences: the real API when
+/// signed in, otherwise the in-app mock. [home v3]
+OnboardingRepository preferencesRepository() => AppConfig.authEnabled
+    ? DiscoveryService()
+    : MockOnboardingRepository.shared;
+
 /// Sends a signed-in user with no saved preferences to onboarding once per
 /// app run. If the check fails the app opens normally; preferences stay
 /// reachable from the account sheet. [S4-04]
