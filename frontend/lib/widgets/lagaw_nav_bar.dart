@@ -373,25 +373,28 @@ class _SwipeMenu extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: primary ? null : const Color(0xFFE7F0FD),
-                  gradient: primary
-                      ? const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFFF9A3D), _orange],
-                        )
-                      : null,
+              // Start matching wears the Lagaw logo, like the button.
+              if (primary)
+                ClipRRect(
+                  key: const ValueKey('swipe-menu-logo'),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.asset(
+                    'assets/brand/logo.png',
+                    width: 46,
+                    height: 46,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                )
+              else
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: const Color(0xFFE7F0FD),
+                  ),
+                  child: Icon(icon, color: AppTheme.primaryBlue),
                 ),
-                child: Icon(
-                  icon,
-                  color: primary ? Colors.white : AppTheme.primaryBlue,
-                ),
-              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(

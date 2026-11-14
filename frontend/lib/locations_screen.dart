@@ -5,6 +5,7 @@ import 'auth/auth_session.dart';
 import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
 import 'screens/home/home_view.dart';
+import 'screens/spots/spots_view.dart';
 import 'screens/trips_tab.dart';
 import 'screens/you_tab.dart';
 import 'services/api_service.dart';
@@ -13,6 +14,7 @@ import 'services/trip_service.dart';
 import 'theme.dart';
 import 'widgets/bacolod_3d_badges.dart';
 import 'widgets/destination_photo.dart';
+import 'widgets/greeting_pill.dart';
 import 'widgets/lagaw_nav_bar.dart';
 import 'widgets/left_swipe_explainer.dart';
 import 'widgets/rating_dialog.dart';
@@ -426,10 +428,18 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                   )
                                 : const SizedBox(width: double.infinity),
                           ),
-                          if (isWide || _activeTab != AppTab.explore)
-                            _buildTopGlassHeader(isWide: isWide),
+                          if (isWide)
+                            _buildTopGlassHeader(isWide: isWide)
+                          else if (_activeTab != AppTab.explore &&
+                              _activeTab != AppTab.spots)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8, bottom: 4),
+                              child: Center(child: _buildGreetingPill()),
+                            ),
                           if (!isWide && _activeTab == AppTab.explore)
                             Expanded(child: _buildHomeV3())
+                          else if (!isWide && _activeTab == AppTab.spots)
+                            Expanded(child: _buildSpotsV3())
                           else
                           Expanded(
                             child: SingleChildScrollView(
@@ -509,6 +519,49 @@ class _LocationsScreenState extends State<LocationsScreen> {
       case SwipeMenuChoice.planTrip:
         await _planTrip();
     }
+  }
+
+  /// The v3 header for phone tabs without their own (Trips, You, Swipe).
+  Widget _buildGreetingPill() => GreetingPill(
+        avatarLetter: _avatarLetter,
+        likedCount: _savedIds.length,
+        onSearch: () => setState(() {
+          _showOnlySaved = false;
+          _activeTab = AppTab.spots;
+        }),
+        onSaved: _viewSavedLocations,
+        onAccount: () => setState(() => _activeTab = AppTab.you),
+      );
+
+  Widget _buildSpotsV3() {
+    final live = _availableLocations;
+    return SpotsView(
+      avatarLetter: _avatarLetter,
+      likedCount: _savedIds.length,
+      onSaved: _viewSavedLocations,
+      onAccount: () => setState(() => _activeTab = AppTab.you),
+      places: live.isEmpty ? const [] : _filteredLocations,
+      categories: [
+        for (final c in HomeCategory.fromLocations(live)) c.id,
+      ],
+      selectedCategory: _selectedCategory,
+      query: _searchQuery,
+      onQuery: (q) => setState(() => _searchQuery = q),
+      onCategory: (id) => setState(() => _selectedCategory = id),
+      savedOnly: _showOnlySaved,
+      onExitSaved: () => setState(() {
+        _showOnlySaved = false;
+        _selectedCategory = 'all';
+        _searchQuery = '';
+      }),
+      isSaved: _interactions.isSaved,
+      isBusy: _interactions.isBusy,
+      ratingFor: _interactions.ratingFor,
+      onSave: (place) => _save(place.id),
+      onRate: _rate,
+      placesState:
+          live.isEmpty ? _buildLandingPlacesState(height: 260) : null,
+    );
   }
 
   Widget _buildHomeV3() {

@@ -25,12 +25,26 @@ The old phone home stacked eight bands: the wordmark and tagline, a header with 
 - **You tab:** the account email, Travel preferences, Liked and saved, and Sign out. These already existed, but were hidden behind the avatar.
 - **Font:** Outfit is bundled at weights 400–900 (`assets/fonts`, SIL Open Font License 1.1, license file included) and is now the app's default font.
 
+## Spots page (second round)
+
+- **Same header as home** on every phone tab: the greeting pill replaces the old "Maayong hapon!" header bar on Spots, Trips, You and Swipe. The pill and the floating elements are now shared widgets (`GreetingPill`, `FloatingElements` with per-page `ElementPlacement` sets), ready for per-page element sequences later.
+- **Spots layout:** "Explore Bacolod" headline with the inasal beside it and the piaya tucked behind the cards; a white glass search pill (clear button; the pill's search icon focuses it); glass category chips **built from the real categories** (so "See 1 museum" from home highlights Museums), and the selected chip scrolls into view.
+- **Places as photo cards:** two columns with the photo, a category-colored fade, the name, category · price, and a heart. Tapping a card **expands it in place** to full width, showing the description, vibe tags, address, visit length, price, your rating, **Save** and **Rate**, and **Show less**. One card is open at a time, and the details appear once the card is wide enough so nothing squeezes mid-animation.
+- **The saved view** ("Your picks") and empty and loading states share the same design.
+- **The menu's Start matching option** now shows the Lagaw logo.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [spots_1](img/home-v3-android/spots_1.jpg) | Spots: greeting pill, headline, search, chips, two-column cards with category fades, name, category · price, heart | Pass |
+| [spots_2](img/home-v3-android/spots_2.jpg) | Arima expanded in place: larger title, description, tags, address | Pass |
+| [spots_3](img/home-v3-android/spots_3.jpg) | Expanded details: 75 mins, Price unknown, Save, Rate, Show less | Pass |
+
 ## Automated checks
 
 | Check | Result |
 | --- | --- |
 | `flutter analyze` | No issues |
-| `flutter test` | 251 passed, 0 failed |
+| `flutter test` | 259 passed, 0 failed |
 
 New `test/home_v3_test.dart` covers:
 - the greeting by hour;

@@ -1,21 +1,13 @@
-import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 
 import '../../models/image_credits.dart';
 import '../../models/location.dart';
 import '../../theme.dart';
 import '../../widgets/destination_photo.dart';
+import '../../widgets/floating_elements.dart';
+import '../../widgets/greeting_pill.dart';
 
-/// Hiligaynon greeting for the local time of day.
-String hiligaynonGreeting(DateTime now) {
-  final h = now.hour;
-  if (h >= 5 && h < 11) return 'Maayong aga,';
-  if (h >= 11 && h < 13) return 'Maayong udto,';
-  if (h >= 13 && h < 18) return 'Maayong hapon,';
-  return 'Maayong gab-i,';
-}
+export '../../widgets/greeting_pill.dart' show hiligaynonGreeting;
 
 /// One carousel card: a category with its real place count.
 class HomeCategory {
@@ -31,6 +23,12 @@ class HomeCategory {
 
   /// Big lowercase word on the card, e.g. "parks".
   String get word => _names[id]?.$1 ?? id;
+
+  /// Chip label for a category id, e.g. "Parks", "Cafés", "Art".
+  static String labelFor(String id) {
+    final w = _names[id]?.$1 ?? id;
+    return w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}';
+  }
 
   /// "3 spots" under the card.
   String get countLabel => count == 1 ? '1 spot' : '$count spots';
@@ -125,26 +123,10 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView>
-    with SingleTickerProviderStateMixin {
+class _HomeViewState extends State<HomeView> {
   /// Created with the first categories so it can open on heritage.
   PageController? _pages;
-  late final AnimationController _float = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 6),
-  );
   int _page = 0;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Gentle floating, off when the system asks for reduced motion.
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _float.stop();
-    } else if (!_float.isAnimating) {
-      _float.repeat();
-    }
-  }
 
   @override
   void didUpdateWidget(HomeView old) {
@@ -164,13 +146,11 @@ class _HomeViewState extends State<HomeView>
   @override
   void dispose() {
     _pages?.dispose();
-    _float.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width.clamp(320.0, 430.0);
     final cats = widget.categories;
     if (cats.isNotEmpty) _controllerFor(cats);
     final current = cats.isEmpty ? null : cats[_page.clamp(0, cats.length - 1)];
@@ -178,12 +158,21 @@ class _HomeViewState extends State<HomeView>
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        ..._elements(width),
+        const Positioned.fill(
+          child: FloatingElements(placements: ElementPlacement.home),
+        ),
         SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 120),
           child: Column(
             children: [
-              _greetingPill(),
+              GreetingPill(
+                avatarLetter: widget.avatarLetter,
+                likedCount: widget.likedCount,
+                onSearch: widget.onSearch,
+                onSaved: widget.onSaved,
+                onAccount: widget.onAccount,
+                clock: widget.clock,
+              ),
               const SizedBox(height: 34),
               Text(
                 widget.spotCount == 1
@@ -242,226 +231,6 @@ class _HomeViewState extends State<HomeView>
         ),
       ],
     );
-  }
-
-  // --- Greeting pill ------------------------------------------------------
-
-  Widget _greetingPill() {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: const Color(0xF5FFFFFF),
-        borderRadius: BorderRadius.circular(999),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x330F1B2D),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-            spreadRadius: -12,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Semantics(
-            button: true,
-            label: 'Your account',
-            child: GestureDetector(
-              key: const ValueKey('home-account'),
-              onTap: widget.onAccount,
-              child: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFF9A3D), Color(0xFFF2620F)],
-                  ),
-                ),
-                child: Text(
-                  widget.avatarLetter,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                hiligaynonGreeting(widget.clock()),
-                key: const ValueKey('home-greeting'),
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF4A5B73),
-                  height: 1.1,
-                ),
-              ),
-              const Text(
-                'Bacolod City',
-                style: TextStyle(
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.slateDark,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 14),
-          _pillIcon(
-            key: const ValueKey('home-saved'),
-            label: 'Liked and saved places',
-            onTap: widget.onSaved,
-            icon: Icons.favorite_rounded,
-            color: const Color(0xFFF2620F),
-            badge: widget.likedCount,
-          ),
-          const SizedBox(width: 6),
-          _pillIcon(
-            key: const ValueKey('home-search'),
-            label: 'Search places',
-            onTap: widget.onSearch,
-            icon: Icons.search_rounded,
-            color: AppTheme.slateDark,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _pillIcon({
-    required Key key,
-    required String label,
-    required VoidCallback onTap,
-    required IconData icon,
-    required Color color,
-    int badge = 0,
-  }) {
-    return Semantics(
-      button: true,
-      label: badge > 0 ? '$label, $badge' : label,
-      child: GestureDetector(
-        key: key,
-        onTap: onTap,
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEEF4FC),
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 20, color: color),
-              ),
-              if (badge > 0)
-                Positioned(
-                  top: -3,
-                  right: -3,
-                  child: Container(
-                    constraints: const BoxConstraints(minWidth: 18),
-                    height: 18,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2620F),
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: Text(
-                      badge > 99 ? '99+' : '$badge',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- Floating elements --------------------------------------------------
-
-  List<Widget> _elements(double w) {
-    // Positions follow the v3 mockup at 390 wide, scaled to the screen.
-    final k = w / 390;
-    Widget el(
-      String name, {
-      required double width,
-      double? left,
-      double? right,
-      required double top,
-      required double turns,
-      double phase = 0,
-      bool flip = false,
-    }) {
-      return Positioned(
-        left: left == null ? null : left * k,
-        right: right == null ? null : right * k,
-        top: top * k,
-        child: IgnorePointer(
-          child: AnimatedBuilder(
-            animation: _float,
-            builder: (context, child) => Transform.translate(
-              offset: Offset(
-                0,
-                math.sin((_float.value + phase) * 2 * math.pi) * 4,
-              ),
-              child: child,
-            ),
-            child: Transform.rotate(
-              angle: turns * 2 * math.pi,
-              child: Transform.flip(
-                flipX: flip,
-                child: _FloatingElement(asset: name, width: width * k),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return [
-      el('masskara', width: 138, left: -58, top: 92, turns: -16 / 360),
-      el(
-        'inasal',
-        width: 168,
-        right: -48,
-        top: 90,
-        turns: -20 / 360,
-        phase: .3,
-      ),
-      el('piaya', width: 132, left: -50, top: 290, turns: 18 / 360, phase: .6),
-      el(
-        'carabao',
-        width: 150,
-        right: -44,
-        top: 284,
-        turns: -6 / 360,
-        phase: .15,
-        flip: true,
-      ),
-    ];
   }
 
   // --- Category carousel --------------------------------------------------
@@ -651,41 +420,6 @@ class _HomeViewState extends State<HomeView>
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// A bundled 3D element with a soft sky-tinted shadow underneath, so it
-/// reads as floating in the sky rather than pasted on it.
-class _FloatingElement extends StatelessWidget {
-  final String asset;
-  final double width;
-
-  const _FloatingElement({required this.asset, required this.width});
-
-  @override
-  Widget build(BuildContext context) {
-    final path = 'assets/elements/$asset.webp';
-    return SizedBox(
-      width: width,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Transform.translate(
-            offset: const Offset(0, 16),
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Image.asset(
-                path,
-                width: width,
-                color: const Color(0x52123E8C),
-                colorBlendMode: BlendMode.srcIn,
-              ),
-            ),
-          ),
-          Image.asset(path, width: width),
-        ],
       ),
     );
   }
