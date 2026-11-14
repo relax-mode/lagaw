@@ -1,7 +1,7 @@
 # #109 Real destination images in Flutter: verification evidence
 
 Issue: [relax-mode/lagaw#109](https://github.com/relax-mode/lagaw/issues/109).
-Branch: `feat/s4-09-destination-images`. Builds on #117 (PR #174: `DestinationPhoto`, no stock photos) and the #107 venue-photos branch (all 10 locations approved). It should merge after both.
+Branch: `feat/s4-09-destination-images`. Builds on #117 (PR #174: `DestinationPhoto`, no stock photos) and the #107 venue photos (PR #173, all 10 locations approved). Both are merged into `main`, and this branch is updated from `main`.
 
 ## What was built
 
@@ -33,4 +33,4 @@ The widget tests cover the issue's **valid, missing and failed** images, plus a 
 
 - [ ] **Upload the approved photos** with the #108 script (the Storage service key is held by the #108 owner, aranxshx), and clear staging's mislinked cathedral `image_url` first.
 - [ ] Deployed screenshots of a licensed photo with its credit and the credit sheet, plus the fallback, once uploaded.
-- [ ] PR review and CI (after #174 and the venue-photos PR merge).
+- [ ] PR review and CI. After updating from `main` (with #173 and #174 merged), `flutter test` passes 239 and `pytest -m "not db"` passes 1108.
