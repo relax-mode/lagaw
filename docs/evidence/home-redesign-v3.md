@@ -46,7 +46,31 @@ Roel found the in-place expansion odd, because it pushed the other cards around.
 | Shot | Check | Result |
 | --- | --- | --- |
 | [spots_4](img/home-v3-android/spots_4.jpg) | Calea popped up over the blurred grid: photo, name, details, Save, Rate, × | Pass |
-| Screen recording (frames reviewed, not committed) | Card grows from its grid spot and shrinks back on close; the grid stays in place; tapping Save turned the heart and button to Saved live (undone afterwards) | Pass |
+| Screen recording (frames reviewed, not committed) | Card grows from its grid spot and shrinks back on close; the grid stays in place; tapping Save turned the heart and button to Saved live | Pass |
+
+Note: that Save stayed on account B (Calea Pastries & Coffee). The app can't remove saves yet ("Removing saved places isn't available yet"), so it couldn't be undone from the app.
+
+### Feedback round: one Save, centered Spots title, elements, travel preferences pop-up
+
+- **Open card:** the heart beside the × is gone; the Save button is the one way to save there. Grid cards keep their heart.
+- **Spots:** "Explore Bacolod" and "Showing N places" are centered; the piaya moved up beside the title, where it shows.
+- **Home:** the piaya and carabao moved down to frame the "See N" pill (where Roel marked them).
+- **Travel preferences** is no longer a separate full page. It opens as one white card over the blurred app, in the same style as the swipe menu and Spots cards (fades and rises in, about 380 ms; fade only under reduced motion):
+  - welcome and done steps have a sky header with the sun, two Bacolod elements and the Lagaw logo (done adds a check);
+  - question steps have a slim sky strip with "Step N of 4" and four segments;
+  - interests are soft pills that turn orange; budget is two plain peso fields; travel style is three soft rows with an orange outline; review is one grouped list with Edit;
+  - buttons match the Spots card: orange pill for the main action, outlined pill for Back.
+  - Steps cross-fade inside the card and the card resizes smoothly. × and tapping the background close it only on welcome and done, so answers aren't lost by a stray tap; Back steps back as before. Same data, validation and saving as before.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [prefs_1](img/home-v3-android/prefs_1.jpg) | First-run welcome over the blurred home: sky header with masskara, inasal, logo, ×; Get started; Skip for now | Pass |
+| [prefs_2](img/home-v3-android/prefs_2.jpg) | Step 1: Café and Heritage picked (orange), progress 1 of 4 | Pass |
+| [prefs_3](img/home-v3-android/prefs_3.jpg) | Step 3: Moderate selected | Pass |
+| [prefs_4](img/home-v3-android/prefs_4.jpg) | Review: Café, Heritage · No preference · Moderate, Edit links, Save preferences (not saved, to keep the account unchanged) | Pass |
+| [home_lowered](img/home-v3-android/home_lowered.jpg) | Home: piaya and carabao lowered beside the See pill | Pass |
+| [spots_5](img/home-v3-android/spots_5.jpg) | Spots: centered title and count, piaya visible beside it | Pass |
+| [spots_6](img/home-v3-android/spots_6.jpg) | Open card: only × at the top, Save button below | Pass |
 
 ## Automated checks
 

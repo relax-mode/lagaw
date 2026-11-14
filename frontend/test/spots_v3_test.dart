@@ -126,6 +126,9 @@ void main() {
     );
     expect(find.text('45 mins'), findsOneWidget);
     expect(find.text('#heritage'), findsOneWidget);
+    // One way to save in the open card: its Save button, no second heart.
+    // Three grid hearts plus the Save button; the card adds no heart.
+    expect(find.byIcon(Icons.favorite_border_rounded), findsNWidgets(4));
     // The grid underneath never moves.
     expect(tester.getRect(find.byKey(const ValueKey('spot-a'))), cardA);
     expect(tester.getRect(find.byKey(const ValueKey('spot-c'))), cardC);

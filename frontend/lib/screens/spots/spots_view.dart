@@ -189,7 +189,7 @@ class _SpotsViewState extends State<SpotsView> {
 
   Widget _title(int count) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         if (widget.savedOnly)
           GestureDetector(
@@ -223,6 +223,7 @@ class _SpotsViewState extends State<SpotsView> {
         Text(
           widget.savedOnly ? 'Your picks' : 'Explore\nBacolod',
           key: const ValueKey('spots-title'),
+          textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 40,
             height: 0.98,
@@ -246,6 +247,7 @@ class _SpotsViewState extends State<SpotsView> {
                     : '$count places you liked or saved')
               : (count == 1 ? 'Showing 1 place' : 'Showing $count places'),
           key: const ValueKey('spots-count'),
+          textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -474,16 +476,19 @@ class _PlacePhoto extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
-          top: 10,
-          right: large ? 54 : 10,
-          child: _HeartButton(
-            key: ValueKey('spot-heart-${place.id}${large ? '-open' : ''}'),
-            saved: saved,
-            busy: busy,
-            onTap: onSave,
+        // The open card saves with its Save button, so only the grid card
+        // carries a heart.
+        if (!large)
+          Positioned(
+            top: 10,
+            right: 10,
+            child: _HeartButton(
+              key: ValueKey('spot-heart-${place.id}'),
+              saved: saved,
+              busy: busy,
+              onTap: onSave,
+            ),
           ),
-        ),
         Positioned(
           left: 14,
           right: 14,

@@ -51,7 +51,7 @@ class ElementPlacement {
       'piaya',
       width: 132,
       left: -50,
-      top: 290,
+      top: 606,
       turns: 18 / 360,
       phase: .6,
     ),
@@ -59,14 +59,14 @@ class ElementPlacement {
       'carabao',
       width: 150,
       right: -44,
-      top: 284,
+      top: 598,
       turns: -6 / 360,
       phase: .15,
       flip: true,
     ),
   ];
 
-  /// Spots: inasal beside the title, piaya peeking at the left.
+  /// Spots: the centered title framed by inasal (right) and piaya (left).
   static const spots = [
     ElementPlacement(
       'inasal',
@@ -76,12 +76,12 @@ class ElementPlacement {
       turns: -18 / 360,
       phase: .2,
     ),
-    // Below the title so it never sits on the text; the cards cover it.
+    // Beside the centered title, lower than the inasal so they stagger.
     ElementPlacement(
       'piaya',
       width: 104,
-      left: -50,
-      top: 318,
+      left: -14,
+      top: 150,
       turns: 22 / 360,
       phase: .55,
     ),
