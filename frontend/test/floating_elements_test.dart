@@ -40,4 +40,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(shown(tester), isEmpty);
   });
+
+  testWidgets('an element changing sides drifts out and back in', (
+    tester,
+  ) async {
+    // Masskara is on the left on home and on the right on swipe.
+    await show(tester, ElementPlacement.home);
+    final start = tester.getTopLeft(find.byKey(const ValueKey('masskara')));
+    await show(tester, ElementPlacement.swipe);
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 80));
+      final shown = find.byKey(const ValueKey('masskara'));
+      if (shown.evaluate().isEmpty) continue;
+      // Never mid-screen: always toward one edge or the other.
+      final x = tester.getCenter(shown).dx;
+      expect(x < 120 || x > 270, isTrue, reason: 'x=$x');
+    }
+    await tester.pump(const Duration(seconds: 1));
+    final end = tester.getTopLeft(find.byKey(const ValueKey('masskara')));
+    expect(end.dx, greaterThan(start.dx + 200));
+  });
 }

@@ -149,3 +149,15 @@ Follow-up (Roel): no more waiting on Like. Swipes are now **optimistic**: the ca
 | Shot | Check | Result |
 | --- | --- | --- |
 | [swipe_instant_frames](img/home-v3-android/swipe_instant_frames.jpg) | 30 fps: Like on Capitol Park flies the card off with the LIKE stamp; Negros Forest Park (6 / 10) shows straight after, with no "Saving…" | Pass |
+
+### Round: elements on Swipe and smoother page changes
+
+- **Swipe your vibe has elements:** piaya and masskara peek out from behind the card's sides, with carabao and inasal at its bottom corners.
+- **Smoother element glide (950 ms):** elements start a beat apart (70 ms) and each eases in and out. Ones that stay on the same side rise in a slight arc. Ones that change sides drift out past their old edge and back in from the new one, instead of flying across the page. New and leaving elements drift in and out from the nearest edge instead of shrinking in the middle.
+- **Pages cross-fade (280 ms)** while the elements move, instead of snapping. Each phone tab fades as a whole with its own header, so nothing jumps when the greeting pill comes or goes.
+- Tests: swipe-deck tests run with reduced motion (the elements hold still) so they can settle. A new test checks that an element changing sides never crosses the middle.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [swipe_elements](img/home-v3-android/swipe_elements.jpg) | Swipe page with four elements around the card | Pass |
+| [elements_glide_frames](img/home-v3-android/elements_glide_frames.jpg) | Swipe → Home at 10 fps: pages cross-fade in place, masskara leaves right and returns left, nothing crosses the page | Pass |

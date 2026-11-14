@@ -436,32 +436,68 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                   )
                                 : const SizedBox(width: double.infinity),
                           ),
-                          if (isWide)
-                            _buildTopGlassHeader(isWide: isWide)
-                          // You has its own avatar hero instead of the pill.
-                          else if (_activeTab != AppTab.explore &&
-                              _activeTab != AppTab.spots &&
-                              _activeTab != AppTab.you)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8, bottom: 4),
-                              child: Center(child: _buildGreetingPill()),
-                            ),
-                          if (!isWide && _activeTab == AppTab.explore)
-                            Expanded(child: _buildHomeV3())
-                          else if (!isWide && _activeTab == AppTab.spots)
-                            Expanded(child: _buildSpotsV3())
-                          else
+                          if (isWide) _buildTopGlassHeader(isWide: isWide),
+                          // Pages cross-fade while the elements float to
+                          // their new spots, instead of snapping. [home v3]
                           Expanded(
-                            child: SingleChildScrollView(
-                              padding: EdgeInsets.fromLTRB(
-                                isWide ? 32 : 20,
-                                14,
-                                isWide ? 32 : 20,
-                                isWide ? 40 : 110,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 280),
+                              switchInCurve: Curves.easeOut,
+                              switchOutCurve: Curves.easeIn,
+                              layoutBuilder: (current, previous) => Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  for (final p in previous)
+                                    IgnorePointer(child: p),
+                                  ?current,
+                                ],
                               ),
-                              child: TactilePageSwitcher(
-                                pageKey: (_activeTab, _showOnlySaved),
-                                child: _buildActiveTabContent(isWide: isWide),
+                              child: KeyedSubtree(
+                                // One key per phone tab: each page (with its
+                                // own header) fades as a whole.
+                                key: ValueKey(
+                                  isWide ? 'page' : _activeTab.name,
+                                ),
+                                child: !isWide && _activeTab == AppTab.explore
+                                    ? _buildHomeV3()
+                                    : !isWide && _activeTab == AppTab.spots
+                                    ? _buildSpotsV3()
+                                    : Column(
+                                        children: [
+                                          // You has its own avatar hero
+                                          // instead of the pill.
+                                          if (!isWide &&
+                                              _activeTab != AppTab.you)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 8,
+                                                bottom: 4,
+                                              ),
+                                              child: Center(
+                                                child: _buildGreetingPill(),
+                                              ),
+                                            ),
+                                          Expanded(
+                                            child: SingleChildScrollView(
+                                              padding: EdgeInsets.fromLTRB(
+                                                isWide ? 32 : 20,
+                                                14,
+                                                isWide ? 32 : 20,
+                                                isWide ? 40 : 110,
+                                              ),
+                                              child: TactilePageSwitcher(
+                                                pageKey: (
+                                                  _activeTab,
+                                                  _showOnlySaved,
+                                                ),
+                                                child: _buildActiveTabContent(
+                                                  isWide: isWide,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                               ),
                             ),
                           ),
@@ -549,7 +585,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         AppTab.spots => ElementPlacement.spots,
         AppTab.trips => ElementPlacement.trips,
         AppTab.you => ElementPlacement.you,
-        AppTab.swipe => const [],
+        AppTab.swipe => ElementPlacement.swipe,
       };
 
   PlaceActions get _placeActions => PlaceActions(

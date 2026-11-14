@@ -76,6 +76,11 @@ class _Backend {
 /// The home's floating elements loop forever, so step time instead of
 /// waiting for it to settle while home is on screen.
 Future<void> _openDeck(WidgetTester tester) async {
+  // The swipe page's floating elements bob forever too; with reduced
+  // motion they hold still, so the swipe tests can settle.
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
   await tester.tap(find.byKey(const ValueKey('nav-swipe')));
   await tester.pump(const Duration(milliseconds: 400));
   tester.takeException();

@@ -143,6 +143,42 @@ class ElementPlacement {
       flip: true,
     ),
   ];
+
+  /// Swipe: peeking out from behind the card's sides, with two below it.
+  static const swipe = [
+    ElementPlacement(
+      'piaya',
+      width: 96,
+      left: -40,
+      top: 214,
+      turns: 22 / 360,
+      phase: .45,
+    ),
+    ElementPlacement(
+      'masskara',
+      width: 104,
+      right: -44,
+      top: 300,
+      turns: 14 / 360,
+      phase: .1,
+    ),
+    ElementPlacement(
+      'carabao',
+      width: 112,
+      left: -34,
+      top: 584,
+      turns: 6 / 360,
+      phase: .7,
+    ),
+    ElementPlacement(
+      'inasal',
+      width: 112,
+      right: -34,
+      top: 590,
+      turns: -22 / 360,
+      phase: .3,
+    ),
+  ];
 }
 
 /// Where one element is drawn at a moment: absolute, so two placements
@@ -185,15 +221,28 @@ class _Pose {
     );
   }
 
-  _Pose absent() => _Pose(
+  /// Off the page: tucked past the nearest side edge, so elements drift
+  /// in and out from the edge instead of popping up mid-screen.
+  _Pose absent(double screenWidth) => _Pose(
     asset,
-    x: x,
-    y: y,
+    x: x + (x + width / 2 < screenWidth / 2 ? -1 : 1) * width * 0.75,
+    y: y + 18,
     width: width,
     turns: turns,
     flip: flip,
     phase: phase,
     presence: 0,
+  );
+
+  _Pose shifted(double dy) => _Pose(
+    asset,
+    x: x,
+    y: y + dy,
+    width: width,
+    turns: turns,
+    flip: flip,
+    phase: phase,
+    presence: presence,
   );
 
   static double _l(double a, double b, double t) => a + (b - a) * t;
@@ -211,8 +260,9 @@ class _Pose {
 }
 
 /// Bundled 3D elements with a sky-tinted shadow, bobbing gently. Give it a
-/// new set of [placements] (another page) and each element glides to its
-/// new spot; ones not on the new page shrink away and new ones grow in.
+/// new set of [placements] (another page) and each element floats to its
+/// new spot, a beat after the one before; ones not on the new page drift
+/// out past the nearest edge and new ones drift in from it.
 /// The bob and the glide stop when the system asks for reduced motion.
 /// Never takes touches. [home v3]
 class FloatingElements extends StatefulWidget {
@@ -230,14 +280,12 @@ class _FloatingElementsState extends State<FloatingElements>
     vsync: this,
     duration: const Duration(seconds: 6),
   );
+
+  /// Runs linearly; each element eases through its own slice of it.
   late final AnimationController _move = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 720),
+    duration: const Duration(milliseconds: 950),
     value: 1,
-  );
-  late final Animation<double> _moveCurve = CurvedAnimation(
-    parent: _move,
-    curve: Curves.easeInOutCubic,
   );
 
   /// Poses at the start of the current glide, by asset.
@@ -267,9 +315,7 @@ class _FloatingElementsState extends State<FloatingElements>
     super.didUpdateWidget(old);
     if (identical(old.placements, widget.placements)) return;
     // Start from wherever things are now, even mid-glide.
-    _from = {
-      for (final p in _poses(old.placements, _moveCurve.value)) p.asset: p,
-    };
+    _from = {for (final p in _poses(old.placements, _move.value)) p.asset: p};
     if (_reduce) {
       _move.value = 1;
     } else {
@@ -285,12 +331,38 @@ class _FloatingElementsState extends State<FloatingElements>
     super.dispose();
   }
 
-  Iterable<_Pose> _poses(List<ElementPlacement> target, double t) sync* {
+  /// -1 for the left half of the screen, 1 for the right.
+  int _side(_Pose p) => p.x + p.width / 2 < _width / 2 ? -1 : 1;
+
+  /// Where everything is at glide progress [raw] (0..1, linear). Elements
+  /// start a beat apart and ease in and out; ones that stay on screen rise
+  /// in a slight arc, so the move reads as floating rather than sliding.
+  Iterable<_Pose> _poses(List<ElementPlacement> target, double raw) sync* {
     final to = {for (final p in target) p.asset: _Pose.of(p, _width)};
-    for (final asset in {..._from.keys, ...to.keys}) {
-      final a = _from[asset] ?? to[asset]!.absent();
-      final b = to[asset] ?? _from[asset]!.absent();
-      final pose = t >= 1 ? b : _Pose.lerp(a, b, t);
+    final assets = {..._from.keys, ...to.keys}.toList();
+    for (final (i, asset) in assets.indexed) {
+      final a = _from[asset] ?? to[asset]!.absent(_width);
+      final b = to[asset] ?? _from[asset]!.absent(_width);
+      if (raw >= 1) {
+        if (b.presence > 0.01) yield b;
+        continue;
+      }
+      final start = math.min(i * 0.07, 0.28);
+      final t = Curves.easeInOutCubic.transform(
+        Interval(start, start + 0.72).transform(raw),
+      );
+      final _Pose pose;
+      if (a.presence > 0 && b.presence > 0 && _side(a) != _side(b)) {
+        // Changing sides: drift out past the old edge, back in from the
+        // new one, rather than flying across the page.
+        pose = t < 0.5
+            ? _Pose.lerp(a, a.absent(_width), t * 2)
+            : _Pose.lerp(b.absent(_width), b, (t - 0.5) * 2);
+      } else if (a.presence > 0 && b.presence > 0) {
+        pose = _Pose.lerp(a, b, t).shifted(-math.sin(math.pi * t) * 22);
+      } else {
+        pose = _Pose.lerp(a, b, t);
+      }
       if (pose.presence > 0.01) yield pose;
     }
   }
@@ -304,11 +376,11 @@ class _FloatingElementsState extends State<FloatingElements>
               ? box.maxWidth
               : MediaQuery.sizeOf(context).width;
           return AnimatedBuilder(
-            animation: _moveCurve,
+            animation: _move,
             builder: (context, _) => Stack(
               clipBehavior: Clip.none,
               children: [
-                for (final p in _poses(widget.placements, _moveCurve.value))
+                for (final p in _poses(widget.placements, _move.value))
                   Positioned(
                     key: ValueKey(p.asset),
                     left: p.x,
@@ -325,7 +397,7 @@ class _FloatingElementsState extends State<FloatingElements>
                       child: Opacity(
                         opacity: p.presence.clamp(0.0, 1.0),
                         child: Transform.scale(
-                          scale: 0.6 + 0.4 * p.presence,
+                          scale: 0.82 + 0.18 * p.presence,
                           child: Transform.rotate(
                             angle: p.turns * 2 * math.pi,
                             child: Transform.flip(
