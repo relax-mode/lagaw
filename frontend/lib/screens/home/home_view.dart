@@ -52,6 +52,13 @@ class HomeCategory {
     'landmark': ('landmarks', 'landmark', 'landmarks'),
   };
 
+  /// Where the carousel opens: heritage when present (Roel's choice, so
+  /// cards peek from both sides), otherwise the middle card.
+  static int startPage(List<HomeCategory> cats) {
+    final heritage = cats.indexWhere((c) => c.id == 'heritage');
+    return heritage >= 0 ? heritage : cats.length ~/ 2;
+  }
+
   /// Categories by size (then name), each with a cover that has an
   /// approved photo when one exists. [home v3]
   static List<HomeCategory> fromLocations(
@@ -120,10 +127,8 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView>
     with SingleTickerProviderStateMixin {
-  late final PageController _pages = PageController(
-    viewportFraction: 0.56,
-    initialPage: 0,
-  );
+  /// Created with the first categories so it can open on heritage.
+  PageController? _pages;
   late final AnimationController _float = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 6),
@@ -145,13 +150,20 @@ class _HomeViewState extends State<HomeView>
   void didUpdateWidget(HomeView old) {
     super.didUpdateWidget(old);
     if (_page >= widget.categories.length && widget.categories.isNotEmpty) {
-      _page = 0;
+      _page = HomeCategory.startPage(widget.categories);
     }
   }
 
+  /// Opens on the start page (heritage), so cards peek from both sides.
+  PageController _controllerFor(List<HomeCategory> cats) =>
+      _pages ??= PageController(
+        viewportFraction: 0.56,
+        initialPage: _page = HomeCategory.startPage(cats),
+      );
+
   @override
   void dispose() {
-    _pages.dispose();
+    _pages?.dispose();
     _float.dispose();
     super.dispose();
   }
@@ -160,6 +172,7 @@ class _HomeViewState extends State<HomeView>
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width.clamp(320.0, 430.0);
     final cats = widget.categories;
+    if (cats.isNotEmpty) _controllerFor(cats);
     final current = cats.isEmpty ? null : cats[_page.clamp(0, cats.length - 1)];
 
     return Stack(
@@ -454,16 +467,17 @@ class _HomeViewState extends State<HomeView>
   // --- Category carousel --------------------------------------------------
 
   Widget _carousel(List<HomeCategory> cats) {
+    final pages = _controllerFor(cats);
     return PageView.builder(
       key: const ValueKey('home-carousel'),
-      controller: _pages,
+      controller: pages,
       itemCount: cats.length,
       onPageChanged: (i) => setState(() => _page = i),
       itemBuilder: (context, i) => AnimatedBuilder(
-        animation: _pages,
+        animation: pages,
         builder: (context, child) {
-          final page = _pages.hasClients && _pages.position.haveDimensions
-              ? _pages.page ?? _page.toDouble()
+          final page = pages.hasClients && pages.position.haveDimensions
+              ? pages.page ?? _page.toDouble()
               : _page.toDouble();
           final delta = (i - page).clamp(-1.0, 1.0);
           return Transform(
@@ -490,7 +504,7 @@ class _HomeViewState extends State<HomeView>
       key: ValueKey('home-category-${cat.id}'),
       onTap: () => index == _page
           ? widget.onSeeCategory(cat.id)
-          : _pages.animateToPage(
+          : _pages!.animateToPage(
               index,
               duration: const Duration(milliseconds: 320),
               curve: Curves.easeOutCubic,

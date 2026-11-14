@@ -15,12 +15,12 @@ The old phone home stacked eight bands: the wordmark and tagline, a header with 
 - **Floating Bacolod elements:** Roel's masskara, chicken inasal, ube piaya and golden carabao.
   - The copies are color-graded to the sky (cooler shadows, warm sun-side light, a soft rim) and shipped as WebP files, about 160 KB in total, with no metadata.
   - They get a sky-tinted drop shadow, are cut off by the screen edges on purpose, and float gently. The floating stops when the system's reduce-motion setting is on.
-- **Category carousel:** the categories with real counts (parks 3, cafés 2, then the 1-spot categories). The side cards bend away in perspective.
+- **Category carousel:** the categories with real counts (parks 3, cafés 2, then the 1-spot categories). The side cards bend away in perspective. It always opens on **heritage** (or the middle card when there is none), so cards peek from both sides.
   - Each cover uses a place with a licensed photo when one exists (#109); otherwise the honest "No photo yet" placeholder.
 - **"See N … →" pill** under the card follows the carousel ("See 3 parks", "See 1 place to eat") and opens Spots with that filter.
 - **Nav:** Home · Spots · raised orange **swipe button** · Trips · **You**. The old dock, the separate orange button and the header's duplicate swipe button are removed on phones.
 - **Swipe menu:** tapping the button dims and blurs the screen and shows "What do you feel like?" with **Start matching** and **Plan a trip**.
-  - The options rise from the button with a quick spring (about 280 ms, staggered), the icon rotates into a dark ×, and tapping outside, × or back closes it.
+  - The options rise from the button with a quick spring (about 280 ms, staggered). The orange card **rolls one full turn** into a dark × on the exact spot of the button, with space between it and the options. Tapping outside, × or back closes it, rolling back.
   - With reduce motion on, it only fades.
 - **You tab:** the account email, Travel preferences, Liked and saved, and Sign out. These already existed, but were hidden behind the avatar.
 - **Font:** Outfit is bundled at weights 400–900 (`assets/fonts`, SIL Open Font License 1.1, license file included) and is now the app's default font.
@@ -49,12 +49,13 @@ The swipe-deck tests now open the deck through the nav menu. The test that asser
 
 | Shot | Check | Result |
 | --- | --- | --- |
-| [v3_1](img/home-v3-android/v3_1.jpg) | Home: "Maayong hapon," (3 PM), 10 spots, floating elements, parks · 3 spots with cafés bending away, "See 3 parks →", the new nav | Pass |
+| [v3_1](img/home-v3-android/v3_1.jpg) | Home opens on **heritage** (Roel's choice) with dining and landmarks peeking on both sides; "See 1 heritage spot →"; the swipe button sits lower, into the white nav | Pass |
 | [v3_2](img/home-v3-android/v3_2.jpg) | Carousel mid-way: dining · 1 spot between art and heritage; pill reads "See 1 place to eat" | Pass |
 | [v3_3](img/home-v3-android/v3_3.jpg) | Swipe menu: dimmed and blurred, Start matching / Plan a trip, × in the button's place | Pass |
 | [v3_4](img/home-v3-android/v3_4.jpg) | Start matching opens the swipe deck | Pass |
 | [v3_5](img/home-v3-android/v3_5.jpg) | "See 3 parks →" opens Spots with exactly the 3 parks; header "Maayong hapon!", no duplicate swipe button | Pass |
 | [v3_6](img/home-v3-android/v3_6.jpg) | You tab: account, Travel preferences, Liked and saved, Sign out | Pass |
+| [v3_7](img/home-v3-android/v3_7_roll.jpg) | Frames from a screen recording: the orange card **rolls a full turn** into the dark ×, which lands on the button's spot, while the options rise with space above the × | Pass |
 
 **Notes**
 - No photos are uploaded to staging yet (#109), so the category covers show the honest "No photo yet" placeholder. They switch to the licensed photos with credits once the upload is done.

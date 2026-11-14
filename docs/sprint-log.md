@@ -1014,4 +1014,4 @@ is a different operation and was not triggered. See the
   - added the home view, the nav with the animated menu (respecting reduce motion) and the You tab;
   - removed the old dock and the duplicate swipe buttons on phones. The wide/web layout is unchanged.
 - `flutter analyze` is clean, and `flutter test` passes 251 tests. Verified on Roel's Infinix with a release build against staging. See [evidence](evidence/home-redesign-v3.md).
-
+- **Feedback round (Roel):** the carousel now always opens on heritage, so cards peek from both sides; the swipe button sits lower, into the nav; tapping it rolls the card one full turn into the × at the button's exact spot; and the menu options leave space above the ×. Verified on the Infinix, including a frame-by-frame screen recording of the roll. `flutter test` passes 252 tests.

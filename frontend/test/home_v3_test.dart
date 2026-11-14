@@ -54,6 +54,7 @@ void main() {
         credits: ImageCredits(const []),
       );
       expect(cats.map((c) => c.id), ['park', 'cafe', 'heritage']);
+      expect(HomeCategory.startPage(cats), 2);
       expect(cats.map((c) => c.count), [3, 2, 1]);
       expect(cats[0].word, 'parks');
       expect(cats[0].seeLabel, 'See 3 parks');
@@ -61,6 +62,14 @@ void main() {
       expect(cats[2].seeLabel, 'See 1 heritage spot');
       expect(cats[2].countLabel, '1 spot');
       expect(cats[0].countLabel, '3 spots');
+    });
+
+    test('starts on heritage, or the middle card without one', () {
+      final noHeritage = HomeCategory.fromLocations(
+        _places.where((p) => p.category != 'heritage').toList(),
+        credits: ImageCredits(const []),
+      );
+      expect(HomeCategory.startPage(noHeritage), 1);
     });
 
     test('prefers a place with an approved photo as the cover', () {
@@ -128,8 +137,9 @@ void main() {
       expect(find.text('6 spots to explore'), findsOneWidget);
       expect(find.byKey(const ValueKey('home-headline')), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
-      expect(find.text('parks'), findsOneWidget);
-      expect(find.text('See 3 parks'), findsOneWidget);
+      // Opens on heritage so neighbors can peek from the side.
+      expect(find.text('heritage'), findsOneWidget);
+      expect(find.text('See 1 heritage spot'), findsOneWidget);
       expect(find.text('Maayong Aga, Roel!'), findsNothing);
     });
 
@@ -139,14 +149,14 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('home-saved')));
       await tester.tap(find.byKey(const ValueKey('home-search')));
       await tester.tap(find.byKey(const ValueKey('home-account')));
-      expect(seen, ['see:park', 'saved', 'search', 'account']);
+      expect(seen, ['see:heritage', 'saved', 'search', 'account']);
     });
 
     testWidgets('the see pill follows the carousel', (tester) async {
       await pump(tester);
       await tester.drag(
         find.byKey(const ValueKey('home-carousel')),
-        const Offset(-260, 0),
+        const Offset(260, 0),
       );
       await tester.pump(const Duration(milliseconds: 600));
       expect(find.text('See 2 cafés'), findsOneWidget);

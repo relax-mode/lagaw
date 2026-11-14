@@ -12,8 +12,9 @@ const _orange = Color(0xFFF2620F);
 const _orangeDeep = Color(0xFFB9430A);
 const _navHeight = 66.0;
 
-/// Raised above the bar, so the swipe button reads as the main action.
-const _orbLift = 26.0;
+/// How far the swipe button rises above the bar: enough to read as the
+/// main action while still sitting in the white pill.
+const _orbLift = 12.0;
 
 /// Floating nav: Home · Spots · swipe card button · Trips · You. [home v3]
 class LagawNavBar extends StatelessWidget {
@@ -234,7 +235,8 @@ class _SwipeMenu extends StatelessWidget {
         Positioned(
           left: 22,
           right: 22,
-          bottom: bottomInset + _navHeight + 22,
+          // Clear of the close button, which sits where the swipe button is.
+          bottom: bottomInset + _navHeight + _orbLift + 20,
           child: Material(
             type: MaterialType.transparency,
             child: Column(
@@ -286,15 +288,21 @@ class _SwipeMenu extends StatelessWidget {
           right: 0,
           bottom: bottomInset + _navHeight - 62 + _orbLift,
           child: Center(
-            child: RotationTransition(
-              turns: reduce
-                  ? const AlwaysStoppedAnimation(0)
-                  : Tween(begin: -0.125, end: 0.0).animate(fade),
-              child: SwipeOrb(
-                key: const ValueKey('swipe-menu-close'),
-                open: true,
-                onTap: close,
-              ),
+            // The card rolls one full turn and becomes the close button;
+            // closing rolls it back. Reduced motion: no roll.
+            child: AnimatedBuilder(
+              animation: animation,
+              builder: (context, _) {
+                final t = Curves.easeOutCubic.transform(animation.value);
+                return Transform.rotate(
+                  angle: reduce ? 0 : (t - 1) * 2 * 3.141592653589793,
+                  child: SwipeOrb(
+                    key: const ValueKey('swipe-menu-close'),
+                    open: reduce || t >= 0.5,
+                    onTap: close,
+                  ),
+                );
+              },
             ),
           ),
         ),
