@@ -999,3 +999,19 @@ is a different operation and was not triggered. See the
 - `flutter test` passes 239 tests and `pytest -m "not db"` passes 1108. On Roel's Infinix (release build, staging), the mislinked cathedral photo is now refused.
 - Pending: uploads by the #108 owner, then deployed photo-and-credit screenshots. See [evidence](evidence/destination-images-ui.md).
 
+### November 14, 2026 — Home redesign v3
+
+- Roel asked for a cleaner, less cramped home screen that keeps Lagaw's vibe. Using the Impeccable design skill (a design review only, since the screen is native), Claude critiqued the current home and produced three mockups from Roel's references. Roel chose v3 and directed each change:
+  - his own Bacolod 3D elements (masskara, inasal, ube piaya, golden carabao) floating around a centered headline;
+  - a category carousel;
+  - the swipe action moved into the nav as a raised card button, with a Start matching / Plan a trip menu;
+  - "See N →" under the carousel;
+  - a You tab.
+- Built on `feat/home-redesign-v3`, stacked on #109 and #117:
+  - bundled the Outfit font (OFL), which the code asked for but never shipped;
+  - replaced the hardcoded "Maayong Aga, Roel!" with a time-of-day Hiligaynon greeting;
+  - graded and optimized the elements;
+  - added the home view, the nav with the animated menu (respecting reduce motion) and the You tab;
+  - removed the old dock and the duplicate swipe buttons on phones. The wide/web layout is unchanged.
+- `flutter analyze` is clean, and `flutter test` passes 251 tests. Verified on Roel's Infinix with a release build against staging. See [evidence](evidence/home-redesign-v3.md).
+

@@ -4,18 +4,21 @@ import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
 import 'models/location.dart';
 import 'screens/trip_create_screen.dart';
+import 'screens/home/home_view.dart';
 import 'screens/trips_tab.dart';
+import 'screens/you_tab.dart';
 import 'services/api_service.dart';
 import 'services/discovery_interactions.dart';
 import 'services/trip_service.dart';
 import 'theme.dart';
 import 'widgets/bacolod_3d_badges.dart';
 import 'widgets/destination_photo.dart';
+import 'widgets/lagaw_nav_bar.dart';
 import 'widgets/left_swipe_explainer.dart';
 import 'widgets/rating_dialog.dart';
 import 'widgets/tactile_motion.dart';
 
-enum AppTab { explore, swipe, spots, trips }
+enum AppTab { explore, swipe, spots, trips, you }
 
 enum ApiViewState { live, loading, empty, error }
 
@@ -400,29 +403,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   child: Coffee3DBadge(size: 120),
                 ),
               ),
-            ] else ...[
-              // Mobile festive ambient accents (non-blocking edge accents)
-              const Positioned(
-                top: 72,
-                right: -8,
-                child: IgnorePointer(
-                  child: MassKara3DBadge(size: 68),
-                ),
-              ),
-              const Positioned(
-                top: 290,
-                left: -12,
-                child: IgnorePointer(
-                  child: Piaya3DBadge(size: 60),
-                ),
-              ),
-              const Positioned(
-                bottom: 120,
-                right: -10,
-                child: IgnorePointer(
-                  child: Inasal3DBadge(size: 66),
-                ),
-              ),
             ],
 
             // 3. Main Center Content Container
@@ -439,14 +419,18 @@ class _LocationsScreenState extends State<LocationsScreen> {
                             duration: TactileMotion.tab,
                             curve: TactileMotion.curve,
                             alignment: Alignment.topCenter,
-                            child: _activeTab == AppTab.explore
+                            child: _activeTab == AppTab.explore && isWide
                                 ? Padding(
                                     padding: const EdgeInsets.only(bottom: 10),
                                     child: _buildLagawHero(isWide: isWide),
                                   )
                                 : const SizedBox(width: double.infinity),
                           ),
-                          _buildTopGlassHeader(isWide: isWide),
+                          if (isWide || _activeTab != AppTab.explore)
+                            _buildTopGlassHeader(isWide: isWide),
+                          if (!isWide && _activeTab == AppTab.explore)
+                            Expanded(child: _buildHomeV3())
+                          else
                           Expanded(
                             child: SingleChildScrollView(
                               padding: EdgeInsets.fromLTRB(
@@ -464,13 +448,17 @@ class _LocationsScreenState extends State<LocationsScreen> {
                         ],
                       ),
 
-                      // Bottom Floating Glass Dock (Mobile only)
+                      // v3 floating nav with the swipe button (mobile only)
                       if (!isWide)
                         Positioned(
-                          left: 20,
-                          right: 20,
-                          bottom: 16,
-                          child: _buildBottomGlassDock(),
+                          left: 18,
+                          right: 18,
+                          bottom: _navBottom,
+                          child: LagawNavBar(
+                            active: _navDestination,
+                            onSelect: _selectDestination,
+                            onSwipe: _openSwipeMenu,
+                          ),
                         ),
                     ],
                   ),
@@ -480,6 +468,69 @@ class _LocationsScreenState extends State<LocationsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  static const double _navBottom = 16;
+
+  NavDestination? get _navDestination => switch (_activeTab) {
+        AppTab.explore => NavDestination.home,
+        AppTab.spots => NavDestination.spots,
+        AppTab.trips => NavDestination.trips,
+        AppTab.you => NavDestination.you,
+        AppTab.swipe => null,
+      };
+
+  void _selectDestination(NavDestination d) {
+    setState(() {
+      _showOnlySaved = false;
+      _activeTab = switch (d) {
+        NavDestination.home => AppTab.explore,
+        NavDestination.spots => AppTab.spots,
+        NavDestination.trips => AppTab.trips,
+        NavDestination.you => AppTab.you,
+      };
+    });
+  }
+
+  /// The nav's swipe button: Start matching or Plan a trip. [home v3]
+  Future<void> _openSwipeMenu() async {
+    final choice = await showSwipeMenu(
+      context,
+      bottomInset: MediaQuery.paddingOf(context).bottom + _navBottom,
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case SwipeMenuChoice.startMatching:
+        setState(() {
+          _showOnlySaved = false;
+          _activeTab = AppTab.swipe;
+        });
+      case SwipeMenuChoice.planTrip:
+        await _planTrip();
+    }
+  }
+
+  Widget _buildHomeV3() {
+    final places = _availableLocations;
+    return HomeView(
+      avatarLetter: _avatarLetter,
+      spotCount: places.length,
+      likedCount: _savedIds.length,
+      categories: HomeCategory.fromLocations(places),
+      placesState: places.isEmpty ? _buildLandingPlacesState(height: 290) : null,
+      onSearch: () => setState(() {
+        _showOnlySaved = false;
+        _activeTab = AppTab.spots;
+      }),
+      onSaved: _viewSavedLocations,
+      onAccount: () => setState(() => _activeTab = AppTab.you),
+      onSeeCategory: (id) => setState(() {
+        _showOnlySaved = false;
+        _searchQuery = '';
+        _selectedCategory = id;
+        _activeTab = AppTab.spots;
+      }),
     );
   }
 
@@ -654,7 +705,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     ],
                   ),
                   Text(
-                    isWide ? 'Bacolod City — City of Smiles' : 'Maayong Aga, Roel!',
+                    isWide
+                        ? 'Bacolod City — City of Smiles'
+                        : hiligaynonGreeting(DateTime.now()).replaceAll(',', '!'),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
@@ -698,7 +751,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
               const SizedBox(width: 8),
             ],
 
-            // 3D Swipe Deck Icon Button
+            // 3D Swipe Deck Icon Button (wide only; phones use the nav)
+            if (isWide) ...[
             Vector3DButton(
               onTap: () => setState(() => _activeTab = AppTab.swipe),
               backgroundColor: _activeTab == AppTab.swipe
@@ -722,6 +776,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
               ),
             ),
             const SizedBox(width: 8),
+            ],
 
             // 3D Search Button
             Vector3DButton(
@@ -876,6 +931,12 @@ class _LocationsScreenState extends State<LocationsScreen> {
         return _buildSwipeTab(isWide: isWide);
       case AppTab.spots:
         return _buildSpotsDirectoryTab(isWide: isWide);
+      case AppTab.you:
+        return YouTab(
+          session: AuthSession.current,
+          likedCount: _savedIds.length,
+          onOpenSaved: _viewSavedLocations,
+        );
       case AppTab.trips:
         return TripsTab(service: _tripService, isWide: isWide);
     }
@@ -3008,124 +3069,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
     );
   }
 
-  /// Bottom Floating 3D Vector Navigation Dock (Used on mobile/narrow viewports)
-  Widget _buildBottomGlassDock() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(36),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 2.2),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0xFFCBD5E1),
-                  offset: Offset(0, 4),
-                  blurRadius: 0,
-                ),
-                BoxShadow(
-                  color: Color(0x220F172A),
-                  blurRadius: 16,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavPillButton(
-                  icon: Icons.explore_rounded,
-                  label: 'Home',
-                  tab: AppTab.explore,
-                ),
-                _buildNavPillButton(
-                  icon: Icons.layers_rounded,
-                  label: 'Spots',
-                  tab: AppTab.spots,
-                ),
-                _buildNavPillButton(
-                  icon: Icons.luggage_rounded,
-                  label: 'Trips',
-                  tab: AppTab.trips,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Vector3DButton(
-          onTap: () => setState(() => _activeTab = AppTab.swipe),
-          backgroundColor: _activeTab == AppTab.swipe
-              ? const Color(0xFFF43F5E)
-              : const Color(0xFFF59E0B),
-          shadowColor: _activeTab == AppTab.swipe
-              ? const Color(0xFF9F1239)
-              : const Color(0xFFB45309),
-          borderColor: Colors.white,
-          borderRadius: 26,
-          padding: const EdgeInsets.all(13),
-          depth: 4.0,
-          child: const Icon(
-            Icons.style_rounded,
-            color: Colors.white,
-            size: 22,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavPillButton({
-    required IconData icon,
-    required String label,
-    required AppTab tab,
-  }) {
-    final isActive = _activeTab == tab && !_showOnlySaved;
-    // Three pills share the dock; shrink rather than overflow on tiny phones.
-    final pill = Vector3DButton(
-      onTap: () => setState(() {
-        _showOnlySaved = false;
-        _activeTab = tab;
-      }),
-      backgroundColor: isActive
-          ? (tab == AppTab.explore ? const Color(0xFF0F172A) : const Color(0xFF2563EB))
-          : Colors.white,
-      shadowColor: isActive
-          ? (tab == AppTab.explore ? const Color(0xFF020617) : const Color(0xFF1D4ED8))
-          : const Color(0xFFE2E8F0),
-      borderColor: isActive
-          ? Colors.transparent
-          : const Color(0xFFF1F5F9),
-      borderRadius: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      depth: 3.0,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isActive ? Colors.white : AppTheme.slateDark,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Outfit',
-              color: isActive ? Colors.white : AppTheme.slateDark,
-            ),
-          ),
-        ],
-      ),
-    );
-    return Flexible(
-      child: FittedBox(fit: BoxFit.scaleDown, child: pill),
-    );
-  }
 }
 
 /// Clips to the child's box grown by [horizontal] and [vertical] pixels, so

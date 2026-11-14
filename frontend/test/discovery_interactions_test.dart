@@ -72,6 +72,18 @@ class _Backend {
   );
 }
 
+/// v3 home: the nav's swipe button opens a menu with Start matching.
+/// The home's floating elements loop forever, so step time instead of
+/// waiting for it to settle while home is on screen.
+Future<void> _openDeck(WidgetTester tester) async {
+  await tester.tap(find.byKey(const ValueKey('nav-swipe')));
+  await tester.pump(const Duration(milliseconds: 400));
+  tester.takeException();
+  await tester.tap(find.byKey(const ValueKey('swipe-menu-start')));
+  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('TripService.listInteractions', () {
     test('reads every page and skips unknown event types', () async {
@@ -251,8 +263,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       tester.takeException(); // Pre-existing home overflow; see home tests.
-      await tester.tap(find.text('Start Matching Spots').first);
-      await tester.pumpAndSettle();
+      await _openDeck(tester);
       tester.takeException();
       return backend;
     }
@@ -359,8 +370,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       tester.takeException();
-      await tester.tap(find.text('Start Matching Spots').first);
-      await tester.pumpAndSettle();
+      await _openDeck(tester);
       tester.takeException();
 
       expect(find.byKey(const ValueKey('swipe-like')), findsNothing);
@@ -390,8 +400,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       tester.takeException();
-      await tester.tap(find.text('Start Matching Spots').first);
-      await tester.pumpAndSettle();
+      await _openDeck(tester);
       tester.takeException();
 
       expect(find.byKey(const ValueKey('swipe-places-state')), findsOneWidget);

@@ -64,6 +64,25 @@ flutter:
   # docs/destination-image-manifest.json by scripts/build_image_credits.py.
   assets:
     - assets/image_credits.json
+    # Bacolod 3D elements for the home screen (Roel's set, graded to the sky).
+    - assets/elements/
+
+  # Outfit, SIL Open Font License 1.1 (assets/fonts/OFL.txt).
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Outfit-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Outfit-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Outfit-Black.ttf
+          weight: 900
 
   # To add assets to your application, add an assets section, like this:
   # assets:
