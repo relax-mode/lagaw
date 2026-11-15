@@ -43,13 +43,17 @@
         "attribution_text": "Photo: Rauxilian / CC BY-SA 4.0 via Wikimedia Commons",
         "share_alike": true,
         "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed.",
-        "accessed_on": "2026-11-06"
+        "accessed_on": "2026-11-06",
+        "upload_modification": "Resized from 4745x3164 to 2048x1366 (and re-encoded without metadata) to fit the 5 MiB Storage limit.",
+        "upload_file": "docs/destination-images/san-sebastian-cathedral/commons-san-sebastian-cathedral.jpg",
+        "upload_sha256": "395784caa1812a7bc96862113ff637c60b8c8e9d9c1c17e92971fd472fe41edf"
       },
       "note": "Facade of the cathedral; people are small and incidental.",
       "rejected_candidates": [
         {
           "title": "File:San Sebastian Cathedral Bacolod (Rizal Street, Bacolod, Negros Occidental; 10-31-2022).jpg",
-          "reason": "Usable (CC BY-SA 4.0) alternate; not selected."
+          "reason": "Usable (CC BY-SA 4.0) alternate; not selected.",
+          "source": "Wikimedia Commons"
         }
       ]
     },
@@ -75,13 +79,17 @@
         "attribution_text": "Photo: Patrickroque01 / CC BY-SA 4.0 via Wikimedia Commons",
         "share_alike": true,
         "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed.",
-        "accessed_on": "2026-11-06"
+        "accessed_on": "2026-11-06",
+        "upload_modification": "Resized from 3552x2664 to 2048x1536 (and re-encoded without metadata) to fit the 5 MiB Storage limit.",
+        "upload_file": "docs/destination-images/negros-museum/commons-negros-museum.jpg",
+        "upload_sha256": "21c8f94b13451686000bf29451190d25d38a00a92175b9677e10da0025e7c158"
       },
       "note": "Front of the museum with its sign; no people.",
       "rejected_candidates": [
         {
           "title": "File:The Negros Museum, Bacolod City, Sep 2026 (1).jpg",
-          "reason": "Usable (CC BY-SA 4.0) alternate; not selected."
+          "reason": "Usable (CC BY-SA 4.0) alternate; not selected.",
+          "source": "Wikimedia Commons"
         }
       ]
     },
@@ -110,7 +118,10 @@
         "share_alike": false,
         "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at Negros Forest Park on 2026-10-11. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-06. It has not been published or licensed elsewhere.",
         "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. No people or logos in the frame; no GPS data embedded.",
-        "accessed_on": "2026-11-06"
+        "accessed_on": "2026-11-06",
+        "upload_file": "docs/destination-images/negros-forest-park/RLSJR-2-hornbill.jpg",
+        "upload_modification": null,
+        "upload_sha256": "d3ce15efe26bb75082882949d99c7ff273633ed3e11bf1ef8a5b4bb2d1c95d0c"
       },
       "note": "Team member's own photos, taken inside the park. No online photo with verifiable rights was found.",
       "rejected_candidates": [],
@@ -136,16 +147,44 @@
           "share_alike": false,
           "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at Negros Forest Park on 2026-10-11. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-06. It has not been published or licensed elsewhere.",
           "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. No people or logos in the frame; no GPS data embedded.",
-          "accessed_on": "2026-11-06"
+          "accessed_on": "2026-11-06",
+          "upload_file": "docs/destination-images/negros-forest-park/RLSJR-1-leopard-cat.jpg",
+          "upload_modification": null,
+          "upload_sha256": "9875aa1b9ee63376df12611b294e0fe727b1b2b40fe884a9ff45ca9079511ec8"
         }
       ]
     },
     {
       "location_id": "d184610e-f8c9-584a-95a3-79809cd81c49",
       "name": "Orange Project",
-      "status": "excluded",
-      "image": null,
-      "note": "No photograph of this venue found on Wikimedia Commons. No permission from the venue on record.",
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-3-orange-project-exterior.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/orange-project/RLSJR-3-orange-project-exterior.jpg",
+        "file_url": null,
+        "width": 2048,
+        "height": 1536,
+        "mime": "image/jpeg",
+        "sha1": "5c9229ae9460573007eef586d1a63608b1c02bac",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-11-07",
+        "subject": "Orange Project facade, logo and entrance at night",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed; the neighbouring shop's name (its sign, standing banner and door poster) is blurred. No people.",
+        "accessed_on": "2026-11-14",
+        "upload_file": "docs/destination-images/orange-project/RLSJR-3-orange-project-exterior.jpg",
+        "upload_modification": null,
+        "upload_sha256": "3482c44d11808bd3b4088317b7e1b0fc381c7bba815a4ad37ee3474530e9d6e5"
+      },
+      "note": "Team member's own photo, taken at the venue on 2026-11-07. No online photo with verifiable rights was found.",
       "rejected_candidates": []
     },
     {
@@ -170,17 +209,22 @@
         "attribution_text": "Photo: Kguirnela / CC BY-SA 3.0 via Wikimedia Commons",
         "share_alike": true,
         "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed.",
-        "accessed_on": "2026-11-06"
+        "accessed_on": "2026-11-06",
+        "upload_modification": null,
+        "upload_file": "docs/destination-images/capitol-park-lagoon/commons-capitol-park-lagoon.jpg",
+        "upload_sha256": "6e358bf57700c46d0527c94da8b503b15e8f64208a9f6de836cd1eb05983e66e"
       },
       "note": "Lagoon with the Capitol behind it; no prominent logos or people.",
       "rejected_candidates": [
         {
           "title": "File:Negros Occidental Capitol Park lagoon (Bacolod, Negros Occidental; 10-24-2022).jpg",
-          "reason": "Excluded: hotel logos (ARB, Seda) dominate the background."
+          "reason": "Excluded: hotel logos (ARB, Seda) dominate the background.",
+          "source": "Wikimedia Commons"
         },
         {
           "title": "File:Negros Occidental Capitol Park and Lagoon, Sep 2026 (1).jpg",
-          "reason": "Excluded: hotel logo (Seda) prominent."
+          "reason": "Excluded: hotel logo (Seda) prominent.",
+          "source": "Wikimedia Commons"
         }
       ]
     },
@@ -206,35 +250,158 @@
         "attribution_text": "Photo: Ralff Nestor Nacor / CC BY-SA 4.0 via Wikimedia Commons",
         "share_alike": true,
         "restrictions": "None recorded on the file page. Keep the credit and license link with the image; if the image is cropped or edited, the edited version must be released under the same license (share-alike) and marked as changed. The building is tagged PD-Philippines-FoP work on Commons; the photograph itself is CC BY-SA 4.0.",
-        "accessed_on": "2026-11-06"
+        "accessed_on": "2026-11-06",
+        "upload_modification": "Resized from 3575x2692 to 2048x1542 (and re-encoded without metadata) to fit the 5 MiB Storage limit.",
+        "upload_file": "docs/destination-images/provincial-capitol/commons-provincial-capitol.jpg",
+        "upload_sha256": "9b0308cb0fe8428ee92f28bd5c9933cd8ed76442371433e14b0bcfd3312b8ed0"
       },
       "note": "Front facade; people only tiny in the distance.",
       "rejected_candidates": [
         {
           "title": "File:Negros Occidental Provincial Capitol 2023-08-05.jpg",
-          "reason": "Excluded: two identifiable people seated front and center."
+          "reason": "Excluded: two identifiable people seated front and center.",
+          "source": "Wikimedia Commons"
         },
         {
           "title": "File:Provincial Capitol of Negros Occidental in Bacolod, Philippines.jpg",
-          "reason": "Excluded: one identifiable person centered at the entrance."
+          "reason": "Excluded: one identifiable person centered at the entrance.",
+          "source": "Wikimedia Commons"
         }
       ]
     },
     {
       "location_id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
       "name": "Cafetolyo Coffee Shop",
-      "status": "excluded",
-      "image": null,
-      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
-      "rejected_candidates": []
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-4-cafetolyo-counter.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg",
+        "file_url": null,
+        "width": 2048,
+        "height": 1536,
+        "mime": "image/jpeg",
+        "sha1": "02a0551a242ad97bf79b762f090d1e6dcb9ba0ae",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-11-07",
+        "subject": "Cafetolyo counter and logo at Capitol Park and Lagoon",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed. No identifiable people as the subject.",
+        "accessed_on": "2026-11-14",
+        "upload_file": "docs/destination-images/cafetolyo/RLSJR-4-cafetolyo-counter.jpg",
+        "upload_modification": null,
+        "upload_sha256": "8ba6deff410f8761efd67c524b803926649f1b6c14255e2a572ddd9da435cc7c"
+      },
+      "note": "Team member's own photo, taken at the venue on 2026-11-07. No online photo with verifiable rights was found.",
+      "rejected_candidates": [
+        {
+          "title": "IMG_1238.jpeg",
+          "reason": "Not used: a close-up of the menu boards, not the venue; prices would go out of date.",
+          "source": "Photographer permission"
+        }
+      ],
+      "additional_images": [
+        {
+          "source": "Photographer permission",
+          "title": "RLSJR-10-cafetolyo-seating.jpg",
+          "source_page_url": null,
+          "file_path": "docs/destination-images/cafetolyo/RLSJR-10-cafetolyo-seating.jpg",
+          "file_url": null,
+          "width": 2048,
+          "height": 1536,
+          "mime": "image/jpeg",
+          "sha1": "3eb6139cc76f482af4ee303e30eeca8c1ff14d78",
+          "photographer": "Roel Jr. S. Lumauag",
+          "uploader": null,
+          "date_taken": "2026-11-07",
+          "subject": "Cafetolyo covered seating area and sign at Capitol Park and Lagoon",
+          "license": "Permission",
+          "license_url": null,
+          "attribution_required": true,
+          "attribution_text": "Photo: Roel Jr. S. Lumauag",
+          "share_alike": false,
+          "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+          "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed; the faces of two seated customers are blurred. No identifiable people.",
+          "accessed_on": "2026-11-14",
+          "upload_file": "docs/destination-images/cafetolyo/RLSJR-10-cafetolyo-seating.jpg",
+          "upload_modification": null,
+          "upload_sha256": "18abe97ba7db37c1b6ff8ce080e290316c3636168af372ea30b19a81754eac56"
+        }
+      ]
     },
     {
       "location_id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
       "name": "Arima Restaurant",
-      "status": "excluded",
-      "image": null,
-      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
-      "rejected_candidates": []
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-5-arima-entrance.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/arima/RLSJR-5-arima-entrance.jpg",
+        "file_url": null,
+        "width": 2048,
+        "height": 1536,
+        "mime": "image/jpeg",
+        "sha1": "752fa08de8bc5c09b2481460bfb6d543f0f81bf3",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-11-07",
+        "subject": "Arima entrance sign and dining room inside Park Inn by Radisson Bacolod",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed. No identifiable people as the subject.",
+        "accessed_on": "2026-11-14",
+        "upload_file": "docs/destination-images/arima/RLSJR-5-arima-entrance.jpg",
+        "upload_modification": null,
+        "upload_sha256": "cb9d2471ed64ef7b11881b258b1c1827ef613e236a587ed9bb74bb0016d6a817"
+      },
+      "note": "Team member's own photo, taken at the venue on 2026-11-07. No online photo with verifiable rights was found.",
+      "rejected_candidates": [
+        {
+          "title": "IMG_1244.jpeg",
+          "reason": "Not used: a dress-code sign fills the frame and the venue is barely visible.",
+          "source": "Photographer permission"
+        }
+      ],
+      "additional_images": [
+        {
+          "source": "Photographer permission",
+          "title": "RLSJR-6-arima-sign.jpg",
+          "source_page_url": null,
+          "file_path": "docs/destination-images/arima/RLSJR-6-arima-sign.jpg",
+          "file_url": null,
+          "width": 2048,
+          "height": 1536,
+          "mime": "image/jpeg",
+          "sha1": "2a20d2e5a7e582b53a6d816a75c61f649bd7edc2",
+          "photographer": "Roel Jr. S. Lumauag",
+          "uploader": null,
+          "date_taken": "2026-11-07",
+          "subject": "Arima sign with the Park Inn breakfast board",
+          "license": "Permission",
+          "license_url": null,
+          "attribution_required": true,
+          "attribution_text": "Photo: Roel Jr. S. Lumauag",
+          "share_alike": false,
+          "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+          "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed. No identifiable people as the subject.",
+          "accessed_on": "2026-11-14",
+          "upload_file": "docs/destination-images/arima/RLSJR-6-arima-sign.jpg",
+          "upload_modification": null,
+          "upload_sha256": "a336341a1be7c672939f91b5aea65e1ea690b6f204754bc257b7262801f41a4d"
+        }
+      ]
     },
     {
       "location_id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
@@ -258,27 +425,96 @@
         "attribution_text": "Photo: Dominic Alojado / CC BY 2.0 via Wikimedia Commons",
         "share_alike": false,
         "restrictions": "Imported from Flickr; Commons FlickreviewR confirmed the CC BY 2.0 license (reviewed-pass). Credit the photographer and link the license. Low resolution (800x449).",
-        "accessed_on": "2026-11-06"
+        "accessed_on": "2026-11-06",
+        "upload_modification": null,
+        "upload_file": "docs/destination-images/panaad/commons-panaad.jpg",
+        "upload_sha256": "53352232b06db6f785e3fc41bf3c9b916a2e34e958b7a6f461124be8a726bc25"
       },
       "note": "Panaad Stadium, the complex's main landmark; players are distant and not identifiable.",
       "rejected_candidates": [
         {
           "title": "File:Panaad Stadium March 2023 renovated.jpg",
-          "reason": "Excluded: PD-PhilippinesGov. Government works carry no copyright, but exploiting them for profit needs prior approval (IP Code s.176); whether Lagaw counts as for-profit is uncertain."
+          "reason": "Excluded: PD-PhilippinesGov. Government works carry no copyright, but exploiting them for profit needs prior approval (IP Code s.176); whether Lagaw counts as for-profit is uncertain.",
+          "source": "Wikimedia Commons"
         },
         {
           "title": "File:2023 Panaad Stadium.jpg",
-          "reason": "Excluded: PD-PhilippinesGov, same uncertainty."
+          "reason": "Excluded: PD-PhilippinesGov, same uncertainty.",
+          "source": "Wikimedia Commons"
         }
       ]
     },
     {
       "location_id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
       "name": "Calea Pastries & Coffee",
-      "status": "excluded",
-      "image": null,
-      "note": "Private business; no photograph found on Wikimedia Commons and no permission from the owner on record.",
-      "rejected_candidates": []
+      "status": "approved",
+      "image": {
+        "source": "Photographer permission",
+        "title": "RLSJR-9-calea-entrance.jpg",
+        "source_page_url": null,
+        "file_path": "docs/destination-images/calea/RLSJR-9-calea-entrance.jpg",
+        "file_url": null,
+        "width": 2048,
+        "height": 1536,
+        "mime": "image/jpeg",
+        "sha1": "8b41c931e2fe34931f5d184a5f8c8defcb6fe28d",
+        "photographer": "Roel Jr. S. Lumauag",
+        "uploader": null,
+        "date_taken": "2026-11-07",
+        "subject": "Calea lit sign, glass front and dining room on 15th Street",
+        "license": "Permission",
+        "license_url": null,
+        "attribution_required": true,
+        "attribution_text": "Photo: Roel Jr. S. Lumauag",
+        "share_alike": false,
+        "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+        "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed; full frame with every diner's face blurred. No identifiable people.",
+        "accessed_on": "2026-11-14",
+        "upload_file": "docs/destination-images/calea/RLSJR-9-calea-entrance.jpg",
+        "upload_modification": null,
+        "upload_sha256": "e55cb1c49c258242dc75225c614bb68edfffaa861112301abe54d5f3d8e0570d"
+      },
+      "note": "Team member's own photo, taken at the venue on 2026-11-07. No online photo with verifiable rights was found.",
+      "rejected_candidates": [
+        {
+          "title": "IMG_1226.jpeg",
+          "source": "Photographer permission",
+          "reason": "Not used: a crowded dining area with many identifiable diners."
+        },
+        {
+          "title": "IMG_1228.jpeg",
+          "source": "Photographer permission",
+          "reason": "Not used: passers-by in the foreground; cropping them out left too little of the storefront."
+        }
+      ],
+      "additional_images": [
+        {
+          "source": "Photographer permission",
+          "title": "RLSJR-8-calea-cakes.jpg",
+          "source_page_url": null,
+          "file_path": "docs/destination-images/calea/RLSJR-8-calea-cakes.jpg",
+          "file_url": null,
+          "width": 2048,
+          "height": 1536,
+          "mime": "image/jpeg",
+          "sha1": "c4cbbb81988254c6a9977f527979a3cb4fea4394",
+          "photographer": "Roel Jr. S. Lumauag",
+          "uploader": null,
+          "date_taken": "2026-11-07",
+          "subject": "Cake display at Calea",
+          "license": "Permission",
+          "license_url": null,
+          "attribution_required": true,
+          "attribution_text": "Photo: Roel Jr. S. Lumauag",
+          "share_alike": false,
+          "permission_record": "Original photo taken by Roel Jr. S. Lumauag (Lagaw team member) at the venue on 2026-11-07. As the photographer and copyright holder, he granted Lagaw permission to use it on 2026-11-14. It has not been published or licensed elsewhere.",
+          "restrictions": "Use within Lagaw only, credited to the photographer. Not licensed to third parties. Resized to at most 2048 px and all metadata (including GPS location) removed. No identifiable people as the subject.",
+          "accessed_on": "2026-11-14",
+          "upload_file": "docs/destination-images/calea/RLSJR-8-calea-cakes.jpg",
+          "upload_modification": null,
+          "upload_sha256": "e5f6d9a0dad2858c564017b7409db71d928b4368274029c6b1c05c844dcfeba3"
+        }
+      ]
     }
   ]
 }

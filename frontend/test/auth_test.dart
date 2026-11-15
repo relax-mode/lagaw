@@ -21,6 +21,9 @@ class FakeAuthClient implements AuthClient {
   final Set<String> unconfirmed = {};
   bool requireConfirmation = false;
   bool refreshSucceeds = true;
+
+  /// Simulates no connection to the auth server during refresh.
+  bool refreshUnreachable = false;
   int refreshCalls = 0;
   int _serial = 0;
   AuthTokens? _current;
@@ -112,6 +115,7 @@ class FakeAuthClient implements AuthClient {
   @override
   Future<bool> refresh() async {
     refreshCalls++;
+    if (refreshUnreachable) throw const AuthUnreachable();
     final email = _current?.email;
     if (!refreshSucceeds || email == null) {
       _current = null;
@@ -377,6 +381,23 @@ void main() {
       expect(client.refreshCalls, 1);
     });
 
+    test('an unreachable auth server keeps the session signed in', () async {
+      final client = FakeAuthClient()..passwords['a@example.com'] = 'pw';
+      final session = AuthSession(client);
+      await session.signIn('a@example.com', 'pw');
+      client.refreshUnreachable = true;
+
+      await expectLater(
+        session.recoverFromUnauthorized(),
+        throwsA(isA<AuthUnreachable>()),
+      );
+      expect(session.expired, isFalse);
+      expect(session.isSignedIn, isTrue);
+
+      client.refreshUnreachable = false;
+      expect(await session.recoverFromUnauthorized(), isTrue);
+    });
+
     test('a failed refresh marks the session expired, once', () async {
       final client = FakeAuthClient()..passwords['a@example.com'] = 'pw';
       final session = AuthSession(client);
@@ -468,6 +489,31 @@ void main() {
       expect(seen.first, isNot(seen.last));
       expect(client.refreshCalls, 1);
     });
+
+    test(
+      'no connection during refresh is a network error, not expiry',
+      () async {
+        client.refreshUnreachable = true;
+        final service = TripService(
+          session: session,
+          client: MockClient((_) async => _json({'detail': 'expired'}, 401)),
+        );
+
+        await expectLater(
+          service.listTrips(),
+          throwsA(
+            isA<TripApiException>()
+                .having((e) => e.statusCode, 'status', isNull)
+                .having(
+                  (e) => e.message,
+                  'message',
+                  contains('Could not reach'),
+                ),
+          ),
+        );
+        expect(session.expired, isFalse);
+      },
+    );
 
     test('a failed refresh stops, marks expired and never loops', () async {
       client.refreshSucceeds = false;
@@ -787,7 +833,10 @@ void main() {
       await fill(tester, 'reset-password', 'correct-pw');
       await fill(tester, 'reset-confirm', 'correct-pw');
       await tap(tester, 'reset-submit');
-      expect(find.textContaining('different from your current'), findsOneWidget);
+      expect(
+        find.textContaining('different from your current'),
+        findsOneWidget,
+      );
       expect(find.text('Choose a new password'), findsOneWidget);
       expect(client.lastUpdatedPassword, isNull);
       await fill(tester, 'reset-password', 'different-pw-123');
