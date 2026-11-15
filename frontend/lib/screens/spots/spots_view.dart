@@ -866,12 +866,8 @@ class _PlacePopup extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-                child: details(),
-              ),
-            ),
+            // Details scroll; Rate and Save stay pinned at the bottom.
+            Expanded(child: details()),
           ],
         ),
       ),
@@ -1034,6 +1030,75 @@ class _CloseButton extends StatelessWidget {
   }
 }
 
+/// The first three lines of a description, with See more / See less when
+/// it runs longer, so Rate and Save stay in view. [home v3]
+class _ShortDescription extends StatefulWidget {
+  final String text;
+
+  const _ShortDescription({super.key, required this.text});
+
+  @override
+  State<_ShortDescription> createState() => _ShortDescriptionState();
+}
+
+class _ShortDescriptionState extends State<_ShortDescription> {
+  static const _lines = 3;
+  static const _style = TextStyle(
+    fontSize: 14.5,
+    height: 1.45,
+    color: Color(0xFF334155),
+  );
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final painter = TextPainter(
+          text: TextSpan(text: widget.text, style: _style),
+          maxLines: _lines,
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout(maxWidth: box.maxWidth);
+        final long = painter.didExceedMaxLines;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOutCubic,
+              alignment: Alignment.topCenter,
+              child: Text(
+                widget.text,
+                maxLines: _open ? null : _lines,
+                overflow: _open ? TextOverflow.visible : TextOverflow.ellipsis,
+                style: _style,
+              ),
+            ),
+            if (long)
+              GestureDetector(
+                key: const ValueKey('spot-see-more'),
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setState(() => _open = !_open),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 2),
+                  child: Text(
+                    _open ? 'See less' : 'See more',
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFF2620F),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 /// Everything about a place, below the photo in the expanded card.
 class _PlaceDetails extends StatelessWidget {
   final LocationItem place;
@@ -1077,95 +1142,109 @@ class _PlaceDetails extends StatelessWidget {
 
     return Column(
       key: ValueKey('spot-details-${place.id}'),
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (place.description.isNotEmpty) ...[
-          Text(
-            place.description,
-            style: const TextStyle(
-              fontSize: 14.5,
-              height: 1.45,
-              color: Color(0xFF334155),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (place.description.isNotEmpty) ...[
+                  _ShortDescription(
+                    key: ValueKey('spot-description-${place.id}'),
+                    text: place.description,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (place.vibeTags.isNotEmpty) ...[
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final tag in place.vibeTags)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '#$tag',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1D4ED8),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                info(Icons.place_outlined, place.address),
+                info(Icons.schedule_rounded, place.duration),
+                info(Icons.payments_outlined, place.costRange),
+                if (rating != null)
+                  info(
+                    Icons.star_rounded,
+                    'You rated it ${rating!.toStringAsFixed(rating! % 1 == 0 ? 0 : 1)}',
+                  ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-        ],
-        if (place.vibeTags.isNotEmpty) ...[
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
+        ),
+        // Always in view, however long the details run.
+        Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Color(0xFFEFF3F8))),
+          ),
+          child: Row(
             children: [
-              for (final tag in place.vibeTags)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+              // Rate on the left, Save (the main action) on the right.
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: ValueKey('spot-rate-${place.id}'),
+                  onPressed: busy ? null : onRate,
+                  style: OutlinedButton.styleFrom(
+                    shape: const StadiumBorder(),
+                    minimumSize: const Size.fromHeight(46),
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '#$tag',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1D4ED8),
-                    ),
-                  ),
+                  icon: const Icon(Icons.star_border_rounded, size: 18),
+                  label: Text(rating == null ? 'Rate' : 'Rate again'),
                 ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  key: ValueKey('spot-save-${place.id}'),
+                  onPressed: busy ? null : onSave,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: saved
+                        ? const Color(0xFFFFEDD5)
+                        : const Color(0xFFF2620F),
+                    foregroundColor: saved
+                        ? const Color(0xFFC2410C)
+                        : Colors.white,
+                    shape: const StadiumBorder(),
+                    minimumSize: const Size.fromHeight(46),
+                  ),
+                  icon: Icon(
+                    saved
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    size: 18,
+                  ),
+                  label: Text(saved ? 'Saved' : 'Save'),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-        ],
-        info(Icons.place_outlined, place.address),
-        info(Icons.schedule_rounded, place.duration),
-        info(Icons.payments_outlined, place.costRange),
-        if (rating != null)
-          info(
-            Icons.star_rounded,
-            'You rated it ${rating!.toStringAsFixed(rating! % 1 == 0 ? 0 : 1)}',
-          ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.icon(
-                key: ValueKey('spot-save-${place.id}'),
-                onPressed: busy ? null : onSave,
-                style: FilledButton.styleFrom(
-                  backgroundColor: saved
-                      ? const Color(0xFFFFEDD5)
-                      : const Color(0xFFF2620F),
-                  foregroundColor: saved
-                      ? const Color(0xFFC2410C)
-                      : Colors.white,
-                  shape: const StadiumBorder(),
-                  minimumSize: const Size.fromHeight(46),
-                ),
-                icon: Icon(
-                  saved
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  size: 18,
-                ),
-                label: Text(saved ? 'Saved' : 'Save'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: OutlinedButton.icon(
-                key: ValueKey('spot-rate-${place.id}'),
-                onPressed: busy ? null : onRate,
-                style: OutlinedButton.styleFrom(
-                  shape: const StadiumBorder(),
-                  minimumSize: const Size.fromHeight(46),
-                ),
-                icon: const Icon(Icons.star_border_rounded, size: 18),
-                label: Text(rating == null ? 'Rate' : 'Rate again'),
-              ),
-            ),
-          ],
         ),
       ],
     );

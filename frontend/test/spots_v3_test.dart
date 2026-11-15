@@ -205,4 +205,43 @@ void main() {
     expect(find.text('Loading Bacolod places…'), findsOneWidget);
     expect(find.byKey(const ValueKey('spot-a')), findsNothing);
   });
+
+  testWidgets('a long description shows three lines and See more', (
+    tester,
+  ) async {
+    final long = LocationItem.fromJson({
+      'id': 'l',
+      'name': 'Long Place',
+      'description': 'A long description of a Bacolod place. ' * 20,
+      'category': 'park',
+      'vibe_tags': ['nature'],
+      'address': 'Somewhere, Bacolod City',
+      'estimated_cost_min': null,
+      'estimated_cost_max': null,
+      'typical_visit_duration': 30,
+    });
+    await pump(tester, places: [long, _places[1]]);
+    await tester.tap(find.byKey(const ValueKey('spot-toggle-l')));
+    await _step(tester);
+
+    final text = find.textContaining('A long description');
+    expect(tester.widget<Text>(text).maxLines, 3);
+    expect(find.text('See more'), findsOneWidget);
+    // Rate on the left, Save on the right, both in view.
+    final rate = tester.getRect(find.byKey(const ValueKey('spot-rate-l')));
+    final save = tester.getRect(find.byKey(const ValueKey('spot-save-l')));
+    expect(rate.right, lessThan(save.left));
+
+    await tester.tap(find.byKey(const ValueKey('spot-see-more')));
+    await _step(tester);
+    expect(tester.widget<Text>(text).maxLines, isNull);
+    expect(find.text('See less'), findsOneWidget);
+
+    // A short description has no See more.
+    await tester.tapAt(const Offset(6, 6));
+    await _step(tester);
+    await tester.tap(find.byKey(const ValueKey('spot-toggle-b')));
+    await _step(tester);
+    expect(find.text('See more'), findsNothing);
+  });
 }
