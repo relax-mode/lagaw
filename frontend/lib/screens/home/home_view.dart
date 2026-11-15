@@ -191,7 +191,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               const SizedBox(height: 2),
               const Text(
-                'Where to\ntoday?',
+                'Where to\nnext?',
                 key: ValueKey('home-headline'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
