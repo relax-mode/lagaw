@@ -173,6 +173,7 @@ void main() {
       expect(find.text('6 spots to explore'), findsOneWidget);
       expect(find.byKey(const ValueKey('home-headline')), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
+      expect(find.text('Where to\nnext?'), findsOneWidget);
       // Opens on heritage so neighbors can peek from the side.
       expect(find.text('heritage'), findsOneWidget);
       expect(find.text('See 1 heritage spot'), findsOneWidget);
