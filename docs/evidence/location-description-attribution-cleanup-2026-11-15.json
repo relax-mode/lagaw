@@ -1,0 +1,30 @@
+{
+  "observed_at_utc": "2026-11-15T04:47:55.734533+00:00",
+  "development": {
+    "first_run": {
+      "changed": 4,
+      "unchanged": 0,
+      "unmanaged_fields_preserved": true
+    },
+    "rerun": {
+      "changed": 0,
+      "unchanged": 4,
+      "unmanaged_fields_preserved": true
+    }
+  },
+  "production": {
+    "status": "pending_operator_sql"
+  },
+  "public_readback": [
+    {
+      "environment": "development",
+      "all_ten_records_match_expected": true,
+      "hours_costs_coordinates_images_and_other_fields_preserved": true
+    },
+    {
+      "environment": "production",
+      "all_ten_records_match_expected": true,
+      "hours_costs_coordinates_images_and_other_fields_preserved": true
+    }
+  ]
+}

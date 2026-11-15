@@ -989,6 +989,7 @@ is a different operation and was not triggered. See the
 - Verified the release APK (against staging) on Roel's Infinix X6850 (Android 16). All 8 checks passed: real places, "Price unknown" and "No photo yet", no fake match %, honest timeout and offline errors with Retry, still signed in while offline, and the "Lagaw" app identity with INTERNET.
 - Found during device testing: staging's San Sebastian Cathedral `image_url` shows the Negros Museum (left over from the #108 test upload; production is unaffected), which is reported for the #108 owner. The launcher icon was still Flutter's default; at Roel's request it is now the Lagaw logo at all densities, with no metadata.
 - **Decision (Roel):** the production check is handed to the release owner (#121, CyGray), who has the production publishable key and a production account. #117 stays open until it is confirmed. See [evidence](evidence/release-build-honest-ui.md).
+- **November 15, 2026 — production check (CyGray):** built the release APK from `main` @ `0ff79bf` with the production API, Supabase URL and publishable key (Flutter 3.47.8, matching CI). `aapt dump badging` reports `com.lagaw.bacolod`, versionName `1.0.0`, `INTERNET` and the label "Lagaw". Installed on a phone (2511FPC34G) and signed in with a production account: Home loaded from production ("10 spots to explore") with "No photo yet" and no match %, and the Arima Restaurant detail showed "Price unknown" and no match %. The APK used the debug signing config because this machine has no `key.properties`; the real upload keystore is still needed for v1.0.0 (#121). Closed #117 after the team meeting recorded below.
 
 ### November 14, 2026 — #109 real destination images in Flutter
 
@@ -1054,3 +1055,60 @@ is a different operation and was not triggered. See the
 - **Feedback round (Roel):** verified four tester reports on the trip screens (pace and group not carried into Plan with AI, two lowercase titles with an em dash, Describe your trip styled differently) and fixed them. Plan a trip became a pop-up; cards, buttons, chips and fields moved to the flat v3 style; the trip min budget is optional; the header pill collapses everywhere except Home; trips can be swiped away with a confirmation; "Trip deleted." fades; date tiles fit their range. `flutter test` passes 285 tests; verified on the Infinix (delete and Plan with AI by tests only).
 - **Feedback round (Roel):** Plan a trip became a step-by-step pop-up (describe or skip, review in the pop-up, basics, getting around, who's coming, vibes) that asks before discarding input; trip details, Edit trip and Plan with AI are pop-ups too (details in Overview and Itinerary tabs; Plan with AI in steps). Recommendation cards and the itinerary were redesigned, without percentages or ranking reasons. `flutter test` passes 287 tests; verified on the Infinix (creating and generating by tests only).
 - **Feedback round (Roel):** the greeting pill is now one shared header above the phone tabs, so it folds only when leaving Home and unfolds only when returning; between Spots, Trips and Swipe it no longer replays. The fold and unfold were smoothed (staged fades, eased width). `flutter test` passes 288 tests; verified on the Infinix with a frame recording.
+
+### November 14–15, 2026 — Team meeting: system QA, v3 UI, and demo video roles
+
+- **When:** 9:00 PM Saturday, November 14 to 12:20 PM Sunday, November 15, 2026 (Asia/Singapore). Recorded by Kyle (CyGray) from the team's meeting notes. Attendees: Jeff, Andrew, Kyle and Roel (the whole team). The demo video is due today, November 15.
+- **Focus:** manual QA of the deployed system, Roel's push of the v3 UI, identifying issues, and assigning the demo video.
+
+**QA findings** (all open unless noted; none is recorded as fixed):
+
+- Sign in: working as intended.
+- Onboarding: works well, but the recommendation screen after onboarding is a dead end and feels odd. Proposed: remove it, or go straight to matching or Home.
+- Spots have no photos, which is an important gap. Andrew owns the destination list and Roel owns the pictures. Status: waiting for Andrew's upload to the storage bucket; Roel only needs to confirm they render in the app.
+- Swipe card layout: the card shows the spot's look ("chura"), price range and primary tag; the action buttons sit outside it. Make the top section more compact (for example, remove the top bar and animate out the "Swipe your vibe" header). Center the cards visually, accounting for the animations and container.
+- Tapping a card should open the Spot Info modal.
+- Trip creation: choosing "Slow" as the pace, then Plan with AI, highlights "Moderate" instead. The preference is not saved or reflected; the same happens with people going and similar fields.
+- Text fixes: "plan with AI" on the Plan with AI page and "plan a trip" on the Plan a trip screen have a lowercase "p"; the Plan a trip subheading contains an em dash; the "Describe your trip" section uses a different font.
+- Catalogue: Andrew adds metadata for the current 10 destinations and adds 10 more.
+
+**Demo video** (Part 1 to 8 of the course checklist). Materials: [team Drive folder](https://drive.google.com/drive/folders/1iX_TqWex11pZz6is73KHjOHGaeRbnth2), the instructions, assignments and script Google Doc ("AI Report Video - Lagaw | Relax Mode"), and the Canva presentation (https://canva.link/186ihbs6erj3tsb), which is still blank. The finished video goes in the Drive folder.
+
+| Part | Presenter |
+| --- | --- |
+| 1. Introduction and progress | Kyle (introduction); Jeff (major features and remaining tasks) |
+| 2. System walkthrough | Roel (sign-in and onboarding, discovery, trip create, read and update); Kyle (recommendations and itinerary, trip delete, frontend/backend/validation) |
+| 3. Hosting | Andrew (database and backend); Kyle (frontend on Cloudflare) |
+| 4. AI/LLM integration | Jeff |
+| 5. Tests and evaluations | Roel (frontend); Andrew (backend); Jeff (AI); Kyle (automated tests) |
+| 6. DevOps configuration and rules | Kyle |
+| 7. End-to-end DevOps demonstration | Kyle |
+| 8. Final progress summary | Kyle |
+
+- **Decision:** #117 is closed after the production check recorded above.
+
+### November 15, 2026 - user-supplied existing-location metadata refresh
+
+- Andrew requested a separate task filling missing metadata from his supplied coordinates, prices and schedules: development first, production after verification. He declined collecting further links. Retained the supplied provenance/uncertainty and rounded four coordinate pairs to database precision. Did not re-add cancelled alternative venues or alter the original ten IDs/images/tags/durations.
+- On `feat/location-metadata-refresh` (from `origin/main` d933d23), prepared seven guarded patches plus qualified descriptions and separate development/production snapshots. Provincial Capitol office hours/free-access claim and explicitly unverified Panaad oval reports remain deferred. Calea menu prices, Arima spending, historical Forest Park fees and exhibition-dependent Orange prices are qualified user-supplied estimates, not guaranteed per-person totals/current operator verification.
+- Focused tests: 77 passed; Ruff passed. An initial REST equality-string quoting mismatch yielded no updated row and stopped at the write guard. After correcting filter encoding, development updated seven records; rerun changed zero. Full public readback matches the prior ten records plus only intended fields. All ten image URLs and identities survive. Development now has 10 coordinate pairs, 8 schedules and 8 bounded cost ranges; field completeness is not factual certification.
+- Production readback remains unchanged. No production credential is available in the process/configuration; execution was blocked before production network access/writes. Prepared `docs/location-metadata-production-2026-11-15.sql` for an authorized operator in the separate production project, and documented process-only credential setup without editing `.env`. Evidence and qualifications are linked in `docs/location-metadata-refresh-2026-11-15.md`. Existing local notes are preserved in a named stash and restored after committing this task.
+
+- Branch pushed. GitHub PR creation failed with a connection argument error; the handoff contains the PR comparison and copy-ready description. No PR, CI result or production update is claimed.
+
+### November 15, 2026 - supplied Capitol and Panaad metadata follow-up
+
+- Andrew explicitly requested using his previously supplied Capitol and Panaad hours and costs, superseding the prior deferral. Applied two existing development records, retaining office-hour and unverified oval-report caveats in descriptions. Guarded rerun changed zero; full public readback preserved all ten expected records and unrelated fields. Development now has 10 schedules and 10 cost ranges. Production remains at 8 of each pending the prepared operator SQL; no environment changes. Evidence: docs/evidence/location-metadata-supplied-followup-2026-11-15.json.
+
+### November 15, 2026 - destination description attribution cleanup
+
+- Removed personal supplied-by wording from four development destination descriptions at the data owner's request. Preserved source qualifications and every other public field. Four updates, zero changes on rerun; full public readback matched all ten records. Production SQL is prepared pending operator execution; no environment changes. Prior audit snapshots remain historical records.
+
+### November 15, 2026 - twenty new catalogue destinations in development
+
+- Applied the requested hours, coordinates and indicative prices to twenty new Bacolod records on feat/twenty-destination-expansion, using fixed UUIDs and the existing travel-tag vocabulary. Kept all new image URLs null and descriptions free of personal supplied-by wording. Ten retained researched pins remain approximate; original precision, source links/labels, mixed-price qualifications and outstanding checks are recorded in the manifest. Midnight closes use a conservative 23:59 cutoff; unspecified days are omitted. Negros Superlanes costs remain null.
+- Development inserted twenty rows (30 total); rerun inserted zero. Full public readback confirmed all intended records and preserved the original ten. Development has 30 coordinate pairs, 30 schedules and 29 bounded cost ranges. Focused tests: 88 passed; Ruff passed. Production remains at its original ten records because its dedicated write credential is absent; the explicit attempt stopped before network/writes. Prepared guarded production SQL outside automatic migrations and documented the operator handoff. No environment changes.
+
+### November 15, 2026 - consistent destination categories
+
+- Grouped the twenty added destinations into existing Art, Dining, Cafes, Parks and Heritage categories, adding only Activities, Shopping and Resorts where needed. Development changed nineteen category values; Coffee Culture already matched. Rerun changed zero. Full thirty-record readback preserved all other fields and the original ten. Production has thirty records but category normalization awaits the guarded SQL because its dedicated credential is unavailable. Added frontend alias normalization, shared readable labels, grouped counts, fitting category titles and a grouping regression case. Flutter is absent locally; frontend validation requires CI. Impeccable mechanical detector returned no findings. No environment or image changes.

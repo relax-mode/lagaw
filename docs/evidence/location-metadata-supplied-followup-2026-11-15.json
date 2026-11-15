@@ -1,0 +1,39 @@
+{
+  "observed_at_utc": "2026-11-15T04:31:42.977417+00:00",
+  "manifest_sha256": "35654bb70a00b6fe3d7f7e016abb937c85f1c4940db2d4068e3b38ba2c154531",
+  "development": {
+    "first_run": {
+      "changed": 2,
+      "unchanged": 0,
+      "unmanaged_fields_preserved": true
+    },
+    "rerun": {
+      "changed": 0,
+      "unchanged": 2,
+      "unmanaged_fields_preserved": true
+    }
+  },
+  "production": {
+    "status": "pending_operator_sql",
+    "reason": "Production credential unavailable; prepared guarded SQL transaction."
+  },
+  "public_readback": {
+    "observed_at_utc": "2026-11-15T04:32:17.390471+00:00",
+    "reports": [
+      {
+        "environment": "development",
+        "all_public_fields_match_expected": true,
+        "active_locations": 10,
+        "opening_schedules": 10,
+        "cost_ranges": 10
+      },
+      {
+        "environment": "production",
+        "all_public_fields_match_expected": true,
+        "active_locations": 10,
+        "opening_schedules": 8,
+        "cost_ranges": 8
+      }
+    ]
+  }
+}

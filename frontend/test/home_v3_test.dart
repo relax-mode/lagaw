@@ -49,6 +49,41 @@ void main() {
   });
 
   group('HomeCategory', () {
+    test('merges expanded aliases with existing categories and clean labels', () {
+      final places = [
+        _loc('orange', 'gallery'),
+        _loc('artfull', 'art_gallery'),
+        _loc('arima', 'restaurant'),
+        _loc('quan', 'local_food'),
+        _loc('palawud', 'seaside_dining'),
+        _loc('bowling', 'evening_bowling'),
+        _loc('arcade', 'arcade_recreation'),
+        _loc('mall', 'shopping_leisure'),
+        _loc('books', 'bookstore_leisure'),
+        _loc('pool', 'waterpark'),
+      ];
+      final cats = HomeCategory.fromLocations(
+        places,
+        credits: ImageCredits(const []),
+      );
+      final counts = {for (final cat in cats) cat.id: cat.count};
+      expect(counts, {
+        'gallery': 2,
+        'restaurant': 3,
+        'recreation': 2,
+        'shopping': 2,
+        'resort': 1,
+      });
+      expect(places[1].id, 'artfull');
+      expect(places[1].category, 'gallery');
+      expect(HomeCategory.labelFor('art_gallery'), 'Art');
+      expect(HomeCategory.labelFor('local_food'), 'Dining');
+      expect(HomeCategory.labelFor('recreation'), 'Activities');
+      expect(HomeCategory.labelFor('shopping'), 'Shopping');
+      expect(HomeCategory.labelFor('resort'), 'Resorts');
+      expect(HomeCategory.labelFor('future_local_spot'), 'Future Local Spot');
+    });
+
     test('groups real places, largest first, with honest labels', () {
       final cats = HomeCategory.fromLocations(
         _places,
@@ -277,13 +312,14 @@ void main() {
   });
 
   test('every category reads as words, including new ones', () {
-    expect(HomeCategory.labelFor('local_food'), 'Local food');
-    expect(HomeCategory.labelFor('coastal_day_resort'), 'Beaches');
-    expect(HomeCategory.labelFor('brand_new_kind'), 'Brand new kind');
+    // Finer catalogue categories group into broad ones (#186).
+    expect(HomeCategory.labelFor('local_food'), 'Dining');
+    expect(HomeCategory.labelFor('coastal_day_resort'), 'Resorts');
+    expect(HomeCategory.labelFor('brand_new_kind'), 'Brand New Kind');
     final cover = LocationItem.fromJson({'id': 'x', 'name': 'X'});
     expect(
       HomeCategory(id: 'garden_farm_tourism', count: 2, cover: cover).seeLabel,
-      'See 2 farms',
+      'See 2 parks',
     );
     expect(
       HomeCategory(id: 'new_thing', count: 1, cover: cover).word,

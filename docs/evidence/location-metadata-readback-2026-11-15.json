@@ -1,0 +1,58 @@
+{
+  "observed_at_utc": "2026-11-15T03:47:34+00:00",
+  "qualification": "User-supplied estimates with documented sources; no guaranteed venue availability, price or feasible production itinerary claimed.",
+  "reports": [
+    {
+      "environment": "development",
+      "active_location_count": 10,
+      "field_counts": {
+        "identity_and_address": 10,
+        "category": 10,
+        "vibe_tags": 10,
+        "coordinate_pair": 10,
+        "opening_hours": 8,
+        "bounded_cost": 8,
+        "visit_duration": 10,
+        "field_complete_only": 8
+      },
+      "field_coverage_percent": {
+        "identity_and_address": 100.0,
+        "category": 100.0,
+        "vibe_tags": 100.0,
+        "coordinate_pair": 100.0,
+        "opening_hours": 80.0,
+        "bounded_cost": 80.0,
+        "visit_duration": 100.0,
+        "field_complete_only": 80.0
+      },
+      "caveat": "Field presence does not verify freshness, rights, or itinerary feasibility.",
+      "matches_expected": true
+    },
+    {
+      "environment": "production",
+      "active_location_count": 10,
+      "field_counts": {
+        "identity_and_address": 10,
+        "category": 10,
+        "vibe_tags": 10,
+        "coordinate_pair": 6,
+        "opening_hours": 2,
+        "bounded_cost": 1,
+        "visit_duration": 10,
+        "field_complete_only": 1
+      },
+      "field_coverage_percent": {
+        "identity_and_address": 100.0,
+        "category": 100.0,
+        "vibe_tags": 100.0,
+        "coordinate_pair": 60.0,
+        "opening_hours": 20.0,
+        "bounded_cost": 10.0,
+        "visit_duration": 100.0,
+        "field_complete_only": 10.0
+      },
+      "caveat": "Field presence does not verify freshness, rights, or itinerary feasibility.",
+      "matches_expected": true
+    }
+  ]
+}

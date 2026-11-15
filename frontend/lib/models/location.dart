@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'location_category.dart';
+
 /// One Bacolod destination from `GET /locations`. Unknown facts stay
 /// unknown: no invented price, visit length, photo or match score. [S4-17]
 class LocationItem {
@@ -36,7 +38,9 @@ class LocationItem {
   /// Deserializes JSON from FastAPI GET /locations [S1-02 / S1-04]
   factory LocationItem.fromJson(Map<String, dynamic> json) {
     final rawImg = json['image_url']?.toString();
-    final cat = json['category']?.toString() ?? 'spot';
+    final cat = canonicalLocationCategory(
+      json['category']?.toString() ?? 'spot',
+    );
     return LocationItem(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown Spot',

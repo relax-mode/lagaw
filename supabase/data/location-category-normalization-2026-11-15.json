@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "scope": "Only category values for the twenty added destinations; original ten and all other fields preserved.",
+  "aliases": {
+    "art_gallery": "gallery",
+    "garden_farm_tourism": "park",
+    "local_food": "restaurant",
+    "seaside_dining": "restaurant",
+    "cafe_meals": "cafe",
+    "heritage_viewpoint": "heritage",
+    "indoor_recreation": "recreation",
+    "childrens_play": "recreation",
+    "arcade_recreation": "recreation",
+    "evening_bowling": "recreation",
+    "crafts_souvenirs": "shopping",
+    "shopping_leisure": "shopping",
+    "pasalubong_food": "shopping",
+    "bookstore_leisure": "shopping",
+    "waterpark": "resort",
+    "coastal_day_resort": "resort"
+  },
+  "entries": [
+    {
+      "id": "c6303987-1b9c-5a83-b80d-7a9a4b389b6b",
+      "name": "Artfull Philippines / Gallery and Cafe",
+      "expected": {
+        "development": {
+          "category": "art_gallery"
+        },
+        "production": {
+          "category": "art_gallery"
+        }
+      },
+      "proposal": {
+        "category": "gallery"
+      }
+    },
+    {
+      "id": "f5daa34a-7e4b-5a7e-9e97-1cf4d9c1c920",
+      "name": "Lopue's East Bowling Center",
+      "expected": {
+        "development": {
+          "category": "indoor_recreation"
+        },
+        "production": {
+          "category": "indoor_recreation"
+        }
+      },
+      "proposal": {
+        "category": "recreation"
+      }
+    },
+    {
+      "id": "c4047367-665b-5a04-8fd1-44aa7e50aa56",
+      "name": "May's Organic Garden and Restaurant",
+      "expected": {
+        "development": {
+          "category": "garden_farm_tourism"
+        },
+        "production": {
+          "category": "garden_farm_tourism"
+        }
+      },
+      "proposal": {
+        "category": "park"
+      }
+    },
+    {
+      "id": "43f712d8-a6bd-5113-905e-b8d00cf2c2f6",
+      "name": "Quan Native Delicacies - Plaza",
+      "expected": {
+        "development": {
+          "category": "local_food"
+        },
+        "production": {
+          "category": "local_food"
+        }
+      },
+      "proposal": {
+        "category": "restaurant"
+      }
+    },
+    {
+      "id": "5509d004-3126-5c89-942a-b1ccc4f742a8",
+      "name": "The Negros Showroom - South Capitol Road",
+      "expected": {
+        "development": {
+          "category": "crafts_souvenirs"
+        },
+        "production": {
+          "category": "crafts_souvenirs"
+        }
+      },
+      "proposal": {
+        "category": "shopping"
+      }
+    },
+    {
+      "id": "f2ee9da3-4f32-50d5-9840-f6352bfccc9a",
+      "name": "Coffee Culture Roastery - Alijis",
+      "expected": {
+        "development": {
+          "category": "cafe"
+        },
+        "production": {
+          "category": "cafe"
+        }
+      },
+      "proposal": {
+        "category": "cafe"
+      }
+    },
+    {
+      "id": "0bf1a140-9303-508f-9375-a2ceabce77f3",
+      "name": "Manokan Country - temporary SM site",
+      "expected": {
+        "development": {
+          "category": "local_food"
+        },
+        "production": {
+          "category": "local_food"
+        }
+      },
+      "proposal": {
+        "category": "restaurant"
+      }
+    },
+    {
+      "id": "69e4f350-bd25-50e8-90f0-24eea097f91d",
+      "name": "Pope John Paul II Tower",
+      "expected": {
+        "development": {
+          "category": "heritage_viewpoint"
+        },
+        "production": {
+          "category": "heritage_viewpoint"
+        }
+      },
+      "proposal": {
+        "category": "heritage"
+      }
+    },
+    {
+      "id": "49f18097-4d77-5237-8f28-cfd4a0b5940a",
+      "name": "kidzooona - SM City Bacolod",
+      "expected": {
+        "development": {
+          "category": "childrens_play"
+        },
+        "production": {
+          "category": "childrens_play"
+        }
+      },
+      "proposal": {
+        "category": "recreation"
+      }
+    },
+    {
+      "id": "eeeb59c9-b5d6-58ca-aa54-ce33c221a222",
+      "name": "Ayala Malls Capitol Central - general visit",
+      "expected": {
+        "development": {
+          "category": "shopping_leisure"
+        },
+        "production": {
+          "category": "shopping_leisure"
+        }
+      },
+      "proposal": {
+        "category": "shopping"
+      }
+    },
+    {
+      "id": "e36ca062-fbf0-5e4b-b6bd-24f61d3e5a99",
+      "name": "Timezone - Ayala Malls Capitol Central",
+      "expected": {
+        "development": {
+          "category": "arcade_recreation"
+        },
+        "production": {
+          "category": "arcade_recreation"
+        }
+      },
+      "proposal": {
+        "category": "recreation"
+      }
+    },
+    {
+      "id": "a9e26ed9-83bb-5056-907a-85b699448eec",
+      "name": "Caribbean Waterpark and Resotel - day use",
+      "expected": {
+        "development": {
+          "category": "waterpark"
+        },
+        "production": {
+          "category": "waterpark"
+        }
+      },
+      "proposal": {
+        "category": "resort"
+      }
+    },
+    {
+      "id": "a22c5862-5ce7-5793-a96e-150b79e1f2af",
+      "name": "Resorts Negrense - day use",
+      "expected": {
+        "development": {
+          "category": "coastal_day_resort"
+        },
+        "production": {
+          "category": "coastal_day_resort"
+        }
+      },
+      "proposal": {
+        "category": "resort"
+      }
+    },
+    {
+      "id": "8bc43864-3bad-5326-9c11-53b1eb274571",
+      "name": "Merzci - Sum-ag branch",
+      "expected": {
+        "development": {
+          "category": "pasalubong_food"
+        },
+        "production": {
+          "category": "pasalubong_food"
+        }
+      },
+      "proposal": {
+        "category": "shopping"
+      }
+    },
+    {
+      "id": "4ce87f7b-17d1-538f-8a1e-408956bdbb64",
+      "name": "Sharyn's Cansi House - Narra",
+      "expected": {
+        "development": {
+          "category": "local_food"
+        },
+        "production": {
+          "category": "local_food"
+        }
+      },
+      "proposal": {
+        "category": "restaurant"
+      }
+    },
+    {
+      "id": "ace4cd5a-e098-545e-bd2b-bfa19e529782",
+      "name": "Aboy's Restaurant - Liroville",
+      "expected": {
+        "development": {
+          "category": "local_food"
+        },
+        "production": {
+          "category": "local_food"
+        }
+      },
+      "proposal": {
+        "category": "restaurant"
+      }
+    },
+    {
+      "id": "977ea9ef-dafe-5986-9efc-79c611ff9f6c",
+      "name": "Palawud Resto Grill and Bar - San Juan/Banago",
+      "expected": {
+        "development": {
+          "category": "seaside_dining"
+        },
+        "production": {
+          "category": "seaside_dining"
+        }
+      },
+      "proposal": {
+        "category": "restaurant"
+      }
+    },
+    {
+      "id": "24d858ec-8cf1-53c6-ab55-97858a5fed88",
+      "name": "Kuppa Coffee and Tea - Tindalo",
+      "expected": {
+        "development": {
+          "category": "cafe_meals"
+        },
+        "production": {
+          "category": "cafe_meals"
+        }
+      },
+      "proposal": {
+        "category": "cafe"
+      }
+    },
+    {
+      "id": "70b981f6-8196-5546-b0ce-0ab1773fbac4",
+      "name": "Fully Booked - SM City Bacolod",
+      "expected": {
+        "development": {
+          "category": "bookstore_leisure"
+        },
+        "production": {
+          "category": "bookstore_leisure"
+        }
+      },
+      "proposal": {
+        "category": "shopping"
+      }
+    },
+    {
+      "id": "3c897dde-3ad4-5599-87d6-6fa234136748",
+      "name": "Negros Superlanes - Goldenfield",
+      "expected": {
+        "development": {
+          "category": "evening_bowling"
+        },
+        "production": {
+          "category": "evening_bowling"
+        }
+      },
+      "proposal": {
+        "category": "recreation"
+      }
+    }
+  ],
+  "baseline_hashes": {
+    "development": "688390b4849bb3ec805860e803ccc708bac43a0700cff266421bb8d0fa447810",
+    "production": "c801ca6d86394224275aa86e50cb7a8992b01d6c8026cc5c09dafbea1c883f8d"
+  }
+}

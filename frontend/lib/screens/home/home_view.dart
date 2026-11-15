@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/image_credits.dart';
 import '../../models/location.dart';
+import '../../models/location_category.dart';
 import '../../theme.dart';
 import '../../widgets/destination_photo.dart';
 import '../../widgets/floating_elements.dart';
@@ -22,15 +23,14 @@ class HomeCategory {
   });
 
   /// Big lowercase word on the card, e.g. "parks".
-  String get word => _names[id]?.$1 ?? _plain(id);
-
-  /// A category id we have no name for yet, readable: "new_thing" →
-  /// "new thing".
-  static String _plain(String id) => id.replaceAll('_', ' ').trim();
+  String get word =>
+      _names[canonicalLocationCategory(id)]?.$1 ??
+      locationCategoryTitle(id).toLowerCase();
 
   /// Chip label for a category id, e.g. "Parks", "Cafés", "Art".
   static String labelFor(String id) {
-    final w = _names[id]?.$1 ?? _plain(id);
+    final w =
+        _names[canonicalLocationCategory(id)]?.$1 ?? locationCategoryTitle(id);
     return w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}';
   }
 
@@ -39,7 +39,7 @@ class HomeCategory {
 
   /// "See 3 parks", "See 1 heritage spot".
   String get seeLabel {
-    final n = _names[id];
+    final n = _names[canonicalLocationCategory(id)];
     if (n == null) return 'See $countLabel';
     return 'See $count ${count == 1 ? n.$2 : n.$3}';
   }
@@ -52,23 +52,9 @@ class HomeCategory {
     'gallery': ('art', 'art spot', 'art spots'),
     'restaurant': ('dining', 'place to eat', 'places to eat'),
     'landmark': ('landmarks', 'landmark', 'landmarks'),
-    // The expanded catalogue's finer categories.
-    'local_food': ('local food', 'local food spot', 'local food spots'),
-    'art_gallery': ('galleries', 'gallery', 'galleries'),
-    'shopping_leisure': ('shopping', 'shopping spot', 'shopping spots'),
-    'indoor_recreation': ('indoor fun', 'indoor spot', 'indoor spots'),
-    'garden_farm_tourism': ('farms', 'farm', 'farms'),
-    'crafts_souvenirs': ('crafts', 'craft shop', 'craft shops'),
-    'heritage_viewpoint': ('viewpoints', 'viewpoint', 'viewpoints'),
-    'childrens_play': ('kids', 'kids’ spot', 'kids’ spots'),
-    'arcade_recreation': ('arcades', 'arcade', 'arcades'),
-    'waterpark': ('waterparks', 'waterpark', 'waterparks'),
-    'coastal_day_resort': ('beaches', 'beach resort', 'beach resorts'),
-    'pasalubong_food': ('pasalubong', 'pasalubong shop', 'pasalubong shops'),
-    'seaside_dining': ('seaside', 'seaside spot', 'seaside spots'),
-    'cafe_meals': ('café meals', 'café', 'cafés'),
-    'bookstore_leisure': ('books', 'bookstore', 'bookstores'),
-    'evening_bowling': ('bowling', 'bowling spot', 'bowling spots'),
+    'recreation': ('activities', 'activity', 'activities'),
+    'shopping': ('shopping', 'shopping spot', 'shopping spots'),
+    'resort': ('resorts', 'resort', 'resorts'),
   };
 
   /// Where the carousel opens: heritage when present (Roel's choice, so
@@ -86,7 +72,9 @@ class HomeCategory {
   }) {
     final groups = <String, List<LocationItem>>{};
     for (final loc in locations) {
-      groups.putIfAbsent(loc.category, () => []).add(loc);
+      groups
+          .putIfAbsent(canonicalLocationCategory(loc.category), () => [])
+          .add(loc);
     }
     final c = credits ?? ImageCredits.instance;
     final list = [
@@ -350,24 +338,26 @@ class _HomeViewState extends State<HomeView> {
                     left: 8,
                     right: 8,
                     child: IgnorePointer(
-                      child: Text(
-                        cat.word,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.fade,
-                        softWrap: false,
-                        style: const TextStyle(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1.2,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Color(0x40000000),
-                              blurRadius: 14,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          cat.word,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                            fontSize: 38,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.2,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Color(0x40000000),
+                                blurRadius: 14,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
