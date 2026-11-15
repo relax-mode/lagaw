@@ -1065,3 +1065,7 @@ is a different operation and was not triggered. See the
 - Production readback remains unchanged. No production credential is available in the process/configuration; execution was blocked before production network access/writes. Prepared `docs/location-metadata-production-2026-11-15.sql` for an authorized operator in the separate production project, and documented process-only credential setup without editing `.env`. Evidence and qualifications are linked in `docs/location-metadata-refresh-2026-11-15.md`. Existing local notes are preserved in a named stash and restored after committing this task.
 
 - Branch pushed. GitHub PR creation failed with a connection argument error; the handoff contains the PR comparison and copy-ready description. No PR, CI result or production update is claimed.
+
+### November 15, 2026 - supplied Capitol and Panaad metadata follow-up
+
+- Andrew explicitly requested using his previously supplied Capitol and Panaad hours and costs, superseding the prior deferral. Applied two existing development records, retaining office-hour and unverified oval-report caveats in descriptions. Guarded rerun changed zero; full public readback preserved all ten expected records and unrelated fields. Development now has 10 schedules and 10 cost ranges. Production remains at 8 of each pending the prepared operator SQL; no environment changes. Evidence: docs/evidence/location-metadata-supplied-followup-2026-11-15.json.
