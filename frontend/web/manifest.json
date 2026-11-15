@@ -1,11 +1,11 @@
 {
-    "name": "frontend",
-    "short_name": "frontend",
+    "name": "Lagaw",
+    "short_name": "Lagaw",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Lagaw is a swipe-based travel planner for Bacolod City.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
