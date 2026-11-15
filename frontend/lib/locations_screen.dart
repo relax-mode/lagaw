@@ -258,6 +258,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
     }
   }
 
+  /// Bumped by the header's heart so You scrolls to Liked and saved.
+  int _focusPicks = 0;
+
+  /// The header's heart: liked and saved places live on You. [home v3]
+  void _openLikedOnYou() => setState(() {
+        _focusPicks++;
+        _activeTab = AppTab.you;
+      });
+
   void _viewSavedLocations() {
     setState(() {
       _showOnlySaved = true;
@@ -473,8 +482,13 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                                 top: 8,
                                                 bottom: 4,
                                               ),
+                                              // Swipe keeps only the
+                                              // heart, folded to the side.
                                               child: Center(
-                                                child: _buildGreetingPill(),
+                                                child: _buildGreetingPill(
+                                                  collapsed: _activeTab ==
+                                                      AppTab.swipe,
+                                                ),
                                               ),
                                             ),
                                           Expanded(
@@ -568,14 +582,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   /// The v3 header for phone tabs without their own (Trips, You, Swipe).
-  Widget _buildGreetingPill() => GreetingPill(
+  Widget _buildGreetingPill({bool collapsed = false}) => GreetingPill(
+        collapsed: collapsed,
         avatarLetter: _avatarLetter,
         likedCount: _savedIds.length,
         onSearch: () => setState(() {
           _showOnlySaved = false;
           _activeTab = AppTab.spots;
         }),
-        onSaved: _viewSavedLocations,
+        onSaved: _openLikedOnYou,
         onAccount: () => setState(() => _activeTab = AppTab.you),
       );
 
@@ -603,7 +618,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
       showElements: false,
       avatarLetter: _avatarLetter,
       likedCount: _savedIds.length,
-      onSaved: _viewSavedLocations,
+      onSaved: _openLikedOnYou,
       onAccount: () => setState(() => _activeTab = AppTab.you),
       places: live.isEmpty ? const [] : _filteredLocations,
       categories: [
@@ -643,7 +658,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         _showOnlySaved = false;
         _activeTab = AppTab.spots;
       }),
-      onSaved: _viewSavedLocations,
+      onSaved: _openLikedOnYou,
       onAccount: () => setState(() => _activeTab = AppTab.you),
       onSeeCategory: (id) => setState(() {
         _showOnlySaved = false;
@@ -1055,7 +1070,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         return YouTab(
           session: AuthSession.current,
           likedCount: _savedIds.length,
-          onOpenSaved: _viewSavedLocations,
+          focusPicks: _focusPicks,
           picks: _availableLocations
               .where((l) => _savedIds.contains(l.id))
               .toList(),
@@ -1839,6 +1854,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
           error: _swipeError,
           onSwipe: _handleSwipe,
           onRate: () => _rate(spot),
+          actions: _placeActions,
         ),
       ),
     );

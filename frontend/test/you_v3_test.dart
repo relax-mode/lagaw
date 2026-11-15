@@ -39,7 +39,6 @@ void main() {
             child: YouTab(
               session: null,
               likedCount: picks.length,
-              onOpenSaved: () => events.add('see-all'),
               picks: picks,
               actions: PlaceActions(
                 isSaved: (_) => true,
@@ -110,8 +109,26 @@ void main() {
     expect(find.byKey(const ValueKey('you-pick-b')), findsOneWidget);
     expect(find.byKey(const ValueKey('you-pick-c')), findsNothing);
     expect(find.text('See all 3'), findsOneWidget);
+
+    // See all expands right here, with search and category chips.
     await tester.tap(find.byKey(const ValueKey('you-saved')));
-    expect(events, ['see-all']);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('you-picks-all')), findsOneWidget);
+    expect(find.byKey(const ValueKey('you-pick-c')), findsOneWidget);
+    expect(find.byKey(const ValueKey('you-picks-chip-cafe')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('you-picks-search')),
+      'arima',
+    );
+    await tester.pump();
+    expect(find.byKey(const ValueKey('you-pick-c')), findsOneWidget);
+    expect(find.byKey(const ValueKey('you-pick-a')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('you-picks-search')), '');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('you-saved')));
+    await tester.pumpAndSettle();
+    expect(find.text('See all 3'), findsOneWidget);
+    expect(find.byKey(const ValueKey('you-pick-c')), findsNothing);
 
     // A pick opens the same pop-up as on Spots.
     await tester.tap(find.byKey(const ValueKey('spot-toggle-a')));

@@ -117,16 +117,17 @@ validateBudgetRange(String minText, String maxText) {
   if (min.value == null && max.value == null) {
     return (min: null, max: null, minError: null, maxError: null);
   }
-  if (min.value == null || max.value == null) {
-    const both = 'Enter both amounts, or leave both empty.';
+  // No minimum means no lower limit: it starts from ₱0.
+  if (max.value == null) {
     return (
       min: null,
       max: null,
-      minError: min.value == null ? both : null,
-      maxError: max.value == null ? both : null,
+      minError: null,
+      maxError: 'Enter a max amount, or leave both empty.',
     );
   }
-  if (double.parse(min.value!) > double.parse(max.value!)) {
+  final minValue = min.value ?? '0.00';
+  if (double.parse(minValue) > double.parse(max.value!)) {
     return (
       min: null,
       max: null,
@@ -134,5 +135,5 @@ validateBudgetRange(String minText, String maxText) {
       maxError: 'Max budget must be at least the min.',
     );
   }
-  return (min: min.value, max: max.value, minError: null, maxError: null);
+  return (min: minValue, max: max.value, minError: null, maxError: null);
 }

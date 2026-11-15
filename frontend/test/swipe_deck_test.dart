@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/models/location.dart';
+import 'package:frontend/screens/spots/spots_view.dart';
 import 'package:frontend/screens/swipe/swipe_deck.dart';
 
 LocationItem _loc(String id, String name) => LocationItem.fromJson({
@@ -59,10 +60,19 @@ void main() {
     expect(find.text('Swipe your vibe'), findsOneWidget);
     expect(find.text('1 / 3'), findsOneWidget);
     expect(find.text('The Ruins'), findsOneWidget);
-    expect(find.text('The Ruins Street'), findsOneWidget);
-    expect(find.text('#heritage'), findsOneWidget);
-    // Only two tags, so the panel stays short.
-    expect(find.text('#history'), findsNothing);
+    expect(find.text('The Ruins description.'), findsOneWidget);
+    // Just the name, a short description and the price on the photo.
+    expect(find.text('Price unknown'), findsOneWidget);
+    expect(find.text('#heritage'), findsNothing);
+    expect(find.text('60 mins'), findsNothing);
+    // Pass, rate and like sit under the card, not on it.
+    final card = tester.getRect(find.byKey(const ValueKey('swipe-card-a')));
+    for (final key in ['swipe-pass', 'swipe-rate', 'swipe-like']) {
+      expect(
+        tester.getRect(find.byKey(ValueKey(key))).top,
+        greaterThan(card.bottom),
+      );
+    }
     expect(find.byKey(const ValueKey('swipe-next-b')), findsOneWidget);
     expect(find.byKey(const ValueKey('swipe-next-c')), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -108,5 +118,44 @@ void main() {
     await tester.drag(find.text('The Ruins'), const Offset(200, 0));
     await tester.pump(const Duration(seconds: 1));
     expect(events, isEmpty);
+  });
+
+  testWidgets('tapping the card opens its details', (tester) async {
+    tester.view.physicalSize = const Size(390, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: SwipeDeck(
+              spot: _loc('a', 'The Ruins'),
+              upNext: const [],
+              position: 1,
+              total: 1,
+              busy: false,
+              rating: null,
+              error: null,
+              onSwipe: (_) async {},
+              onRate: () {},
+              actions: PlaceActions(
+                isSaved: (_) => false,
+                isBusy: (_) => false,
+                ratingFor: (_) => null,
+                onSave: (_) {},
+                onRate: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text('The Ruins'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('spot-details-a')), findsOneWidget);
+    expect(find.text('The Ruins Street, Bacolod City'), findsOneWidget);
+    expect(find.text('#heritage'), findsOneWidget);
   });
 }

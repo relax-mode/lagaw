@@ -93,7 +93,9 @@ void main() {
       expect(validateBudgetRange('', '').min, isNull);
       expect(validateBudgetRange('', '').minError, isNull);
       expect(validateBudgetRange('500', '').maxError, isNotNull);
-      expect(validateBudgetRange('', '500').minError, isNotNull);
+      // No minimum starts at zero.
+      final noMin = validateBudgetRange('', '500');
+      expect((noMin.min, noMin.max, noMin.minError), ('0.00', '500.00', null));
       expect(validateBudgetRange('900', '500').maxError, isNotNull);
       final ok = validateBudgetRange('500', '500');
       expect((ok.min, ok.max), ('500.00', '500.00'));
@@ -192,7 +194,7 @@ void main() {
     await tester.enterText(max, '');
     await _tapKey(tester, 'onboarding-next');
     expect(
-      find.text('Enter both amounts, or leave both empty.'),
+      find.text('Enter a max amount, or leave both empty.'),
       findsOneWidget,
     );
 

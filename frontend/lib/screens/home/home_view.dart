@@ -22,11 +22,15 @@ class HomeCategory {
   });
 
   /// Big lowercase word on the card, e.g. "parks".
-  String get word => _names[id]?.$1 ?? id;
+  String get word => _names[id]?.$1 ?? _plain(id);
+
+  /// A category id we have no name for yet, readable: "new_thing" →
+  /// "new thing".
+  static String _plain(String id) => id.replaceAll('_', ' ').trim();
 
   /// Chip label for a category id, e.g. "Parks", "Cafés", "Art".
   static String labelFor(String id) {
-    final w = _names[id]?.$1 ?? id;
+    final w = _names[id]?.$1 ?? _plain(id);
     return w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}';
   }
 
@@ -48,6 +52,23 @@ class HomeCategory {
     'gallery': ('art', 'art spot', 'art spots'),
     'restaurant': ('dining', 'place to eat', 'places to eat'),
     'landmark': ('landmarks', 'landmark', 'landmarks'),
+    // The expanded catalogue's finer categories.
+    'local_food': ('local food', 'local food spot', 'local food spots'),
+    'art_gallery': ('galleries', 'gallery', 'galleries'),
+    'shopping_leisure': ('shopping', 'shopping spot', 'shopping spots'),
+    'indoor_recreation': ('indoor fun', 'indoor spot', 'indoor spots'),
+    'garden_farm_tourism': ('farms', 'farm', 'farms'),
+    'crafts_souvenirs': ('crafts', 'craft shop', 'craft shops'),
+    'heritage_viewpoint': ('viewpoints', 'viewpoint', 'viewpoints'),
+    'childrens_play': ('kids', 'kids’ spot', 'kids’ spots'),
+    'arcade_recreation': ('arcades', 'arcade', 'arcades'),
+    'waterpark': ('waterparks', 'waterpark', 'waterparks'),
+    'coastal_day_resort': ('beaches', 'beach resort', 'beach resorts'),
+    'pasalubong_food': ('pasalubong', 'pasalubong shop', 'pasalubong shops'),
+    'seaside_dining': ('seaside', 'seaside spot', 'seaside spots'),
+    'cafe_meals': ('café meals', 'café', 'cafés'),
+    'bookstore_leisure': ('books', 'bookstore', 'bookstores'),
+    'evening_bowling': ('bowling', 'bowling spot', 'bowling spots'),
   };
 
   /// Where the carousel opens: heritage when present (Roel's choice, so

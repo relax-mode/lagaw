@@ -23,6 +23,10 @@ class GreetingPill extends StatelessWidget {
   /// Test hook for the greeting.
   final DateTime Function() clock;
 
+  /// Folds the pill away to just its heart, docked at the right (the swipe
+  /// page), with a smooth collapse when the page opens.
+  final bool collapsed;
+
   const GreetingPill({
     super.key,
     required this.avatarLetter,
@@ -31,10 +35,41 @@ class GreetingPill extends StatelessWidget {
     required this.onSaved,
     required this.onAccount,
     this.clock = DateTime.now,
+    this.collapsed = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!collapsed) return _pill(0);
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: reduce ? 1 : 0, end: 1),
+      duration: const Duration(milliseconds: 560),
+      curve: Curves.easeInOutCubic,
+      builder: (context, t, _) => Align(
+        alignment: Alignment.lerp(Alignment.center, Alignment.centerRight, t)!,
+        child: Padding(
+          padding: EdgeInsets.only(right: 16 * t),
+          child: _pill(t),
+        ),
+      ),
+    );
+  }
+
+  /// Hides a part of the pill as [t] goes 0 → 1: it narrows and fades,
+  /// and stops taking taps once mostly gone.
+  Widget _folding(double t, Widget child) => IgnorePointer(
+    ignoring: t > 0.5,
+    child: ClipRect(
+      child: Align(
+        alignment: Alignment.centerLeft,
+        widthFactor: 1 - t,
+        child: Opacity(opacity: (1 - t * 1.4).clamp(0.0, 1.0), child: child),
+      ),
+    ),
+  );
+
+  Widget _pill(double t) {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -52,62 +87,70 @@ class GreetingPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Semantics(
-            button: true,
-            label: 'Your account',
-            child: GestureDetector(
-              key: const ValueKey('home-account'),
-              onTap: onAccount,
-              child: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFF9A3D), Color(0xFFF2620F)],
+          _folding(
+            t,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Semantics(
+                  button: true,
+                  label: 'Your account',
+                  child: GestureDetector(
+                    key: const ValueKey('home-account'),
+                    onTap: onAccount,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFFFF9A3D), Color(0xFFF2620F)],
+                        ),
+                      ),
+                      child: Text(
+                        avatarLetter,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  avatarLetter,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      hiligaynonGreeting(clock()),
+                      key: const ValueKey('home-greeting'),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF4A5B73),
+                        height: 1.1,
+                      ),
+                    ),
+                    const Text(
+                      'Bacolod City',
+                      style: TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.slateDark,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                const SizedBox(width: 14),
+              ],
             ),
           ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                hiligaynonGreeting(clock()),
-                key: const ValueKey('home-greeting'),
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF4A5B73),
-                  height: 1.1,
-                ),
-              ),
-              const Text(
-                'Bacolod City',
-                style: TextStyle(
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.slateDark,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 14),
           _icon(
             key: const ValueKey('home-saved'),
             label: 'Liked and saved places',
@@ -116,13 +159,21 @@ class GreetingPill extends StatelessWidget {
             color: const Color(0xFFF2620F),
             badge: likedCount,
           ),
-          const SizedBox(width: 6),
-          _icon(
-            key: const ValueKey('home-search'),
-            label: 'Search places',
-            onTap: onSearch,
-            icon: Icons.search_rounded,
-            color: AppTheme.slateDark,
+          _folding(
+            t,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 6),
+                _icon(
+                  key: const ValueKey('home-search'),
+                  label: 'Search places',
+                  onTap: onSearch,
+                  icon: Icons.search_rounded,
+                  color: AppTheme.slateDark,
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -477,6 +477,34 @@ class PlaceActions {
   });
 }
 
+/// Opens [place]'s full details in the Spots pop-up, growing from
+/// [origin], for pages other than Spots (e.g. a swipe card). [home v3]
+Future<void> openPlaceDetails(
+  BuildContext context, {
+  required LocationItem place,
+  required Rect origin,
+  required PlaceActions actions,
+}) {
+  final a = actions;
+  return showPlacePopup(
+    context,
+    place: place,
+    origin: origin,
+    changes: a.changes,
+    details: () => _PlaceDetails(
+      place: place,
+      saved: a.isSaved(place.id),
+      busy: a.isBusy(place.id),
+      rating: a.ratingFor(place.id),
+      onSave: () => a.onSave(place),
+      onRate: () => a.onRate(place),
+    ),
+    saved: () => a.isSaved(place.id),
+    busy: () => a.isBusy(place.id),
+    onSave: () => a.onSave(place),
+  );
+}
+
 /// A Spots photo card for use outside Spots: same look, and tapping it
 /// opens the same pop-up from where it sits. [home v3]
 class PlacePickCard extends StatefulWidget {

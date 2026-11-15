@@ -188,3 +188,13 @@ Roel asked for a swipeable introduction before sign-in, with the swiping cards f
 | [auth_signup](img/home-v3-android/auth_signup.jpg) | Create your account: Back pill, email, password, confirm, Create account, Log in link | Pass |
 
 Follow-up (Roel): the form sheet left a large empty white area at the bottom. It is now only as tall as the form, sitting at the bottom; the spare height goes to the sky, with a larger logo in the middle. Everything scrolls when the keyboard is up (checked on the Infinix; the Log in button stays visible above the keyboard). On the "Sign in again" screen after an expired session, the sheet leaves room for the expiry banner at the bottom, which would otherwise cover the button (caught by the existing re-sign-in test).
+
+### Round: lighter swipe card, collapsing header, Liked and saved on You, budget rule
+
+- **Budget:** an empty minimum now counts as ₱0 when a maximum is given, so "up to ₱2,000" saves as ₱0 – ₱2,000. A minimum without a maximum still asks for the maximum. The Min field is labeled "(optional)", with "0" as its hint, and the step explains it ([prefs_budget_v2](img/home-v3-android/prefs_budget_v2.jpg)).
+- **Picked for you:** the two questions are now separate numbered cards (the number turns into a check once answered), with roomier chips and the search button below them ([picked_v2](img/home-v3-android/picked_v2.jpg)).
+- **Swipe card:** the panel on the photo shows only the name, a two-line description and the price; time, area and hashtags are gone. Tapping the card opens the same details pop-up as Spots ([swipe_details](img/home-v3-android/swipe_details.jpg)). Pass (×), Rate (★) and Like (♥) are round buttons under the card ([swipe_v4](img/home-v3-android/swipe_v4.jpg)).
+- **Swipe header:** the greeting pill folds away to just its heart, docked top-right, with a 560 ms collapse as the page opens.
+- **The heart opens You** (no longer Spots' "Your picks") and scrolls to Liked and saved. **See all** expands the list right there, with a search bar and category chips; **Show less** folds it back ([you_liked_all](img/home-v3-android/you_liked_all.jpg), Cafés chip: [you_liked_cafes](img/home-v3-android/you_liked_cafes.jpg)). Removing a like or save is still not possible; the interaction history is append-only by design (#110).
+- **Category names:** staging now has 30 places in 23 finer categories (for example `local_food`, `coastal_day_resort`). Each has a friendly name (Local food, Beaches, Farms…), and any future id shows with spaces instead of underscores.
+- Device check (Infinix, staging): all of the above. Roel's travel preferences were saved again unchanged (Food, no budget, Slow) to reach Picked for you. `flutter test` passes 277.

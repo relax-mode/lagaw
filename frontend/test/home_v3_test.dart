@@ -265,16 +265,28 @@ void main() {
 
   testWidgets('You tab without a session shows no sign out', (tester) async {
     await _size(tester);
-    var opened = false;
-    await tester.pumpWidget(
-      _app(
-        YouTab(session: null, likedCount: 2, onOpenSaved: () => opened = true),
-      ),
-    );
+    await tester.pumpWidget(_app(const YouTab(session: null, likedCount: 2)));
     expect(find.text('Not signed in'), findsOneWidget);
     expect(find.text('2 places liked and saved'), findsOneWidget);
     expect(find.byKey(const ValueKey('you-sign-out')), findsNothing);
+    // See all expands on You itself.
     await tester.tap(find.byKey(const ValueKey('you-saved')));
-    expect(opened, isTrue);
+    await tester.pump();
+    expect(find.text('Show less'), findsOneWidget);
+  });
+
+  test('every category reads as words, including new ones', () {
+    expect(HomeCategory.labelFor('local_food'), 'Local food');
+    expect(HomeCategory.labelFor('coastal_day_resort'), 'Beaches');
+    expect(HomeCategory.labelFor('brand_new_kind'), 'Brand new kind');
+    final cover = LocationItem.fromJson({'id': 'x', 'name': 'X'});
+    expect(
+      HomeCategory(id: 'garden_farm_tourism', count: 2, cover: cover).seeLabel,
+      'See 2 farms',
+    );
+    expect(
+      HomeCategory(id: 'new_thing', count: 1, cover: cover).word,
+      'new thing',
+    );
   });
 }

@@ -4,8 +4,10 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 import '../../models/location.dart';
+import '../../theme.dart';
 import '../../widgets/destination_photo.dart';
 import '../home/home_view.dart' show HomeCategory;
+import '../spots/spots_view.dart' show PlaceActions, openPlaceDetails;
 
 const _orange = Color(0xFFF2620F);
 
@@ -32,6 +34,9 @@ class SwipeDeck extends StatefulWidget {
   final Future<void> Function(bool liked) onSwipe;
   final VoidCallback onRate;
 
+  /// Tapping the card opens its full details, as on Spots.
+  final PlaceActions? actions;
+
   const SwipeDeck({
     super.key,
     required this.spot,
@@ -43,6 +48,7 @@ class SwipeDeck extends StatefulWidget {
     required this.error,
     required this.onSwipe,
     required this.onRate,
+    this.actions,
   });
 
   @override
@@ -51,6 +57,20 @@ class SwipeDeck extends StatefulWidget {
 
 class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   double _drag = 0;
+  final GlobalKey _cardKey = GlobalKey();
+
+  /// Opens the top card's details, growing from the card.
+  void _openDetails() {
+    final actions = widget.actions;
+    final box = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+    if (actions == null || box == null || !box.hasSize || _drag != 0) return;
+    openPlaceDetails(
+      context,
+      place: widget.spot,
+      origin: box.localToGlobal(Offset.zero) & box.size,
+      actions: actions,
+    );
+  }
 
   /// The card is flying off; ignore further swipes until the deck moves.
   bool _flying = false;
@@ -132,7 +152,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final cardHeight = (w * 1.08).clamp(360.0, 440.0);
+    final cardHeight = (w * 1.0).clamp(340.0, 420.0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -191,7 +211,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
           ],
         ),
         // Clear room so the tilted back cards never touch the subtitle.
-        const SizedBox(height: 52),
+        const SizedBox(height: 44),
         Padding(
           // Inset so the whole card reads smaller, not just shorter.
           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -218,7 +238,15 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 18),
+        // Pass, rate and like sit under the card, so the photo stays clear.
+        _ActionButtons(
+          busy: widget.busy,
+          rating: widget.rating,
+          onPass: () => _swipe(false),
+          onRate: widget.onRate,
+          onLike: () => _swipe(true),
+        ),
         if (widget.error != null)
           Container(
             key: const ValueKey('swipe-error'),
@@ -245,6 +273,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
     final liking = _drag > 0;
     final stamp = ((_drag.abs() - 16) / 80).clamp(0.0, 1.0);
     return GestureDetector(
+      onTap: _openDetails,
       onPanStart: (_) => _settle.stop(),
       onPanUpdate: (d) {
         if (widget.busy) return;
@@ -274,6 +303,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
             builder: (context, scale, child) =>
                 Transform.scale(scale: scale, child: child),
             child: Container(
+              key: _cardKey,
               height: height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
@@ -322,14 +352,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
                       left: 12,
                       right: 12,
                       bottom: 12,
-                      child: _InfoPanel(
-                        spot: spot,
-                        busy: widget.busy,
-                        rating: widget.rating,
-                        onPass: () => _swipe(false),
-                        onLike: () => _swipe(true),
-                        onRate: widget.onRate,
-                      ),
+                      child: _InfoPanel(spot: spot),
                     ),
                     // Drag feedback: the card warms toward Like or Pass.
                     if (stamp > 0)
@@ -424,72 +447,37 @@ class _Glass extends StatelessWidget {
   }
 }
 
+/// Just enough to decide: the name, a short description and the price.
+/// Tap the card for everything else.
 class _InfoPanel extends StatelessWidget {
   final LocationItem spot;
-  final bool busy;
-  final double? rating;
-  final VoidCallback onPass;
-  final VoidCallback onLike;
-  final VoidCallback onRate;
 
-  const _InfoPanel({
-    required this.spot,
-    required this.busy,
-    required this.rating,
-    required this.onPass,
-    required this.onLike,
-    required this.onRate,
-  });
+  const _InfoPanel({required this.spot});
 
   @override
   Widget build(BuildContext context) {
-    final area = spot.address.split(',').first.trim();
     return _Glass(
-      padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+      padding: const EdgeInsets.fromLTRB(16, 13, 14, 14),
       tint: const Color(0x38FFFFFF),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (area.isNotEmpty)
-            Row(
-              children: [
-                const Icon(
-                  Icons.place_rounded,
-                  size: 14,
-                  color: Color(0xE6FFFFFF),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    area,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xE6FFFFFF),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          const SizedBox(height: 4),
           Text(
             spot.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 26,
+              fontSize: 24,
               height: 1.05,
               fontWeight: FontWeight.w900,
-              letterSpacing: -0.6,
+              letterSpacing: -0.5,
               color: Colors.white,
               shadows: [Shadow(color: Color(0x40000000), blurRadius: 10)],
             ),
           ),
           if (spot.description.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             Text(
               spot.description,
               maxLines: 2,
@@ -502,159 +490,184 @@ class _InfoPanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              _tag(Icons.payments_outlined, spot.costRange),
-              _tag(Icons.schedule_rounded, spot.duration),
-              for (final t in spot.vibeTags.take(2)) _tag(null, '#$t'),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _square(
-                key: const ValueKey('swipe-pass'),
-                label: 'Pass',
-                onTap: busy ? null : onPass,
-                child: const Icon(
-                  Icons.close_rounded,
-                  size: 24,
+          const SizedBox(height: 9),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0x2EFFFFFF),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: const Color(0x40FFFFFF)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.payments_outlined,
+                  size: 13,
                   color: Colors.white,
                 ),
-              ),
-              const SizedBox(width: 8),
-              // Been here? Rate it. Shows your stars once rated.
-              _square(
-                key: const ValueKey('swipe-rate'),
-                label: rating == null
-                    ? 'Rate this place'
-                    : 'You rated it ${_stars(rating!)}. Rate again',
-                onTap: busy ? null : onRate,
-                child: rating == null
-                    ? const Icon(
-                        Icons.star_border_rounded,
-                        size: 24,
-                        color: Colors.white,
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 20,
-                            color: Color(0xFFFFD166),
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            _stars(rating!),
-                            key: const ValueKey('swipe-rating'),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey('swipe-like'),
-                  onPressed: busy ? null : onLike,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _orange,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFF7A26F),
-                    disabledForegroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.4,
-                    ),
+                const SizedBox(width: 4),
+                Text(
+                  spot.costRange,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
-                  icon: busy
-                      ? const SizedBox(
-                          key: ValueKey('swipe-busy'),
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.4,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.favorite_rounded, size: 20),
-                  label: Text(busy ? 'Saving…' : 'Like'),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Round buttons under the deck: pass on the left, rate in the middle,
+/// like on the right.
+class _ActionButtons extends StatelessWidget {
+  final bool busy;
+  final double? rating;
+  final VoidCallback onPass;
+  final VoidCallback onRate;
+  final VoidCallback onLike;
+
+  const _ActionButtons({
+    required this.busy,
+    required this.rating,
+    required this.onPass,
+    required this.onRate,
+    required this.onLike,
+  });
 
   static String _stars(double r) => r.toStringAsFixed(r % 1 == 0 ? 0 : 1);
 
-  Widget _square({
-    required Key key,
-    required String label,
-    required VoidCallback? onTap,
-    required Widget child,
-  }) {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _Round(
+          key: const ValueKey('swipe-pass'),
+          label: 'Pass',
+          size: 64,
+          color: Colors.white,
+          onTap: busy ? null : onPass,
+          child: const Icon(
+            Icons.close_rounded,
+            size: 32,
+            color: Color(0xFFE11D48),
+          ),
+        ),
+        const SizedBox(width: 22),
+        _Round(
+          key: const ValueKey('swipe-rate'),
+          label: rating == null
+              ? 'Rate this place'
+              : 'You rated it ${_stars(rating!)}. Rate again',
+          size: 52,
+          color: Colors.white,
+          onTap: busy ? null : onRate,
+          child: rating == null
+              ? const Icon(
+                  Icons.star_rounded,
+                  size: 26,
+                  color: Color(0xFFF5B000),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 18,
+                      color: Color(0xFFF5B000),
+                    ),
+                    Text(
+                      _stars(rating!),
+                      key: const ValueKey('swipe-rating'),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.slateDark,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+        const SizedBox(width: 22),
+        _Round(
+          key: const ValueKey('swipe-like'),
+          label: 'Like',
+          size: 64,
+          color: _orange,
+          onTap: busy ? null : onLike,
+          child: busy
+              ? const SizedBox(
+                  key: ValueKey('swipe-busy'),
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.6,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(
+                  Icons.favorite_rounded,
+                  size: 30,
+                  color: Colors.white,
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Round extends StatelessWidget {
+  final String label;
+  final double size;
+  final Color color;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  const _Round({
+    super.key,
+    required this.label,
+    required this.size,
+    required this.color,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Semantics(
       button: true,
       label: label,
       child: GestureDetector(
-        key: key,
         onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minWidth: 52),
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: const Color(0x33FFFFFF),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0x66FFFFFF)),
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  Widget _tag(IconData? icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0x2EFFFFFF),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0x40FFFFFF)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 13, color: Colors.white),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: onTap == null ? 0.6 : 1,
+          child: Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x400F285A),
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
+                  spreadRadius: -8,
+                ),
+              ],
             ),
+            child: child,
           ),
-        ],
+        ),
       ),
     );
   }

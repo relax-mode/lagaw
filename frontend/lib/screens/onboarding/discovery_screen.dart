@@ -181,9 +181,9 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                           color: Color(0xEBFFFFFF),
                         ),
                       ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 26),
                       _setup(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 28),
                       ..._results(),
                     ],
                   ),
@@ -196,26 +196,14 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w800,
-        color: AppTheme.slateDark,
-      ),
-    ),
-  );
-
   Widget _chips(
     List<ChipOption> options,
     String? selected,
     ValueChanged<String?> onChanged,
   ) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 10,
+      runSpacing: 10,
       children: [
         for (final o in options)
           _Chip(
@@ -229,136 +217,193 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  Widget _setup() {
-    final canSearch = _group != null && _budgetChoice != null && !_loading;
+  /// One question in its own card, numbered, with room around the choices.
+  Widget _step({
+    required int number,
+    required String title,
+    required String hint,
+    required bool done,
+    required List<Widget> children,
+  }) {
     return Container(
-      key: const ValueKey('discovery-setup'),
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Two quick things',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
-              letterSpacing: -0.4,
-              color: AppTheme.slateDark,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'So we can find places that fit this outing.',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.slateMuted,
-            ),
-          ),
-          const SizedBox(height: 18),
-          _label('Who’s coming?'),
-          _chips(kDiscoveryGroups, _group, (v) => setState(() => _group = v)),
-          const SizedBox(height: 18),
-          _label('Max you’d spend per place, per person'),
-          _chips(
-            kPerPlaceBudgets,
-            _budgetChoice,
-            (v) => setState(() {
-              _budgetChoice = v;
-              _customError = null;
-            }),
-          ),
-          if (_budgetChoice == 'custom') ...[
-            const SizedBox(height: 12),
-            TextField(
-              key: const ValueKey('discovery-custom-budget'),
-              controller: _customController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
-              ],
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.slateDark,
-              ),
-              decoration: InputDecoration(
-                hintText: '750',
-                prefixText: '₱ ',
-                errorText: _customError,
-                filled: true,
-                fillColor: const Color(0xFFF1F5FB),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+          Row(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: done ? _orange : const Color(0xFFEEF4FC),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: _orange, width: 1.6),
-                ),
+                child: done
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 18,
+                        color: Colors.white,
+                      )
+                    : Text(
+                        '$number',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.primaryBlue,
+                        ),
+                      ),
               ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          const Text(
-            'Entrance fees and food at one place. Getting there isn’t '
-            'included. Places with unknown prices are left out.',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 12.5,
-              height: 1.4,
-              color: AppTheme.slateMuted,
-            ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton(
-            key: const ValueKey('discovery-search'),
-            onPressed: canSearch ? _search : null,
-            style: FilledButton.styleFrom(
-              backgroundColor: _orange,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: const Color(0xFFF9C4A3),
-              disabledForegroundColor: Colors.white,
-              shape: const StadiumBorder(),
-              minimumSize: const Size.fromHeight(50),
-              textStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_loading) ...[
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    height: 1.2,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.slateDark,
                   ),
-                  const SizedBox(width: 10),
-                ],
-                Text(
-                  _loading
-                      ? 'Finding places…'
-                      : _page == null
-                      ? 'Show my places'
-                      : 'Update places',
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 42),
+            child: Text(
+              hint,
+              style: const TextStyle(
+                fontSize: 13.5,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.slateMuted,
+              ),
             ),
           ),
+          const SizedBox(height: 18),
+          ...children,
         ],
       ),
+    );
+  }
+
+  Widget _setup() {
+    final canSearch = _group != null && _budgetChoice != null && !_loading;
+    return Column(
+      key: const ValueKey('discovery-setup'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _step(
+          number: 1,
+          title: 'Who’s coming?',
+          hint: 'We’ll pick places that suit the group.',
+          done: _group != null,
+          children: [
+            _chips(kDiscoveryGroups, _group, (v) => setState(() => _group = v)),
+          ],
+        ),
+        const SizedBox(height: 14),
+        _step(
+          number: 2,
+          title: 'Max you’d spend per place',
+          hint:
+              'Per person: entrance fees and food at one place, not getting '
+              'there. Places with unknown prices are left out.',
+          done: _budgetChoice != null && _perVisitMax != null,
+          children: [
+            _chips(
+              kPerPlaceBudgets,
+              _budgetChoice,
+              (v) => setState(() {
+                _budgetChoice = v;
+                _customError = null;
+              }),
+            ),
+            if (_budgetChoice == 'custom') ...[
+              const SizedBox(height: 14),
+              TextField(
+                key: const ValueKey('discovery-custom-budget'),
+                controller: _customController,
+                onChanged: (_) => setState(() {}),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                ],
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.slateDark,
+                ),
+                decoration: InputDecoration(
+                  hintText: '750',
+                  prefixText: '₱ ',
+                  errorText: _customError,
+                  filled: true,
+                  fillColor: const Color(0xFFF1F5FB),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: _orange, width: 1.6),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 20),
+        FilledButton(
+          key: const ValueKey('discovery-search'),
+          onPressed: canSearch ? _search : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: _orange,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: const Color(0xFFF9C4A3),
+            disabledForegroundColor: Colors.white,
+            shape: const StadiumBorder(),
+            minimumSize: const Size.fromHeight(54),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_loading) ...[
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
+              Text(
+                _loading
+                    ? 'Finding places…'
+                    : _page == null
+                    ? 'Show my places'
+                    : 'Update places',
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -523,7 +568,7 @@ class _Chip extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: selected ? _orange : const Color(0xFFF1F5FB),
             borderRadius: BorderRadius.circular(999),

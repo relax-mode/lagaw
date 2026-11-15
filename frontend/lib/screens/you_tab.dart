@@ -7,6 +7,7 @@ import '../services/onboarding_repository.dart';
 import '../theme.dart';
 import '../widgets/trip_form/trip_form.dart' show kPreferredTags;
 import 'onboarding/first_run_gate.dart';
+import 'home/home_view.dart' show HomeCategory;
 import 'spots/spots_view.dart';
 
 /// "Roel.jr@x.com" → "Roel": a friendly name until profiles have one.
@@ -28,7 +29,9 @@ const _orange = Color(0xFFF2620F);
 class YouTab extends StatefulWidget {
   final AuthSession? session;
   final int likedCount;
-  final VoidCallback onOpenSaved;
+
+  /// Bump to scroll the page to Liked and saved (the header's heart).
+  final int focusPicks;
 
   /// Liked and saved places; the first two show here.
   final List<LocationItem> picks;
@@ -46,7 +49,7 @@ class YouTab extends StatefulWidget {
     super.key,
     required this.session,
     required this.likedCount,
-    required this.onOpenSaved,
+    this.focusPicks = 0,
     this.picks = const [],
     this.actions,
     this.preferences,
@@ -58,6 +61,38 @@ class YouTab extends StatefulWidget {
 }
 
 class _YouTabState extends State<YouTab> {
+  final GlobalKey _picksKey = GlobalKey();
+
+  /// See all: every pick, with search and category chips.
+  bool _showAll = false;
+  String _query = '';
+  String _category = 'all';
+  final TextEditingController _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(YouTab old) {
+    super.didUpdateWidget(old);
+    if (widget.focusPicks != old.focusPicks) _scrollToPicks();
+  }
+
+  void _scrollToPicks() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _picksKey.currentContext;
+      if (ctx == null || !mounted) return;
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOutCubic,
+      );
+    });
+  }
+
   OnboardingPreferences? _prefs;
   bool _loading = false;
   String? _error;
@@ -65,6 +100,7 @@ class _YouTabState extends State<YouTab> {
   @override
   void initState() {
     super.initState();
+    if (widget.focusPicks > 0) _scrollToPicks();
     _load();
   }
 
@@ -189,7 +225,7 @@ class _YouTabState extends State<YouTab> {
           _preferencesCard(),
         ],
         const SizedBox(height: 26),
-        _picksHeader(),
+        KeyedSubtree(key: _picksKey, child: _picksHeader()),
         const SizedBox(height: 12),
         _picks(),
         if (widget.session != null) ...[
@@ -542,7 +578,14 @@ class _YouTabState extends State<YouTab> {
         if (widget.likedCount > 0)
           TextButton(
             key: const ValueKey('you-saved'),
-            onPressed: widget.onOpenSaved,
+            onPressed: () => setState(() {
+              _showAll = !_showAll;
+              if (!_showAll) {
+                _query = '';
+                _category = 'all';
+                _search.clear();
+              }
+            }),
             style: TextButton.styleFrom(
               backgroundColor: const Color(0xF5FFFFFF),
               foregroundColor: AppTheme.slateDark,
@@ -554,7 +597,137 @@ class _YouTabState extends State<YouTab> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            child: Text('See all ${widget.likedCount}'),
+            child: Text(
+              _showAll ? 'Show less' : 'See all ${widget.likedCount}',
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Every pick, filtered by search and category, two per row.
+  Widget _allPicks(PlaceActions actions) {
+    final categories = <String>{
+      for (final p in widget.picks) p.category,
+    }.toList()..sort();
+    final q = _query.trim().toLowerCase();
+    final shown = [
+      for (final p in widget.picks)
+        if ((_category == 'all' || p.category == _category) &&
+            (q.isEmpty ||
+                p.name.toLowerCase().contains(q) ||
+                p.address.toLowerCase().contains(q)))
+          p,
+    ];
+    Widget chip(String id, String label) {
+      final on = _category == id;
+      return GestureDetector(
+        key: ValueKey('you-picks-chip-$id'),
+        onTap: () => setState(() => _category = id),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: on ? Colors.white : const Color(0x33FFFFFF),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: const Color(0x66FFFFFF)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: on ? AppTheme.slateDark : Colors.white,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      key: const ValueKey('you-picks-all'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: const Color(0xF5FFFFFF),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.search_rounded,
+                size: 21,
+                color: AppTheme.slateMuted,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('you-picks-search'),
+                  controller: _search,
+                  onChanged: (v) => setState(() => _query = v),
+                  decoration: const InputDecoration(
+                    hintText: 'Search your picks…',
+                    border: InputBorder.none,
+                    isDense: true,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.slateDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              chip('all', 'All'),
+              for (final c in categories) ...[
+                const SizedBox(width: 8),
+                chip(c, HomeCategory.labelFor(c)),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        if (shown.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 18),
+            child: Text(
+              'No picks match. Try another search or category.',
+              key: ValueKey('you-picks-none'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          )
+        else
+          LayoutBuilder(
+            builder: (context, box) {
+              final half = (box.maxWidth - 12) / 2;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final place in shown)
+                    PlacePickCard(
+                      key: ValueKey('you-pick-${place.id}'),
+                      place: place,
+                      width: half,
+                      actions: actions,
+                    ),
+                ],
+              );
+            },
           ),
       ],
     );
@@ -562,6 +735,9 @@ class _YouTabState extends State<YouTab> {
 
   Widget _picks() {
     final actions = widget.actions;
+    if (_showAll && actions != null && widget.picks.isNotEmpty) {
+      return _allPicks(actions);
+    }
     final shown = widget.picks.take(2).toList();
     if (shown.isEmpty || actions == null) {
       if (widget.likedCount > 0) return const SizedBox.shrink();

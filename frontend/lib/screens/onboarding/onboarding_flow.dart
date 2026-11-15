@@ -452,8 +452,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     id: 'budget',
     title: 'What’s your usual budget?',
     body:
-        'Your typical spend per trip in pesos. Leave both empty if you’d '
-        'rather not say.',
+        'Your typical spend per trip in pesos. No minimum? Leave Min empty '
+        'and it starts at ₱0. Leave both empty if you’d rather not say.',
     content: [
       Form(
         key: _budgetForm,
@@ -463,8 +463,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             Expanded(
               child: _amount(
                 key: 'onboarding-budget-min',
-                label: 'Min',
-                hint: '500',
+                label: 'Min (optional)',
+                hint: '0',
                 controller: _minController,
                 error: () => validateBudgetRange(
                   _minController.text,
