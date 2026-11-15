@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
 import 'models/location.dart';
+import 'models/location_category.dart';
 import 'screens/trip_create_screen.dart';
 import 'screens/home/home_view.dart';
 import 'screens/spots/spots_view.dart';
@@ -1703,7 +1704,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              spot.category.toUpperCase(),
+                              locationCategoryTitle(spot.category).toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 9,
@@ -2688,7 +2689,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        item.category.toUpperCase(),
+                        locationCategoryTitle(item.category).toUpperCase(),
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
@@ -2747,7 +2748,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        item.category.toUpperCase(),
+                        locationCategoryTitle(item.category).toUpperCase(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,

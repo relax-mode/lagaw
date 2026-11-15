@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../models/location.dart';
+import '../models/location_category.dart';
 import '../theme.dart';
 import 'trip_card.dart';
 
-/// "heritage" → "Heritage"; locations store lowercase categories.
-String categoryLabel(String category) => category.isEmpty
-    ? 'Spot'
-    : '${category[0].toUpperCase()}${category.substring(1)}';
+/// Category identifiers stay internal; cards show readable category names.
+String categoryLabel(String category) => locationCategoryTitle(category);
 
-IconData categoryIcon(String category) => switch (category) {
+IconData categoryIcon(String category) => switch (canonicalLocationCategory(category)) {
   'cafe' => Icons.local_cafe_rounded,
   'restaurant' => Icons.restaurant_rounded,
   'heritage' => Icons.account_balance_rounded,
@@ -17,6 +16,9 @@ IconData categoryIcon(String category) => switch (category) {
   'gallery' => Icons.palette_rounded,
   'park' => Icons.park_rounded,
   'landmark' => Icons.location_city_rounded,
+  'recreation' => Icons.sports_esports_rounded,
+  'shopping' => Icons.shopping_bag_rounded,
+  'resort' => Icons.pool_rounded,
   _ => Icons.place_rounded,
 };
 
