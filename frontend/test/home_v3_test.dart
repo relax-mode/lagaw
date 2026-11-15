@@ -172,6 +172,7 @@ void main() {
       expect(find.text('Bacolod City'), findsOneWidget);
       expect(find.text('6 spots to explore'), findsOneWidget);
       expect(find.byKey(const ValueKey('home-headline')), findsOneWidget);
+      expect(fint.text('Where to\nnext?'), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
       // Opens on heritage so neighbors can peek from the side.
       expect(find.text('heritage'), findsOneWidget);
