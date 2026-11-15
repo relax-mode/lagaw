@@ -40,34 +40,50 @@ class GreetingPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!collapsed) return _pill(0);
     final reduce = MediaQuery.disableAnimationsOf(context);
+    // Animates only when [collapsed] changes; on first build it starts
+    // where it should be, so a page that opens collapsed never replays the
+    // fold. The value runs linearly and each part eases on its own below.
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: reduce ? 1 : 0, end: 1),
-      duration: const Duration(milliseconds: 560),
-      curve: Curves.easeInOutCubic,
-      builder: (context, t, _) => Align(
-        alignment: Alignment.lerp(Alignment.center, Alignment.centerRight, t)!,
-        child: Padding(
-          padding: EdgeInsets.only(right: 16 * t),
-          child: _pill(t),
+      tween: Tween(end: collapsed ? 1 : 0),
+      duration: Duration(milliseconds: reduce ? 0 : 620),
+      builder: (context, t, _) {
+        final move = Curves.easeInOutCubic.transform(t);
+        return RepaintBoundary(
+          child: Align(
+            alignment: Alignment.lerp(
+              Alignment.center,
+              Alignment.centerRight,
+              move,
+            )!,
+            child: Padding(
+              padding: EdgeInsets.only(right: 16 * move),
+              child: _pill(t),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Hides a part of the pill as [t] goes 0 → 1 (linear): it narrows
+  /// smoothly over the whole move, while its contents fade out early when
+  /// folding and fade back in late when unfolding, so nothing is squeezed
+  /// while visible. Stops taking taps once mostly gone.
+  Widget _folding(double t, Widget child) {
+    final width = 1 - Curves.easeInOutCubic.transform(t);
+    final fade = 1 - Curves.easeOut.transform((t / 0.4).clamp(0.0, 1.0));
+    return IgnorePointer(
+      ignoring: t > 0.5,
+      child: ClipRect(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          widthFactor: width,
+          child: Opacity(opacity: fade, child: child),
         ),
       ),
     );
   }
-
-  /// Hides a part of the pill as [t] goes 0 → 1: it narrows and fades,
-  /// and stops taking taps once mostly gone.
-  Widget _folding(double t, Widget child) => IgnorePointer(
-    ignoring: t > 0.5,
-    child: ClipRect(
-      child: Align(
-        alignment: Alignment.centerLeft,
-        widthFactor: 1 - t,
-        child: Opacity(opacity: (1 - t * 1.4).clamp(0.0, 1.0), child: child),
-      ),
-    ),
-  );
 
   Widget _pill(double t) {
     return Container(

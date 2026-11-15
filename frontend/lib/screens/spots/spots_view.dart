@@ -45,6 +45,10 @@ class SpotsView extends StatefulWidget {
   /// Off when the app draws one shared element layer for every tab.
   final bool showElements;
 
+  /// Off when the app draws one shared greeting pill above every tab; the
+  /// page keeps the same space for it.
+  final bool showPill;
+
   /// The greeting pill folded to its heart (in the app; full only on Home).
   final bool collapsedPill;
 
@@ -74,6 +78,7 @@ class SpotsView extends StatefulWidget {
     this.placesState,
     this.changes,
     this.showElements = true,
+    this.showPill = true,
     this.collapsedPill = false,
   });
 
@@ -178,16 +183,19 @@ class _SpotsViewState extends State<SpotsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: GreetingPill(
-                  collapsed: widget.collapsedPill,
-                  avatarLetter: widget.avatarLetter,
-                  likedCount: widget.likedCount,
-                  onSearch: () => _searchFocus.requestFocus(),
-                  onSaved: widget.onSaved,
-                  onAccount: widget.onAccount,
+              if (!widget.showPill)
+                const SizedBox(height: 52)
+              else
+                Center(
+                  child: GreetingPill(
+                    collapsed: widget.collapsedPill,
+                    avatarLetter: widget.avatarLetter,
+                    likedCount: widget.likedCount,
+                    onSearch: () => _searchFocus.requestFocus(),
+                    onSaved: widget.onSaved,
+                    onAccount: widget.onAccount,
+                  ),
                 ),
-              ),
               const SizedBox(height: 26),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),

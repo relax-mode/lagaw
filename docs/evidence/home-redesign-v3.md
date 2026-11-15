@@ -248,3 +248,15 @@ Follow-up (Roel): places liked by swiping right appeared in Liked and saved with
 - **Recommendation cards:** photo, name and category · price, with four even buttons: **Not for me**, **Like**, **Save** and **Rate**. There are no percentages or ranking reasons ([plan_ai_recs](img/home-v3-android/plan_ai_recs.jpg)).
 - **Itinerary:** "Your stops", with day headers that carry the date ("Day 1 · Sat, Nov 7") and a numbered timeline of stops (photo, name, time and cost, "min to get here"). The ranking reason text (such as "Content fallback (unseen user) content score…") is no longer shown; manual stops say "Added by you".
 - `flutter test` passes 287. On the Infinix: Plan a trip (describe and basics), trip details on both tabs, Plan with AI through recommendations. Creating a trip, generating an itinerary and the itinerary with stops were covered by tests only, to avoid writing to Roel's staging trips.
+
+### Round: one shared header, smoother fold
+
+Roel saw the pill replay a brief unfold-and-fold when moving between Spots, Trips and Swipe. The cause: every page built its own pill, and a collapsed pill played its fold each time it appeared, while the page cross-fade briefly showed two pills.
+
+- **One greeting pill for all phone tabs**, drawn above the pages like the floating elements: full on Home, folded to its heart on Spots, Trips and Swipe, and faded out on You. Each page keeps the same space for it. Because it is shared, it only animates when you go to or from Home; between Spots, Trips and Swipe it doesn't move.
+- **Smoother motion (620 ms):** the pill's width and position ease in and out together. When folding, the greeting, avatar and search fade out early; when unfolding, they fade in late, once there's room, so nothing is squeezed while visible. A page that opens folded starts folded, with no replay.
+- Test: a pill that starts folded stays still, and only animates when `collapsed` changes. `flutter test` passes 288.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [pill_frames](img/home-v3-android/pill_frames.jpg) | 10 fps header strip: Home → Spots folds once; Spots → Trips → Swipe the heart stays still (dim frames are the swipe menu's blur); → Home unfolds smoothly | Pass |

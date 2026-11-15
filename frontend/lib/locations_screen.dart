@@ -484,20 +484,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                           // instead of the pill.
                                           if (!isWide &&
                                               _activeTab != AppTab.you)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                                bottom: 4,
-                                              ),
-                                              // Swipe keeps only the
-                                              // heart, folded to the side.
-                                              child: Center(
-                                                child: _buildGreetingPill(
-                                                  // Full only on Home.
-                                                  collapsed: true,
-                                                ),
-                                              ),
-                                            ),
+                                            // Room for the shared header
+                                            // drawn above the pages.
+                                            const SizedBox(height: 64),
                                           Expanded(
                                             child: SingleChildScrollView(
                                               padding: EdgeInsets.fromLTRB(
@@ -524,6 +513,29 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           ),
                         ],
                       ),
+
+                      // One greeting pill for every phone tab, above the
+                      // pages: full on Home, folded to its heart elsewhere,
+                      // hidden on You. Being shared, it only animates when
+                      // you go to or from Home. [home v3]
+                      if (!isWide)
+                        Positioned(
+                          top: 8,
+                          left: 0,
+                          right: 0,
+                          child: IgnorePointer(
+                            ignoring: _activeTab == AppTab.you,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 260),
+                              opacity: _activeTab == AppTab.you ? 0 : 1,
+                              child: Center(
+                                child: _buildGreetingPill(
+                                  collapsed: _activeTab != AppTab.explore,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
                       // v3 floating nav with the swipe button (mobile only)
                       if (!isWide)
@@ -623,7 +635,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final live = _availableLocations;
     return SpotsView(
       showElements: false,
-      collapsedPill: true,
+      showPill: false,
       avatarLetter: _avatarLetter,
       likedCount: _savedIds.length,
       onSaved: _openLikedOnYou,
@@ -657,6 +669,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final places = _availableLocations;
     return HomeView(
       showElements: false,
+      showPill: false,
       avatarLetter: _avatarLetter,
       spotCount: places.length,
       likedCount: _savedIds.length,

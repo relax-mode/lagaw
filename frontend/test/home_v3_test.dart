@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/widgets/greeting_pill.dart';
 import 'package:frontend/models/image_credits.dart';
 import 'package:frontend/models/location.dart';
 import 'package:frontend/screens/home/home_view.dart';
@@ -288,5 +289,51 @@ void main() {
       HomeCategory(id: 'new_thing', count: 1, cover: cover).word,
       'new thing',
     );
+  });
+
+  testWidgets('the pill only animates when it folds or unfolds', (
+    tester,
+  ) async {
+    await _size(tester);
+    Widget pill(bool collapsed) => MaterialApp(
+      home: Scaffold(
+        body: GreetingPill(
+          avatarLetter: 'R',
+          likedCount: 0,
+          onSearch: () {},
+          onSaved: () {},
+          onAccount: () {},
+          collapsed: collapsed,
+        ),
+      ),
+    );
+    double width() => tester
+        .getSize(
+          find
+              .descendant(
+                of: find.byType(GreetingPill),
+                matching: find.byType(Container),
+              )
+              .first,
+        )
+        .width;
+
+    // A page that opens collapsed shows just the heart at once.
+    await tester.pumpWidget(pill(true));
+    final folded = width();
+    expect(folded, lessThan(80));
+
+    // Staying collapsed (Spots to Trips) never moves.
+    await tester.pumpWidget(pill(true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(width(), folded);
+
+    // Going Home unfolds smoothly, then settles full width.
+    await tester.pumpWidget(pill(false));
+    await tester.pump(const Duration(milliseconds: 300));
+    final midway = width();
+    expect(midway, greaterThan(folded));
+    await tester.pumpAndSettle();
+    expect(width(), greaterThan(midway));
   });
 }
