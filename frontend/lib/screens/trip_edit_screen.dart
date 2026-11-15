@@ -5,7 +5,7 @@ import '../services/preference_service.dart';
 import '../services/trip_service.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/trip_form/trip_form.dart';
-import 'trip_page_scaffold.dart';
+import '../widgets/popup_route.dart';
 
 /// Edit a saved trip: loads it through `GET /api/v1/trips/{id}` and saves
 /// only the changed fields through `PATCH /api/v1/trips/{id}`.
@@ -95,55 +95,64 @@ class _TripEditScreenState extends State<TripEditScreen> {
     final trip = _trip;
     final status = _status;
 
-    return TripPageScaffold(
-      title: 'Edit trip',
-      subtitle: trip?.title,
-      children: [
-        if (_loadError != null)
-          StatusBanner(
-            key: const ValueKey('edit-load-error'),
-            tone: StatusTone.error,
-            message: _loadError!,
-            actionLabel: 'Retry',
-            onAction: _load,
-          )
-        else if (trip == null)
-          const Padding(
-            padding: EdgeInsets.only(top: 80),
-            child: Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
-          )
-        else ...[
-          if (status != null) ...[
-            StatusBanner(
-              key: ValueKey('edit-status-${status.message}'),
-              tone: status.tone,
-              message: status.message,
-              actionLabel: _offerReload ? 'Reload' : null,
-              onAction: _offerReload
-                  ? () {
-                      setState(() {
-                        _status = null;
-                        _offerReload = false;
-                      });
-                      _load();
-                    }
-                  : null,
-            ),
-            const SizedBox(height: 16),
+    // A pop-up, with the same flat form as Plan a trip. [home v3]
+    return PopupCard(
+      eyebrow: 'Edit trip',
+      title: trip?.title ?? 'Your trip',
+      busy: _submitting,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_loadError != null)
+              StatusBanner(
+                key: const ValueKey('edit-load-error'),
+                tone: StatusTone.error,
+                message: _loadError!,
+                actionLabel: 'Retry',
+                onAction: _load,
+              )
+            else if (trip == null)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFFF2620F)),
+                ),
+              )
+            else ...[
+              if (status != null) ...[
+                StatusBanner(
+                  key: ValueKey('edit-status-${status.message}'),
+                  tone: status.tone,
+                  message: status.message,
+                  actionLabel: _offerReload ? 'Reload' : null,
+                  onAction: _offerReload
+                      ? () {
+                          setState(() {
+                            _status = null;
+                            _offerReload = false;
+                          });
+                          _load();
+                        }
+                      : null,
+                ),
+                const SizedBox(height: 16),
+              ],
+              TripForm(
+                key: ValueKey('edit-form-${trip.id}-$_formVersion'),
+                initial: trip,
+                submitLabel: 'Save changes',
+                isSubmitting: _submitting,
+                fieldErrors: _fieldErrors,
+                onSubmit: _save,
+                preferenceService: widget.preferenceService,
+                flat: true,
+              ),
+            ],
           ],
-          TripForm(
-            key: ValueKey('edit-form-${trip.id}-$_formVersion'),
-            initial: trip,
-            submitLabel: 'Save changes',
-            isSubmitting: _submitting,
-            fieldErrors: _fieldErrors,
-            onSubmit: _save,
-            preferenceService: widget.preferenceService,
-          ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }

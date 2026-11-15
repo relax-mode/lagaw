@@ -5,7 +5,9 @@ import '../../models/trip.dart';
 import '../../services/preference_service.dart';
 import '../../services/trip_service.dart';
 import '../../theme.dart';
+import '../status_banner.dart';
 import '../tactile_motion.dart';
+import '../trip_card.dart' show chipOptionFor;
 import 'budget_range_field.dart';
 import 'choice_chips_field.dart';
 import 'date_range_field.dart';
@@ -67,6 +69,11 @@ class TripForm extends StatefulWidget {
   /// being cards inside the card, so the form has room. [home v3]
   final bool flat;
 
+  /// One small step at a time (Plan a trip): describe or skip, review the
+  /// suggestions, basics, getting around, who's coming, then vibes.
+  /// [home v3]
+  final bool stepped;
+
   const TripForm({
     super.key,
     this.initial,
@@ -76,6 +83,7 @@ class TripForm extends StatefulWidget {
     this.fieldErrors = const {},
     this.preferenceService,
     this.flat = false,
+    this.stepped = false,
   });
 
   @override
@@ -100,16 +108,32 @@ class TripFormState extends State<TripForm> {
   /// Reviews extracted suggestions; only vibes the user ticks are added, and
   /// nothing already chosen is removed. Saving still needs the Save button.
   Future<void> _reviewSuggestions(PreferenceDraft draft) async {
+    if (widget.stepped) {
+      // In steps, the review is the next page, not a sheet.
+      setState(() {
+        _pending = draft;
+        _accepted = {
+          for (final tag in draft.preferredTags)
+            if (!_tags.contains(tag)) tag,
+        };
+        _step = _Step.review;
+      });
+      return;
+    }
     final add = await showPreferenceReview(
       context,
       draft: draft,
       currentTags: _tags,
     );
     if (add == null || !mounted) return;
+    _applySuggestions(draft, add);
+  }
+
+  /// Adds the accepted vibes; Who's coming and the budget from the
+  /// description fill in only what is still empty.
+  void _applySuggestions(PreferenceDraft draft, List<String> add) {
     final room = TripFormValidators.maxTags - _tags.length;
     final accepted = add.take(room).toList();
-    // Who's coming and the budget from the description fill in only
-    // what is still empty, so nothing the user typed is overwritten.
     final group = draft.groupType;
     final takeGroup =
         _group.isEmpty &&
@@ -136,6 +160,70 @@ class TripFormState extends State<TripForm> {
           ? 'No changes applied.'
           : 'Added ${parts.join(', ')}. Check the form, then save.';
     });
+  }
+
+  // Steps (Plan a trip) ------------------------------------------------------
+
+  _Step _step = _Step.describe;
+  PreferenceDraft? _pending;
+  Set<String> _accepted = {};
+  bool _basicsTried = false;
+
+  /// Anything typed or picked, so closing can ask before discarding it.
+  bool get isDirty =>
+      _title.text.trim().isNotEmpty ||
+      _budgetMin.text.trim().isNotEmpty ||
+      _budgetMax.text.trim().isNotEmpty ||
+      _dates != null ||
+      _transport.isNotEmpty ||
+      _group.isNotEmpty ||
+      _tags.isNotEmpty;
+
+  static const _order = [
+    _Step.basics,
+    _Step.transport,
+    _Step.group,
+    _Step.vibes,
+  ];
+
+  void _go(_Step step) => setState(() => _step = step);
+
+  /// Checks the basics before moving on.
+  void _nextFromBasics() {
+    setState(() {
+      _basicsTried = true;
+      _triedSubmit = true;
+    });
+    final fields = _formKey.currentState!.validate();
+    final dates = TripFormValidators.dates(_dates?.start, _dates?.end) == null;
+    if (fields && dates) _go(_Step.transport);
+  }
+
+  @override
+  void didUpdateWidget(TripForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A server problem with an earlier step's field: go back to that step.
+    if (widget.stepped &&
+        widget.fieldErrors.isNotEmpty &&
+        widget.fieldErrors != oldWidget.fieldErrors) {
+      final keys = widget.fieldErrors.keys;
+      _step =
+          keys.any(
+            (k) => const [
+              'title',
+              'start_date',
+              'end_date',
+              'budget_min',
+              'budget_max',
+            ].contains(k),
+          )
+          ? _Step.basics
+          : keys.contains('transportation_mode')
+          ? _Step.transport
+          : keys.contains('group_type')
+          ? _Step.group
+          : _step;
+    }
   }
 
   @override
@@ -200,6 +288,7 @@ class TripFormState extends State<TripForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.stepped) return _steppedBuild();
     final errors = widget.fieldErrors;
     final formError = errors[TripApiException.formErrorKey];
 
@@ -260,8 +349,6 @@ class TripFormState extends State<TripForm> {
               options: kGroupTypes,
               selected: _group,
               errorText: errors['group_type'],
-              accent: const Color(0xFF7C3AED),
-              accentShadow: const Color(0xFF5B21B6),
               onChanged: (v) => setState(() => _group = v),
             ),
             const SizedBox(height: 18),
@@ -272,8 +359,6 @@ class TripFormState extends State<TripForm> {
               multiSelect: true,
               maxSelected: TripFormValidators.maxTags,
               errorText: errors['preferred_tags'],
-              accent: const Color(0xFFEA580C),
-              accentShadow: const Color(0xFF9A3412),
               onChanged: (v) => setState(() => _tags = v),
             ),
           ]),
@@ -319,6 +404,325 @@ class TripFormState extends State<TripForm> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _steppedBuild() {
+    final errors = widget.fieldErrors;
+    final formError = errors[TripApiException.formErrorKey];
+    final index = _order.indexOf(_step);
+    final (title, hint) = switch (_step) {
+      _Step.describe => (
+        'Describe your trip',
+        'Optional. Lagaw suggests vibes and details you can review.',
+      ),
+      _Step.review => (
+        'Review the suggestions',
+        'Pick what to add. Nothing you already chose is removed.',
+      ),
+      _Step.basics => ('The basics', 'Name, dates and budget.'),
+      _Step.transport => ('Getting around', 'Optional. Pick one.'),
+      _Step.group => ('Who is coming', 'Optional. Pick one.'),
+      _Step.vibes => ('Vibes you want', 'Optional. Pick as many as you like.'),
+    };
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (index >= 0) ...[
+            Row(
+              key: const ValueKey('trip-steps'),
+              children: [
+                for (var i = 0; i < _order.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 240),
+                      height: 6,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: i <= index
+                            ? const Color(0xFFF2620F)
+                            : const Color(0xFFE3E9F2),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 18),
+          ],
+          Text(
+            title,
+            key: const ValueKey('trip-step-title'),
+            style: const TextStyle(
+              fontSize: 22,
+              height: 1.15,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.4,
+              color: AppTheme.slateDark,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            hint,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.slateMuted,
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (formError != null) ...[
+            _FormErrorBanner(message: formError),
+            const SizedBox(height: 16),
+          ],
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: KeyedSubtree(key: ValueKey(_step), child: _stepBody(errors)),
+          ),
+          const SizedBox(height: 26),
+          _stepButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepBody(Map<String, String> errors) {
+    switch (_step) {
+      case _Step.describe:
+        return DescribeTripCard(
+          service: _preferences,
+          enabled: !widget.isSubmitting,
+          notice: null,
+          showHeader: false,
+          onSuggestions: _reviewSuggestions,
+        );
+      case _Step.review:
+        final draft = _pending!;
+        final newTags = [
+          for (final tag in draft.preferredTags)
+            if (!_tags.contains(tag)) tag,
+        ];
+        String human(String v) => v == 'unspecified'
+            ? 'Not mentioned'
+            : v
+                  .split('_')
+                  .map(
+                    (w) => w.isEmpty
+                        ? w
+                        : '${w[0].toUpperCase()}${w.substring(1)}',
+                  )
+                  .join(' ');
+        final group = chipOptionFor(kGroupTypes, draft.groupType)?.label;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (newTags.isEmpty)
+              const Text(
+                'No new vibes to add.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.slateMuted,
+                ),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final tag in newTags)
+                    _ReviewChip(
+                      key: ValueKey('review-tag-$tag'),
+                      option:
+                          chipOptionFor(kPreferredTags, tag) ??
+                          ChipOption(tag, human(tag), Icons.tag),
+                      selected: _accepted.contains(tag),
+                      onTap: () => setState(
+                        () => _accepted.contains(tag)
+                            ? _accepted.remove(tag)
+                            : _accepted.add(tag),
+                      ),
+                    ),
+                ],
+              ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F8FC),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                children: [
+                  _reviewLine('Who is coming', group ?? 'Not mentioned'),
+                  _reviewLine(
+                    'Budget',
+                    draft.budgetMax == null
+                        ? 'Not mentioned'
+                        : '₱${_formatBudget(draft.budgetMin ?? 0)} – ₱${_formatBudget(draft.budgetMax!)}',
+                  ),
+                  _reviewLine('Pace', human(draft.pace)),
+                  _reviewLine('Time of day', human(draft.duration)),
+                ],
+              ),
+            ),
+          ],
+        );
+      case _Step.basics:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_suggestionNotice != null) ...[
+              StatusBanner(
+                key: const ValueKey('describe-trip-notice'),
+                tone: StatusTone.success,
+                message: _suggestionNotice!,
+              ),
+              const SizedBox(height: 16),
+            ],
+            TactileTextField(
+              key: const ValueKey('trip-title'),
+              label: 'Trip name',
+              controller: _title,
+              hintText: 'e.g. Weekend food crawl',
+              maxLength: TripFormValidators.titleMaxLength,
+              textInputAction: TextInputAction.next,
+              validator: TripFormValidators.title,
+              serverError: errors['title'],
+            ),
+            const SizedBox(height: 18),
+            DateRangeField(
+              value: _dates,
+              errorText: _basicsTried ? _datesError : errors['start_date'],
+              onChanged: (range) => setState(() => _dates = range),
+            ),
+            const SizedBox(height: 18),
+            BudgetRangeField(
+              minController: _budgetMin,
+              maxController: _budgetMax,
+              minServerError: errors['budget_min'],
+              maxServerError: errors['budget_max'],
+            ),
+          ],
+        );
+      case _Step.transport:
+        return TactileChipsField(
+          label: 'How you’ll get around',
+          options: kTransportationModes,
+          selected: _transport,
+          errorText: errors['transportation_mode'],
+          onChanged: (v) => setState(() => _transport = v),
+        );
+      case _Step.group:
+        return TactileChipsField(
+          label: 'Who is coming',
+          options: kGroupTypes,
+          selected: _group,
+          errorText: errors['group_type'],
+          onChanged: (v) => setState(() => _group = v),
+        );
+      case _Step.vibes:
+        return TactileChipsField(
+          label: 'Vibes',
+          options: kPreferredTags,
+          selected: _tags,
+          multiSelect: true,
+          maxSelected: TripFormValidators.maxTags,
+          errorText: errors['preferred_tags'],
+          onChanged: (v) => setState(() => _tags = v),
+        );
+    }
+  }
+
+  Widget _reviewLine(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 9),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.slateMuted,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14.5,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.slateDark,
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _stepButtons() {
+    final busy = widget.isSubmitting;
+    Widget back(VoidCallback? onTap, {String label = 'Back', String? key}) =>
+        _StepButton(
+          key: key == null ? null : ValueKey(key),
+          label: label,
+          filled: false,
+          onTap: busy ? null : onTap,
+        );
+    Widget next(
+      String label,
+      VoidCallback? onTap, {
+      String key = 'trip-next',
+      bool spinner = false,
+    }) => _StepButton(
+      key: ValueKey(key),
+      label: label,
+      filled: true,
+      busy: spinner,
+      onTap: busy ? null : onTap,
+    );
+    final (left, right) = switch (_step) {
+      _Step.describe => (
+        null,
+        back(() => _go(_Step.basics), label: 'Skip', key: 'trip-skip-describe'),
+      ),
+      _Step.review => (
+        back(() => _go(_Step.describe)),
+        next('Apply to form', () {
+          _applySuggestions(_pending!, _accepted.toList());
+          _go(_Step.basics);
+        }, key: 'review-apply'),
+      ),
+      _Step.basics => (
+        back(() => _go(_Step.describe)),
+        next('Next', _nextFromBasics),
+      ),
+      _Step.transport => (
+        back(() => _go(_Step.basics)),
+        next('Next', () => _go(_Step.group)),
+      ),
+      _Step.group => (
+        back(() => _go(_Step.transport)),
+        next('Next', () => _go(_Step.vibes)),
+      ),
+      _Step.vibes => (
+        back(() => _go(_Step.group)),
+        next(
+          busy ? 'Saving…' : widget.submitLabel,
+          _submit,
+          key: 'trip-submit',
+          spinner: busy,
+        ),
+      ),
+    };
+    return Row(
+      children: [
+        if (left != null) ...[Expanded(child: left), const SizedBox(width: 10)],
+        Expanded(flex: left == null ? 1 : 2, child: right),
+      ],
     );
   }
 
@@ -389,6 +793,125 @@ class _FormErrorBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+enum _Step { describe, review, basics, transport, group, vibes }
+
+class _StepButton extends StatelessWidget {
+  final String label;
+  final bool filled;
+  final bool busy;
+  final VoidCallback? onTap;
+
+  const _StepButton({
+    super.key,
+    required this.label,
+    required this.filled,
+    required this.onTap,
+    this.busy = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const shape = StadiumBorder();
+    const size = Size.fromHeight(52);
+    const text = TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800);
+    final child = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (busy) ...[
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.4,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
+        Flexible(
+          child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ],
+    );
+    return filled
+        ? FilledButton(
+            onPressed: onTap,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFF2620F),
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFF7A26F),
+              disabledForegroundColor: Colors.white,
+              shape: shape,
+              minimumSize: size,
+              textStyle: text,
+            ),
+            child: child,
+          )
+        : OutlinedButton(
+            onPressed: onTap,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.slateDark,
+              side: const BorderSide(color: Color(0xFFD5DEEA)),
+              shape: shape,
+              minimumSize: size,
+              textStyle: text,
+            ),
+            child: child,
+          );
+  }
+}
+
+class _ReviewChip extends StatelessWidget {
+  final ChipOption option;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ReviewChip({
+    super.key,
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFF2620F) : TactileFieldStyle.fill,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                selected ? Icons.check_rounded : option.icon,
+                size: 16,
+                color: selected ? Colors.white : AppTheme.primaryBlue,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                option.label,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : AppTheme.slateDark,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -231,3 +231,20 @@ Follow-up (Roel): places liked by swiping right appeared in Liked and saved with
 - **Headers:** the greeting pill folds to its heart on every tab except Home (Spots, Trips, Swipe; You has its own profile header) ([spots_v6](img/home-v3-android/spots_v6.jpg), [trips_v4](img/home-v3-android/trips_v4.jpg)). The Spots chip "All spots" is now "All".
 - **My Trips:** swipe a trip left to delete it, after a confirmation pop-up. The card only leaves once the server confirms; a failure keeps it and explains why. "Trip deleted." fades away after 3 s. Date tiles fit the dates: "NOV / 10–14" within a month, "NOV 28 to DEC 2" across months, "DEC / 5" for one day.
 - `flutter test` passes 285. On the Infinix: Trips, the Plan a trip pop-up and Spots were checked. Swipe-to-delete and the Plan with AI page were covered by tests only, to avoid deleting real trips or generating plans on staging.
+
+### Round: trips in steps, all in pop-ups
+
+- **Plan a trip in steps** (pop-up, progress bar):
+  1. **Describe your trip:** Suggest preferences, or **Skip**.
+  2. **Review the suggestions:** now a step in the pop-up, not a sheet. Tick the vibes to add; Who's coming, budget, pace and time of day are shown, then **Apply to form**.
+  3. **The basics:** name, dates and budget, checked before moving on.
+  4. **Getting around.**
+  5. **Who is coming.**
+  6. **Vibes you want**, then **Create trip**.
+
+  Closing (×, background or Back) with anything filled in asks "Discard this trip?"; an empty form just closes. The new trip opens in the same pop-up style ([trip_step_describe](img/home-v3-android/trip_step_describe.jpg), [trip_step_basics](img/home-v3-android/trip_step_basics.jpg)).
+- **Trip details are a pop-up** with **Overview** (dates, budget, getting around, who's coming, vibes) and **Itinerary** tabs, and Plan with AI, Edit trip and Delete trip at the bottom. Edit trip is a pop-up too ([trip_detail_overview](img/home-v3-android/trip_detail_overview.jpg), [trip_detail_itinerary](img/home-v3-android/trip_detail_itinerary.jpg)).
+- **Plan with AI in steps** (pop-up): who and how many, time and pace (it started on Roel's saved **Fast**), then **Ready to plan** with Generate itinerary or See recommendations ([plan_ai_step1](img/home-v3-android/plan_ai_step1.jpg), [plan_ai_step2](img/home-v3-android/plan_ai_step2.jpg), [plan_ai_step3](img/home-v3-android/plan_ai_step3.jpg)).
+- **Recommendation cards:** photo, name and category · price, with four even buttons: **Not for me**, **Like**, **Save** and **Rate**. There are no percentages or ranking reasons ([plan_ai_recs](img/home-v3-android/plan_ai_recs.jpg)).
+- **Itinerary:** "Your stops", with day headers that carry the date ("Day 1 · Sat, Nov 7") and a numbered timeline of stops (photo, name, time and cost, "min to get here"). The ranking reason text (such as "Content fallback (unseen user) content score…") is no longer shown; manual stops say "Added by you".
+- `flutter test` passes 287. On the Infinix: Plan a trip (describe and basics), trip details on both tabs, Plan with AI through recommendations. Creating a trip, generating an itinerary and the itinerary with stops were covered by tests only, to avoid writing to Roel's staging trips.

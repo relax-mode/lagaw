@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/trip.dart';
 import '../services/preference_service.dart';
 import '../services/trip_service.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/trip_form/trip_form.dart';
 import 'trip_detail_screen.dart';
@@ -28,7 +29,26 @@ class TripCreateScreen extends StatefulWidget {
 }
 
 class _TripCreateScreenState extends State<TripCreateScreen> {
+  final _form = GlobalKey<TripFormState>();
   bool _submitting = false;
+  bool _done = false;
+
+  /// Closing with something filled in asks first, so nothing is lost by a
+  /// stray tap.
+  Future<void> _confirmClose() async {
+    final discard = await showTactileConfirmDialog(
+      context,
+      title: 'Discard this trip?',
+      message: 'You haven’t created it yet. What you filled in will be lost.',
+      confirmLabel: 'Discard',
+      icon: Icons.delete_outline_rounded,
+    );
+    if (discard && mounted) {
+      setState(() => _done = true);
+      Navigator.of(context).pop();
+    }
+  }
+
   String? _error;
   Map<String, String> _fieldErrors = const {};
   TripDraft? _lastDraft;
@@ -43,9 +63,11 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
     try {
       final trip = await widget.service.createTrip(draft);
       if (!mounted) return;
+      _done = true;
+      // The new trip opens in the same pop-up style.
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => TripDetailScreen(
+        blurPopupRoute(
+          (_) => TripDetailScreen(
             service: widget.service,
             tripId: trip.id,
             initial: trip,
@@ -70,37 +92,52 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
     final canRetry = _fieldErrors.isEmpty && _lastDraft != null;
 
     // A pop-up over the app, like travel preferences. [home v3]
-    return PopupCard(
-      eyebrow: 'New trip',
-      title: 'Plan a trip',
-      subtitle: 'Set the basics, and Lagaw fills in the stops later.',
-      busy: _submitting,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_error != null) ...[
-              StatusBanner(
-                key: const ValueKey('create-error'),
-                tone: StatusTone.error,
-                message: _error!,
-                actionLabel: canRetry ? 'Retry' : null,
-                onAction: canRetry && !_submitting
-                    ? () => _create(_lastDraft!)
-                    : null,
+    return PopScope(
+      // Decided when closing, since what's filled in lives in the form.
+      canPop: _done,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || _submitting) return;
+        if (_form.currentState?.isDirty ?? false) {
+          _confirmClose();
+        } else {
+          setState(() => _done = true);
+          Navigator.of(context).pop();
+        }
+      },
+      child: PopupCard(
+        eyebrow: 'New trip',
+        title: 'Plan a trip',
+        subtitle: 'Set the basics, and Lagaw fills in the stops later.',
+        busy: _submitting,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_error != null) ...[
+                StatusBanner(
+                  key: const ValueKey('create-error'),
+                  tone: StatusTone.error,
+                  message: _error!,
+                  actionLabel: canRetry ? 'Retry' : null,
+                  onAction: canRetry && !_submitting
+                      ? () => _create(_lastDraft!)
+                      : null,
+                ),
+                const SizedBox(height: 16),
+              ],
+              TripForm(
+                key: _form,
+                stepped: true,
+                submitLabel: 'Create trip',
+                isSubmitting: _submitting,
+                fieldErrors: _fieldErrors,
+                onSubmit: _create,
+                preferenceService: widget.preferenceService,
+                flat: true,
               ),
-              const SizedBox(height: 16),
             ],
-            TripForm(
-              submitLabel: 'Create trip',
-              isSubmitting: _submitting,
-              fieldErrors: _fieldErrors,
-              onSubmit: _create,
-              preferenceService: widget.preferenceService,
-              flat: true,
-            ),
-          ],
+          ),
         ),
       ),
     );

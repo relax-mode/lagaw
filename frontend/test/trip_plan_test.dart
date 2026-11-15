@@ -376,8 +376,24 @@ void main() {
       return popped;
     }
 
+    /// Plan with AI is a pop-up in steps: walk forward (or back) to the
+    /// step that has [key], then tap it.
     Future<void> tap(WidgetTester tester, String key) async {
       final finder = find.byKey(ValueKey(key));
+      for (final move in [
+        'plan-next',
+        'plan-next',
+        'plan-next',
+        'plan-back',
+        'plan-back',
+        'plan-back',
+      ]) {
+        if (finder.evaluate().isNotEmpty) break;
+        final step = find.byKey(ValueKey(move));
+        if (step.evaluate().isEmpty) continue;
+        await tester.tap(step);
+        await tester.pumpAndSettle();
+      }
       await tester.ensureVisible(finder);
       await tester.pumpAndSettle();
       await tester.tap(finder);
@@ -402,7 +418,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Plan with AI'), findsOneWidget);
+      expect(find.text('PLAN WITH AI'), findsOneWidget);
+      // Pace is on the second step.
+      await tester.tap(find.byKey(const ValueKey('plan-next')));
+      await tester.pumpAndSettle();
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('chip-slow')),
@@ -412,7 +431,9 @@ void main() {
       );
     });
 
-    testWidgets('shows ranked places with score and reason', (tester) async {
+    testWidgets('shows ranked places, without scores or reasons', (
+      tester,
+    ) async {
       service.recResponses.add(
         RecommendationsPage(
           items: [
@@ -425,8 +446,13 @@ void main() {
       await tap(tester, 'plan-recommend');
 
       expect(find.text('San Sebastian Cathedral'), findsOneWidget);
-      expect(find.text('92%'), findsOneWidget);
-      expect(find.text('The Negros Museum fits your trip.'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('San Sebastian Cathedral')).dy,
+        lessThan(tester.getTopLeft(find.text('The Negros Museum')).dy),
+      );
+      // Ranking internals stay out of view.
+      expect(find.text('92%'), findsNothing);
+      expect(find.text('The Negros Museum fits your trip.'), findsNothing);
     });
 
     testWidgets('no matches shows the empty state', (tester) async {
@@ -489,7 +515,7 @@ void main() {
       expect(service.interactions.single.$2, InteractionType.leftSwipe);
       expect(service.recCalls, 2);
       expect(find.byKey(const ValueKey('rec-loc-1')), findsNothing);
-      expect(find.text('85%'), findsOneWidget);
+      expect(find.byKey(const ValueKey('rec-loc-2')), findsOneWidget);
     });
 
     testWidgets('rating sends the chosen stars and refreshes', (tester) async {
@@ -668,7 +694,7 @@ void main() {
     });
   });
 
-  testWidgets('itinerary shows schedule, reason, total and manual stops', (
+  testWidgets('itinerary shows schedule, total and manual stops', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(900, 2000);
@@ -708,15 +734,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Estimated total: ₱360'), findsOneWidget);
-    expect(
-      find.text('9:00 AM – 10:30 AM · 15 min travel · ₱120'),
-      findsOneWidget,
-    );
-    expect(find.text('Matches your heritage vibe.'), findsOneWidget);
-    expect(find.text('Added by you · not scheduled'), findsOneWidget);
+    expect(find.text('9:00 AM – 10:30 AM · ₱120'), findsOneWidget);
+    expect(find.text('15 min to get here'), findsOneWidget);
+    // The ranking's reason is internal; it never shows.
+    expect(find.text('Matches your heritage vibe.'), findsNothing);
+    expect(find.text('Added by you'), findsOneWidget);
 
     // The backend clears the total on manual edits; so does the UI.
-    await tester.tap(find.byIcon(Icons.remove_circle_outline_rounded).last);
+    await tester.tap(find.byIcon(Icons.close_rounded).last);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Remove'));
     await tester.pumpAndSettle();

@@ -21,12 +21,16 @@ class DescribeTripCard extends StatefulWidget {
   /// Shown after suggestions were applied, e.g. "Added 2 vibes…".
   final String? notice;
 
+  /// Off when a step title above already says "Describe your trip".
+  final bool showHeader;
+
   const DescribeTripCard({
     super.key,
     required this.service,
     required this.onSuggestions,
     this.enabled = true,
     this.notice,
+    this.showHeader = true,
   });
 
   @override
@@ -77,36 +81,38 @@ class _DescribeTripCardState extends State<DescribeTripCard> {
       key: const ValueKey('describe-trip'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Row(
-          children: [
-            Icon(
-              Icons.auto_awesome_rounded,
-              color: Color(0xFFF2620F),
-              size: 20,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Describe your trip',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 17,
-                color: AppTheme.slateDark,
+        if (widget.showHeader) ...[
+          const Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_rounded,
+                color: Color(0xFFF2620F),
+                size: 20,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Optional. Get suggested vibes, then review them before anything '
-          'changes. Or just fill in the form below.',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 13.5,
-            height: 1.4,
-            color: AppTheme.slateMuted,
+              SizedBox(width: 8),
+              Text(
+                'Describe your trip',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 17,
+                  color: AppTheme.slateDark,
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 10),
+          const SizedBox(height: 4),
+          const Text(
+            'Optional. Get suggested vibes, then review them before anything '
+            'changes. Or just fill in the form below.',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 13.5,
+              height: 1.4,
+              color: AppTheme.slateMuted,
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
         TextField(
           key: const ValueKey('describe-trip-prompt'),
           controller: _prompt,

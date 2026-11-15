@@ -11,13 +11,12 @@ import '../utils/trip_format.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/itinerary_section.dart';
 import '../widgets/status_banner.dart';
-import '../widgets/tactile_motion.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/trip_form/choice_chips_field.dart';
 import '../widgets/trip_form/trip_form.dart';
 import 'trip_edit_screen.dart';
 import 'trip_planner_screen.dart';
-import 'trip_page_scaffold.dart';
+import '../widgets/popup_route.dart';
 
 /// What a detail page tells the list when it closes.
 enum TripDetailResult { deleted }
@@ -62,6 +61,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool _missing = false;
 
   late final ApiService _locations = widget.locations ?? ApiService();
+
+  /// 0: Overview, 1: Itinerary.
+  int _tab = 0;
 
   @override
   void initState() {
@@ -139,8 +141,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final trip = _trip;
     if (trip == null) return;
     final result = await Navigator.of(context).push<GenerationResult>(
-      MaterialPageRoute(
-        builder: (_) => TripPlannerScreen(
+      blurPopupRoute(
+        (_) => TripPlannerScreen(
           service: widget.service,
           trip: trip,
           savedPace: AppConfig.authEnabled
@@ -153,6 +155,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() {
       _itineraryVersion++;
       if (result != null) {
+        _tab = 1;
         _notice =
             'Itinerary generated: ${result.items.length} '
             '${result.items.length == 1 ? 'stop' : 'stops'} saved.';
@@ -163,9 +166,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   Future<void> _edit() async {
     final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) =>
-            TripEditScreen(service: widget.service, tripId: widget.tripId),
+      blurPopupRoute(
+        (_) => TripEditScreen(service: widget.service, tripId: widget.tripId),
       ),
     );
     if (saved == true && mounted) {
@@ -177,53 +179,92 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final trip = _trip;
-
-    return TripPageScaffold(
-      title: trip?.title ?? 'your trip',
+    final status = trip == null
+        ? null
+        : trip.status.isEmpty
+        ? 'Draft'
+        : '${trip.status[0].toUpperCase()}${trip.status.substring(1)}';
+    // A pop-up, like Plan a trip, in two tabs so neither feels crowded.
+    return PopupCard(
+      eyebrow: status == null ? 'Trip' : 'Trip · $status',
+      title: trip?.title ?? 'Your trip',
       subtitle: trip == null
           ? null
-          : formatDateRange(trip.startDate, trip.endDate),
-      trailing: trip == null ? null : TripStatusPill(trip.status),
-      children: [
-        if (_notice != null) ...[
-          StatusBanner(
-            key: const ValueKey('detail-notice'),
-            tone: StatusTone.success,
-            message: _notice!,
-          ),
-          const SizedBox(height: 14),
-        ],
-        if (_error != null) ...[
-          StatusBanner(
-            key: const ValueKey('detail-error'),
-            tone: StatusTone.error,
-            message: _error!,
-            actionLabel: 'Retry',
-            onAction: _load,
-          ),
-          const SizedBox(height: 14),
-        ],
-        if (_missing)
-          StatusBanner(
-            key: const ValueKey('detail-missing'),
-            tone: StatusTone.info,
-            message: 'This trip no longer exists. It may have been deleted.',
-            actionLabel: 'Back to My Trips',
-            onAction: _closeAsDeleted,
-          ),
-        if (trip == null && _loading)
-          const Padding(
-            padding: EdgeInsets.only(top: 80),
-            child: Center(
-              child: CircularProgressIndicator(color: Colors.white),
+          : '${formatDayCount(tripDayCount(trip.startDate, trip.endDate))} · '
+                '${formatDateRange(trip.startDate, trip.endDate)}',
+      busy: _deleting,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (trip != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: _Tabs(
+                index: _tab,
+                onChanged: (i) => setState(() => _tab = i),
+              ),
+            ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_notice != null) ...[
+                    StatusBanner(
+                      key: const ValueKey('detail-notice'),
+                      tone: StatusTone.success,
+                      message: _notice!,
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (_error != null) ...[
+                    StatusBanner(
+                      key: const ValueKey('detail-error'),
+                      tone: StatusTone.error,
+                      message: _error!,
+                      actionLabel: 'Retry',
+                      onAction: _load,
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (_missing)
+                    StatusBanner(
+                      key: const ValueKey('detail-missing'),
+                      tone: StatusTone.info,
+                      message: 'This trip no longer exists. It may have been deleted.',
+                      actionLabel: 'Back to My Trips',
+                      onAction: _closeAsDeleted,
+                    ),
+                  if (trip == null && _loading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFF2620F),
+                        ),
+                      ),
+                    ),
+                  if (trip != null && _tab == 0) ..._overview(trip),
+                  if (trip != null && _tab == 1)
+                    ItineraryLocationsSection(
+                      key: ValueKey('itinerary-${trip.id}-$_itineraryVersion'),
+                      service: widget.service,
+                      locations: _locations,
+                      trip: trip,
+                    ),
+                ],
+              ),
             ),
           ),
-        if (trip != null) ..._buildDetails(trip),
-      ],
+          if (trip != null) _footer(),
+        ],
+      ),
     );
   }
 
-  List<Widget> _buildDetails(Trip trip) {
+  List<Widget> _overview(Trip trip) {
     final transport = chipOptionFor(
       kTransportationModes,
       trip.transportationMode,
@@ -233,207 +274,152 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       for (final tag in trip.preferredTags)
         chipOptionFor(kPreferredTags, tag) ?? ChipOption(tag, tag, Icons.tag),
     ];
-
     return [
-      FadeSlideIn(
-        child: Row(
+      Row(
+        children: [
+          Expanded(
+            child: _FactTile(
+              icon: Icons.calendar_month_rounded,
+              label: 'Dates',
+              value: formatDayCount(tripDayCount(trip.startDate, trip.endDate)),
+              detail: formatDateRange(trip.startDate, trip.endDate),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _FactTile(
+              icon: Icons.payments_rounded,
+              label: 'Budget',
+              value: formatPeso(trip.budgetMax),
+              detail: trip.budgetMin == trip.budgetMax
+                  ? 'Fixed budget'
+                  : trip.budgetMin == 0
+                  ? 'Up to this'
+                  : 'From ${formatPeso(trip.budgetMin)}',
+              accent: const Color(0xFF16A34A),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+      _infoRow(
+        'Getting around',
+        transport?.label ?? 'Not set',
+        transport?.icon ?? Icons.alt_route_rounded,
+      ),
+      const Divider(height: 24, color: Color(0xFFE9EEF5)),
+      _infoRow(
+        'Who is coming',
+        group?.label ?? 'Not set',
+        group?.icon ?? Icons.group_add_rounded,
+      ),
+      const Divider(height: 24, color: Color(0xFFE9EEF5)),
+      const Text(
+        'Vibes',
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          color: AppTheme.slateMuted,
+        ),
+      ),
+      const SizedBox(height: 8),
+      if (tags.isEmpty)
+        const Text(
+          'No vibes picked yet',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppTheme.slateDark,
+          ),
+        )
+      else
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
           children: [
-            Expanded(
-              child: _FactTile(
-                icon: Icons.calendar_month_rounded,
-                label: 'Dates',
-                value: formatDayCount(
-                  tripDayCount(trip.startDate, trip.endDate),
-                ),
-                detail: formatDateRange(trip.startDate, trip.endDate),
+            for (final tag in tags)
+              TripPill(
+                label: tag.label,
+                icon: tag.icon,
+                color: const Color(0xFFC2410C),
+                background: const Color(0xFFFFF3EA),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _FactTile(
-                icon: Icons.payments_rounded,
-                label: 'Budget',
-                value: formatPeso(trip.budgetMax),
-                detail: trip.budgetMin == trip.budgetMax
-                    ? 'Fixed budget'
-                    : 'From ${formatPeso(trip.budgetMin)}',
-                accent: const Color(0xFF16A34A),
-              ),
-            ),
           ],
         ),
-      ),
-      const SizedBox(height: 14),
-      FadeSlideIn(
-        index: 1,
-        child: GlassContainer(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _infoRow(
-                'Getting around',
-                transport?.label ?? 'Not set',
-                transport?.icon ?? Icons.alt_route_rounded,
-              ),
-              const Divider(height: 24, color: Color(0xFFE2E8F0)),
-              _infoRow(
-                'Who is coming',
-                group?.label ?? 'Not set',
-                group?.icon ?? Icons.group_add_rounded,
-              ),
-              const Divider(height: 24, color: Color(0xFFE2E8F0)),
-              const Text(
-                'Vibes',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                  color: AppTheme.slateMuted,
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (tags.isEmpty)
-                const Text(
-                  'No vibes picked yet',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.slateDark,
-                  ),
-                )
-              else
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    for (final tag in tags)
-                      TripPill(
-                        label: tag.label,
-                        icon: tag.icon,
-                        color: const Color(0xFFC2410C),
-                        background: const Color(0xFFFFF7ED),
-                      ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-      ),
-      const SizedBox(height: 14),
-      FadeSlideIn(
-        index: 2,
-        child: Vector3DButton(
-          key: const ValueKey('trip-plan-ai'),
-          onTap: _deleting ? null : _plan,
-          backgroundColor: const Color(0xFF7C3AED),
-          shadowColor: const Color(0xFF5B21B6),
-          borderColor: const Color(0xFFC4B5FD),
-          borderRadius: 28,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          depth: 4.5,
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text(
-                'Plan with AI',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      const SizedBox(height: 14),
-      FadeSlideIn(
-        index: 2,
-        child: ItineraryLocationsSection(
-          key: ValueKey('itinerary-${trip.id}-$_itineraryVersion'),
-          service: widget.service,
-          locations: _locations,
-          trip: trip,
-        ),
-      ),
-      const SizedBox(height: 20),
-      FadeSlideIn(
-        index: 3,
-        child: Vector3DButton(
-          key: const ValueKey('trip-edit'),
-          onTap: _deleting ? null : _edit,
-          backgroundColor: AppTheme.primaryBlue,
-          shadowColor: const Color(0xFF1D4ED8),
-          borderColor: const Color(0xFF93C5FD),
-          borderRadius: 28,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          depth: 4.5,
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.edit_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text(
-                'Edit trip',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      const SizedBox(height: 14),
-      FadeSlideIn(
-        index: 4,
-        child: Vector3DButton(
-          key: const ValueKey('trip-delete'),
-          onTap: _deleting ? null : _delete,
-          backgroundColor: Colors.white,
-          shadowColor: const Color(0xFFFDA4AF),
-          borderColor: const Color(0xFFFECDD3),
-          borderRadius: 28,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          depth: 3.5,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_deleting)
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Color(0xFFE11D48),
-                  ),
-                )
-              else
-                const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Color(0xFFE11D48),
-                  size: 19,
-                ),
-              const SizedBox(width: 8),
-              Text(
-                _deleting ? 'Deleting…' : 'Delete trip',
-                style: const TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15,
-                  color: Color(0xFFE11D48),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     ];
+  }
+
+  /// Plan with AI first; Edit and Delete beside each other below it.
+  Widget _footer() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0xFFEFF3F8))),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FilledButton.icon(
+            key: const ValueKey('trip-plan-ai'),
+            onPressed: _deleting ? null : _plan,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFF2620F),
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
+              minimumSize: const Size.fromHeight(50),
+              textStyle: const TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            icon: const Icon(Icons.auto_awesome_rounded, size: 19),
+            label: const Text('Plan with AI'),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const ValueKey('trip-edit'),
+                  onPressed: _deleting ? null : _edit,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.slateDark,
+                    side: const BorderSide(color: Color(0xFFD5DEEA)),
+                    shape: const StadiumBorder(),
+                    minimumSize: const Size.fromHeight(46),
+                  ),
+                  icon: const Icon(Icons.edit_rounded, size: 17),
+                  label: const Text('Edit trip'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const ValueKey('trip-delete'),
+                  onPressed: _deleting ? null : _delete,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFE11D48),
+                    side: const BorderSide(color: Color(0xFFFBD0D9)),
+                    shape: const StadiumBorder(),
+                    minimumSize: const Size.fromHeight(46),
+                  ),
+                  icon: _deleting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: Color(0xFFE11D48),
+                          ),
+                        )
+                      : const Icon(Icons.delete_outline_rounded, size: 18),
+                  label: Text(_deleting ? 'Deleting…' : 'Delete trip'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _infoRow(String label, String value, IconData icon) {
@@ -489,9 +475,12 @@ class _FactTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      borderRadius: 20,
+    return Container(
       padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F8FC),
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -530,6 +519,77 @@ class _FactTile extends StatelessWidget {
               color: AppTheme.slateMuted,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Overview | Itinerary, as a soft segmented pill.
+class _Tabs extends StatelessWidget {
+  final int index;
+  final ValueChanged<int> onChanged;
+
+  const _Tabs({required this.index, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget tab(int i, String label, IconData icon) {
+      final on = i == index;
+      return Expanded(
+        child: GestureDetector(
+          key: ValueKey('trip-tab-$i'),
+          onTap: () => onChanged(i),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: on ? Colors.white : Colors.transparent,
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: on
+                  ? const [
+                      BoxShadow(
+                        color: Color(0x1A0F285A),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 17,
+                  color: on ? const Color(0xFFF2620F) : AppTheme.slateMuted,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: on ? AppTheme.slateDark : AppTheme.slateMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5FB),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        children: [
+          tab(0, 'Overview', Icons.info_outline_rounded),
+          tab(1, 'Itinerary', Icons.map_rounded),
         ],
       ),
     );

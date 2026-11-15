@@ -96,8 +96,9 @@ class _TripsTabState extends State<TripsTab> {
 
   /// Opens [page]; whatever happened there, the list is re-fetched after.
   Future<Object?> _open(Widget page) async {
+    // Trips open as pop-ups, like Plan a trip. [home v3]
     final result = await Navigator.of(context)
-        .push<Object?>(MaterialPageRoute(builder: (_) => page));
+        .push<Object?>(blurPopupRoute((_) => page));
     if (mounted) {
       setState(() => _notice = null);
       _load();
