@@ -185,6 +185,21 @@ void main() {
       expect(state.isBusy('a'), isFalse);
     });
 
+    test('a liked place counts as picked, so its heart is filled', () async {
+      final backend = _Backend([
+        _event('liked', 'right_swipe'),
+        _event('saved', 'save'),
+        _event('passed', 'left_swipe'),
+      ]);
+      final state = DiscoveryInteractions(backend.service());
+      await state.load();
+      expect(state.isPicked('liked'), isTrue);
+      expect(state.isSaved('liked'), isFalse);
+      expect(state.isPicked('saved'), isTrue);
+      expect(state.isPicked('passed'), isFalse);
+      expect(state.isPicked('other'), isFalse);
+    });
+
     test('a swipe leaves the deck at once and returns if it fails', () async {
       final backend = _Backend()
         ..holdPosts = Completer<void>()

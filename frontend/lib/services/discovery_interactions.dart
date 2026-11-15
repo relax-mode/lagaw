@@ -29,6 +29,10 @@ class DiscoveryInteractions extends ChangeNotifier {
   String? get loadError => _loadError;
 
   bool isSaved(String id) => _saved.contains(id);
+
+  /// Liked or saved, and not passed: what a filled heart means.
+  bool isPicked(String id) =>
+      (_liked.contains(id) || _saved.contains(id)) && !_passed.contains(id);
   bool isBusy(String id) => _busy.contains(id);
   double? ratingFor(String id) => _ratings[id];
 

@@ -214,8 +214,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Saves are append-only (#52): a saved place stays saved.
   Future<void> _save(String id) async {
-    if (_interactions.isSaved(id)) {
-      _showMessage('Already saved. Removing saved places isn’t available yet.');
+    if (_interactions.isPicked(id)) {
+      _showMessage(
+        'Already in your liked and saved. Removing places isn’t available yet.',
+      );
       return;
     }
     try {
@@ -604,7 +606,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
       };
 
   PlaceActions get _placeActions => PlaceActions(
-        isSaved: _interactions.isSaved,
+        isSaved: _interactions.isPicked,
         isBusy: _interactions.isBusy,
         ratingFor: _interactions.ratingFor,
         onSave: (place) => _save(place.id),
@@ -634,7 +636,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         _selectedCategory = 'all';
         _searchQuery = '';
       }),
-      isSaved: _interactions.isSaved,
+      isSaved: _interactions.isPicked,
       isBusy: _interactions.isBusy,
       ratingFor: _interactions.ratingFor,
       changes: _interactions,
@@ -1672,7 +1674,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   Widget _buildCenterFanCard(LocationItem spot) {
-    final isSaved = _interactions.isSaved(spot.id);
+    final isSaved = _interactions.isPicked(spot.id);
 
     return GlassContainer(
       borderRadius: 28,
@@ -2632,7 +2634,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Mobile Compact Spot Card
   Widget _buildMobileSpotCard(LocationItem item) {
-    final isSaved = _interactions.isSaved(item.id);
+    final isSaved = _interactions.isPicked(item.id);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GlassContainer(
@@ -2732,7 +2734,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Web Glassmorphic Spot Card
   Widget _buildWebSpotCard(LocationItem item) {
-    final isSaved = _interactions.isSaved(item.id);
+    final isSaved = _interactions.isPicked(item.id);
     return SizedBox(
       width: 310,
       child: GlassContainer(
