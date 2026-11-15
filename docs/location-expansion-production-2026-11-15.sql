@@ -1,0 +1,1999 @@
+-- Target ONLY production: https://zjnuqqtbapbpudsjbpif.supabase.co
+-- Twenty insertions; images null; existing records must match the captured baseline.
+-- Safe reruns accept identical records only. Select the correct project in SQL Editor.
+BEGIN;
+LOCK TABLE public.locations IN SHARE ROW EXCLUSIVE MODE;
+DO $catalogue_expansion$
+DECLARE expected jsonb; desired jsonb;
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.locations WHERE NOT (id = ANY (ARRAY['f52c28a6-cf76-5efa-b0a3-d04f8b15794c'::uuid,'a752a30a-1859-503d-8a77-8cd59097ac1d'::uuid,'f2ccf475-56ea-51a0-a003-70f66d9f852a'::uuid,'af80a358-d1ad-529f-84b3-ff1e591e041f'::uuid,'b3783066-7484-5917-a09b-404974974880'::uuid,'4618dfae-4a30-5917-85f1-94f216cf5b97'::uuid,'d184610e-f8c9-584a-95a3-79809cd81c49'::uuid,'ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c'::uuid,'1a3bca09-5532-5de6-8587-2440c4e5830d'::uuid,'61bf94ab-6ec0-5ec3-8451-b575ee06169e'::uuid,'c6303987-1b9c-5a83-b80d-7a9a4b389b6b'::uuid,'f5daa34a-7e4b-5a7e-9e97-1cf4d9c1c920'::uuid,'c4047367-665b-5a04-8fd1-44aa7e50aa56'::uuid,'43f712d8-a6bd-5113-905e-b8d00cf2c2f6'::uuid,'5509d004-3126-5c89-942a-b1ccc4f742a8'::uuid,'f2ee9da3-4f32-50d5-9840-f6352bfccc9a'::uuid,'0bf1a140-9303-508f-9375-a2ceabce77f3'::uuid,'69e4f350-bd25-50e8-90f0-24eea097f91d'::uuid,'49f18097-4d77-5237-8f28-cfd4a0b5940a'::uuid,'eeeb59c9-b5d6-58ca-aa54-ce33c221a222'::uuid,'e36ca062-fbf0-5e4b-b6bd-24f61d3e5a99'::uuid,'a9e26ed9-83bb-5056-907a-85b699448eec'::uuid,'a22c5862-5ce7-5793-a96e-150b79e1f2af'::uuid,'8bc43864-3bad-5326-9c11-53b1eb274571'::uuid,'4ce87f7b-17d1-538f-8a1e-408956bdbb64'::uuid,'ace4cd5a-e098-545e-bd2b-bfa19e529782'::uuid,'977ea9ef-dafe-5986-9efc-79c611ff9f6c'::uuid,'24d858ec-8cf1-53c6-ab55-97858a5fed88'::uuid,'70b981f6-8196-5546-b0ce-0ab1773fbac4'::uuid,'3c897dde-3ad4-5599-87d6-6fa234136748'::uuid]))) THEN RAISE EXCEPTION 'Unrecognized location inventory'; END IF;
+  FOR expected IN SELECT value FROM jsonb_array_elements('[
+  {
+    "id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
+    "name": "Arima Restaurant",
+    "description": "An all-day restaurant at Park Inn by Radisson Bacolod serving regional and international dishes, including breakfast and later meals. Indicative spending estimate of PHP 500-1,000 per visitor, not an admission fee or guaranteed maximum. Map pin is approximate.",
+    "category": "restaurant",
+    "vibe_tags": [
+      "food",
+      "relaxing"
+    ],
+    "address": "Park Inn by Radisson Bacolod, Block 12 Reclamation Area, Palanca Avenue, SM City Bacolod Complex, Bacolod City, Negros Occidental 6100",
+    "latitude": 10.673281,
+    "longitude": 122.943819,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "06:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 500.0,
+    "estimated_cost_max": 1000.0,
+    "typical_visit_duration": 75,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+    "name": "Cafetolyo Coffee Shop",
+    "description": "A coffee and light-refreshment stop at the provincial capitol park, associated with locally sourced coffee and casual breaks. Reported hours and PHP 70-120 spending estimate are reported on the official Facebook page; Sunday access is unspecified. Prices are indicative, not guaranteed total spending.",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe",
+      "food",
+      "relaxing"
+    ],
+    "address": "Provincial Capitol Park and Lagoon, Bacolod City, Negros Occidental",
+    "latitude": 10.67675,
+    "longitude": 122.951725,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 70.0,
+    "estimated_cost_max": 120.0,
+    "typical_visit_duration": 35,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+    "name": "Calea Pastries & Coffee",
+    "description": "A Bacolod pastry and dessert café on 15th Street offering a stop for cakes and coffee. The reported PHP 95-1,100 menu-price range includes different products such as slices and whole cakes; it is an indicative purchase allowance, not a fixed per-person meal or admission price. Hours and branch pin await independent confirmation.",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe",
+      "food",
+      "relaxing"
+    ],
+    "address": "15th Street, Bacolod City, Negros Occidental 6100",
+    "latitude": 10.679792,
+    "longitude": 122.95475,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "09:00",
+          "close": "22:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "09:00",
+          "close": "21:30"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "09:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "09:00",
+          "close": "21:30"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "09:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "09:00",
+          "close": "21:30"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "09:00",
+          "close": "21:30"
+        }
+      ]
+    },
+    "estimated_cost_min": 95.0,
+    "estimated_cost_max": 1100.0,
+    "typical_visit_duration": 40,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "af80a358-d1ad-529f-84b3-ff1e591e041f",
+    "name": "Capitol Park and Lagoon",
+    "description": "A public landscape surrounding the provincial capitol lagoon, offering leafy paths and opportunities to appreciate the civic setting. The travel guide reports daily 05:00-22:00 and free ordinary entry; temporary closures and event restrictions may differ.",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "relaxing",
+      "photography"
+    ],
+    "address": "Provincial Capitol Complex, Bacolod City, Negros Occidental",
+    "latitude": 10.676,
+    "longitude": 122.95213,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "05:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0.0,
+    "estimated_cost_max": 0.0,
+    "typical_visit_duration": 35,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "b3783066-7484-5917-a09b-404974974880",
+    "name": "Negros Forest Park",
+    "description": "A conservation and wildlife education center presenting native Negros species and the work of the Talarak Foundation. Reported Tuesday-Sunday hours are 09:00-17:00; Monday is unspecified. Historical 2022 admission reports give PHP 100 for adults and PHP 50 for eligible discounted visitors; current prices are not operator-confirmed.",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "photography"
+    ],
+    "address": "South Capitol Road, Bacolod City, Negros Occidental 6100",
+    "latitude": 10.67507,
+    "longitude": 122.95105,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 50.0,
+    "estimated_cost_max": 100.0,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "4618dfae-4a30-5917-85f1-94f216cf5b97",
+    "name": "Negros Occidental Provincial Capitol",
+    "description": "The provincial government’s prominent capitol building, an architectural focal point of central Bacolod. Reported schedule: Tuesday-Friday 08:00-19:00, citing the provincial government website; these may be office hours rather than confirmed tourist access hours. Entrance is reported as free; visitor access and admission are not independently verified.",
+    "category": "landmark",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "address": "Provincial Capitol Building, Gatuslao Street, Bacolod City, Negros Occidental 6100",
+    "latitude": 10.67647,
+    "longitude": 122.95093,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0.0,
+    "estimated_cost_max": 0.0,
+    "typical_visit_duration": 20,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "d184610e-f8c9-584a-95a3-79809cd81c49",
+    "name": "Orange Project",
+    "description": "A contemporary art gallery within Mandalagan’s Art District, featuring exhibitions and work by local and visiting artists. Reported exhibition admission varies: PHP 0-50 is an indicative range, not a guaranteed future tariff. The cited PHP 50 article concerns March-June 2026 exhibitions; confirm the current exhibition before visiting.",
+    "category": "gallery",
+    "vibe_tags": [
+      "photography",
+      "relaxing"
+    ],
+    "address": "Orange Project Building, Art District, Lopue’s Annex Building, Mandalagan, Bacolod City, Negros Occidental 6100",
+    "latitude": 10.695876,
+    "longitude": 122.95983,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "13:00",
+          "close": "19:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "13:00",
+          "close": "19:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "13:00",
+          "close": "17:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "13:00",
+          "close": "19:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "13:00",
+          "close": "19:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "13:00",
+          "close": "19:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "13:00",
+          "close": "19:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0.0,
+    "estimated_cost_max": 50.0,
+    "typical_visit_duration": 45,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
+    "name": "Panaad Park and Sports Complex",
+    "description": "A provincial park and sports venue in Mansilingan used for major local events and the Panaad sa Negros Festival. Unverified Reddit reports: 04:00-20:00 daily and PHP 0-25 estimated admission. Reported oval fees are PHP 25 regular and PHP 15 student; they may not apply to the whole park. Hours and fees await confirmation.",
+    "category": "park",
+    "vibe_tags": [
+      "nature",
+      "photography"
+    ],
+    "address": "Barangay Mansilingan, Bacolod City, Negros Occidental",
+    "latitude": 10.62379,
+    "longitude": 122.96481,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "04:00",
+          "close": "20:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0.0,
+    "estimated_cost_max": 25.0,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "1a3bca09-5532-5de6-8587-2440c4e5830d",
+    "name": "San Sebastian Cathedral",
+    "description": "A historic coral-stone Catholic cathedral in downtown Bacolod, suitable for a quiet architectural visit that respects ongoing worship. The travel guide reports these opening hours and free entry. Mass schedules are separate from sightseeing access; respect worship and any visitor restrictions.",
+    "category": "heritage",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "address": "Jose Rizal Street, Bacolod City, Negros Occidental",
+    "latitude": 10.67035,
+    "longitude": 122.94715,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "05:00",
+          "close": "20:30"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "06:00",
+          "close": "19:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0.0,
+    "estimated_cost_max": 0.0,
+    "typical_visit_duration": 25,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+    "name": "The Negros Museum",
+    "description": "A museum of Negros history, heritage and the arts near the provincial capitol, with exhibits that introduce local culture.",
+    "category": "museum",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "address": "Gatuslao Street, Bacolod City, Negros Occidental",
+    "latitude": 10.67516,
+    "longitude": 122.95032,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "monday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 70.0,
+    "estimated_cost_max": 100.0,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "family",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  }
+]'::jsonb) LOOP
+    IF NOT EXISTS (SELECT 1 FROM public.locations AS existing WHERE existing.id = (expected->>'id')::uuid AND to_jsonb(existing) @> expected) THEN
+      RAISE EXCEPTION 'Existing destination changed; transaction aborted';
+    END IF;
+  END LOOP;
+  FOR desired IN SELECT value FROM jsonb_array_elements('[
+  {
+    "id": "c6303987-1b9c-5a83-b80d-7a9a4b389b6b",
+    "name": "Artfull Philippines / Gallery and Cafe",
+    "description": "A local art gallery and cafe on 18th Street featuring exhibitions and work by Bacolod artists. Indicative PHP 100-950 range combines food and creative purchases; workshops and reserved classes are excluded.",
+    "category": "art_gallery",
+    "vibe_tags": [
+      "heritage",
+      "cafe",
+      "relaxing"
+    ],
+    "address": "Door 3, E. Montelibano Apartments, corner 18th Street and Lacson Street, Bacolod City, Negros Occidental",
+    "latitude": 10.681241,
+    "longitude": 122.955374,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 100,
+    "estimated_cost_max": 950,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "f5daa34a-7e4b-5a7e-9e97-1cf4d9c1c920",
+    "name": "Lopue''s East Bowling Center",
+    "description": "An indoor bowling venue in the Lopues East Centre Annex in Villamonte. Reported PHP 100-160 bowling prices are unverified and may exclude shoe rental or additional games.",
+    "category": "indoor_recreation",
+    "vibe_tags": [
+      "relaxing"
+    ],
+    "address": "Second floor, Lopue''s East Centre Annex, Carlos Hilado Highway corner Burgos Extension, Villamonte, Bacolod City, Negros Occidental",
+    "latitude": 10.663345,
+    "longitude": 122.966446,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "12:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "12:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "12:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "12:00",
+          "close": "22:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "12:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 100,
+    "estimated_cost_max": 160,
+    "typical_visit_duration": 90,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "c4047367-665b-5a04-8fd1-44aa7e50aa56",
+    "name": "May''s Organic Garden and Restaurant",
+    "description": "A garden and restaurant in Pahanocoy offering an outdoor setting and farm-oriented dining. Indicative PHP 150-350 range varies by admission and activities; meals and optional amenities may cost extra.",
+    "category": "garden_farm_tourism",
+    "vibe_tags": [
+      "nature",
+      "relaxing",
+      "food",
+      "photography"
+    ],
+    "address": "Sitio Aning, Barangay Pahanocoy, Araneta Avenue, Bacolod City, Negros Occidental",
+    "latitude": 10.61359,
+    "longitude": 122.924462,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 150,
+    "estimated_cost_max": 350,
+    "typical_visit_duration": 120,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "43f712d8-a6bd-5113-905e-b8d00cf2c2f6",
+    "name": "Quan Native Delicacies - Plaza",
+    "description": "A downtown branch serving regional kakanin, meals and pasalubong products. Indicative PHP 1-500 menu range varies by item and is not a guaranteed complete meal total.",
+    "category": "local_food",
+    "vibe_tags": [
+      "food"
+    ],
+    "address": "74 San Juan Street, Bacolod City, Negros Occidental",
+    "latitude": 10.669227,
+    "longitude": 122.945091,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "08:00",
+          "close": "19:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 1,
+    "estimated_cost_max": 500,
+    "typical_visit_duration": 45,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "5509d004-3126-5c89-942a-b1ccc4f742a8",
+    "name": "The Negros Showroom - South Capitol Road",
+    "description": "A showroom of regional crafts and products from members of the Association of Negros Producers. General browsing is free; souvenir purchases are optional and excluded from the zero entrance estimate.",
+    "category": "crafts_souvenirs",
+    "vibe_tags": [
+      "heritage",
+      "relaxing"
+    ],
+    "address": "South Capitol Road, beside Negros Forest, Bacolod City, Negros Occidental",
+    "latitude": 10.675834,
+    "longitude": 122.950763,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0,
+    "estimated_cost_max": 0,
+    "typical_visit_duration": 45,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "f2ee9da3-4f32-50d5-9840-f6352bfccc9a",
+    "name": "Coffee Culture Roastery - Alijis",
+    "description": "A specialty coffee roastery and cafe along Alijis Road. Indicative PHP 75-450 menu range varies by order; booked tours and cupping sessions are excluded.",
+    "category": "cafe",
+    "vibe_tags": [
+      "cafe",
+      "relaxing"
+    ],
+    "address": "Alijis Road beside 7-Eleven, Greenplains area, Bacolod City, Negros Occidental",
+    "latitude": 10.645752,
+    "longitude": 122.938292,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 75,
+    "estimated_cost_max": 450,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "0bf1a140-9303-508f-9375-a2ceabce77f3",
+    "name": "Manokan Country - temporary SM site",
+    "description": "A cluster of chicken inasal vendors temporarily operating beside SM City Bacolod. Vendor hours and PHP 100-250 spending estimates vary by stall; this record refers to the temporary site.",
+    "category": "local_food",
+    "vibe_tags": [
+      "food"
+    ],
+    "address": "Temporary stalls at SM City Bacolod terminal/parking hub, Reclamation Area, Bacolod City, Negros Occidental",
+    "latitude": 10.672152,
+    "longitude": 122.945658,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 100,
+    "estimated_cost_max": 250,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "69e4f350-bd25-50e8-90f0-24eea097f91d",
+    "name": "Pope John Paul II Tower",
+    "description": "A religious heritage tower commemorating Pope John Paul IIs visit to Bacolod. Reported admission is PHP 10 for students and PHP 20 regular; viewing-deck access may vary.",
+    "category": "heritage_viewpoint",
+    "vibe_tags": [
+      "heritage",
+      "photography"
+    ],
+    "address": "Reclamation Area near SM City Bacolod, Bacolod City, Negros Occidental",
+    "latitude": 10.671901,
+    "longitude": 122.942382,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "08:00",
+          "close": "17:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 10,
+    "estimated_cost_max": 20,
+    "typical_visit_duration": 45,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "49f18097-4d77-5237-8f28-cfd4a0b5940a",
+    "name": "kidzooona - SM City Bacolod",
+    "description": "An indoor play venue for children in the North Wing of SM City Bacolod. Reported PHP 230-400 rates vary by play session and eligibility; guardian and sock charges may differ.",
+    "category": "childrens_play",
+    "vibe_tags": [
+      "relaxing"
+    ],
+    "address": "Third floor, North Wing, SM City Bacolod, Bacolod City, Negros Occidental",
+    "latitude": 10.672861,
+    "longitude": 122.944431,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 230,
+    "estimated_cost_max": 400,
+    "typical_visit_duration": 120,
+    "suitable_group_types": [
+      "family"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "eeeb59c9-b5d6-58ca-aa54-ce33c221a222",
+    "name": "Ayala Malls Capitol Central - general visit",
+    "description": "A shopping mall near the Provincial Capitol with retail and dining spaces. General mall entrance is free; purchases, parking, screenings and paid activities are excluded.",
+    "category": "shopping_leisure",
+    "vibe_tags": [
+      "relaxing",
+      "food"
+    ],
+    "address": "Gatuslao Street, North Capitol Road area, Bacolod City, Negros Occidental",
+    "latitude": 10.676951,
+    "longitude": 122.950283,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "11:00",
+          "close": "21:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "11:00",
+          "close": "21:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "11:00",
+          "close": "21:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "11:00",
+          "close": "21:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "11:00",
+          "close": "21:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0,
+    "estimated_cost_max": 0,
+    "typical_visit_duration": 90,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "e36ca062-fbf0-5e4b-b6bd-24f61d3e5a99",
+    "name": "Timezone - Ayala Malls Capitol Central",
+    "description": "An indoor arcade and entertainment venue offering games and social activities at Ayala Malls Capitol Central. Indicative PHP 5-1100 range covers games or card/package options, not a fixed visit charge; reserved events are excluded.",
+    "category": "arcade_recreation",
+    "vibe_tags": [
+      "relaxing"
+    ],
+    "address": "Fourth level, Ayala Malls Capitol Central, Gatuslao Street, Bacolod City, Negros Occidental",
+    "latitude": 10.677087,
+    "longitude": 122.950054,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "10:00",
+          "close": "21:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 5,
+    "estimated_cost_max": 1100,
+    "typical_visit_duration": 90,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "a9e26ed9-83bb-5056-907a-85b699448eec",
+    "name": "Caribbean Waterpark and Resotel - day use",
+    "description": "A waterpark in Goldenfield with swimming pools and slides available for day visits. Published day rates vary by height and weekday: PHP 120-150 below 3 feet and PHP 200-250 regular; under 1 year is listed free and senior/PWD PHP 200 with ID. Rooms and reserved facilities are excluded.",
+    "category": "waterpark",
+    "vibe_tags": [
+      "nature",
+      "relaxing"
+    ],
+    "address": "Goldenfields Commercial Complex, Araneta Street, Singcang, Bacolod City, Negros Occidental",
+    "latitude": 10.649516,
+    "longitude": 122.937217,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 120,
+    "estimated_cost_max": 250,
+    "typical_visit_duration": 180,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "a22c5862-5ce7-5793-a96e-150b79e1f2af",
+    "name": "Resorts Negrense - day use",
+    "description": "A coastal resort in Punta Taytay with grounds and swimming facilities for day outings. Reported PHP 50-2800 range can vary by admission, amenities and optional rentals; it is not a fixed per-person charge. Only Friday-Sunday hours are recorded; overnight stays and reserved events are excluded.",
+    "category": "coastal_day_resort",
+    "vibe_tags": [
+      "nature",
+      "relaxing",
+      "photography"
+    ],
+    "address": "Purok Bayanihan, Barangay Punta Taytay, Bacolod City, Negros Occidental",
+    "latitude": 10.598195,
+    "longitude": 122.899105,
+    "opening_hours": {
+      "friday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 50,
+    "estimated_cost_max": 2800,
+    "typical_visit_duration": 180,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "8bc43864-3bad-5326-9c11-53b1eb274571",
+    "name": "Merzci - Sum-ag branch",
+    "description": "A Sum-ag branch selling local pasalubong, baked products and snacks. Indicative PHP 15-350 product range varies by purchase; factory tours are excluded.",
+    "category": "pasalubong_food",
+    "vibe_tags": [
+      "food"
+    ],
+    "address": "Purok Masagana, Araneta Street, Sum-ag, Bacolod City, Negros Occidental",
+    "latitude": 10.603339,
+    "longitude": 122.920665,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "06:00",
+          "close": "20:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 15,
+    "estimated_cost_max": 350,
+    "typical_visit_duration": 30,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "4ce87f7b-17d1-538f-8a1e-408956bdbb64",
+    "name": "Sharyn''s Cansi House - Narra",
+    "description": "A Narra Avenue eatery specializing in Bacolod cansi, a sour beef-shank soup. Indicative PHP 85-580 menu range includes individual and shared orders; a shared dish price is not a per-person meal total.",
+    "category": "local_food",
+    "vibe_tags": [
+      "food"
+    ],
+    "address": "Narra Avenue, Capitol Shopping Center, Villamonte, Bacolod City, Negros Occidental",
+    "latitude": 10.673397,
+    "longitude": 122.959617,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "08:00",
+          "close": "20:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 85,
+    "estimated_cost_max": 580,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "ace4cd5a-e098-545e-bd2b-bfa19e529782",
+    "name": "Aboy''s Restaurant - Liroville",
+    "description": "A Filipino and seafood restaurant in Liroville Subdivision, Singcang. Indicative PHP 50-480 selected-menu range includes individual, shared and weight-priced dishes; it is not a complete menu or guaranteed meal total.",
+    "category": "local_food",
+    "vibe_tags": [
+      "food"
+    ],
+    "address": "Liroville Subdivision, Singcang; map code MW2Q+7W4, Bacolod City, Negros Occidental",
+    "latitude": 10.650674,
+    "longitude": 122.939891,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 50,
+    "estimated_cost_max": 480,
+    "typical_visit_duration": 90,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "977ea9ef-dafe-5986-9efc-79c611ff9f6c",
+    "name": "Palawud Resto Grill and Bar - San Juan/Banago",
+    "description": "A seaside restaurant in the San Juan and Banago area serving seafood and grilled dishes. Indicative PHP 225-2000 range varies by order and sharing. Reported service ends at midnight; the planning schedule conservatively ends at 23:59.",
+    "category": "seaside_dining",
+    "vibe_tags": [
+      "food",
+      "relaxing",
+      "photography"
+    ],
+    "address": "San Juan Street, Banago; map code PW2X+CPR, Bacolod City, Negros Occidental",
+    "latitude": 10.701113,
+    "longitude": 122.949243,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ],
+      "friday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "11:00",
+          "close": "23:59"
+        }
+      ]
+    },
+    "estimated_cost_min": 225,
+    "estimated_cost_max": 2000,
+    "typical_visit_duration": 90,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "24d858ec-8cf1-53c6-ab55-97858a5fed88",
+    "name": "Kuppa Coffee and Tea - Tindalo",
+    "description": "A Tindalo Avenue cafe offering coffee and meals in the Capitol Shopping area. Indicative PHP 110-500 menu range varies by order and is not a guaranteed complete meal total.",
+    "category": "cafe_meals",
+    "vibe_tags": [
+      "cafe",
+      "food",
+      "relaxing"
+    ],
+    "address": "Tindalo Avenue, Capitol Shopping Center, Villamonte, Bacolod City, Negros Occidental",
+    "latitude": 10.67404,
+    "longitude": 122.958465,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "07:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 110,
+    "estimated_cost_max": 500,
+    "typical_visit_duration": 60,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "70b981f6-8196-5546-b0ce-0ab1773fbac4",
+    "name": "Fully Booked - SM City Bacolod",
+    "description": "A bookstore in SM City Bacolods North Wing offering books and browsing. General bookstore entry is free; purchases are optional and excluded from the zero entrance estimate.",
+    "category": "bookstore_leisure",
+    "vibe_tags": [
+      "relaxing"
+    ],
+    "address": "Ground floor, North Wing Expansion, SM City Bacolod, Bacolod City, Negros Occidental",
+    "latitude": 10.672799,
+    "longitude": 122.94381,
+    "opening_hours": {
+      "monday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "tuesday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "wednesday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "friday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ]
+    },
+    "estimated_cost_min": 0,
+    "estimated_cost_max": 0,
+    "typical_visit_duration": 45,
+    "suitable_group_types": [
+      "solo",
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  },
+  {
+    "id": "3c897dde-3ad4-5599-87d6-6fa234136748",
+    "name": "Negros Superlanes - Goldenfield",
+    "description": "An indoor bowling venue in the Goldenfield Commercial Complex. No public price range is recorded. Only Tuesday and Thursday-Sunday hours are recorded; Monday and Wednesday are unspecified. Reported closing is midnight; the planning schedule conservatively ends at 23:59.",
+    "category": "evening_bowling",
+    "vibe_tags": [
+      "relaxing"
+    ],
+    "address": "Goldenfield Commercial Complex, Singcang, Bacolod City, Negros Occidental",
+    "latitude": 10.649759,
+    "longitude": 122.937939,
+    "opening_hours": {
+      "tuesday": [
+        {
+          "open": "16:00",
+          "close": "23:59"
+        }
+      ],
+      "thursday": [
+        {
+          "open": "16:00",
+          "close": "23:59"
+        }
+      ],
+      "friday": [
+        {
+          "open": "16:00",
+          "close": "23:59"
+        }
+      ],
+      "saturday": [
+        {
+          "open": "16:00",
+          "close": "23:59"
+        }
+      ],
+      "sunday": [
+        {
+          "open": "16:00",
+          "close": "23:59"
+        }
+      ]
+    },
+    "estimated_cost_min": null,
+    "estimated_cost_max": null,
+    "typical_visit_duration": 90,
+    "suitable_group_types": [
+      "couple",
+      "friends",
+      "family",
+      "group"
+    ],
+    "image_url": null,
+    "is_active": true
+  }
+]'::jsonb) LOOP
+    IF EXISTS (SELECT 1 FROM public.locations WHERE id = (desired->>'id')::uuid) THEN
+      IF NOT EXISTS (SELECT 1 FROM public.locations AS existing WHERE existing.id = (desired->>'id')::uuid AND to_jsonb(existing) @> desired) THEN
+        RAISE EXCEPTION 'Expansion record changed; transaction aborted';
+      END IF;
+    ELSIF EXISTS (SELECT 1 FROM public.locations WHERE lower(btrim(name)) = lower(btrim(desired->>'name'))) THEN
+      RAISE EXCEPTION 'Destination name collision; transaction aborted';
+    ELSE
+      INSERT INTO public.locations (id, name, description, category, vibe_tags, address, latitude, longitude, opening_hours, estimated_cost_min, estimated_cost_max, typical_visit_duration, suitable_group_types, image_url, is_active) SELECT id, name, description, category, vibe_tags, address, latitude, longitude, opening_hours, estimated_cost_min, estimated_cost_max, typical_visit_duration, suitable_group_types, image_url, is_active FROM jsonb_populate_record(NULL::public.locations, desired);
+    END IF;
+  END LOOP;
+END;
+$catalogue_expansion$;
+COMMIT;

@@ -1,0 +1,26 @@
+{
+  "observed_at_utc": "2026-11-15T08:19:33.751625+00:00",
+  "method": "Read-only public /locations?limit=100; production unchanged pending operator SQL",
+  "reports": [
+    {
+      "environment": "development",
+      "active_locations": 30,
+      "all_public_fields_match_expected": true,
+      "original_ten_preserved": true,
+      "coordinate_pairs": 30,
+      "opening_schedules": 30,
+      "bounded_costs": 29,
+      "new_records_images_null": true
+    },
+    {
+      "environment": "production",
+      "active_locations": 10,
+      "all_public_fields_match_expected": true,
+      "original_ten_preserved": true,
+      "coordinate_pairs": 10,
+      "opening_schedules": 10,
+      "bounded_costs": 10,
+      "new_records_images_null": null
+    }
+  ]
+}
