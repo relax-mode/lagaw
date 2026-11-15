@@ -32,19 +32,23 @@ void main() {
       expect(location.vibeTags, contains('heritage'));
     });
 
-    test('handles null costs and default fallback image', () {
+    test('keeps unknown price, visit length and photo unknown', () {
       final json = {
         'id': 'test-123',
         'name': 'Mystery Spot',
         'category': 'cafe',
+        'estimated_cost_min': null,
+        'estimated_cost_max': null,
+        'typical_visit_duration': null,
+        'image_url': null,
       };
 
       final location = LocationItem.fromJson(json);
 
       expect(location.name, 'Mystery Spot');
-      expect(location.costRange, 'Free');
-      expect(location.duration, '60 mins');
-      expect(location.imageUrl.isNotEmpty, true);
+      expect(location.costRange, 'Price unknown');
+      expect(location.duration, 'Visit length unknown');
+      expect(location.imageUrl, isNull);
     });
   });
 

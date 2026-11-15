@@ -72,6 +72,23 @@ class _Backend {
   );
 }
 
+/// v3 home: the nav's swipe button opens a menu with Start matching.
+/// The home's floating elements loop forever, so step time instead of
+/// waiting for it to settle while home is on screen.
+Future<void> _openDeck(WidgetTester tester) async {
+  // The swipe page's floating elements bob forever too; with reduced
+  // motion they hold still, so the swipe tests can settle.
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+  await tester.tap(find.byKey(const ValueKey('nav-swipe')));
+  await tester.pump(const Duration(milliseconds: 400));
+  tester.takeException();
+  await tester.tap(find.byKey(const ValueKey('swipe-menu-start')));
+  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('TripService.listInteractions', () {
     test('reads every page and skips unknown event types', () async {
@@ -168,6 +185,25 @@ void main() {
       expect(state.isBusy('a'), isFalse);
     });
 
+    test('a swipe leaves the deck at once and returns if it fails', () async {
+      final backend = _Backend()
+        ..holdPosts = Completer<void>()
+        ..postResults.add(503);
+      final state = DiscoveryInteractions(backend.service());
+      await state.load();
+
+      final pending = state.swipe('a', liked: true);
+      // No waiting on the server: the place is already swiped.
+      expect(state.isSwiped('a'), isTrue);
+      expect(state.picks, contains('a'));
+
+      backend.holdPosts!.complete();
+      await expectLater(pending, throwsA(isA<TripApiException>()));
+      expect(state.isSwiped('a'), isFalse);
+      expect(state.picks, isEmpty);
+      expect(backend.posts, hasLength(1));
+    });
+
     test('a failed write changes nothing and is not retried', () async {
       final backend = _Backend()..postResults.addAll([503, 0]);
       final state = DiscoveryInteractions(backend.service());
@@ -251,8 +287,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       tester.takeException(); // Pre-existing home overflow; see home tests.
-      await tester.tap(find.text('Start Matching Spots').first);
-      await tester.pumpAndSettle();
+      await _openDeck(tester);
       tester.takeException();
       return backend;
     }
@@ -271,7 +306,7 @@ void main() {
       expect(find.text('2 / 3'), findsOneWidget);
     });
 
-    testWidgets('a like is recorded once and advances after the server', (
+    testWidgets('a like is recorded once and the deck moves on', (
       tester,
     ) async {
       final backend = await pumpDeck(tester);
@@ -328,7 +363,14 @@ void main() {
       await tapKey(tester, 'rating-submit');
 
       expect(jsonDecode(backend.posts.single.body)['rating_value'], 4.0);
-      expect(find.text('You rated it 4 · Rate again'), findsOneWidget);
+      // The star button now shows the rating.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('swipe-rate')),
+          matching: find.text('4'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a failed history load blocks the deck with Retry', (
@@ -359,8 +401,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       tester.takeException();
-      await tester.tap(find.text('Start Matching Spots').first);
-      await tester.pumpAndSettle();
+      await _openDeck(tester);
       tester.takeException();
 
       expect(find.byKey(const ValueKey('swipe-like')), findsNothing);
@@ -390,8 +431,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       tester.takeException();
-      await tester.tap(find.text('Start Matching Spots').first);
-      await tester.pumpAndSettle();
+      await _openDeck(tester);
       tester.takeException();
 
       expect(find.byKey(const ValueKey('swipe-places-state')), findsOneWidget);
