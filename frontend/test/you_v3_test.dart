@@ -94,8 +94,8 @@ void main() {
     );
     expect(find.byKey(const ValueKey('you-preferences')), findsOneWidget);
     expect(find.byKey(const ValueKey('you-take-preferences')), findsNothing);
-    // Interests show under the name and in the card.
-    expect(find.text('Café'), findsNWidgets(2));
+    // Interests show in the card only, not again under the name.
+    expect(find.text('Café'), findsOneWidget);
     expect(find.text('₱500 – ₱2,000'), findsOneWidget);
     expect(find.text('Slow'), findsOneWidget);
   });

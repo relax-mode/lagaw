@@ -45,6 +45,12 @@ class YouTab extends StatefulWidget {
   /// Opens Spots when nothing is liked yet.
   final VoidCallback? onExplore;
 
+  /// Category ids in Spots' order, so the chips match Spots.
+  final List<String> categories;
+
+  /// "See places for me": the Picked for you pop-up. Null hides it.
+  final Future<void> Function(BuildContext context)? onSeePlaces;
+
   const YouTab({
     super.key,
     required this.session,
@@ -54,6 +60,8 @@ class YouTab extends StatefulWidget {
     this.actions,
     this.preferences,
     this.onExplore,
+    this.onSeePlaces,
+    this.categories = const [],
   });
 
   @override
@@ -128,7 +136,7 @@ class _YouTabState extends State<YouTab> {
   }
 
   Future<void> _openPreferences() async {
-    await openTravelPreferences(context);
+    await openTravelPreferences(context, continueToPlaces: false);
     if (mounted) _load();
   }
 
@@ -149,10 +157,6 @@ class _YouTabState extends State<YouTab> {
   @override
   Widget build(BuildContext context) {
     final email = widget.session?.accountEmail;
-    final tags = [
-      for (final o in kPreferredTags)
-        if (_prefs?.preferredTags.contains(o.value) ?? false) o,
-    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -209,20 +213,33 @@ class _YouTabState extends State<YouTab> {
             color: Color(0xD9FFFFFF),
           ),
         ),
-        if (tags.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final t in tags) _tagChip(t.icon, t.label, onSky: true),
-            ],
-          ),
-        ],
         if (widget.preferences != null) ...[
           const SizedBox(height: 22),
           _preferencesCard(),
+          if (widget.onSeePlaces != null &&
+              _prefs != null &&
+              !_prefs!.isUnset) ...[
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              key: const ValueKey('you-see-places'),
+              onPressed: () async {
+                await widget.onSeePlaces!(context);
+                if (mounted) _load();
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: _orange,
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                minimumSize: const Size.fromHeight(52),
+                textStyle: const TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              icon: const Icon(Icons.auto_awesome_rounded, size: 19),
+              label: const Text('See places for me'),
+            ),
+          ],
         ],
         const SizedBox(height: 26),
         KeyedSubtree(key: _picksKey, child: _picksHeader()),
@@ -359,7 +376,7 @@ class _YouTabState extends State<YouTab> {
 
   Widget _card({required Widget child}) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
@@ -494,19 +511,40 @@ class _YouTabState extends State<YouTab> {
                 ),
               ),
               if (set)
-                TextButton.icon(
+                // A compact pill, so the header keeps the card's margins.
+                GestureDetector(
                   key: const ValueKey('you-preferences'),
-                  onPressed: _openPreferences,
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.primaryBlue,
-                    textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                  onTap: _openPreferences,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF4FC),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.edit_rounded,
+                          size: 15,
+                          color: AppTheme.primaryBlue,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          'Edit',
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryBlue,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  icon: const Icon(Icons.edit_rounded, size: 16),
-                  label: const Text('Edit'),
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           body,
         ],
       ),
@@ -607,9 +645,10 @@ class _YouTabState extends State<YouTab> {
 
   /// Every pick, filtered by search and category, two per row.
   Widget _allPicks(PlaceActions actions) {
-    final categories = <String>{
-      for (final p in widget.picks) p.category,
-    }.toList()..sort();
+    // Spots' categories when known, so every page offers the same ones.
+    final categories = widget.categories.isNotEmpty
+        ? widget.categories
+        : (<String>{for (final p in widget.picks) p.category}.toList()..sort());
     final q = _query.trim().toLowerCase();
     final shown = [
       for (final p in widget.picks)

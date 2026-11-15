@@ -1,6 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../models/location.dart';
 import '../../models/onboarding_preferences.dart';
 import '../../models/trip_plan.dart';
 import '../../services/discovery_service.dart';
@@ -10,6 +13,7 @@ import '../../widgets/status_banner.dart';
 import '../../widgets/trip_form/choice_chips_field.dart';
 import '../../widgets/trip_form/trip_form.dart';
 import '../home/home_view.dart' show HomeCategory;
+import '../spots/spots_view.dart' show PlaceActions, openPlaceDetails;
 
 /// Groups the cold-start API accepts, labelled like the trip form.
 final List<ChipOption> kDiscoveryGroups = [
@@ -27,16 +31,104 @@ const List<ChipOption> kPerPlaceBudgets = [
   ChipOption('custom', 'Custom', Icons.edit_rounded),
 ];
 
+/// Opens "Picked for you" as a pop-up over the blurred app, like travel
+/// preferences. [home v3]
+Future<void> showPickedForYou(
+  BuildContext context, {
+  required DiscoveryService service,
+  bool review = true,
+  PlaceActions? actions,
+  Future<void> Function(BuildContext context)? onEditPreferences,
+}) {
+  return Navigator.of(context).push(
+    pickedForYouRoute(
+      (_) => DiscoveryScreen(
+        service: service,
+        review: review,
+        actions: actions,
+        onEditPreferences: onEditPreferences,
+      ),
+    ),
+  );
+}
+
+/// The pop-up route: the app behind blurs and dims, the card rises in.
+Route<void> pickedForYouRoute(WidgetBuilder builder) {
+  return PageRouteBuilder<void>(
+    opaque: false,
+    barrierColor: Colors.transparent,
+    transitionDuration: const Duration(milliseconds: 380),
+    reverseTransitionDuration: const Duration(milliseconds: 260),
+    pageBuilder: (context, animation, _) => builder(context),
+    transitionsBuilder: (context, animation, _, child) {
+      final reduce = MediaQuery.disableAnimationsOf(context);
+      final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      final rise = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: FadeTransition(
+              opacity: fade,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                child: const ColoredBox(color: Color(0x590A1830)),
+              ),
+            ),
+          ),
+          FadeTransition(
+            opacity: fade,
+            child: reduce
+                ? child
+                : AnimatedBuilder(
+                    animation: rise,
+                    builder: (context, c) => Transform.translate(
+                      offset: Offset(0, 28 * (1 - rise.value)),
+                      child: Transform.scale(
+                        scale: 0.94 + 0.06 * rise.value,
+                        child: c,
+                      ),
+                    ),
+                    child: child,
+                  ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+enum _Step { review, setup, results }
+
 /// "Picked for you": cold-start recommendations from the user's saved
-/// onboarding interests (#103). Who is coming and the per-place limit are
-/// asked, never assumed, because the API needs both and the profile budget
-/// has no per-visit meaning. Nothing here is saved. Styled like the v3
-/// home and Spots: sky, centered title, white cards, orange pills.
-/// [S4-04, home v3]
+/// onboarding interests (#103), in one pop-up card with three steps:
+/// review the preferences (or edit them), answer who is coming and the
+/// per-place limit (asked, never assumed: the API needs both and the
+/// profile budget has no per-visit meaning), then the top places in rank
+/// order, each with a heart and a tap for details. [S4-04, home v3]
 class DiscoveryScreen extends StatefulWidget {
   final DiscoveryService service;
 
-  const DiscoveryScreen({super.key, required this.service});
+  /// Start by reviewing the saved preferences (from You). Right after
+  /// onboarding they were just reviewed, so it starts at the questions.
+  final bool review;
+
+  /// Hearts and details on the results; hidden without them.
+  final PlaceActions? actions;
+
+  /// Opens travel preferences for editing; the review reloads after.
+  final Future<void> Function(BuildContext context)? onEditPreferences;
+
+  const DiscoveryScreen({
+    super.key,
+    required this.service,
+    this.review = false,
+    this.actions,
+    this.onEditPreferences,
+  });
 
   @override
   State<DiscoveryScreen> createState() => _DiscoveryScreenState();
@@ -44,6 +136,12 @@ class DiscoveryScreen extends StatefulWidget {
 
 class _DiscoveryScreenState extends State<DiscoveryScreen> {
   final _customController = TextEditingController();
+  late _Step _step = widget.review ? _Step.review : _Step.setup;
+
+  OnboardingPreferences? _prefs;
+  bool _prefsLoading = false;
+  String? _prefsError;
+
   String? _group;
   String? _budgetChoice;
   String? _customError;
@@ -56,9 +154,43 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
   int _generation = 0;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.review) _loadPrefs();
+  }
+
+  @override
   void dispose() {
     _customController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPrefs() async {
+    setState(() {
+      _prefsLoading = true;
+      _prefsError = null;
+    });
+    try {
+      final prefs = await widget.service.load();
+      if (!mounted) return;
+      setState(() {
+        _prefs = prefs;
+        _prefsLoading = false;
+      });
+    } on Object {
+      if (!mounted) return;
+      setState(() {
+        _prefsLoading = false;
+        _prefsError = 'Couldn’t load your preferences.';
+      });
+    }
+  }
+
+  Future<void> _edit() async {
+    final edit = widget.onEditPreferences;
+    if (edit == null) return;
+    await edit(context);
+    if (mounted) _loadPrefs();
   }
 
   String? get _perVisitMax {
@@ -93,108 +225,172 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
       setState(() {
         _page = page;
         _loading = false;
+        _step = _Step.results;
       });
     } on DiscoveryApiException catch (e) {
       if (!mounted || generation != _generation) return;
       setState(() {
         _error = e;
         _loading = false;
+        // Keep earlier results in view, with the error above them.
+        if (_page != null) _step = _Step.results;
       });
     }
   }
 
+  void _close() => Navigator.of(context).maybePop();
+
   @override
   Widget build(BuildContext context) {
-    final pad = MediaQuery.paddingOf(context);
-    return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppTheme.skyTop, AppTheme.skyMid, AppTheme.skyBottom],
-            stops: [0.0, 0.48, 1.0],
+    final insets = MediaQuery.viewInsetsOf(context);
+    final (title, subtitle) = switch (_step) {
+      _Step.review => ('Your travel preferences', 'Look good?'),
+      _Step.setup => ('Two quick things', 'So the places fit this outing.'),
+      _Step.results => ('Your top places', 'Best match first.'),
+    };
+    return Material(
+      type: MaterialType.transparency,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _loading ? null : _close,
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            const Positioned(top: -80, left: -80, child: _Sun()),
-            // Still elements, so the page settles (and tests can settle).
-            Positioned(
-              top: pad.top + 64,
-              left: -34,
-              child: Transform.rotate(
-                angle: -0.28,
-                child: Image.asset('assets/elements/masskara.webp', width: 112),
-              ),
-            ),
-            Positioned(
-              top: pad.top + 92,
-              right: -30,
-              child: Transform.rotate(
-                angle: 0.32,
-                child: Image.asset('assets/elements/piaya.webp', width: 104),
-              ),
-            ),
-            SafeArea(
-              child: Center(
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + insets.bottom),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: _CircleButton(
-                          key: const ValueKey('discovery-back'),
-                          icon: Icons.arrow_back_rounded,
-                          label: 'Back',
-                          onTap: () => Navigator.of(context).maybePop(),
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x660A1830),
+                          blurRadius: 40,
+                          offset: Offset(0, 22),
+                          spreadRadius: -14,
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Picked\nfor you',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 40,
-                          height: 0.98,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1.4,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Color(0x40104AA0),
-                              blurRadius: 22,
-                              offset: Offset(0, 6),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _Header(
+                          title: title,
+                          subtitle: subtitle,
+                          step: _step.index,
+                          onClose: _loading ? null : _close,
+                        ),
+                        Flexible(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 240),
+                            child: KeyedSubtree(
+                              key: ValueKey(_step),
+                              child: switch (_step) {
+                                _Step.review => _reviewBody(),
+                                _Step.setup => _setupBody(),
+                                _Step.results => _resultsBody(),
+                              },
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Based on your travel preferences',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xEBFFFFFF),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+                          child: _footer(),
                         ),
-                      ),
-                      const SizedBox(height: 26),
-                      _setup(),
-                      const SizedBox(height: 28),
-                      ..._results(),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _scroll(List<Widget> children) => SingleChildScrollView(
+    padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    ),
+  );
+
+  // Review ------------------------------------------------------------------
+
+  Widget _reviewBody() {
+    final prefs = _prefs;
+    if (_prefsLoading && prefs == null) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 36),
+        child: Center(child: CircularProgressIndicator(color: _orange)),
+      );
+    }
+    if (_prefsError != null) {
+      return _scroll([
+        StatusBanner(
+          tone: StatusTone.error,
+          message: _prefsError!,
+          actionLabel: 'Retry',
+          onAction: _loadPrefs,
+        ),
+      ]);
+    }
+    final tags = [
+      for (final o in kPreferredTags)
+        if (prefs?.preferredTags.contains(o.value) ?? false) o.label,
+    ];
+    String peso(String a) {
+      final whole = a
+          .split('.')
+          .first
+          .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+      return '₱$whole';
+    }
+
+    const paces = {'slow': 'Slow', 'moderate': 'Moderate', 'fast': 'Fast'};
+    return _scroll([
+      Container(
+        key: const ValueKey('picked-review'),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F8FC),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            _ReviewLine(
+              label: 'Interests',
+              value: tags.isEmpty ? 'None yet' : tags.join(', '),
+            ),
+            const Divider(height: 1, color: Color(0xFFE3E9F2)),
+            _ReviewLine(
+              label: 'Budget',
+              value: prefs?.hasBudget ?? false
+                  ? '${peso(prefs!.budgetMin!)} – ${peso(prefs.budgetMax!)}'
+                  : 'No preference',
+            ),
+            const Divider(height: 1, color: Color(0xFFE3E9F2)),
+            _ReviewLine(
+              label: 'Pace',
+              value: paces[prefs?.travelStyle] ?? 'No preference',
+            ),
+          ],
+        ),
+      ),
+    ]);
+  }
+
+  // Setup -------------------------------------------------------------------
 
   Widget _chips(
     List<ChipOption> options,
@@ -202,8 +398,8 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     ValueChanged<String?> onChanged,
   ) {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: 8,
+      runSpacing: 8,
       children: [
         for (final o in options)
           _Chip(
@@ -217,327 +413,571 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  /// One question in its own card, numbered, with room around the choices.
-  Widget _step({
-    required int number,
-    required String title,
-    required String hint,
-    required bool done,
-    required List<Widget> children,
-  }) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
-      decoration: _cardDecoration,
-      child: Column(
+  Widget _question(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+        color: AppTheme.slateDark,
+      ),
+    ),
+  );
+
+  Widget _setupBody() {
+    return _scroll([
+      Column(
+        key: const ValueKey('discovery-setup'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: done ? _orange : const Color(0xFFEEF4FC),
-                ),
-                child: done
-                    ? const Icon(
-                        Icons.check_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      )
-                    : Text(
-                        '$number',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.primaryBlue,
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    height: 1.2,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.slateDark,
-                  ),
-                ),
-              ),
-            ],
+          _question('Who’s coming?'),
+          _chips(kDiscoveryGroups, _group, (v) => setState(() => _group = v)),
+          const SizedBox(height: 22),
+          _question('Max you’d spend per place, per person'),
+          _chips(
+            kPerPlaceBudgets,
+            _budgetChoice,
+            (v) => setState(() {
+              _budgetChoice = v;
+              _customError = null;
+            }),
           ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.only(left: 42),
-            child: Text(
-              hint,
+          if (_budgetChoice == 'custom') ...[
+            const SizedBox(height: 12),
+            TextField(
+              key: const ValueKey('discovery-custom-budget'),
+              controller: _customController,
+              onChanged: (_) => setState(() {}),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+              ],
               style: const TextStyle(
-                fontSize: 13.5,
-                height: 1.4,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.slateMuted,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.slateDark,
+              ),
+              decoration: InputDecoration(
+                hintText: '750',
+                prefixText: '₱ ',
+                errorText: _customError,
+                filled: true,
+                fillColor: const Color(0xFFF1F5FB),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: _orange, width: 1.6),
+                ),
               ),
             ),
+          ],
+          const SizedBox(height: 12),
+          const Text(
+            'Entrance fees and food at one place; getting there isn’t '
+            'included. Places with unknown prices are left out.',
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.slateMuted,
+            ),
           ),
-          const SizedBox(height: 18),
-          ...children,
+          if (_error != null) ...[const SizedBox(height: 14), _errorBanner()],
         ],
       ),
+    ]);
+  }
+
+  Widget _errorBanner() {
+    final error = _error!;
+    return StatusBanner(
+      key: const ValueKey('discovery-error'),
+      tone: StatusTone.error,
+      message: error.message,
+      actionLabel: error.statusCode == 422
+          ? null
+          : error.preferencesChanged
+          ? 'Reload'
+          : 'Try again',
+      onAction: _search,
     );
   }
 
-  Widget _setup() {
-    final canSearch = _group != null && _budgetChoice != null && !_loading;
-    return Column(
-      key: const ValueKey('discovery-setup'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _step(
-          number: 1,
-          title: 'Who’s coming?',
-          hint: 'We’ll pick places that suit the group.',
-          done: _group != null,
-          children: [
-            _chips(kDiscoveryGroups, _group, (v) => setState(() => _group = v)),
-          ],
-        ),
-        const SizedBox(height: 14),
-        _step(
-          number: 2,
-          title: 'Max you’d spend per place',
-          hint:
-              'Per person: entrance fees and food at one place, not getting '
-              'there. Places with unknown prices are left out.',
-          done: _budgetChoice != null && _perVisitMax != null,
-          children: [
-            _chips(
-              kPerPlaceBudgets,
-              _budgetChoice,
-              (v) => setState(() {
-                _budgetChoice = v;
-                _customError = null;
-              }),
-            ),
-            if (_budgetChoice == 'custom') ...[
-              const SizedBox(height: 14),
-              TextField(
-                key: const ValueKey('discovery-custom-budget'),
-                controller: _customController,
-                onChanged: (_) => setState(() {}),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
-                ],
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.slateDark,
-                ),
-                decoration: InputDecoration(
-                  hintText: '750',
-                  prefixText: '₱ ',
-                  errorText: _customError,
-                  filled: true,
-                  fillColor: const Color(0xFFF1F5FB),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: _orange, width: 1.6),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 20),
-        FilledButton(
-          key: const ValueKey('discovery-search'),
-          onPressed: canSearch ? _search : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: _orange,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: const Color(0xFFF9C4A3),
-            disabledForegroundColor: Colors.white,
-            shape: const StadiumBorder(),
-            minimumSize: const Size.fromHeight(54),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_loading) ...[
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 10),
-              ],
-              Text(
-                _loading
-                    ? 'Finding places…'
-                    : _page == null
-                    ? 'Show my places'
-                    : 'Update places',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // Results -----------------------------------------------------------------
 
-  List<Widget> _results() {
-    final error = _error;
-    if (error != null) {
-      return [
-        StatusBanner(
-          key: const ValueKey('discovery-error'),
-          tone: StatusTone.error,
-          message: error.message,
-          actionLabel: error.statusCode == 422
-              ? null
-              : error.preferencesChanged
-              ? 'Reload'
-              : 'Try again',
-          onAction: _search,
-        ),
-        if (_page != null) ...[const SizedBox(height: 16), ..._list(_page!)],
-      ];
-    }
+  Widget _resultsBody() {
     final page = _page;
-    if (page == null) return const [];
-    return _list(page);
-  }
-
-  List<Widget> _list(DiscoveryPage page) {
-    if (page.items.isEmpty) {
-      return const [
-        StatusBanner(
+    if (page == null || page.items.isEmpty) {
+      return _scroll([
+        if (_error != null) ...[_errorBanner(), const SizedBox(height: 12)],
+        const StatusBanner(
           key: ValueKey('discovery-empty'),
           tone: StatusTone.info,
           message:
               'No places match yet. Try a higher limit per place or another '
               'group.',
         ),
-      ];
+      ]);
     }
-    return [
-      const Padding(
-        padding: EdgeInsets.only(left: 4, bottom: 12),
-        child: Text(
-          'Your top places',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 22,
-            letterSpacing: -0.5,
-            color: AppTheme.slateDark,
+    final actions = widget.actions;
+    Widget list() => Column(
+      children: [
+        for (final (i, item) in page.items.indexed) ...[
+          if (i > 0) const SizedBox(height: 10),
+          _PlaceRow(
+            key: ValueKey('discovery-${item.locationId}'),
+            rank: i + 1,
+            place: item.location,
+            actions: actions,
           ),
-        ),
-      ),
-      for (final item in page.items) ...[
-        _RecommendationCard(item: item),
-        const SizedBox(height: 12),
+        ],
       ],
-    ];
+    );
+    return _scroll([
+      if (_error != null) ...[_errorBanner(), const SizedBox(height: 12)],
+      if (actions?.changes != null)
+        ListenableBuilder(
+          listenable: actions!.changes!,
+          builder: (context, _) => list(),
+        )
+      else
+        list(),
+    ]);
+  }
+
+  // Footer ------------------------------------------------------------------
+
+  Widget _footer() {
+    switch (_step) {
+      case _Step.review:
+        return Row(
+          children: [
+            if (widget.onEditPreferences != null) ...[
+              Expanded(
+                child: _Outline(
+                  key: const ValueKey('picked-edit'),
+                  label: 'Edit',
+                  icon: Icons.edit_rounded,
+                  onTap: _prefsLoading ? null : _edit,
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              flex: 2,
+              child: _Filled(
+                key: const ValueKey('picked-continue'),
+                label: 'Looks good',
+                onTap: _prefsLoading || _prefs == null
+                    ? null
+                    : () => setState(() => _step = _Step.setup),
+              ),
+            ),
+          ],
+        );
+      case _Step.setup:
+        return Row(
+          children: [
+            if (widget.review) ...[
+              Expanded(
+                child: _Outline(
+                  key: const ValueKey('picked-back'),
+                  label: 'Back',
+                  onTap: _loading
+                      ? null
+                      : () => setState(() => _step = _Step.review),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              flex: 2,
+              child: _Filled(
+                key: const ValueKey('discovery-search'),
+                label: _loading
+                    ? 'Finding places…'
+                    : _page == null
+                    ? 'Show my places'
+                    : 'Update places',
+                busy: _loading,
+                onTap: _group != null && _budgetChoice != null && !_loading
+                    ? _search
+                    : null,
+              ),
+            ),
+          ],
+        );
+      case _Step.results:
+        return Row(
+          children: [
+            Expanded(
+              child: _Outline(
+                key: const ValueKey('picked-change'),
+                label: 'Change answers',
+                onTap: () => setState(() => _step = _Step.setup),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _Filled(
+                key: const ValueKey('picked-done'),
+                label: 'Done',
+                onTap: _close,
+              ),
+            ),
+          ],
+        );
+    }
   }
 }
 
 const _orange = Color(0xFFF2620F);
 
-final _cardDecoration = BoxDecoration(
-  color: Colors.white,
-  borderRadius: BorderRadius.circular(28),
-  boxShadow: const [
-    BoxShadow(
-      color: Color(0x4D0F285A),
-      blurRadius: 30,
-      offset: Offset(0, 16),
-      spreadRadius: -16,
-    ),
-  ],
-);
+class _Header extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final int step;
+  final VoidCallback? onClose;
 
-class _Sun extends StatelessWidget {
-  const _Sun();
+  const _Header({
+    required this.title,
+    required this.subtitle,
+    required this.step,
+    required this.onClose,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 240,
-      height: 240,
+      padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
       decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            Color(0xFFFFFBEB),
-            Color(0xFFFEF08A),
-            Color(0xFFF59E0B),
-            Color(0x00F59E0B),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppTheme.skyTop, AppTheme.skyMid],
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'PICKED FOR YOU',
+                  style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xD9FFFFFF),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  title,
+                  key: const ValueKey('picked-title'),
+                  style: const TextStyle(
+                    fontSize: 21,
+                    height: 1.15,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xE6FFFFFF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onClose != null)
+            Semantics(
+              button: true,
+              label: 'Close',
+              child: GestureDetector(
+                key: const ValueKey('picked-close'),
+                onTap: onClose,
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xEBFFFFFF),
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    size: 19,
+                    color: AppTheme.slateDark,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewLine extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _ReviewLine({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 82,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.slateMuted,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.slateDark,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One top place: rank, square photo, name, category · price, and a heart.
+/// Tapping it opens the full details.
+class _PlaceRow extends StatelessWidget {
+  final int rank;
+  final LocationItem place;
+  final PlaceActions? actions;
+
+  const _PlaceRow({
+    super.key,
+    required this.rank,
+    required this.place,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final a = actions;
+    final liked = a?.isSaved(place.id) ?? false;
+    final busy = a?.isBusy(place.id) ?? false;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: a == null
+          ? null
+          : () {
+              final box = context.findRenderObject() as RenderBox?;
+              if (box == null || !box.hasSize) return;
+              openPlaceDetails(
+                context,
+                place: place,
+                origin: box.localToGlobal(Offset.zero) & box.size,
+                actions: a,
+              );
+            },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F8FC),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 22,
+              child: Text(
+                '$rank',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.slateMuted,
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: DestinationPhoto(
+                location: place,
+                width: 58,
+                height: 58,
+                compact: true,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 1.15,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.slateDark,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '${HomeCategory.labelFor(place.category)} · ${place.costRange}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.slateMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (a != null)
+              Semantics(
+                button: true,
+                label: liked ? 'Liked' : 'Like ${place.name}',
+                child: GestureDetector(
+                  key: ValueKey('discovery-heart-${place.id}'),
+                  onTap: busy ? null : () => a.onSave(place),
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    margin: const EdgeInsets.only(left: 6),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: Icon(
+                      liked
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      size: 21,
+                      color: _orange,
+                    ),
+                  ),
+                ),
+              ),
           ],
-          stops: [0.0, 0.35, 0.7, 1.0],
         ),
       ),
     );
   }
 }
 
-class _CircleButton extends StatelessWidget {
-  final IconData icon;
+class _Filled extends StatelessWidget {
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool busy;
 
-  const _CircleButton({
+  const _Filled({
     super.key,
-    required this.icon,
     required this.label,
     required this.onTap,
+    this.busy = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Color(0xF5FFFFFF),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x330F1B2D),
-                blurRadius: 18,
-                offset: Offset(0, 8),
-                spreadRadius: -10,
+    return FilledButton(
+      onPressed: onTap,
+      style: FilledButton.styleFrom(
+        backgroundColor: _orange,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: const Color(0xFFF9C4A3),
+        disabledForegroundColor: Colors.white,
+        shape: const StadiumBorder(),
+        minimumSize: const Size.fromHeight(50),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (busy) ...[
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.4,
+                color: Colors.white,
               ),
-            ],
+            ),
+            const SizedBox(width: 10),
+          ],
+          Flexible(
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
-          child: Icon(icon, size: 21, color: AppTheme.slateDark),
-        ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Outline extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final VoidCallback? onTap;
+
+  const _Outline({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppTheme.slateDark,
+        side: const BorderSide(color: Color(0xFFD5DEEA)),
+        shape: const StadiumBorder(),
+        minimumSize: const Size.fromHeight(50),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[Icon(icon, size: 17), const SizedBox(width: 6)],
+          Flexible(
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+        ],
       ),
     );
   }
@@ -568,7 +1008,7 @@ class _Chip extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: selected ? _orange : const Color(0xFFF1F5FB),
             borderRadius: BorderRadius.circular(999),
@@ -593,106 +1033,6 @@ class _Chip extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// One recommendation: photo, name, category · price, why it fits, and
-/// how well it matches.
-class _RecommendationCard extends StatelessWidget {
-  final TripRecommendation item;
-  const _RecommendationCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final percent = (item.score * 100).round().clamp(0, 100);
-    final place = item.location;
-    return Container(
-      key: ValueKey('discovery-${item.locationId}'),
-      padding: const EdgeInsets.all(12),
-      decoration: _cardDecoration.copyWith(
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: DestinationPhoto(
-              location: place,
-              width: 84,
-              height: 96,
-              compact: true,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        place.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16.5,
-                          height: 1.15,
-                          color: AppTheme.slateDark,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8F8EE),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '$percent%',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF15803D),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '${HomeCategory.labelFor(place.category)} · ${place.costRange}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.slateMuted,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  item.reason,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.35,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF334155),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

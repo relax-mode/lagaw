@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/models/onboarding_preferences.dart';
 import 'package:frontend/screens/onboarding/discovery_screen.dart';
+import 'package:frontend/screens/spots/spots_view.dart';
 import 'package:frontend/screens/onboarding/first_run_gate.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -239,9 +240,15 @@ void main() {
         'per_person_visit_budget_max': '500.00',
         'limit': 10,
       });
-      expect(find.text('Ruins'), findsOneWidget);
-      expect(find.text('82%'), findsOneWidget);
-      expect(find.text('Matches your Museum vibe.'), findsOneWidget);
+      // Top places in rank order, without percentages or long reasons.
+      expect(find.text('Your top places'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Ruins')).dy,
+        lessThan(tester.getTopLeft(find.text('Museum')).dy),
+      );
+      expect(find.text('82%'), findsNothing);
+      expect(find.text('Matches your Museum vibe.'), findsNothing);
+      await tap(tester, 'picked-change');
       expect(find.text('Update places'), findsOneWidget);
     });
 
@@ -311,6 +318,7 @@ void main() {
       await tap(tester, 'chip-solo');
       await tap(tester, 'chip-200.00');
       await tap(tester, 'discovery-search');
+      await tap(tester, 'picked-change');
       await tap(tester, 'discovery-search');
 
       expect(find.text('Try again'), findsOneWidget);
@@ -437,5 +445,91 @@ void main() {
     expect(find.text('See places for me'), findsOneWidget);
     await tap('onboarding-finish');
     expect(find.byKey(const ValueKey('discovery-setup')), findsOneWidget);
+  });
+
+  testWidgets('from You: review, edit, questions, then hearts on places', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final server = _Server()
+      ..reply({
+        'preferred_tags': ['cafe'],
+        'budget_min': '0.00',
+        'budget_max': '500.00',
+        'travel_style': 'slow',
+      })
+      ..reply({
+        'preferred_tags': ['cafe', 'food'],
+        'budget_min': '0.00',
+        'budget_max': '500.00',
+        'travel_style': 'slow',
+      })
+      ..reply({
+        'items': [_rec('a', 'Ruins', 0.82), _rec('b', 'Museum', 0.5)],
+        'empty_reason': null,
+      });
+    final liked = <String>{};
+    var edits = 0;
+    final changes = ValueNotifier(0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DiscoveryScreen(
+          service: server.service(),
+          review: true,
+          onEditPreferences: (_) async => edits++,
+          actions: PlaceActions(
+            isSaved: liked.contains,
+            isBusy: (_) => false,
+            ratingFor: (_) => null,
+            onSave: (p) {
+              liked.add(p.id);
+              changes.value++;
+            },
+            onRate: (_) {},
+            changes: changes,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your travel preferences'), findsOneWidget);
+    expect(find.text('Café'), findsOneWidget);
+    expect(find.text('₱0 – ₱500'), findsOneWidget);
+    expect(find.text('Slow'), findsOneWidget);
+
+    // Edit opens travel preferences, then the review reloads.
+    await tester.tap(find.byKey(const ValueKey('picked-edit')));
+    await tester.pumpAndSettle();
+    expect(edits, 1);
+    expect(find.text('Café, Food'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('picked-continue')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('discovery-setup')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('chip-solo')));
+    await tester.tap(find.byKey(const ValueKey('chip-500.00')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('discovery-search')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your top places'), findsOneWidget);
+    final heart = find.byKey(const ValueKey('discovery-heart-a'));
+    expect(
+      find.descendant(
+        of: heart,
+        matching: find.byIcon(Icons.favorite_border_rounded),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(heart);
+    await tester.pump();
+    expect(liked, {'a'});
+    expect(
+      find.descendant(of: heart, matching: find.byIcon(Icons.favorite_rounded)),
+      findsOneWidget,
+    );
   });
 }

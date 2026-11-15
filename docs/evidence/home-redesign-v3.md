@@ -202,3 +202,16 @@ Follow-up (Roel): the form sheet left a large empty white area at the bottom. It
 Follow-up (Roel): in the details pop-up (Spots, You and the swipe card), the description shows three lines with **See more** / **See less** (shown only when it runs longer). **Rate is on the left and Save on the right**, pinned at the bottom of the card so they are always in view, while the details above them scroll ([details_short](img/home-v3-android/details_short.jpg), [details_more](img/home-v3-android/details_more.jpg)). `flutter test` passes 278 (1 new).
 
 Follow-up (Roel): places liked by swiping right appeared in Liked and saved with hollow hearts, because the heart only checked **saved**. Hearts (Spots, You, details, and the wide layout) now fill for any place that is liked **or** saved and not passed (`DiscoveryInteractions.isPicked`); tapping a filled heart explains that removing isn't available yet ([you_hearts_filled](img/home-v3-android/you_hearts_filled.jpg)). Un-liking needs a backend change (see the sprint log). `flutter test` passes 279.
+
+### Round: See places for me on You, Picked for you as a pop-up, tidier swipe deck
+
+- **You:** the interest chips under the name are gone (they're in the preferences card). The preferences card has even 20 pt margins and a compact Edit pill. A **See places for me** button sits under it ([you_prefs_v2](img/home-v3-android/you_prefs_v2.jpg), email blurred).
+- **Picked for you is now one pop-up** over the blurred app, in three steps:
+  1. **Review:** interests, budget and pace, with **Edit** (opens travel preferences, then the review reloads) and **Looks good** ([picked_review](img/home-v3-android/picked_review.jpg)).
+  2. **Who's coming and max spend** ([picked_setup](img/home-v3-android/picked_setup.jpg)).
+  3. **Your top places:** a numbered list in rank order with a small photo, name and category · price, and a heart to like each place. There are no percentages or reasons; tapping a place opens the full details ([picked_results](img/home-v3-android/picked_results.jpg), [picked_details](img/home-v3-android/picked_details.jpg)).
+
+  Finishing travel preferences continues into the same pop-up at step 2. If a refresh fails, earlier results stay in view under the error.
+- **Categories:** the chips in the expanded Liked and saved list use the same categories, in the same order, as Spots.
+- **Swipe deck:** the card is sized from the screen height (300–400 pt, about 4:5) and centered between the title and the buttons. The cards behind tilt and offset less (2.5°, 8 pt), so they only peek ([swipe_v5](img/home-v3-android/swipe_v5.jpg)).
+- `flutter test` passes 280 (a new test covers review → Edit → questions → places → heart). Verified on the Infinix.

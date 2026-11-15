@@ -8,6 +8,7 @@ import '../../services/onboarding_repository.dart';
 import '../../theme.dart';
 import '../../widgets/status_banner.dart';
 import '../../widgets/trip_form/trip_form.dart';
+import 'discovery_screen.dart' show pickedForYouRoute;
 
 enum OnboardingStep { welcome, interests, budget, style, review, done }
 
@@ -606,8 +607,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         if (next == null) {
           Navigator.of(context).pop(_prefs);
         } else {
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute<void>(builder: next));
+          // The places pop-up takes this card's place.
+          Navigator.of(context).pushReplacement(pickedForYouRoute(next));
         }
       },
     ),

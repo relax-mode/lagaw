@@ -151,8 +151,14 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.sizeOf(context).width;
-    final cardHeight = (w * 1.0).clamp(340.0, 420.0);
+    // Sized from the screen, so the card sits centered between the title
+    // and the buttons on any phone: what's left after the header, title,
+    // buttons and nav, within limits.
+    final size = MediaQuery.sizeOf(context);
+    final pad = MediaQuery.paddingOf(context);
+    final spare = size.height - pad.vertical - 64 - 84 - 100 - 118;
+    final cardHeight = spare.clamp(300.0, 400.0);
+    final cardWidth = math.min(cardHeight * 0.8, size.width - 56);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -211,30 +217,33 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
           ],
         ),
         // Clear room so the tilted back cards never touch the subtitle.
-        const SizedBox(height: 44),
+        const SizedBox(height: 30),
         Padding(
           // Inset so the whole card reads smaller, not just shorter.
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: SizedBox(
-            height: cardHeight + 26,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.bottomCenter,
-              children: [
-                // The next places, tilted behind like a stack of photos.
-                for (final (i, next)
-                    in widget.upNext.take(2).indexed.toList()
-                      ..sort((a, b) => b.$1.compareTo(a.$1)))
-                  _BackCard(
-                    key: ValueKey('swipe-next-${next.id}'),
-                    place: next,
-                    height: cardHeight,
-                    depth: i + 1,
-                    // The card behind leans in as you drag the top one away.
-                    lift: i == 0 ? (_drag.abs() / 160).clamp(0.0, 1.0) : 0,
-                  ),
-                _frontCard(cardHeight),
-              ],
+          padding: EdgeInsets.zero,
+          child: Center(
+            child: SizedBox(
+              width: cardWidth,
+              height: cardHeight + 18,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomCenter,
+                children: [
+                  // The next places, tilted behind like a stack of photos.
+                  for (final (i, next)
+                      in widget.upNext.take(2).indexed.toList()
+                        ..sort((a, b) => b.$1.compareTo(a.$1)))
+                    _BackCard(
+                      key: ValueKey('swipe-next-${next.id}'),
+                      place: next,
+                      height: cardHeight,
+                      depth: i + 1,
+                      // The card behind leans in as you drag the top one away.
+                      lift: i == 0 ? (_drag.abs() / 160).clamp(0.0, 1.0) : 0,
+                    ),
+                  _frontCard(cardHeight),
+                ],
+              ),
             ),
           ),
         ),
@@ -695,18 +704,18 @@ class _BackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = depth - lift;
-    final turn = (depth.isOdd ? 1 : -1) * 4.5 * d * math.pi / 180;
+    final turn = (depth.isOdd ? 1 : -1) * 2.5 * d * math.pi / 180;
     return Positioned(
       left: 0,
       right: 0,
-      bottom: 26,
+      bottom: 18,
       child: IgnorePointer(
         child: Transform.translate(
-          offset: Offset(0, -13.0 * d),
+          offset: Offset(0, -8.0 * d),
           child: Transform.rotate(
             angle: turn * (1 - lift * 0.6),
             child: Transform.scale(
-              scale: 1 - 0.05 * d,
+              scale: 1 - 0.035 * d,
               child: Opacity(
                 opacity: (1 - 0.18 * d).clamp(0.0, 1.0),
                 child: Container(

@@ -7,7 +7,11 @@ import 'screens/trip_create_screen.dart';
 import 'screens/home/home_view.dart';
 import 'screens/spots/spots_view.dart';
 import 'screens/swipe/swipe_deck.dart';
-import 'screens/onboarding/first_run_gate.dart' show preferencesRepository;
+import 'screens/onboarding/discovery_screen.dart' show showPickedForYou;
+import 'screens/onboarding/first_run_gate.dart'
+    show openTravelPreferences, preferencesRepository;
+import 'config.dart';
+import 'services/discovery_service.dart';
 import 'widgets/floating_elements.dart';
 import 'screens/trips_tab.dart';
 import 'screens/you_tab.dart';
@@ -1077,7 +1081,20 @@ class _LocationsScreenState extends State<LocationsScreen> {
               .where((l) => _savedIds.contains(l.id))
               .toList(),
           actions: _placeActions,
+          categories: [
+            for (final c in HomeCategory.fromLocations(_availableLocations))
+              c.id,
+          ],
           preferences: preferencesRepository,
+          onSeePlaces: AppConfig.authEnabled
+              ? (ctx) => showPickedForYou(
+                    ctx,
+                    service: DiscoveryService(),
+                    actions: _placeActions,
+                    onEditPreferences: (c) =>
+                        openTravelPreferences(c, continueToPlaces: false),
+                  )
+              : null,
           onExplore: () => setState(() {
             _showOnlySaved = false;
             _activeTab = AppTab.spots;

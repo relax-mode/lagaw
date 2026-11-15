@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../config.dart';
 import '../../services/discovery_service.dart';
 import '../../services/onboarding_repository.dart';
+import '../spots/spots_view.dart' show PlaceActions;
 import 'discovery_screen.dart';
 import 'onboarding_flow.dart';
 
@@ -13,13 +14,17 @@ Future<void> openTravelPreferences(
   BuildContext context, {
   bool allowSkip = false,
   DiscoveryService? service,
+  bool continueToPlaces = true,
+  PlaceActions? actions,
 }) {
   final OnboardingRepository repository;
   WidgetBuilder? next;
   if (service != null || AppConfig.authEnabled) {
     final discovery = service ?? DiscoveryService();
     repository = discovery;
-    next = (_) => DiscoveryScreen(service: discovery);
+    if (continueToPlaces) {
+      next = (_) => DiscoveryScreen(service: discovery, actions: actions);
+    }
   } else {
     repository = MockOnboardingRepository.shared;
   }
