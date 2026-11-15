@@ -1,0 +1,68 @@
+{
+  "observed_at_utc": "2026-11-15T09:00:53.044718+00:00",
+  "manifest_sha256": "a8338bbfcc6d937546395ecc6da63084f51e2b5c832796809b8f0ea497864919",
+  "development": {
+    "first_run": {
+      "changed": 19,
+      "unchanged": 1,
+      "unmanaged_fields_preserved": true
+    },
+    "rerun": {
+      "changed": 0,
+      "unchanged": 20,
+      "unmanaged_fields_preserved": true
+    }
+  },
+  "production": {
+    "status": "pending_operator_sql"
+  },
+  "readback": [
+    {
+      "environment": "development",
+      "all_thirty_records_match_expected": true,
+      "original_ten_and_all_unrelated_fields_preserved": true,
+      "category_counts": {
+        "cafe": 4,
+        "gallery": 2,
+        "heritage": 2,
+        "landmark": 1,
+        "museum": 1,
+        "park": 4,
+        "recreation": 4,
+        "resort": 2,
+        "restaurant": 6,
+        "shopping": 4
+      }
+    },
+    {
+      "environment": "production",
+      "all_thirty_records_match_expected": true,
+      "original_ten_and_all_unrelated_fields_preserved": true,
+      "category_counts": {
+        "arcade_recreation": 1,
+        "art_gallery": 1,
+        "bookstore_leisure": 1,
+        "cafe": 3,
+        "cafe_meals": 1,
+        "childrens_play": 1,
+        "coastal_day_resort": 1,
+        "crafts_souvenirs": 1,
+        "evening_bowling": 1,
+        "gallery": 1,
+        "garden_farm_tourism": 1,
+        "heritage": 1,
+        "heritage_viewpoint": 1,
+        "indoor_recreation": 1,
+        "landmark": 1,
+        "local_food": 4,
+        "museum": 1,
+        "park": 3,
+        "pasalubong_food": 1,
+        "restaurant": 1,
+        "seaside_dining": 1,
+        "shopping_leisure": 1,
+        "waterpark": 1
+      }
+    }
+  ]
+}
