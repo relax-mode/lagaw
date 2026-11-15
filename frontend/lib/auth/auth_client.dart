@@ -40,6 +40,13 @@ class AuthTokens {
   }
 }
 
+/// The auth server could not be reached (offline, DNS, timeout). The
+/// session is still valid; callers should report a connection problem,
+/// never an expired session. [S4-17]
+class AuthUnreachable implements Exception {
+  const AuthUnreachable();
+}
+
 enum AuthChange { signedIn, refreshed, signedOut, passwordRecovery }
 
 /// Email/password auth. The real implementation wraps Supabase; tests use a
@@ -60,7 +67,8 @@ abstract class AuthClient {
   /// Set a password only with the authenticated recovery session.
   Future<void> updatePassword(String password);
 
-  /// Refreshes through the SDK; returns false when the session is gone.
+  /// Refreshes through the SDK; returns false when the server rejected the
+  /// session. Throws [AuthUnreachable] when the server could not be reached.
   Future<bool> refresh();
 }
 
@@ -146,8 +154,15 @@ class SupabaseAuthClient implements AuthClient {
     try {
       final response = await _auth.refreshSession();
       return response.session != null;
-    } catch (_) {
+    } on sb.AuthRetryableFetchException {
+      throw const AuthUnreachable();
+    } on sb.AuthException {
       return false;
+    } on TimeoutException {
+      throw const AuthUnreachable();
+    } catch (_) {
+      // Anything else (socket, DNS, HTTP client) means no answer arrived.
+      throw const AuthUnreachable();
     }
   }
 

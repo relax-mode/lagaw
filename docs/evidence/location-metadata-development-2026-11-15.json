@@ -1,0 +1,14 @@
+{
+  "environment": "development",
+  "first_run": {
+    "changed": 7,
+    "unchanged": 0,
+    "unmanaged_fields_preserved": true
+  },
+  "rerun": {
+    "changed": 0,
+    "unchanged": 7,
+    "unmanaged_fields_preserved": true
+  },
+  "manifest_sha256": "0b794dfe755032a6c8b585f4e4f47b480333421c93edde09becf3012e8bc52b0"
+}

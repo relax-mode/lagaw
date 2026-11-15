@@ -960,3 +960,116 @@ is a different operation and was not triggered. See the
 - Device testing found that a failed locations load silently fell back to a built-in list with truncated IDs. Fixed: the deck now requires live places, the IDs were corrected, and a regression test was added.
 - Noted for #117: a network drop during token refresh shows "session expired". See [evidence](evidence/discovery-interactions.md).
 
+
+### November 13, 2026 - #106 catalogue verification and blocker handoff
+
+- Andrew authorized work, PR publication and issue/PR comments for #106 only. Kept separate development/test and production projects, development before production writes, and no `.env` reads/edits. Preserved earlier uncommitted sprint-log entries in the named stash before branching from current `origin/main` (`8920bb7`) to `docs/s4-06-catalogue-verification`; the scraped CSV and test results remain untracked.
+- Added the credential-free public-API snapshot (development first, production second on November 13) and the source-qualified CSV candidate review produced in this session. Both APIs expose ten active places but only one field-complete record. Rechecked existing operator sources: museum hours/fees still conflict; Forest Park and Orange Project remain incomplete; Arima hours agree with the stored record. No operator was contacted.
+- Corrected the #106 guide's stale pending-review status: PR #130 is merged/approved, but catalogue updates and the three-stop itinerary are not delivered. Added `docs/destination-enrichment-verification-2026-11-13.md` with existing-record gaps, conditional alternatives, concrete verification questions, planner allowlist limitations and development-to-production acceptance steps. No venue proposal was approved, SQL applied, catalogue changed or itinerary demonstrated.
+- Validation: `.venv/Scripts/python.exe -m pytest -q backend/test_destination_enrichment.py backend/test_destination_coverage_audit.py` returned **35 passed in 0.09 s**; focused Ruff checks passed. Existing offline planner reports four blocked candidates, zero approved updates and zero writes. Evidence JSON parsing and `git diff --check` passed. PR publication and CI results are recorded separately on GitHub.
+
+- Publication: pushed `docs/s4-06-catalogue-verification`; GitHub integration refused both PR creation and #106 comment with HTTP 403 (`Resource not accessible by integration`). Local `gh` is unavailable. Added a comparison link and copy-ready PR description/issue comment to the handoff; no PR, posted comment, reviewer approval, CI result or merge is claimed. Earlier local sprint-log edits are restored after committing the scoped work and retained in the named stash.
+
+### November 14, 2026 — #107 follow-up: Roel's venue photos
+
+- Roel photographed **Orange Project, Cafetolyo, Arima and Calea** on 2026-11-07 (eleven iPhone photos). Seven were used and four left out:
+  - left out: the crowded Calea dining area (too many close, identifiable diners); a Calea storefront where cropping out passers-by left too little of the building; a menu close-up with prices that would go stale; a frame dominated by a dress-code sign;
+  - **shop name blurred** (Roel's request, instead of cropping): the neighbouring shop's sign, standing banner and door poster in the full Orange Project exterior;
+  - **faces blurred** (Roel's request): every diner in the full Calea entrance photo, and two seated customers in the Cafetolyo seating photo, which is now used as an extra image.
+- The originals carried **GPS coordinates**. The committed copies are resized to at most 2048 px and have all metadata removed (verified).
+- They are recorded as photographer-permission entries on `docs/s4-07-venue-photos`, so **all 10 locations now have a licensed or permitted image**.
+- Andrew mentioned deleting 3 locations. As of this entry, `main`, the staging API and the production API all still list 10, so the manifest still covers all 10.
+
+### November 14, 2026 — #117 Android release build and honest UI states
+
+- Roel started #117 on `fix/s4-17-release-build-honest-ui` and audited `main`. Verified: release APKs had **no INTERNET permission** (debug/profile only), the identity was `com.example.frontend`, release signing used the debug key, a release build without `API_BASE_URL` called localhost, and the UI showed hardcoded match scores, "Free" for unknown prices, a default "60 mins", Unsplash stock photos, hardcoded weather, a silent sample-data fallback, and "session expired" when the network dropped during a token refresh.
+- **Decisions (Roel):** app ID **`com.lagaw.bacolod`**; **remove sample spots** so only live data is shown.
+- Fixed all of the above. Release signing reads a git-ignored `key.properties`; the keystore stays with the release owner (#121). Release builds without a server configuration show a clear error. Unknown values stay unknown, there are no stock photos, and a network failure during refresh no longer signs the user out.
+- `flutter analyze` is clean, and `flutter test` passes 231 tests. A release APK (built against staging) reports `com.lagaw.bacolod`, `INTERNET` and the label "Lagaw".
+- Verified the release APK (against staging) on Roel's Infinix X6850 (Android 16). All 8 checks passed: real places, "Price unknown" and "No photo yet", no fake match %, honest timeout and offline errors with Retry, still signed in while offline, and the "Lagaw" app identity with INTERNET.
+- Found during device testing: staging's San Sebastian Cathedral `image_url` shows the Negros Museum (left over from the #108 test upload; production is unaffected), which is reported for the #108 owner. The launcher icon was still Flutter's default; at Roel's request it is now the Lagaw logo at all densities, with no metadata.
+- **Decision (Roel):** the production check is handed to the release owner (#121, CyGray), who has the production publishable key and a production account. #117 stays open until it is confirmed. See [evidence](evidence/release-build-honest-ui.md).
+- **November 15, 2026 — production check (CyGray):** built the release APK from `main` @ `0ff79bf` with the production API, Supabase URL and publishable key (Flutter 3.47.8, matching CI). `aapt dump badging` reports `com.lagaw.bacolod`, versionName `1.0.0`, `INTERNET` and the label "Lagaw". Installed on a phone (2511FPC34G) and signed in with a production account: Home loaded from production ("10 spots to explore") with "No photo yet" and no match %, and the Arima Restaurant detail showed "Price unknown" and no match %. The APK used the debug signing config because this machine has no `key.properties`; the real upload keystore is still needed for v1.0.0 (#121). Closed #117 after the team meeting recorded below.
+
+### November 14, 2026 — #109 real destination images in Flutter
+
+- Roel started #109 on `feat/s4-09-destination-images`, stacked on #174 (#117) and the unmerged venue-photos branch, so all 10 approved locations are available.
+- **Design:** the app shows a photo only when the file's SHA-256 (which the #108 script puts in the Storage path) is approved for that same location in a bundled credits asset generated from the #107 manifest. This came out of device testing for #117, where staging linked the Negros Museum photo to San Sebastian Cathedral.
+- Built a credit chip and credit sheet (attribution, changes, links to the original and the license), loading and failure placeholders, and decoding near display size.
+- Prepared an upload pack: Commons originals were verified against the reviewed SHA-1, the three over 2048 px were resized for the 5 MiB bucket (change recorded), and each upload file's SHA-256 is in the manifest.
+- `flutter test` passes 239 tests and `pytest -m "not db"` passes 1108. On Roel's Infinix (release build, staging), the mislinked cathedral photo is now refused.
+- Pending: uploads by the #108 owner, then deployed photo-and-credit screenshots. See [evidence](evidence/destination-images-ui.md).
+
+### November 14, 2026 — Home redesign v3
+
+- Roel asked for a cleaner, less cramped home screen that keeps Lagaw's vibe. Using the Impeccable design skill (a design review only, since the screen is native), Claude critiqued the current home and produced three mockups from Roel's references. Roel chose v3 and directed each change:
+  - his own Bacolod 3D elements (masskara, inasal, ube piaya, golden carabao) floating around a centered headline;
+  - a category carousel;
+  - the swipe action moved into the nav as a raised card button, with a Start matching / Plan a trip menu;
+  - "See N →" under the carousel;
+  - a You tab.
+- Built on `feat/home-redesign-v3`, stacked on #109 and #117:
+  - bundled the Outfit font (OFL), which the code asked for but never shipped;
+  - replaced the hardcoded "Maayong Aga, Roel!" with a time-of-day Hiligaynon greeting;
+  - graded and optimized the elements;
+  - added the home view, the nav with the animated menu (respecting reduce motion) and the You tab;
+  - removed the old dock and the duplicate swipe buttons on phones. The wide/web layout is unchanged.
+- `flutter analyze` is clean, and `flutter test` passes 251 tests. Verified on Roel's Infinix with a release build against staging. See [evidence](evidence/home-redesign-v3.md).
+- **Feedback round (Roel):** the carousel now always opens on heritage, so cards peek from both sides; the swipe button sits lower, into the nav; tapping it rolls the card one full turn into the × at the button's exact spot; and the menu options leave space above the ×. Verified on the Infinix, including a frame-by-frame screen recording of the roll. `flutter test` passes 252 tests.
+- **Feedback round (Roel):** the swipe button now uses the app logo. The yellow mascot card was redrawn as vector art (the logo crops its bottom), shown straight in the nav; tapping it fans the glass back card out into the full logo pose, replacing the ×. Verified on the Infinix with a frame-by-frame recording. `flutter test` passes 252 tests.
+- **Spots redesign (Roel's request):** the same greeting pill on every phone tab; Spots gets the headline with inasal and piaya, a glass search, chips from the real categories, and two-column photo cards with a category fade that expand in place to show full details with Save and Rate. Start matching in the menu shows the Lagaw logo. The pill and elements are now shared widgets for the planned per-page element sequences (noted for later). `flutter test` passes 259 tests (7 new Spots tests); verified on the Infinix.
+- **Feedback round (Roel):** Spots cards no longer expand in place, which moved the other cards. Tapping one pops it up like the swipe menu: the background blurs and the card grows from its grid spot into one centered card, the same size for every place, then shrinks back on close (×, background, or Back). Save and Rate work inside it and update live. `flutter test` passes 259 tests; verified on the Infinix with a frame-by-frame recording.
+- **Feedback round (Roel):** the open Spots card drops its duplicate heart (Save stays); the Spots title and count are centered with the piaya moved up beside them; on home the piaya and carabao moved down beside the See pill. Travel preferences was redesigned from a full page into a pop-up card over the blurred app in the home/Spots style (sky header with elements and logo, orange pills, smooth step cross-fades), keeping the same data, validation and saving. `flutter test` passes 260 tests; verified on the Infinix. During checks, a test Save on Calea stayed on account B because the app can't remove saves yet.
+- **Feedback round (Roel):** the Spots pop-up became a smooth container-transform morph (no mid-animation size switch or reflow). Trips, You and Picked for you were redesigned in the home/Spots style: centered titles, white cards, orange pills. You now has a profile hero with an avatar pencil (photo upload is a placeholder), travel preferences in full or a button to take them, and two liked places with See all. Floating elements are now one shared layer with a set per tab that glides between pages. `flutter test` passes 266 tests; verified on the Infinix except Picked for you, which needs a preferences save on the test account.
+- **Feedback round (Roel):** Swipe your vibe was redesigned to match the other pages: centered title and count, full-photo cards with the next places stacked behind, and a frosted panel with Pass and an orange Like. Dragging tilts the card with a LIKE or PASS stamp and springs back on short drags. Saving swipes, the pass explainer and rating are unchanged. `flutter test` passes 270 tests (4 new); verified on the Infinix.
+- **Feedback round (Roel):** swipe cards were resized to the area Roel marked on a screenshot, and rating moved from the "Been here? Rate it" link to a star button between Pass and Like that shows the stars once rated. `flutter test` passes 270 tests; verified on the Infinix.
+- **Feedback round (Roel):** swipes no longer show a loading state. They are optimistic: the card flies off and the next place shows at once while the swipe saves in the background; a failed save undoes the swipe and shows why. Still sent once, never retried automatically. `flutter test` passes 271 tests (1 new); verified on the Infinix, where the check recorded a like on Capitol Park for account B.
+- **Feedback round (Roel):** Swipe your vibe now has floating elements around its card. Moving between tabs is smoother: elements glide one after another in a slight arc, elements changing sides drift out and back in from the edges, and pages cross-fade instead of snapping. `flutter test` passes 272 tests; verified on the Infinix with screen recordings.
+
+### November 14–15, 2026 — Team meeting: system QA, v3 UI, and demo video roles
+
+- **When:** 9:00 PM Saturday, November 14 to 12:20 PM Sunday, November 15, 2026 (Asia/Singapore). Recorded by Kyle (CyGray) from the team's meeting notes. Attendees: Jeff, Andrew, Kyle and Roel (the whole team). The demo video is due today, November 15.
+- **Focus:** manual QA of the deployed system, Roel's push of the v3 UI, identifying issues, and assigning the demo video.
+
+**QA findings** (all open unless noted; none is recorded as fixed):
+
+- Sign in: working as intended.
+- Onboarding: works well, but the recommendation screen after onboarding is a dead end and feels odd. Proposed: remove it, or go straight to matching or Home.
+- Spots have no photos, which is an important gap. Andrew owns the destination list and Roel owns the pictures. Status: waiting for Andrew's upload to the storage bucket; Roel only needs to confirm they render in the app.
+- Swipe card layout: the card shows the spot's look ("chura"), price range and primary tag; the action buttons sit outside it. Make the top section more compact (for example, remove the top bar and animate out the "Swipe your vibe" header). Center the cards visually, accounting for the animations and container.
+- Tapping a card should open the Spot Info modal.
+- Trip creation: choosing "Slow" as the pace, then Plan with AI, highlights "Moderate" instead. The preference is not saved or reflected; the same happens with people going and similar fields.
+- Text fixes: "plan with AI" on the Plan with AI page and "plan a trip" on the Plan a trip screen have a lowercase "p"; the Plan a trip subheading contains an em dash; the "Describe your trip" section uses a different font.
+- Catalogue: Andrew adds metadata for the current 10 destinations and adds 10 more.
+
+**Demo video** (Part 1 to 8 of the course checklist). Materials: [team Drive folder](https://drive.google.com/drive/folders/1iX_TqWex11pZz6is73KHjOHGaeRbnth2), the instructions, assignments and script Google Doc ("AI Report Video - Lagaw | Relax Mode"), and the Canva presentation (https://canva.link/186ihbs6erj3tsb), which is still blank. The finished video goes in the Drive folder.
+
+| Part | Presenter |
+| --- | --- |
+| 1. Introduction and progress | Kyle (introduction); Jeff (major features and remaining tasks) |
+| 2. System walkthrough | Roel (sign-in and onboarding, discovery, trip create, read and update); Kyle (recommendations and itinerary, trip delete, frontend/backend/validation) |
+| 3. Hosting | Andrew (database and backend); Kyle (frontend on Cloudflare) |
+| 4. AI/LLM integration | Jeff |
+| 5. Tests and evaluations | Roel (frontend); Andrew (backend); Jeff (AI); Kyle (automated tests) |
+| 6. DevOps configuration and rules | Kyle |
+| 7. End-to-end DevOps demonstration | Kyle |
+| 8. Final progress summary | Kyle |
+
+- **Decision:** #117 is closed after the production check recorded above.
+
+### November 15, 2026 - user-supplied existing-location metadata refresh
+
+- Andrew requested a separate task filling missing metadata from his supplied coordinates, prices and schedules: development first, production after verification. He declined collecting further links. Retained the supplied provenance/uncertainty and rounded four coordinate pairs to database precision. Did not re-add cancelled alternative venues or alter the original ten IDs/images/tags/durations.
+- On `feat/location-metadata-refresh` (from `origin/main` d933d23), prepared seven guarded patches plus qualified descriptions and separate development/production snapshots. Provincial Capitol office hours/free-access claim and explicitly unverified Panaad oval reports remain deferred. Calea menu prices, Arima spending, historical Forest Park fees and exhibition-dependent Orange prices are qualified user-supplied estimates, not guaranteed per-person totals/current operator verification.
+- Focused tests: 77 passed; Ruff passed. An initial REST equality-string quoting mismatch yielded no updated row and stopped at the write guard. After correcting filter encoding, development updated seven records; rerun changed zero. Full public readback matches the prior ten records plus only intended fields. All ten image URLs and identities survive. Development now has 10 coordinate pairs, 8 schedules and 8 bounded cost ranges; field completeness is not factual certification.
+- Production readback remains unchanged. No production credential is available in the process/configuration; execution was blocked before production network access/writes. Prepared `docs/location-metadata-production-2026-11-15.sql` for an authorized operator in the separate production project, and documented process-only credential setup without editing `.env`. Evidence and qualifications are linked in `docs/location-metadata-refresh-2026-11-15.md`. Existing local notes are preserved in a named stash and restored after committing this task.
+
+- Branch pushed. GitHub PR creation failed with a connection argument error; the handoff contains the PR comparison and copy-ready description. No PR, CI result or production update is claimed.
+
+### November 15, 2026 - supplied Capitol and Panaad metadata follow-up
+
+- Andrew explicitly requested using his previously supplied Capitol and Panaad hours and costs, superseding the prior deferral. Applied two existing development records, retaining office-hour and unverified oval-report caveats in descriptions. Guarded rerun changed zero; full public readback preserved all ten expected records and unrelated fields. Development now has 10 schedules and 10 cost ranges. Production remains at 8 of each pending the prepared operator SQL; no environment changes. Evidence: docs/evidence/location-metadata-supplied-followup-2026-11-15.json.
+
+### November 15, 2026 - destination description attribution cleanup
+
+- Removed personal supplied-by wording from four development destination descriptions at the data owner's request. Preserved source qualifications and every other public field. Four updates, zero changes on rerun; full public readback matched all ten records. Production SQL is prepared pending operator execution; no environment changes. Prior audit snapshots remain historical records.
