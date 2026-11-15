@@ -176,4 +176,13 @@ Roel asked for a swipeable introduction before sign-in, with the swiping cards f
 - **Unchanged:** validation, the rate-limit cooldown, password reset, the email-confirmation message, and re-sign-in after an expired session (still pushed over the app, so unsaved forms are kept).
 - Reduced motion stops the intro loops.
 - Tests: auth tests open the form directly (`AuthGate(intro: false)`); a new `welcome_flow_test.dart` covers the walkthrough (Next, a swipe, Skip), the seen flag, Create account / Log in / Back, and signing in from the intro. `flutter test` passes 275.
-- Device check: not yet. The phone disconnected before the new build could be installed.
+- Device check (Infinix, staging build installed fresh with app data cleared): the intro opens on Swipe your vibe with the demo running; Next, swipes and Skip work; the welcome page shows both buttons; and a relaunch opens straight on the welcome page. Fixed while checking: the Art and Landmarks pills overlapped on page 2, and the white "Back" text was hard to read over the sun (now a white pill).
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [intro_1](img/home-v3-android/intro_1.jpg) | Swipe your vibe: card deck demo, dots 1 of 4, Next, Skip | Pass |
+| [intro_2](img/home-v3-android/intro_2.jpg) | Find spots around Bacolod: floating category pills, none overlapping | Pass |
+| [intro_3](img/home-v3-android/intro_3.jpg) | Plan a trip in seconds: Day 1 card with stops ticking in | Pass |
+| [intro_4](img/home-v3-android/intro_4.jpg) | Welcome to Lagaw: logo and elements, Create account and Log in | Pass |
+| [auth_login](img/home-v3-android/auth_login.jpg) | Welcome back: sky header with logo, email, password, Forgot password?, Log in, Sign up link | Pass |
+| [auth_signup](img/home-v3-android/auth_signup.jpg) | Create your account: Back pill, email, password, confirm, Create account, Log in link | Pass |

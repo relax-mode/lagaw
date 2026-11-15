@@ -280,14 +280,25 @@ class _SignInScreenState extends State<SignInScreen> {
                         height: 52,
                         child: Row(
                           children: [
+                            const SizedBox(width: 12),
                             if (canGoBack)
                               TextButton.icon(
                                 key: const ValueKey('auth-back'),
                                 onPressed: _busy ? null : back,
+                                // A white pill, so it reads even over
+                                // the sun.
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: const Color(0xF5FFFFFF),
+                                  foregroundColor: AppTheme.slateDark,
+                                  shape: const StadiumBorder(),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    12,
+                                    8,
+                                    16,
+                                    8,
+                                  ),
                                   textStyle: const TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),

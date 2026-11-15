@@ -719,13 +719,14 @@ class _FloatingChips extends StatelessWidget {
 
   const _FloatingChips({required this.loop});
 
+  // Staggered left/right rows so no two pills overlap.
   static const _chips = [
-    (Icons.local_cafe_rounded, 'Cafés', -0.5, -0.8, -6.0),
-    (Icons.account_balance_rounded, 'Heritage', 0.45, -0.62, 5.0),
-    (Icons.park_rounded, 'Parks', -0.55, -0.3, 4.0),
-    (Icons.restaurant_rounded, 'Food', 0.4, -0.1, -5.0),
-    (Icons.palette_rounded, 'Art', -0.35, 0.22, -3.0),
-    (Icons.location_city_rounded, 'Landmarks', 0.4, 0.4, 6.0),
+    (Icons.local_cafe_rounded, 'Cafés', -0.55, -0.9, -6.0),
+    (Icons.account_balance_rounded, 'Heritage', 0.5, -0.68, 5.0),
+    (Icons.park_rounded, 'Parks', -0.6, -0.4, 4.0),
+    (Icons.restaurant_rounded, 'Food', 0.5, -0.14, -5.0),
+    (Icons.palette_rounded, 'Art', -0.62, 0.12, -3.0),
+    (Icons.location_city_rounded, 'Landmarks', 0.5, 0.4, 6.0),
     (Icons.cake_rounded, 'Sweets', -0.5, 0.68, 4.0),
   ];
 
@@ -742,7 +743,7 @@ class _FloatingChips extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               Align(
-                alignment: const Alignment(0.95, 0.95),
+                alignment: const Alignment(1.0, 1.05),
                 child: Transform.translate(
                   offset: Offset(0, _bob(t, 0.3)),
                   child: Transform.rotate(
@@ -752,7 +753,7 @@ class _FloatingChips extends StatelessWidget {
                 ),
               ),
               Align(
-                alignment: const Alignment(-1.05, 0.0),
+                alignment: const Alignment(1.08, -0.98),
                 child: Transform.translate(
                   offset: Offset(0, _bob(t, 0.8)),
                   child: Transform.flip(
