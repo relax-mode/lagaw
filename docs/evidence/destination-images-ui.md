@@ -54,4 +54,14 @@ Andrew gave Roel the staging Supabase service-role key for this upload. It stays
 - [x] **Upload the approved photos** to staging, and clear the mislinked cathedral `image_url` first (done 2026-11-14, see above).
 - [x] Deployed screenshots of licensed photos with credits and the credit sheet (above). The fallback is covered by tests and 109_1.
 - [x] PR review and CI (PR #175, merged).
-- [ ] Production upload, when the team releases to production. The same script and files apply; it needs a production-approved run by the key holder.
+- [x] Production upload: done on 2026-11-15 (see below), after the team approved it.
+
+### Upload to production (2026-11-15, Roel and Claude)
+
+The team approved uploading the photos to production. Roel holds the production service-role key in his git-ignored `.env` as `PROD_SUPABASE_SERVICE_ROLE_KEY`; its value was never printed. The key was confirmed to name production (`zjnuqqtbapbpudsjbpif`) before use.
+
+- **Script:** `scripts/destination_images.py` gained an explicit `--production` flag. It reads only `PROD_SUPABASE_SERVICE_ROLE_KEY`, refuses the development key, and refuses a legacy key that names another project. Without the flag it stays development-only. New tests are in `backend/test_destination_images.py` (10 pass, ruff clean).
+- **Before:** read-only, production has 30 places. All 10 photo locations exist with the same IDs as staging, all with an empty `image_url`; the `destination-images` bucket already exists, and its settings were checked by the script.
+- **Run:** a dry run of all 14 files, then 10 main photos with `--execute --approved-usage --link-location` and 4 extras without linking. Every public copy was verified by SHA-256.
+- **After:** all 10 places link to their own approved file, by the app's SHA-256 rule; the other 20 places have no approved photo yet.
+- **Not done:** the check that app users can't write to the bucket. The test upload with the public key was blocked by the session's permission check, because it would write to production if the protection were missing. Whoever manages production migrations should confirm that `20261103100000_destination_image_storage_policies.sql` is applied there.

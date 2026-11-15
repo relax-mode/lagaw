@@ -1,11 +1,16 @@
-"""Repeatable, development-only Supabase destination-image setup and upload.
+"""Repeatable Supabase destination-image setup and upload.
 
-No live changes by default. Storage bucket operations use the Storage REST API,
-not direct writes to managed storage metadata tables. No client upload endpoint.
+Development by default. Production only with an explicit ``--production``
+flag and its own key (``PROD_SUPABASE_SERVICE_ROLE_KEY``), after the team
+approved it (#109). No live changes by default. Storage bucket operations use
+the Storage REST API, not direct writes to managed storage metadata tables.
+No client upload endpoint.
 """
 
 import argparse
+import base64
 import hashlib
+import json
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -17,6 +22,7 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parents[1]
 BUCKET = "destination-images"
 DEVELOPMENT = "https://vnpkyvtbupnquvirzlzp.supabase.co"
+PRODUCTION = "https://zjnuqqtbapbpudsjbpif.supabase.co"
 MAX_BYTES = 5 * 1024 * 1024
 MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
         ".webp": "image/webp"}
@@ -61,6 +67,31 @@ def development_credentials() -> tuple[str, str]:
     if (url != DEVELOPMENT and not loopback) or not key or parsed.username or parsed.password:
         raise StorageError("Use the explicitly approved development Supabase project.")
     return url, key
+
+
+def _jwt_project(key: str) -> str | None:
+    """The project ref inside a legacy service-role JWT, if it is one."""
+    parts = key.split(".")
+    if len(parts) != 3:
+        return None
+    try:
+        payload = parts[1] + "=" * (-len(parts[1]) % 4)
+        return json.loads(base64.urlsafe_b64decode(payload)).get("ref")
+    except (ValueError, TypeError):
+        return None
+
+
+def production_credentials() -> tuple[str, str]:
+    """Production's own key, never the development one. A legacy JWT must
+    name the production project. Never print or format the key."""
+    load_dotenv(ROOT / ".env", override=False)
+    key = os.environ.get("PROD_SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    if not key or key == os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip():
+        raise StorageError("Set PROD_SUPABASE_SERVICE_ROLE_KEY for production.")
+    ref = _jwt_project(key)
+    if ref is not None and ref != "zjnuqqtbapbpudsjbpif":
+        raise StorageError("That key is not for the production project.")
+    return PRODUCTION, key
 
 
 def admin_headers(key: str) -> dict[str, str]:
@@ -155,6 +186,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--approved-usage", action="store_true",
                         help="Confirm that this specific image is authorized for project use")
     parser.add_argument("--link-location", action="store_true")
+    parser.add_argument(
+        "--production", action="store_true",
+        help="Target production (approved for #109) with PROD_SUPABASE_SERVICE_ROLE_KEY",
+    )
     args = parser.parse_args(argv)
     if (args.file is None) != (args.location_id is None):
         parser.error("--file and --location-id must be supplied together")
@@ -162,14 +197,17 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--link-location requires an image and destination")
     try:
         info = image_info(args.file, args.location_id) if args.file else None
+        target = "production" if args.production else "development"
         if not args.execute:
-            print("DRY RUN: development storage bucket configuration; no network or writes.")
+            print(f"DRY RUN: {target} storage bucket configuration; no network or writes.")
             if info:
                 print(f"DRY RUN: would upload {info[2]} ({len(info[0])} bytes)")
             return 0
         if info and not args.approved_usage:
             raise StorageError("Do not upload before confirming image usage permissions.")
-        url, key = development_credentials()
+        url, key = (
+            production_credentials() if args.production else development_credentials()
+        )
         with httpx.Client(base_url=url, headers=admin_headers(key), timeout=10.0,
                           follow_redirects=False, trust_env=False) as client:
             bucket_configuration(client)
@@ -177,12 +215,12 @@ def main(argv: list[str] | None = None) -> int:
                 public = upload_and_verify(client, url, info[0], info[1], info[2])
                 if args.link_location:
                     link_if_empty(client, args.location_id, public)
-                print(f"Verified development public image URL: {public}")
+                print(f"Verified {target} public image URL: {public}")
             else:
-                print("Development bucket configuration verified.")
+                print(f"{target.capitalize()} bucket configuration verified.")
         return 0
     except (StorageError, httpx.HTTPError, ValueError):
-        print("Destination image storage operation failed; inspect development configuration.")
+        print("Destination image storage operation failed; inspect the target configuration.")
         return 1
 
 

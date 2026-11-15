@@ -47,6 +47,58 @@ def test_target_is_development_only_without_leaking_key(monkeypatch):
     assert images.admin_headers(KEY) == {"apikey": KEY}
 
 
+def _jwt(ref: str) -> str:
+    import base64
+    import json
+
+    body = base64.urlsafe_b64encode(json.dumps({"ref": ref, "role": "service_role"}).encode())
+    return "eyJhbGciOiJIUzI1NiJ9." + body.decode().rstrip("=") + ".signature"
+
+
+def test_production_needs_its_own_production_key(monkeypatch):
+    monkeypatch.setattr(images, "load_dotenv", lambda *a, **kw: None)
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", KEY)
+    monkeypatch.delenv("PROD_SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    with pytest.raises(images.StorageError):
+        images.production_credentials()
+    # The development key never stands in for production.
+    monkeypatch.setenv("PROD_SUPABASE_SERVICE_ROLE_KEY", KEY)
+    with pytest.raises(images.StorageError):
+        images.production_credentials()
+    # A legacy key for another project is refused, without leaking it.
+    staging = _jwt("vnpkyvtbupnquvirzlzp")
+    monkeypatch.setenv("PROD_SUPABASE_SERVICE_ROLE_KEY", staging)
+    with pytest.raises(images.StorageError) as failure:
+        images.production_credentials()
+    assert staging not in str(failure.value)
+    production = _jwt("zjnuqqtbapbpudsjbpif")
+    monkeypatch.setenv("PROD_SUPABASE_SERVICE_ROLE_KEY", production)
+    assert images.production_credentials() == (images.PRODUCTION, production)
+
+
+def test_production_run_targets_production_only(tmp_path, monkeypatch):
+    path = tmp_path / "approved.png"
+    path.write_bytes(PNG)
+    monkeypatch.setattr(images, "development_credentials", lambda: pytest.fail(
+        "a production run must not use development credentials"
+    ))
+    monkeypatch.setattr(images, "production_credentials", lambda: (images.PRODUCTION, KEY))
+    seen = []
+
+    class Recorder(httpx.Client):
+        def __init__(self, *a, **kw):
+            seen.append(str(kw.get("base_url", "")))
+            raise httpx.ConnectError("offline test")
+
+    monkeypatch.setattr(images.httpx, "Client", Recorder)
+    code = images.main([
+        "--production", "--execute", "--approved-usage",
+        "--file", str(path), "--location-id", str(LOCATION),
+    ])
+    assert code == 1
+    assert seen == [images.PRODUCTION]
+
+
 def test_no_execute_is_offline_dry_run(tmp_path, monkeypatch, capsys):
     path = tmp_path / "approved.png"
     path.write_bytes(PNG)

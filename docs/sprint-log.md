@@ -1007,6 +1007,13 @@ is a different operation and was not triggered. See the
 - Checked on Roel's Infinix: real photos with credits on Home, Spots, the open card and the credit sheet. The credit chip had been hidden under card titles on Spots and swipe cards, so it moved to a top corner, and the credit sheet is now full width. `flutter test` passes 273 tests. See [evidence](evidence/destination-images-ui.md).
 - #109 can close. A production upload is left for the production release.
 
+### November 15, 2026 — #109 photos uploaded to production
+
+- **Approval and credential:** the team approved uploading the #109 photos to production. Roel received the production service-role key and holds it in his git-ignored `.env` (`PROD_SUPABASE_SERVICE_ROLE_KEY`).
+- Added an explicit `--production` mode to `scripts/destination_images.py` that only accepts that key and refuses a development key or one for another project (tests added).
+- Uploaded all 14 approved photos to production and linked the 10 main ones (they were all empty). Each upload was verified by SHA-256, and every link matches the app's approved credits.
+- Pending: confirm on production that the destination-images storage policy migration is applied (the client-write denial test was not run).
+
 ### November 15, 2026 — #117 production check
 
 - **Credential handoff:** CyGray gave Roel the production Supabase **publishable** key (the public client key) for the #117 production check. Roel holds it in his git-ignored `.env`.
