@@ -1,0 +1,31 @@
+{
+  "observed_at_utc": "2026-11-15T10:42:52.592400+00:00",
+  "reports": [
+    {
+      "environment": "development",
+      "public_api": "https://lagaw-api-staging-i5kvldluga-as.a.run.app/locations",
+      "public_locations": 30,
+      "locations_with_image_urls": 30,
+      "uploaded_objects_publicly_byte_verified": 32,
+      "new_main_images_linked": 20,
+      "additional_objects": 12,
+      "all_public_fields_match_database_readback": true,
+      "all_other_database_fields_preserved": true,
+      "all_uploaded_hashes_present_in_local_frontend_asset": true
+    },
+    {
+      "environment": "production",
+      "public_api": "https://lagaw-api-i5kvldluga-as.a.run.app/locations",
+      "public_locations": 30,
+      "locations_with_image_urls": 30,
+      "uploaded_objects_publicly_byte_verified": 32,
+      "new_main_images_linked": 20,
+      "additional_objects": 12,
+      "all_public_fields_match_database_readback": true,
+      "all_other_database_fields_preserved": true,
+      "all_uploaded_hashes_present_in_local_frontend_asset": true
+    }
+  ],
+  "local_files_preserved_and_hash_verified": 32,
+  "mixed_folder_removed": true
+}

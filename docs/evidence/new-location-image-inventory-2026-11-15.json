@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-15",
+  "status": "organized",
+  "images": [
+    {
+      "location_id": "ace4cd5a-e098-545e-bd2b-bfa19e529782",
+      "name": "Aboy's Restaurant - Liroville",
+      "primary": true,
+      "original_file": "AboysLiroville_1.jpg",
+      "file": "docs/destination-images/aboys-liroville/AboysLiroville_1.jpg",
+      "sha256": "6605d65ebbb23108fa6c9c55c53b0769bfb8fa52381d328dba2e6db40a4759e2",
+      "bytes": 91103
+    },
+    {
+      "location_id": "ace4cd5a-e098-545e-bd2b-bfa19e529782",
+      "name": "Aboy's Restaurant - Liroville",
+      "primary": false,
+      "original_file": "AboysLiroville_2.jpg",
+      "file": "docs/destination-images/aboys-liroville/AboysLiroville_2.jpg",
+      "sha256": "9cfd3275521aeb1a41ba190f934dd67d56a0f6b78e79c9b3da19074a0ede476a",
+      "bytes": 56227
+    },
+    {
+      "location_id": "c6303987-1b9c-5a83-b80d-7a9a4b389b6b",
+      "name": "Artfull Philippines / Gallery and Cafe",
+      "primary": true,
+      "original_file": "artful_1.webp",
+      "file": "docs/destination-images/artfull-philippines/artful_1.webp",
+      "sha256": "af77e2ae6e1f8d763c98c8126aa9dadd88c2d9007e88f8231149ce14121c2ad9",
+      "bytes": 162674
+    },
+    {
+      "location_id": "eeeb59c9-b5d6-58ca-aa54-ce33c221a222",
+      "name": "Ayala Malls Capitol Central - general visit",
+      "primary": true,
+      "original_file": "AyalaCapitol_1.jpg",
+      "file": "docs/destination-images/ayala-capitol-central/AyalaCapitol_1.jpg",
+      "sha256": "2743f8acf87615c287c8c5e5756a38ec4adc86911aa38f8b67f7af7587534185",
+      "bytes": 183956
+    },
+    {
+      "location_id": "eeeb59c9-b5d6-58ca-aa54-ce33c221a222",
+      "name": "Ayala Malls Capitol Central - general visit",
+      "primary": false,
+      "original_file": "AyalaCapitol_2.jpg",
+      "file": "docs/destination-images/ayala-capitol-central/AyalaCapitol_2.jpg",
+      "sha256": "8212886f66c139de53f51adb2bdfb1b4b8db3325cb25d517f824530a70b345df",
+      "bytes": 227928
+    },
+    {
+      "location_id": "a9e26ed9-83bb-5056-907a-85b699448eec",
+      "name": "Caribbean Waterpark and Resotel - day use",
+      "primary": true,
+      "original_file": "CarribeanWaterpark_1.jpg",
+      "file": "docs/destination-images/caribbean-waterpark/CarribeanWaterpark_1.jpg",
+      "sha256": "df92469d624ea1ec15d3223a1f56904b9a1f5885ea917d546a40843540015dd9",
+      "bytes": 34610
+    },
+    {
+      "location_id": "a9e26ed9-83bb-5056-907a-85b699448eec",
+      "name": "Caribbean Waterpark and Resotel - day use",
+      "primary": false,
+      "original_file": "CarribeanWaterpark_2.jpg",
+      "file": "docs/destination-images/caribbean-waterpark/CarribeanWaterpark_2.jpg",
+      "sha256": "59c0a3d6eca2112c8c9f3c9c4c5ab87a534b096e2f8a466ba226ea63454ee281",
+      "bytes": 103053
+    },
+    {
+      "location_id": "f2ee9da3-4f32-50d5-9840-f6352bfccc9a",
+      "name": "Coffee Culture Roastery - Alijis",
+      "primary": true,
+      "original_file": "coffeeculture_1.jpg",
+      "file": "docs/destination-images/coffee-culture-alijis/coffeeculture_1.jpg",
+      "sha256": "fe6e4b7fe972ff9cedb0a4ee17aa8272c7e3d4bddf3d7454e7f508657fd55d69",
+      "bytes": 48238
+    },
+    {
+      "location_id": "70b981f6-8196-5546-b0ce-0ab1773fbac4",
+      "name": "Fully Booked - SM City Bacolod",
+      "primary": true,
+      "original_file": "fullybooked_1.jpg",
+      "file": "docs/destination-images/fully-booked-sm/fullybooked_1.jpg",
+      "sha256": "184c417d7875dc76b75586a78a6f02709f39664833cb818cfe8eec3e234453e7",
+      "bytes": 2248656
+    },
+    {
+      "location_id": "70b981f6-8196-5546-b0ce-0ab1773fbac4",
+      "name": "Fully Booked - SM City Bacolod",
+      "primary": false,
+      "original_file": "fullybooked_2.jpg",
+      "file": "docs/destination-images/fully-booked-sm/fullybooked_2.jpg",
+      "sha256": "8642fc20d367efa08e2026dace8a4e05d27b6076ff00b04b2b62d8a6b3fbbd6a",
+      "bytes": 403374
+    },
+    {
+      "location_id": "49f18097-4d77-5237-8f28-cfd4a0b5940a",
+      "name": "kidzooona - SM City Bacolod",
+      "primary": true,
+      "original_file": "kidzoona_1.jpg",
+      "file": "docs/destination-images/kidzooona-sm/kidzoona_1.jpg",
+      "sha256": "f34cc1ed35e6cbdd850b06b65408c84663b87170cf97aaaa25e3d28cfd7576af",
+      "bytes": 32538
+    },
+    {
+      "location_id": "49f18097-4d77-5237-8f28-cfd4a0b5940a",
+      "name": "kidzooona - SM City Bacolod",
+      "primary": false,
+      "original_file": "kidzoona_2.jpg",
+      "file": "docs/destination-images/kidzooona-sm/kidzoona_2.jpg",
+      "sha256": "054a5043a75434a144e902767b22cb4fa6ec80ba306fc5031a059676710c437e",
+      "bytes": 40344
+    },
+    {
+      "location_id": "24d858ec-8cf1-53c6-ab55-97858a5fed88",
+      "name": "Kuppa Coffee and Tea - Tindalo",
+      "primary": true,
+      "original_file": "Kuppa_1.jpg",
+      "file": "docs/destination-images/kuppa-tindalo/Kuppa_1.jpg",
+      "sha256": "38443621d0af857563f9bd0d6d3438e7d526aa37795a3e3b810cbdb2e40b15d6",
+      "bytes": 178337
+    },
+    {
+      "location_id": "f5daa34a-7e4b-5a7e-9e97-1cf4d9c1c920",
+      "name": "Lopue's East Bowling Center",
+      "primary": true,
+      "original_file": "lopues_1.jpg",
+      "file": "docs/destination-images/lopues-east-bowling/lopues_1.jpg",
+      "sha256": "772e79f7360b00bf614c8feb4a6193a43d960485803ef8638179796364ddfa57",
+      "bytes": 73833
+    },
+    {
+      "location_id": "f5daa34a-7e4b-5a7e-9e97-1cf4d9c1c920",
+      "name": "Lopue's East Bowling Center",
+      "primary": false,
+      "original_file": "lopues_2.jpg",
+      "file": "docs/destination-images/lopues-east-bowling/lopues_2.jpg",
+      "sha256": "8e154d98d4f85ff812baceedc952c19d0684782cebb752070c56d3c51a9ef6ef",
+      "bytes": 39450
+    },
+    {
+      "location_id": "0bf1a140-9303-508f-9375-a2ceabce77f3",
+      "name": "Manokan Country - temporary SM site",
+      "primary": true,
+      "original_file": "manokan_1.jpg",
+      "file": "docs/destination-images/manokan-country-sm/manokan_1.jpg",
+      "sha256": "096304ce027efc690d37c6d114fe9c421eca253ca008611d5db1a044f41c9f13",
+      "bytes": 250513
+    },
+    {
+      "location_id": "8bc43864-3bad-5326-9c11-53b1eb274571",
+      "name": "Merzci - Sum-ag branch",
+      "primary": true,
+      "original_file": "Merzci_1.jpg",
+      "file": "docs/destination-images/merzci-sum-ag/Merzci_1.jpg",
+      "sha256": "1e883452934beed3e86d99652d341a3cebce913b1068be5c8b529b2e8e4999c5",
+      "bytes": 57027
+    },
+    {
+      "location_id": "3c897dde-3ad4-5599-87d6-6fa234136748",
+      "name": "Negros Superlanes - Goldenfield",
+      "primary": true,
+      "original_file": "negrossuperlanes_1.jpg",
+      "file": "docs/destination-images/negros-superlanes/negrossuperlanes_1.jpg",
+      "sha256": "6ed04fb5def7c09f7448da3a3791b7c17fae9f901f98ab2870e1e0e10882322f",
+      "bytes": 2512123
+    },
+    {
+      "location_id": "3c897dde-3ad4-5599-87d6-6fa234136748",
+      "name": "Negros Superlanes - Goldenfield",
+      "primary": false,
+      "original_file": "negrossuperlanes_2.jpg",
+      "file": "docs/destination-images/negros-superlanes/negrossuperlanes_2.jpg",
+      "sha256": "84992245617d594347b2bb1c3c032ac86896fbfe72010dbdc73ca7e22bde3440",
+      "bytes": 1988080
+    },
+    {
+      "location_id": "c4047367-665b-5a04-8fd1-44aa7e50aa56",
+      "name": "May's Organic Garden and Restaurant",
+      "primary": true,
+      "original_file": "organicgarden_1.jpg",
+      "file": "docs/destination-images/mays-organic-garden/organicgarden_1.jpg",
+      "sha256": "43dd77e70f11a662384e99c4d0c92a5f6e455b4d3055b49928bbd9fdeef41187",
+      "bytes": 213755
+    },
+    {
+      "location_id": "c4047367-665b-5a04-8fd1-44aa7e50aa56",
+      "name": "May's Organic Garden and Restaurant",
+      "primary": false,
+      "original_file": "organicgarden_2.jpg",
+      "file": "docs/destination-images/mays-organic-garden/organicgarden_2.jpg",
+      "sha256": "bb0f1c27bfeaef987ff6fc97b2f46738813058536699154dd5e46ffc75e17580",
+      "bytes": 62310
+    },
+    {
+      "location_id": "c4047367-665b-5a04-8fd1-44aa7e50aa56",
+      "name": "May's Organic Garden and Restaurant",
+      "primary": false,
+      "original_file": "organicgarden_3.jpg",
+      "file": "docs/destination-images/mays-organic-garden/organicgarden_3.jpg",
+      "sha256": "1f3f14b61a7f970b033431921b6d42c3bc932b40faf96ab5a3cf3d0ca59cb400",
+      "bytes": 217710
+    },
+    {
+      "location_id": "977ea9ef-dafe-5986-9efc-79c611ff9f6c",
+      "name": "Palawud Resto Grill and Bar - San Juan/Banago",
+      "primary": true,
+      "original_file": "Palawud_1.jpg",
+      "file": "docs/destination-images/palawud-san-juan/Palawud_1.jpg",
+      "sha256": "e5609308d59d3566ec0846cd4d8dcf9738980f1c3187f17e8424ebedf33c56bb",
+      "bytes": 42342
+    },
+    {
+      "location_id": "977ea9ef-dafe-5986-9efc-79c611ff9f6c",
+      "name": "Palawud Resto Grill and Bar - San Juan/Banago",
+      "primary": false,
+      "original_file": "Palawud_2.jpg",
+      "file": "docs/destination-images/palawud-san-juan/Palawud_2.jpg",
+      "sha256": "426627f63ae213815e7c8022eacee7c44c770a0278b938af19169d74027f2d9e",
+      "bytes": 124127
+    },
+    {
+      "location_id": "69e4f350-bd25-50e8-90f0-24eea097f91d",
+      "name": "Pope John Paul II Tower",
+      "primary": true,
+      "original_file": "popejohnpaul_1.jpg",
+      "file": "docs/destination-images/pope-john-paul-ii-tower/popejohnpaul_1.jpg",
+      "sha256": "faaed2193cbcb8290cd2ad7c069cc8e5c6f79d90d2a25e18b6b3df8c7c3ee74b",
+      "bytes": 38511
+    },
+    {
+      "location_id": "43f712d8-a6bd-5113-905e-b8d00cf2c2f6",
+      "name": "Quan Native Delicacies - Plaza",
+      "primary": true,
+      "original_file": "quan_1.jpg",
+      "file": "docs/destination-images/quan-plaza/quan_1.jpg",
+      "sha256": "dcfb414ed0ba0edb2f1c3eb718a26e2d8c2b708b703204f60e6abb3bb34c4534",
+      "bytes": 1943614
+    },
+    {
+      "location_id": "a22c5862-5ce7-5793-a96e-150b79e1f2af",
+      "name": "Resorts Negrense - day use",
+      "primary": true,
+      "original_file": "ResortNegrense_1.jpg",
+      "file": "docs/destination-images/resorts-negrense/ResortNegrense_1.jpg",
+      "sha256": "c78b9b696da6b9823150ed91858160a5622df31d3c6c6ab9af9fd083fceb4534",
+      "bytes": 330179
+    },
+    {
+      "location_id": "a22c5862-5ce7-5793-a96e-150b79e1f2af",
+      "name": "Resorts Negrense - day use",
+      "primary": false,
+      "original_file": "ResortNegrense_2.jpg",
+      "file": "docs/destination-images/resorts-negrense/ResortNegrense_2.jpg",
+      "sha256": "0f25f00aba13de68d1d98ab770c54c3dbf00287d294020b5e0d9c19bdf5aa2b6",
+      "bytes": 90467
+    },
+    {
+      "location_id": "4ce87f7b-17d1-538f-8a1e-408956bdbb64",
+      "name": "Sharyn's Cansi House - Narra",
+      "primary": true,
+      "original_file": "SharynsCansi_1.jpg",
+      "file": "docs/destination-images/sharyns-cansi-narra/SharynsCansi_1.jpg",
+      "sha256": "e21a051e2faf67255b75661e26bafc93fee448e3f7fa8fa6bc8f3995fdcbdf28",
+      "bytes": 61855
+    },
+    {
+      "location_id": "4ce87f7b-17d1-538f-8a1e-408956bdbb64",
+      "name": "Sharyn's Cansi House - Narra",
+      "primary": false,
+      "original_file": "SharynsCansi_2.jpg",
+      "file": "docs/destination-images/sharyns-cansi-narra/SharynsCansi_2.jpg",
+      "sha256": "be3d1bee79b710ceac2c677091841a13e25dc4d872a4f72fccb7f91583fc114b",
+      "bytes": 133041
+    },
+    {
+      "location_id": "5509d004-3126-5c89-942a-b1ccc4f742a8",
+      "name": "The Negros Showroom - South Capitol Road",
+      "primary": true,
+      "original_file": "showroom_1.jpg",
+      "file": "docs/destination-images/negros-showroom-south-capitol/showroom_1.jpg",
+      "sha256": "be113f4bc1a8216ba3d452d277f21eda3c92110593b0a89fe7d31e8ba5333da6",
+      "bytes": 413297
+    },
+    {
+      "location_id": "e36ca062-fbf0-5e4b-b6bd-24f61d3e5a99",
+      "name": "Timezone - Ayala Malls Capitol Central",
+      "primary": true,
+      "original_file": "TimeZoneCapitol_1.jpg",
+      "file": "docs/destination-images/timezone-ayala-capitol/TimeZoneCapitol_1.jpg",
+      "sha256": "16482ad08f33922fbc456abfed868247e6b6898de468a1d2b5fb2f1837bace98",
+      "bytes": 172980
+    }
+  ],
+  "authorization_record": {
+    "authorized_by": "Andrew",
+    "date": "2026-11-15",
+    "confirmation": "just put it, it is good to use",
+    "scope": "Publish supplied new-location images to development and production for Lagaw."
+  }
+}

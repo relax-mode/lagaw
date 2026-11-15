@@ -1,4 +1,4 @@
-"""#108 offline tests for the development-only Storage administration tool."""
+"""Offline tests for explicitly targeted Storage administration."""
 import importlib.util
 from pathlib import Path
 from uuid import UUID
@@ -55,6 +55,29 @@ def test_no_execute_is_offline_dry_run(tmp_path, monkeypatch, capsys):
     ))
     assert images.main(["--file", str(path), "--location-id", str(LOCATION)]) == 0
     assert "DRY RUN" in capsys.readouterr().out
+
+
+def test_production_requires_its_own_credentials_and_exact_project(monkeypatch):
+    monkeypatch.setattr(images, "load_dotenv", lambda *a, **kw: None)
+    monkeypatch.setenv("SUPABASE_URL", images.DEVELOPMENT)
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", KEY)
+    monkeypatch.delenv("PROD_SUPABASE_URL", raising=False)
+    monkeypatch.delenv("PROD_SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    with pytest.raises(images.StorageError):
+        images.production_credentials()
+    monkeypatch.setenv("PROD_SUPABASE_URL", images.DEVELOPMENT)
+    monkeypatch.setenv("PROD_SUPABASE_SERVICE_ROLE_KEY", KEY)
+    with pytest.raises(images.StorageError):
+        images.production_credentials()
+    monkeypatch.setenv("PROD_SUPABASE_URL", images.PRODUCTION)
+    assert images.production_credentials() == (images.PRODUCTION, KEY)
+
+
+def test_production_dry_run_never_reads_credentials_or_contacts_storage(monkeypatch, capsys):
+    monkeypatch.setattr(images, "production_credentials", lambda: pytest.fail("offline"))
+    monkeypatch.setattr(images.httpx, "Client", lambda **kw: pytest.fail("offline"))
+    assert images.main(["--environment", "production"]) == 0
+    assert "production" in capsys.readouterr().out
 
 
 def test_approved_upload_creates_bucket_checks_public_hash_and_links(tmp_path, monkeypatch):
