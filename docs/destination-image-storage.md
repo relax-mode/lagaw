@@ -90,3 +90,42 @@ objects or reset the Storage schema as an emergency shortcut.
 References: [Supabase Storage schema](https://supabase.com/docs/guides/storage/schema/design),
 [Storage buckets](https://supabase.com/docs/guides/storage/buckets/fundamentals),
 [Storage access control](https://supabase.com/docs/guides/storage/security/access-control).
+
+## November 15: twenty-location upload workflow
+
+The CLI now accepts `--environment development|production` (default development).
+Development uses `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; production uses
+only `PROD_SUPABASE_URL` and `PROD_SUPABASE_SERVICE_ROLE_KEY`. Each target is checked
+against its known project URL. Production credentials never replace development
+settings. The November 3 procedure above describes the original development-only
+implementation; this section documents its explicit production extension.
+
+Andrew authorized publication of the 32 supplied files to both environments.
+Their 20 destination mappings and hashes are recorded in
+[`new-location-image-inventory-2026-11-15.json`](evidence/new-location-image-inventory-2026-11-15.json).
+Each `_1` file is the main photo; the other 12 are additional Storage objects.
+The database's existing `image_url` remains a single main-image reference.
+
+```powershell
+# Offline inventory and checksum validation:
+python scripts/upload_catalogue_images.py
+# Read-only hosted checks (repeat with --environment production):
+python scripts/upload_catalogue_images.py --inspect
+# Authorized development upload and full catalogue readback:
+python scripts/upload_catalogue_images.py --execute --approved-usage
+# Requires a successful development receipt for the same inventory:
+python scripts/upload_catalogue_images.py --environment production --execute --approved-usage
+```
+
+The batch uploader checks all destination identities and existing main links
+before writing, uploads every file under its content hash, verifies each with an
+unauthenticated public download, and fills only empty main links. Final catalogue
+readback must equal the initial records plus exactly the intended image URLs.
+Progress receipts in `docs/evidence/new-location-images-<environment>-2026-11-15.json`
+are complete only after that readback succeeds; receipts contain no credentials.
+
+The image manifest records Andrew's project-use authorization. Run
+`python scripts/build_image_credits.py` after manifest changes. The generated
+credits asset must ship in a frontend release before the app recognizes these
+new image hashes. Existing attributed-photo labels remain unchanged; supplied
+images use the manifest's attribution text.

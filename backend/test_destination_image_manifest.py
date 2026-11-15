@@ -44,6 +44,10 @@ def _approved_images():
 
 def test_every_seeded_location_is_listed_once():
     seeded = set(re.findall(r"'([0-9a-f-]{36})'::uuid", SEED_SQL))
+    expansion = json.loads(
+        (ROOT / "supabase/data/location-expansion-2026-11-15.json").read_text("utf-8")
+    )
+    seeded.update(entry["record"]["id"] for entry in expansion["entries"])
     listed = [entry["location_id"] for entry in MANIFEST["locations"]]
     assert len(listed) == len(set(listed))
     assert set(listed) == seeded
@@ -68,7 +72,7 @@ def test_commons_images_have_complete_attribution():
 
 def test_permission_images_are_recorded_and_match_their_files():
     for name, image in _approved_images():
-        if image["source"] == "Wikimedia Commons":
+        if image["source"] in {"Wikimedia Commons", "Project authorization"}:
             continue
         assert image["source"] == "Photographer permission", name
         missing = [key for key in PERMISSION_REQUIRED if not image.get(key)]
@@ -79,6 +83,27 @@ def test_permission_images_are_recorded_and_match_their_files():
         path = ROOT / image["file_path"]
         assert path.is_file(), image["file_path"]
         assert hashlib.sha1(path.read_bytes()).hexdigest() == image["sha1"], name
+
+
+def test_project_authorized_uploads_match_supplied_inventory():
+    inventory = json.loads(
+        (ROOT / "docs/evidence/new-location-image-inventory-2026-11-15.json").read_text("utf-8")
+    )
+    supplied = {entry["file"]: entry for entry in inventory["images"]}
+    authorized = [(name, image) for name, image in _approved_images()
+                  if image["source"] == "Project authorization"]
+    assert len(authorized) == len(supplied) == 32
+    for name, image in authorized:
+        entry = supplied[image["upload_file"]]
+        assert entry["name"] == name
+        assert image["upload_sha256"] == entry["sha256"]
+        assert image["authorization_record"]["authorized_by"] == "Andrew"
+        assert image["authorization_record"]["confirmation"] == "just put it, it is good to use"
+        assert image["license"] == "Project use authorized"
+        assert image["photographer"] == ""
+        assert image["license_url"] is None
+        assert image["source_page_url"] is None
+        assert image["attribution_text"] == "Image supplied for Lagaw"
 
 
 def test_excluded_locations_explain_why_and_have_no_image():

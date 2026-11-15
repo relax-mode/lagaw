@@ -1,4 +1,4 @@
-"""Repeatable, development-only Supabase destination-image setup and upload.
+"""Repeatable Supabase destination-image setup and upload with explicit targets.
 
 No live changes by default. Storage bucket operations use the Storage REST API,
 not direct writes to managed storage metadata tables. No client upload endpoint.
@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parents[1]
 BUCKET = "destination-images"
 DEVELOPMENT = "https://vnpkyvtbupnquvirzlzp.supabase.co"
+PRODUCTION = "https://zjnuqqtbapbpudsjbpif.supabase.co"
 MAX_BYTES = 5 * 1024 * 1024
 MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
         ".webp": "image/webp"}
@@ -63,6 +64,16 @@ def development_credentials() -> tuple[str, str]:
     return url, key
 
 
+def production_credentials() -> tuple[str, str]:
+    """Production never falls back to the development URL or key."""
+    load_dotenv(ROOT / ".env", override=False)
+    url = os.environ.get("PROD_SUPABASE_URL", "").strip().rstrip("/")
+    key = os.environ.get("PROD_SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    if url != PRODUCTION or not key:
+        raise StorageError("Configure the separate approved production URL and server key.")
+    return url, key
+
+
 def admin_headers(key: str) -> dict[str, str]:
     """New sb_secret keys use apikey alone; legacy service_role JWTs use Bearer too."""
     headers = {"apikey": key}
@@ -80,10 +91,10 @@ def bucket_configuration(client: httpx.Client) -> None:
             "file_size_limit": MAX_BYTES, "allowed_mime_types": ALLOWED_MIME_TYPES,
         })
         if created.status_code not in (200, 201):
-            raise StorageError("Development bucket creation failed.")
+            raise StorageError("Bucket creation failed.")
         reply = client.get(f"/storage/v1/bucket/{BUCKET}")
     if reply.status_code != 200:
-        raise StorageError("Development bucket inventory is unavailable.")
+        raise StorageError("Bucket inventory is unavailable.")
     try:
         data = reply.json()
         valid = (data["id"] == BUCKET and data["public"] is True
@@ -107,7 +118,13 @@ def upload_and_verify(
         headers={"Content-Type": content_type, "x-upsert": "false"},
         content=raw,
     )
-    if response.status_code not in (200, 201, 409):
+    duplicate = False
+    if response.status_code == 400:
+        try:
+            duplicate = response.json().get("error") == "Duplicate"
+        except (ValueError, AttributeError):
+            pass
+    if response.status_code not in (200, 201, 409) and not duplicate:
         raise StorageError("Authorized image upload was rejected.")
     public = public_url(url, key)
     # Public GET intentionally has NO privileged headers or cookies.
@@ -152,6 +169,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--file", type=Path)
     parser.add_argument("--location-id", type=UUID)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--environment", choices=("development", "production"),
+                        default="development")
     parser.add_argument("--approved-usage", action="store_true",
                         help="Confirm that this specific image is authorized for project use")
     parser.add_argument("--link-location", action="store_true")
@@ -163,13 +182,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         info = image_info(args.file, args.location_id) if args.file else None
         if not args.execute:
-            print("DRY RUN: development storage bucket configuration; no network or writes.")
+            print(f"DRY RUN: {args.environment} storage bucket configuration; no network or writes.")
             if info:
                 print(f"DRY RUN: would upload {info[2]} ({len(info[0])} bytes)")
             return 0
         if info and not args.approved_usage:
             raise StorageError("Do not upload before confirming image usage permissions.")
-        url, key = development_credentials()
+        url, key = (production_credentials() if args.environment == "production"
+                    else development_credentials())
         with httpx.Client(base_url=url, headers=admin_headers(key), timeout=10.0,
                           follow_redirects=False, trust_env=False) as client:
             bucket_configuration(client)
@@ -177,12 +197,12 @@ def main(argv: list[str] | None = None) -> int:
                 public = upload_and_verify(client, url, info[0], info[1], info[2])
                 if args.link_location:
                     link_if_empty(client, args.location_id, public)
-                print(f"Verified development public image URL: {public}")
+                print(f"Verified {args.environment} public image URL: {public}")
             else:
-                print("Development bucket configuration verified.")
+                print(f"{args.environment.capitalize()} bucket configuration verified.")
         return 0
     except (StorageError, httpx.HTTPError, ValueError):
-        print("Destination image storage operation failed; inspect development configuration.")
+        print(f"Destination image storage operation failed; inspect {args.environment} configuration.")
         return 1
 
 
