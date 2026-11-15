@@ -649,6 +649,8 @@ void main() {
           ),
           home: AuthGate(
             session: session,
+            // These tests cover the form; the intro has its own test.
+            intro: false,
             signedIn: () => Scaffold(
               body: Column(
                 children: [
@@ -686,7 +688,7 @@ void main() {
       tester,
     ) async {
       await pumpApp(tester);
-      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
 
       await fill(tester, 'auth-email', 'a@example.com');
       await fill(tester, 'auth-password', 'correct-pw');
@@ -752,7 +754,7 @@ void main() {
       await tap(tester, 'auth-submit');
 
       expect(find.textContaining('Check new@example.com'), findsOneWidget);
-      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
       expect(session.isSignedIn, isFalse);
 
       // Signing in before confirming explains instead of failing silently.
@@ -776,7 +778,7 @@ void main() {
         findsOneWidget,
       );
       await tap(tester, 'auth-switch-mode');
-      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
     });
 
     testWidgets('reset request errors can be retried', (tester) async {
@@ -813,7 +815,7 @@ void main() {
       expect(find.text('Password updated'), findsOneWidget);
       expect(client.lastUpdatedPassword, 'new-password-123');
       await tap(tester, 'reset-return-sign-in');
-      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
 
       await fill(tester, 'auth-email', 'a@example.com');
       await fill(tester, 'auth-password', 'correct-pw');
@@ -856,7 +858,7 @@ void main() {
       expect(find.text('Recovery link expired.'), findsOneWidget);
       expect(find.text('Choose a new password'), findsOneWidget);
       await tap(tester, 'reset-cancel');
-      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
     });
 
     testWidgets('ordinary sign-in does not open a password reset form', (
@@ -939,7 +941,7 @@ void main() {
       await session.signIn('a@example.com', 'correct-pw');
       await pumpApp(tester);
 
-      expect(find.text('Welcome to Lagaw'), findsNothing);
+      expect(find.text('Welcome back'), findsNothing);
       expect(find.byKey(const ValueKey('unsaved-field')), findsOneWidget);
     });
 
@@ -951,7 +953,7 @@ void main() {
       expect(find.text('a@example.com'), findsOneWidget);
       await tap(tester, 'sign-out');
 
-      expect(find.text('Welcome to Lagaw'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
       expect(session.isSignedIn, isFalse);
     });
 

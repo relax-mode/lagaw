@@ -5,6 +5,7 @@ import '../theme.dart';
 import 'auth_session.dart';
 import 'password_reset_screen.dart';
 import 'sign_in_screen.dart';
+import 'welcome_flow.dart';
 
 /// Shows sign-in until there is a session, then [signedIn]. An expired
 /// session keeps the app mounted (forms intact) and shows a banner instead;
@@ -13,7 +14,16 @@ class AuthGate extends StatelessWidget {
   final AuthSession session;
   final Widget Function() signedIn;
 
-  const AuthGate({super.key, required this.session, required this.signedIn});
+  /// Signed out: the swipe intro and welcome page first (the app), or
+  /// straight to log in (tests of the form itself).
+  final bool intro;
+
+  const AuthGate({
+    super.key,
+    required this.session,
+    required this.signedIn,
+    this.intro = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +34,9 @@ class AuthGate extends StatelessWidget {
           return PasswordResetScreen(session: session);
         }
         if (!session.isSignedIn && !session.expired) {
-          return SignInScreen(session: session);
+          return intro
+              ? WelcomeFlow(session: session)
+              : SignInScreen(session: session);
         }
         return KeyedSubtree(
           key: ValueKey('account-${session.accountEmail}'),

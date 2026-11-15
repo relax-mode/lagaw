@@ -161,3 +161,19 @@ Follow-up (Roel): no more waiting on Like. Swipes are now **optimistic**: the ca
 | --- | --- | --- |
 | [swipe_elements](img/home-v3-android/swipe_elements.jpg) | Swipe page with four elements around the card | Pass |
 | [elements_glide_frames](img/home-v3-android/elements_glide_frames.jpg) | Swipe → Home at 10 fps: pages cross-fade in place, masskara leaves right and returns left, nothing crosses the page | Pass |
+
+### Round: intro and sign-in redesign
+
+Roel asked for a swipeable introduction before sign-in, with the swiping cards first and a welcome page last, and for log in and sign up in the v3 style. Email only; Lagaw has no social sign-in.
+
+- **Intro (`WelcomeFlow`, signed out):** four pages on the sky, with a white panel holding the title, words, page dots (the active one stretches, orange) and Next. Skip is at the top right.
+  1. **Swipe your vibe:** a small deck on a loop. The top card gets a LIKE stamp, flies right, and the next one settles in. Masskara and inasal float around it.
+  2. **Find spots around Bacolod:** floating category pills (Cafés, Heritage, Parks, Food, Art, Landmarks, Sweets) with piaya and carabao.
+  3. **Plan a trip in seconds:** a "Planned for you" Day 1 card whose stops tick in one by one.
+  4. **Welcome to Lagaw:** the logo with the four elements, "Maayong pag-abot!", and **Create account** (orange) and **Log in** (outlined).
+- After the welcome page is reached once (or Skip is tapped), later sign-outs open straight on the welcome page (`lagaw.intro.seen` in shared preferences).
+- **Log in / Create account (`SignInScreen`):** a sky header with the sun, masskara, inasal and the Lagaw logo, plus a white sheet with a centered title ("Welcome back", "Create your account"), soft filled fields, "Forgot password?" on the right, an orange pill button, and "Don't have an account? Sign up" / "Already have an account? Log in". Back returns to the welcome page.
+- **Unchanged:** validation, the rate-limit cooldown, password reset, the email-confirmation message, and re-sign-in after an expired session (still pushed over the app, so unsaved forms are kept).
+- Reduced motion stops the intro loops.
+- Tests: auth tests open the form directly (`AuthGate(intro: false)`); a new `welcome_flow_test.dart` covers the walkthrough (Next, a swipe, Skip), the seen flag, Create account / Log in / Back, and signing in from the intro. `flutter test` passes 275.
+- Device check: not yet. The phone disconnected before the new build could be installed.

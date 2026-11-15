@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
-import '../widgets/bacolod_3d_badges.dart';
-import '../widgets/tactile_motion.dart';
 import '../widgets/status_banner.dart';
 import 'auth_client.dart';
 import 'auth_session.dart';
@@ -13,7 +11,8 @@ enum _Mode { signIn, signUp, resetRequest }
 
 final RegExp _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
-/// Email/password sign-in and sign-up through Supabase Auth. [S3-16]
+/// Email/password log in and sign-up through Supabase Auth: a sky header
+/// with the Lagaw logo and a white sheet holding the form. [S3-16, home v3]
 ///
 /// With [reauthenticate], it is pushed over the current screen after a
 /// session expired, and pops on success so unsaved forms underneath stay.
@@ -21,10 +20,18 @@ class SignInScreen extends StatefulWidget {
   final AuthSession session;
   final bool reauthenticate;
 
+  /// Opens on Create account instead of Log in.
+  final bool initialSignUp;
+
+  /// Back to the welcome page (from the intro flow).
+  final VoidCallback? onBack;
+
   const SignInScreen({
     super.key,
     required this.session,
     this.reauthenticate = false,
+    this.initialSignUp = false,
+    this.onBack,
   });
 
   @override
@@ -39,7 +46,7 @@ class _SignInScreenState extends State<SignInScreen> {
   );
   final _password = TextEditingController();
   final _confirm = TextEditingController();
-  _Mode _mode = _Mode.signIn;
+  late _Mode _mode = widget.initialSignUp ? _Mode.signUp : _Mode.signIn;
   bool _busy = false;
   bool _showPassword = false;
   String? _error;
@@ -180,14 +187,42 @@ class _SignInScreenState extends State<SignInScreen> {
   String? _validateConfirm(String? value) =>
       value == _password.text ? null : 'Passwords do not match.';
 
-  InputDecoration _decoration(String label, {Widget? suffix}) =>
-      InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: Colors.white,
-        suffixIcon: suffix,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-      );
+  InputDecoration _decoration(String hint, {Widget? suffix}) => InputDecoration(
+    hintText: hint,
+    filled: true,
+    fillColor: const Color(0xFFF1F5FB),
+    suffixIcon: suffix,
+    errorMaxLines: 3,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: const BorderSide(color: _orange, width: 1.6),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.2),
+    ),
+  );
+
+  String get _submitLabel => _busy
+      ? (_requestingReset
+            ? 'Sending reset email…'
+            : _signingUp
+            ? 'Creating account…'
+            : 'Logging in…')
+      : _cooldown > 0
+      ? 'Try again in ${_cooldown}s'
+      : (_requestingReset
+            ? 'Send reset link'
+            : _signingUp
+            ? 'Create account'
+            : widget.reauthenticate
+            ? 'Sign in'
+            : 'Log in');
 
   @override
   Widget build(BuildContext context) {
@@ -197,498 +232,395 @@ class _SignInScreenState extends State<SignInScreen> {
         ? 'Reset your password'
         : _signingUp
         ? 'Create your account'
-        : 'Welcome to Lagaw';
+        : 'Welcome back';
     final subtitle = widget.reauthenticate
         ? 'Your session expired. Your unsaved changes are kept.'
         : _requestingReset
         ? 'We will send a reset link to your email address.'
         : _signingUp
-        ? 'Plan Bacolod trips that stay with your account.'
-        : 'Sign in to plan and save your Bacolod trips.';
+        ? 'Swipe, save and plan Bacolod trips with your own account.'
+        : 'Log in to keep swiping, saving and planning your Bacolod trips.';
 
-    final isWide = MediaQuery.sizeOf(context).width >= 768;
+    void back() {
+      if (_requestingReset) {
+        _switchMode();
+      } else if (widget.onBack != null) {
+        widget.onBack!();
+      } else {
+        Navigator.of(context).maybePop();
+      }
+    }
+
+    final canGoBack =
+        _requestingReset ||
+        widget.onBack != null ||
+        (widget.reauthenticate && Navigator.of(context).canPop());
+
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: widget.reauthenticate
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              elevation: 0,
-            )
-          : null,
-      body: _SkyBackdrop(
-        isWide: isWide,
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: isWide ? 32 : 20,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    FadeSlideIn(child: _Wordmark(isWide: isWide)),
-                    SizedBox(height: isWide ? 26 : 20),
-                    FadeSlideIn(
-                      index: 1,
-                      child: GlassContainer(
-                        padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
-                        child: Form(
-                          key: _formKey,
-                          child: AutofillGroup(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Semantics(
-                                  header: true,
-                                  child: Text(
-                                    title,
-                                    style: const TextStyle(
-                                      fontFamily: 'Outfit',
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 24,
-                                      color: AppTheme.slateDark,
-                                    ),
+      backgroundColor: Colors.white,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppTheme.skyTop, AppTheme.skyMid],
+          ),
+        ),
+        child: Stack(
+          children: [
+            const _SkyArt(),
+            SafeArea(
+              bottom: false,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 52,
+                        child: Row(
+                          children: [
+                            if (canGoBack)
+                              TextButton.icon(
+                                key: const ValueKey('auth-back'),
+                                onPressed: _busy ? null : back,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  textStyle: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  subtitle,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.slateMuted,
-                                  ),
+                                icon: const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 16,
                                 ),
-                                const SizedBox(height: 18),
-                                if (_error != null) ...[
-                                  StatusBanner(
-                                    key: const ValueKey('auth-error'),
-                                    tone: StatusTone.error,
-                                    message: _error!,
-                                  ),
-                                  const SizedBox(height: 14),
-                                ],
-                                if (_info != null) ...[
-                                  StatusBanner(
-                                    key: const ValueKey('auth-info'),
-                                    tone: StatusTone.info,
-                                    message: _info!,
-                                  ),
-                                  const SizedBox(height: 14),
-                                ],
-                                TextFormField(
-                                  key: const ValueKey('auth-email'),
-                                  controller: _email,
-                                  enabled: !_busy,
-                                  keyboardType: TextInputType.emailAddress,
-                                  autofillHints: const [AutofillHints.email],
-                                  textInputAction: _requestingReset
-                                      ? TextInputAction.done
-                                      : TextInputAction.next,
-                                  onFieldSubmitted: _requestingReset
-                                      ? (_) => _submit()
-                                      : null,
-                                  decoration: _decoration('Email'),
-                                  validator: _validateEmail,
-                                ),
-                                if (!_requestingReset) ...[
-                                  const SizedBox(height: 14),
-                                  TextFormField(
-                                    key: const ValueKey('auth-password'),
-                                    controller: _password,
-                                    enabled: !_busy,
-                                    obscureText: !_showPassword,
-                                    autofillHints: [
-                                      _signingUp
-                                          ? AutofillHints.newPassword
-                                          : AutofillHints.password,
-                                    ],
-                                    textInputAction: _signingUp
-                                        ? TextInputAction.next
-                                        : TextInputAction.done,
-                                    onFieldSubmitted: _signingUp
-                                        ? null
-                                        : (_) => _submit(),
-                                    decoration: _decoration(
-                                      'Password',
-                                      suffix: IconButton(
-                                        tooltip: _showPassword
-                                            ? 'Hide password'
-                                            : 'Show password',
-                                        icon: Icon(
-                                          _showPassword
-                                              ? Icons.visibility_off_rounded
-                                              : Icons.visibility_rounded,
-                                        ),
-                                        onPressed: () => setState(
-                                          () => _showPassword = !_showPassword,
-                                        ),
-                                      ),
-                                    ),
-                                    validator: _validatePassword,
-                                  ),
-                                  if (_signingUp) ...[
-                                    const SizedBox(height: 14),
-                                    TextFormField(
-                                      key: const ValueKey('auth-confirm'),
-                                      controller: _confirm,
-                                      enabled: !_busy,
-                                      obscureText: !_showPassword,
-                                      autofillHints: const [
-                                        AutofillHints.newPassword,
-                                      ],
-                                      textInputAction: TextInputAction.done,
-                                      onFieldSubmitted: (_) => _submit(),
-                                      decoration: _decoration(
-                                        'Confirm password',
-                                      ),
-                                      validator: _validateConfirm,
-                                    ),
-                                  ],
-                                ],
-                                const SizedBox(height: 20),
-                                Vector3DButton(
-                                  key: const ValueKey('auth-submit'),
-                                  onTap: _canSubmit ? _submit : null,
-                                  backgroundColor: const Color(0xFFEA580C),
-                                  shadowColor: const Color(0xFF9A3412),
-                                  borderColor: const Color(0xFFFDBA74),
-                                  borderRadius: 26,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                  ),
-                                  depth: 4,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      if (_busy) ...[
-                                        const SizedBox(
-                                          width: 18,
-                                          height: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                      ],
-                                      Text(
-                                        _busy
-                                            ? (_requestingReset
-                                                  ? 'Sending reset email…'
-                                                  : _signingUp
-                                                  ? 'Creating account…'
-                                                  : 'Signing in…')
-                                            : _cooldown > 0
-                                            ? 'Try again in ${_cooldown}s'
-                                            : (_requestingReset
-                                                  ? 'Send reset link'
-                                                  : _signingUp
-                                                  ? 'Create account'
-                                                  : 'Sign in'),
-                                        style: const TextStyle(
-                                          fontFamily: 'Outfit',
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (!widget.reauthenticate) ...[
-                                  const SizedBox(height: 10),
-                                  TextButton(
-                                    key: const ValueKey('auth-switch-mode'),
-                                    onPressed: _busy ? null : _switchMode,
-                                    child: Text(
-                                      _requestingReset
-                                          ? 'Back to sign in'
-                                          : _signingUp
-                                          ? 'Already have an account? Sign in'
-                                          : 'New to Lagaw? Create an account',
-                                    ),
-                                  ),
-                                  if (!_signingUp && !_requestingReset) ...[
-                                    const SizedBox(height: 4),
-                                    TextButton(
-                                      key: const ValueKey(
-                                        'auth-forgot-password',
-                                      ),
-                                      onPressed: _busy
-                                          ? null
-                                          : _showResetRequest,
-                                      child: const Text('Forgot password?'),
-                                    ),
-                                  ],
-                                ],
-                              ],
+                                label: const Text('Back'),
+                              ),
+                          ],
+                        ),
+                      ),
+                      // The logo, floating in the sky above the sheet.
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, bottom: 22),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x550A2A6B),
+                                blurRadius: 26,
+                                offset: Offset(0, 14),
+                                spreadRadius: -8,
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Image.asset(
+                              'assets/brand/logo.png',
+                              key: const ValueKey('auth-logo'),
+                              width: 78,
+                              height: 78,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    const FadeSlideIn(index: 2, child: _FeatureRow()),
-                  ],
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(34),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x330F285A),
+                                blurRadius: 30,
+                                offset: Offset(0, -6),
+                                spreadRadius: -12,
+                              ),
+                            ],
+                          ),
+                          child: SafeArea(
+                            top: false,
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(
+                                24,
+                                30,
+                                24,
+                                24,
+                              ),
+                              child: _form(title, subtitle),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _form(String title, String subtitle) {
+    return Form(
+      key: _formKey,
+      child: AutofillGroup(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 28,
+                  letterSpacing: -0.6,
+                  color: AppTheme.slateDark,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14.5,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.slateMuted,
+              ),
+            ),
+            const SizedBox(height: 22),
+            if (_error != null) ...[
+              StatusBanner(
+                key: const ValueKey('auth-error'),
+                tone: StatusTone.error,
+                message: _error!,
+              ),
+              const SizedBox(height: 14),
+            ],
+            if (_info != null) ...[
+              StatusBanner(
+                key: const ValueKey('auth-info'),
+                tone: StatusTone.info,
+                message: _info!,
+              ),
+              const SizedBox(height: 14),
+            ],
+            TextFormField(
+              key: const ValueKey('auth-email'),
+              controller: _email,
+              enabled: !_busy,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              textInputAction: _requestingReset
+                  ? TextInputAction.done
+                  : TextInputAction.next,
+              onFieldSubmitted: _requestingReset ? (_) => _submit() : null,
+              decoration: _decoration('Email'),
+              validator: _validateEmail,
+            ),
+            if (!_requestingReset) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                key: const ValueKey('auth-password'),
+                controller: _password,
+                enabled: !_busy,
+                obscureText: !_showPassword,
+                autofillHints: [
+                  _signingUp
+                      ? AutofillHints.newPassword
+                      : AutofillHints.password,
+                ],
+                textInputAction: _signingUp
+                    ? TextInputAction.next
+                    : TextInputAction.done,
+                onFieldSubmitted: _signingUp ? null : (_) => _submit(),
+                decoration: _decoration(
+                  'Password',
+                  suffix: IconButton(
+                    tooltip: _showPassword ? 'Hide password' : 'Show password',
+                    icon: Icon(
+                      _showPassword
+                          ? Icons.visibility_off_rounded
+                          : Icons.visibility_rounded,
+                      color: AppTheme.slateMuted,
+                    ),
+                    onPressed: () =>
+                        setState(() => _showPassword = !_showPassword),
+                  ),
+                ),
+                validator: _validatePassword,
+              ),
+              if (_signingUp) ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                  key: const ValueKey('auth-confirm'),
+                  controller: _confirm,
+                  enabled: !_busy,
+                  obscureText: !_showPassword,
+                  autofillHints: const [AutofillHints.newPassword],
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(),
+                  decoration: _decoration('Confirm password'),
+                  validator: _validateConfirm,
+                ),
+              ],
+            ],
+            if (!_signingUp && !_requestingReset && !widget.reauthenticate)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const ValueKey('auth-forgot-password'),
+                  onPressed: _busy ? null : _showResetRequest,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.primaryBlue,
+                    textStyle: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: const Text('Forgot password?'),
+                ),
+              )
+            else
+              const SizedBox(height: 18),
+            const SizedBox(height: 6),
+            FilledButton(
+              key: const ValueKey('auth-submit'),
+              onPressed: _canSubmit ? _submit : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: _orange,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFFF7A26F),
+                disabledForegroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                minimumSize: const Size.fromHeight(54),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_busy) ...[
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Flexible(child: Text(_submitLabel)),
+                ],
+              ),
+            ),
+            if (!widget.reauthenticate) ...[
+              const SizedBox(height: 18),
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    _requestingReset
+                        ? 'Remembered it?'
+                        : _signingUp
+                        ? 'Already have an account?'
+                        : 'Don’t have an account?',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.slateMuted,
+                    ),
+                  ),
+                  TextButton(
+                    key: const ValueKey('auth-switch-mode'),
+                    onPressed: _busy ? null : _switchMode,
+                    style: TextButton.styleFrom(
+                      foregroundColor: _orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    child: Text(
+                      _requestingReset || _signingUp ? 'Log in' : 'Sign up',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 }
 
-/// The app's sky: gradient, glowing sun and scattered 3D Bacolod badges,
-/// matching the home screen. Decorations ignore taps. [S3-16]
-class _SkyBackdrop extends StatelessWidget {
-  final bool isWide;
-  final Widget child;
+const _orange = Color(0xFFF2620F);
 
-  const _SkyBackdrop({required this.isWide, required this.child});
+/// The sky behind the header: the sun and two Bacolod elements, still so
+/// the form never competes with motion. [home v3]
+class _SkyArt extends StatelessWidget {
+  const _SkyArt();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppTheme.skyTop, AppTheme.skyMid, AppTheme.skyBottom],
-          stops: [0.0, 0.5, 1.0],
-        ),
-      ),
+    return IgnorePointer(
       child: Stack(
         children: [
           Positioned(
-            top: isWide ? -110 : -80,
-            left: isWide ? -110 : -80,
-            child: IgnorePointer(
-              child: Container(
-                width: isWide ? 360 : 260,
-                height: isWide ? 360 : 260,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    radius: 0.8,
-                    colors: [
-                      Color(0xFFFFFBEB),
-                      Color(0xFFFEF08A),
-                      Color(0xFFF59E0B),
-                      Color(0x00F59E0B),
-                    ],
-                    stops: [0.0, 0.35, 0.7, 1.0],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x66F59E0B),
-                      blurRadius: 110,
-                      spreadRadius: 40,
-                    ),
+            top: -90,
+            left: -90,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0xFFFFFBEB),
+                    Color(0xFFFEF08A),
+                    Color(0xFFF59E0B),
+                    Color(0x00F59E0B),
                   ],
+                  stops: [0, 0.35, 0.7, 1],
                 ),
               ),
             ),
           ),
-          // Soft clouds drifting across the sky.
-          ..._clouds(),
-          if (isWide) ...const [
-            Positioned(
-              top: 150,
-              left: 40,
-              child: IgnorePointer(child: Cathedral3DBadge(size: 130)),
+          Positioned(
+            top: 92,
+            left: -30,
+            child: Transform.rotate(
+              angle: -0.28,
+              child: Image.asset('assets/elements/masskara.webp', width: 100),
             ),
-            Positioned(
-              bottom: 90,
-              left: 56,
-              child: IgnorePointer(child: Inasal3DBadge(size: 125)),
+          ),
+          Positioned(
+            top: 70,
+            right: -34,
+            child: Transform.rotate(
+              angle: -0.35,
+              child: Image.asset('assets/elements/inasal.webp', width: 116),
             ),
-            Positioned(
-              top: 70,
-              right: 48,
-              child: IgnorePointer(child: MassKara3DBadge(size: 140)),
-            ),
-            Positioned(
-              top: 330,
-              right: 70,
-              child: IgnorePointer(child: Piaya3DBadge(size: 110)),
-            ),
-            Positioned(
-              bottom: 70,
-              right: 40,
-              child: IgnorePointer(child: Coffee3DBadge(size: 120)),
-            ),
-          ] else ...const [
-            Positioned(
-              top: 56,
-              right: -10,
-              child: IgnorePointer(child: MassKara3DBadge(size: 70)),
-            ),
-            Positioned(
-              bottom: 150,
-              left: -14,
-              child: IgnorePointer(child: Piaya3DBadge(size: 62)),
-            ),
-            Positioned(
-              bottom: 40,
-              right: -10,
-              child: IgnorePointer(child: Coffee3DBadge(size: 70)),
-            ),
-          ],
-          child,
+          ),
         ],
       ),
-    );
-  }
-
-  /// Placed by fraction of the screen so they stay off the wordmark at any
-  /// size; translucent, so they can pass behind the card.
-  List<Widget> _clouds() => [
-    for (final (alignment, width) in [
-      (const Alignment(-0.6, 0.3), isWide ? 160.0 : 100.0),
-      (const Alignment(0.6, -0.42), isWide ? 120.0 : 80.0),
-    ])
-      Align(
-        alignment: alignment,
-        child: IgnorePointer(
-          child: Container(
-            width: width,
-            height: width * 0.32,
-            decoration: BoxDecoration(
-              color: const Color(0x55FFFFFF),
-              borderRadius: BorderRadius.circular(width),
-            ),
-          ),
-        ),
-      ),
-  ];
-}
-
-/// "lagaw." wordmark with the amber dot, as on the home hero.
-class _Wordmark extends StatelessWidget {
-  final bool isWide;
-
-  const _Wordmark({required this.isWide});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              'lagaw',
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontSize: isWide ? 60 : 48,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: -1.6,
-                height: 1.0,
-                shadows: const [
-                  Shadow(
-                    color: Color(0x33000000),
-                    blurRadius: 14,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 3),
-            Container(
-              width: isWide ? 9 : 7.5,
-              height: isWide ? 9 : 7.5,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF59E0B),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x66F59E0B),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Swipe your vibe and tour Bacolod your way.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13.5,
-            color: Color(0xEEFFFFFF),
-            fontWeight: FontWeight.w600,
-            height: 1.35,
-            shadows: [Shadow(color: Color(0x33000000), blurRadius: 8)],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Small pills under the card hinting at what an account unlocks.
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow();
-
-  @override
-  Widget build(BuildContext context) {
-    const items = [
-      (Icons.luggage_rounded, 'Saved trips'),
-      (Icons.auto_awesome_rounded, 'AI vibe picks'),
-      (Icons.map_rounded, 'Day-by-day stops'),
-    ];
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final (icon, label) in items)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0xFFCBD5E1),
-                  offset: Offset(0, 3),
-                  blurRadius: 0,
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 15, color: const Color(0xFFEA580C)),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12.5,
-                    color: AppTheme.slateDark,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
     );
   }
 }
