@@ -186,3 +186,5 @@ Roel asked for a swipeable introduction before sign-in, with the swiping cards f
 | [intro_4](img/home-v3-android/intro_4.jpg) | Welcome to Lagaw: logo and elements, Create account and Log in | Pass |
 | [auth_login](img/home-v3-android/auth_login.jpg) | Welcome back: sky header with logo, email, password, Forgot password?, Log in, Sign up link | Pass |
 | [auth_signup](img/home-v3-android/auth_signup.jpg) | Create your account: Back pill, email, password, confirm, Create account, Log in link | Pass |
+
+Follow-up (Roel): the form sheet left a large empty white area at the bottom. It is now only as tall as the form, sitting at the bottom; the spare height goes to the sky, with a larger logo in the middle. Everything scrolls when the keyboard is up (checked on the Infinix; the Log in button stays visible above the keyboard). On the "Sign in again" screen after an expired session, the sheet leaves room for the expiry banner at the bottom, which would otherwise cover the button (caught by the existing re-sign-in test).

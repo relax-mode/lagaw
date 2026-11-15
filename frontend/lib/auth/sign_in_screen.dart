@@ -274,101 +274,118 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 52,
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 12),
-                            if (canGoBack)
-                              TextButton.icon(
-                                key: const ValueKey('auth-back'),
-                                onPressed: _busy ? null : back,
-                                // A white pill, so it reads even over
-                                // the sun.
-                                style: TextButton.styleFrom(
-                                  backgroundColor: const Color(0xF5FFFFFF),
-                                  foregroundColor: AppTheme.slateDark,
-                                  shape: const StadiumBorder(),
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    8,
-                                    16,
-                                    8,
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                  // The sheet is only as tall as the form; spare height
+                  // goes to the sky above it, and it all scrolls when the
+                  // keyboard is up.
+                  child: LayoutBuilder(
+                    builder: (context, box) => SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: box.maxHeight),
+                        child: IntrinsicHeight(
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 52,
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 12),
+                                    if (canGoBack)
+                                      TextButton.icon(
+                                        key: const ValueKey('auth-back'),
+                                        onPressed: _busy ? null : back,
+                                        // A white pill, so it reads even over
+                                        // the sun.
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: const Color(
+                                            0xF5FFFFFF,
+                                          ),
+                                          foregroundColor: AppTheme.slateDark,
+                                          shape: const StadiumBorder(),
+                                          padding: const EdgeInsets.fromLTRB(
+                                            12,
+                                            8,
+                                            16,
+                                            8,
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        icon: const Icon(
+                                          Icons.arrow_back_ios_new_rounded,
+                                          size: 16,
+                                        ),
+                                        label: const Text('Back'),
+                                      ),
+                                  ],
                                 ),
-                                icon: const Icon(
-                                  Icons.arrow_back_ios_new_rounded,
-                                  size: 16,
-                                ),
-                                label: const Text('Back'),
                               ),
-                          ],
-                        ),
-                      ),
-                      // The logo, floating in the sky above the sheet.
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4, bottom: 22),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x550A2A6B),
-                                blurRadius: 26,
-                                offset: Offset(0, 14),
-                                spreadRadius: -8,
+                              // The logo, floating in the middle of the sky.
+                              Expanded(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 18),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(24),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Color(0x550A2A6B),
+                                            blurRadius: 26,
+                                            offset: Offset(0, 14),
+                                            spreadRadius: -8,
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(24),
+                                        child: Image.asset(
+                                          'assets/brand/logo.png',
+                                          key: const ValueKey('auth-logo'),
+                                          width: 96,
+                                          height: 96,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: double.infinity,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(34),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0x330F285A),
+                                      blurRadius: 30,
+                                      offset: Offset(0, -6),
+                                      spreadRadius: -12,
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    24,
+                                    30,
+                                    24,
+                                    24 +
+                                        MediaQuery.paddingOf(context).bottom +
+                                        // Room for the "session expired" banner
+                                        // that stays at the bottom meanwhile.
+                                        (widget.reauthenticate ? 96 : 0),
+                                  ),
+                                  child: _form(title, subtitle),
+                                ),
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Image.asset(
-                              'assets/brand/logo.png',
-                              key: const ValueKey('auth-logo'),
-                              width: 78,
-                              height: 78,
-                            ),
-                          ),
                         ),
                       ),
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(34),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0x330F285A),
-                                blurRadius: 30,
-                                offset: Offset(0, -6),
-                                spreadRadius: -12,
-                              ),
-                            ],
-                          ),
-                          child: SafeArea(
-                            top: false,
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.fromLTRB(
-                                24,
-                                30,
-                                24,
-                                24,
-                              ),
-                              child: _form(title, subtitle),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
