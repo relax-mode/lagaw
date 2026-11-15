@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lagaw — Collaborative Filtering Fixture Visualizer</title>
+<style>
+:root{--bg:#0b1423;--surface:#142337;--line:#314459;--fg:#edf4fb;--muted:#a5b8cc;--blue:#5bc4e7;--good:#43c6a3;--bad:#ff9b8e;--gold:#f0c77c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1450px;margin:auto;padding:27px 38px 24px}
+header{display:flex;justify-content:space-between;align-items:start;gap:20px}
+.eyebrow{font-size:13px;letter-spacing:.15em;color:var(--blue);font-weight:800}
+h1{font-size:30px;margin:8px 0 6px;font-weight:750;letter-spacing:-.035em}
+.sub{color:var(--muted);font-size:16px;line-height:1.5;margin:0}
+.stamp{padding:11px 15px;border:1px solid #526b73;border-radius:12px;color:var(--gold);font-weight:750;font-size:12px;letter-spacing:.07em;text-align:center;white-space:nowrap}
+.tabs{display:flex;gap:8px;margin:28px 0 22px}
+.tab{background:#1c3048;border:1px solid var(--line);color:var(--muted);border-radius:11px;padding:12px 17px;font-size:14px;font-weight:750;cursor:pointer}
+.tab.active{background:#164c61;border-color:#47b6ca;color:#fff}
+.slide{display:none;animation:fade .18s ease}.slide.active{display:block}
+@keyframes fade{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:none}}
+.columns{display:grid;grid-template-columns:1.15fr .85fr;gap:21px;align-items:stretch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:23px}
+h2{margin:0 0 13px;font-size:22px;letter-spacing:-.025em}
+h3{margin:0 0 11px;font-size:16px}
+.lead{color:#ccdeef;font-size:16px;line-height:1.65}
+.small{color:var(--muted);font-size:13px;line-height:1.6}
+.row{display:flex;gap:12px;align-items:center}
+.pill{display:inline-block;padding:6px 10px;border:1px solid #4d6b7a;background:#18344a;color:#cceef3;font-size:12px;border-radius:7px;font-weight:700}
+table{border-collapse:separate;border-spacing:5px;text-align:center;width:100%;margin-top:16px;table-layout:fixed}
+th{color:var(--muted);font-size:13px;font-weight:700}
+td{font-size:16px;font-weight:800;border-radius:8px;height:54px;border:1px solid var(--line)}
+td.pos{background:#16463e;color:#8be7ca;border-color:#2f806e}
+td.neg{background:#4c2c36;color:#ffbeb6;border-color:#a65c65}
+td.none{background:#1c2b3d;color:#71879a}
+td.mark{outline:2px solid var(--gold);outline-offset:1px}
+.legend{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:15px}
+.dot{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:7px;vertical-align:middle}
+.flow{display:flex;align-items:center;gap:9px;margin:28px 0;flex-wrap:wrap}
+.step{padding:16px 19px;border-radius:12px;background:#213e52;border:1px solid #4a7292;font-weight:750;color:#d7eff8;text-align:center;font-size:16px}
+.arrow{font-size:26px;color:var(--blue)}
+.formula{font-family:"Cambria Math",Georgia,serif;font-size:33px;text-align:center;color:#e6f4fa;padding:22px 10px;background:#0d1d2e;border:1px solid var(--line);border-radius:14px;margin:17px 0}
+.big{font-size:37px;font-weight:800;letter-spacing:-.04em}
+.calc{background:#0c2131;border:1px solid #285974;border-radius:12px;padding:19px 20px;font-family:"Cascadia Code",Consolas,monospace;color:#caf0ff;font-size:18px;line-height:1.8;margin:14px 0}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:22px}
+.metric{background:var(--surface);border:1px solid var(--line);padding:19px;border-radius:14px}
+.metricname{font-size:14px;font-weight:800}
+.compare{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:13px 0 6px}
+.bar{height:14px;background:#253b52;border-radius:8px;overflow:hidden}
+.fill{height:100%;border-radius:8px}
+.before{background:#8ca5b9}.after{background:var(--good)}
+.stat{font-size:27px;font-weight:800;margin-top:13px;color:var(--good)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tag{color:var(--good);font-weight:800}
+.footer{margin-top:19px;display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid var(--line);padding-top:15px;color:var(--muted);font-size:12px}
+.nav{background:#20394f;border:1px solid #5a8194;padding:9px 12px;border-radius:8px;color:white;cursor:pointer}
+strong{color:#fff}
+@media(max-width:900px){.columns,.two,.metrics{grid-template-columns:1fr}header{flex-direction:column}.wrap{padding:18px}.tabs{overflow:auto}.tab{white-space:nowrap}.flow{gap:4px}.step{font-size:13px;padding:10px}.formula{font-size:25px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div>
+<div class="eyebrow">LAGAW / AI INTEGRATION / PART 4</div>
+<h1>Collaborative Filtering and Hybrid Recommendations</h1>
+<p class="sub">A code-grounded walkthrough of how interaction history improves destination ranking.</p>
+</div>
+<div class="stamp">LABELED SYNTHETIC FIXTURE<br>NOT LIVE USER METRICS</div>
+</header>
+<nav class="tabs" aria-label="Presentation screens">
+<button class="tab active" onclick="go(0)">01 · Interaction matrix</button>
+<button class="tab" onclick="go(1)">02 · SVD + hybrid inference</button>
+<button class="tab" onclick="go(2)">03 · Held-out evaluation</button>
+</nav>
+<section class="slide active" id="slide0">
+<div class="columns">
+<div class="card">
+<h2>1. Users × destinations: signed interactions</h2>
+<p class="small">Actual 6 × 6 subset computed from the existing synthetic <code>backend/fixtures/hybrid/dataset.json</code>. U2 × D1 is held out and was <b>not</b> used to train the model.</p>
+<table aria-label="Synthetic interaction matrix">
+<thead><tr><th></th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th><th>D6</th></tr></thead>
+<tbody>
+<tr><th>U1</th><td class="pos">+0.6</td><td class="pos">+0.6</td><td class="none">·</td><td class="neg">−0.2</td><td class="none">·</td><td class="neg">−0.2</td></tr>
+<tr><th>U2</th><td class="none mark">?</td><td class="pos">+0.6</td><td class="pos">+0.6</td><td class="none">·</td><td class="neg">−0.2</td><td class="neg">−0.2</td></tr>
+<tr><th>U3</th><td class="pos">+0.6</td><td class="none">·</td><td class="pos">+0.6</td><td class="neg">−0.2</td><td class="neg">−0.2</td><td class="none">·</td></tr>
+<tr><th>U4</th><td class="pos">+0.6</td><td class="pos">+0.6</td><td class="none">·</td><td class="none">·</td><td class="neg">−0.2</td><td class="neg">−0.2</td></tr>
+<tr><th>U5</th><td class="pos">+0.6</td><td class="none">·</td><td class="pos">+0.6</td><td class="neg">−0.2</td><td class="neg">−0.2</td><td class="none">·</td></tr>
+<tr><th>U6</th><td class="none">·</td><td class="pos">+0.6</td><td class="pos">+0.6</td><td class="none">·</td><td class="neg">−0.2</td><td class="neg">−0.2</td></tr>
+</tbody>
+</table>
+<div class="legend">
+<span><i class="dot" style="background:#2f806e"></i>positive affinity</span>
+<span><i class="dot" style="background:#a65c65"></i>negative affinity</span>
+<span><i class="dot" style="background:#5c6e86"></i>unknown / unobserved</span>
+<span style="color:var(--gold)">▢ held-out candidate</span>
+</div>
+</div>
+<div class="card">
+<h2>What enters the model?</h2>
+<p class="lead">Lagaw converts <strong>swipes, saves and ratings</strong> into a signed preference signal for each user–destination pair.</p>
+<div class="calc">Right swipe = +1<br>Save = +2<br>Rating 1…5 = −2…+2<br>Normalize: clip(sum / 5, −1, 1)</div>
+<p class="lead">Example: a right swipe and save on one destination yields <strong>+0.6</strong>. A left swipe yields <strong>−0.2</strong>.</p>
+<p class="small"><strong>Unknown is not a dislike.</strong> The training matrix uses 0 for unobserved pairs. The model then learns cross-user structure from the full matrix.</p>
+</div>
+</div>
+</section>
+<section class="slide" id="slide1">
+<div class="columns">
+<div class="card">
+<h2>2. Low-rank matrix factorization</h2>
+<p class="lead">The model applies NumPy singular value decomposition (SVD) to the signed user–destination matrix.</p>
+<div class="formula">A ≈ U<sub>k</sub> Σ<sub>k</sub> V<sub>k</sub><sup>T</sup></div>
+<div class="flow">
+<div class="step">Interaction matrix<br><span style="color:#9ec7d8;font-size:12px">users × places</span></div>
+<div class="arrow">→</div>
+<div class="step">Latent user factors<br><span style="color:#9ec7d8;font-size:12px">SVD, rank ≤ 3</span></div>
+<div class="arrow">×</div>
+<div class="step">Latent place factors<br><span style="color:#9ec7d8;font-size:12px">dot product</span></div>
+<div class="arrow">→</div>
+<div class="step">Predicted affinity</div>
+</div>
+<p class="small">The latent factors represent patterns in interactions, not manually named categories. This is a compact conceptual drawing of the real <code>signed-svd-v1</code> model.</p>
+</div>
+<div class="card">
+<h2>3. Combine with content relevance</h2>
+<p class="lead">Lagaw separately scores destination fit from tags, category, budget, and hard constraints. When collaborative support is sufficient, it blends both scores.</p>
+<div class="calc">Hybrid score<br>= 0.60 × content<br>+ 0.40 × collaborative</div>
+<p class="small">Example from synthetic user U2 and held-out destination D1:</p>
+<div class="formula" style="font-size:25px">0.60 × 0.8000 + 0.40 × 0.6997 ≈ <span style="color:var(--good)">0.7599</span></div>
+<p class="small">Unseen users or destinations and insufficient history use a <strong>full content-based fallback</strong>, not an artificially diluted score.</p>
+</div>
+</div>
+</section>
+<section class="slide" id="slide2">
+<div class="card">
+<div class="row" style="justify-content:space-between">
+<div><h2>4. Evaluate on held-out interactions</h2><p class="small">The synthetic fixture trains on 256 events and withholds 24 positive user–place pairs from training.</p></div>
+<span class="pill">24 synthetic users · seed 20261025 · SVD rank 3</span>
+</div>
+<div class="two">
+<div class="card" style="background:#0c1c2b">
+<h3>Concrete example: U2 → D1</h3>
+<p class="lead">Content-only ranks the withheld relevant destination <strong>second</strong> among tied 0.8000 scores. Hybrid ranking puts it <strong>first</strong> at 0.7599, using a collaborative score of 0.6997.</p>
+<div class="flow"><div class="step">Content-only<br><span class="big" style="color:var(--gold)">#2</span></div><div class="arrow">→</div><div class="step">Hybrid SVD<br><span class="big" style="color:var(--good)">#1</span></div></div>
+<p class="small">The withheld user–destination pair was excluded from training and inference history, then checked against the ranking.</p>
+</div>
+<div class="card" style="background:#0c1c2b">
+<h3>Reported offline fixture metrics</h3>
+<div class="metrics" style="grid-template-columns:1fr;gap:7px;margin:0">
+<div><div class="metricname">Recall@3</div><div class="compare"><span>Content 75.0%</span><span>Hybrid 100.0%</span></div><div class="bar"><div class="fill before" style="width:75%"></div></div><div class="bar" style="margin-top:4px"><div class="fill after" style="width:100%"></div></div></div>
+<div><div class="metricname">NDCG@3</div><div class="compare"><span>Content 0.590</span><span>Hybrid 1.000</span></div><div class="bar"><div class="fill before" style="width:59%"></div></div><div class="bar" style="margin-top:4px"><div class="fill after" style="width:100%"></div></div></div>
+<div><div class="metricname">Hit Rate@1</div><div class="compare"><span>Content 37.5%</span><span>Hybrid 100.0%</span></div><div class="bar"><div class="fill before" style="width:37.5%"></div></div><div class="bar" style="margin-top:4px"><div class="fill after" style="width:100%"></div></div></div>
+</div>
+</div>
+</div>
+<p class="small"><strong>Interpretation:</strong> The deliberately clustered synthetic evaluation verifies recovery of a constructed collaborative signal. It does <strong>not</strong> establish accuracy, satisfaction, or generalization for real travelers. Separate production serving evidence is required.</p>
+</div>
+</section>
+<div class="footer">
+<span>Source: <code>docs/evidence/hybrid-evaluation.json</code> · <code>backend/fixtures/hybrid/dataset.json</code> · <code>backend/app/recommendations/collaborative.py</code></span>
+<div class="row"><button class="nav" onclick="go(index-1)">← Previous</button><span id="page">1 / 3</span><button class="nav" onclick="go(index+1)">Next →</button></div>
+</div>
+</div>
+<script>
+let index=0;
+function go(i){index=Math.max(0,Math.min(2,i));document.querySelectorAll('.slide').forEach((x,j)=>x.classList.toggle('active',j===index));document.querySelectorAll('.tab').forEach((x,j)=>{x.classList.toggle('active',j===index);x.setAttribute('aria-selected',String(j===index))});document.getElementById('page').textContent=(index+1)+' / 3';}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')go(index+1);if(e.key==='ArrowLeft'||e.key==='PageUp')go(index-1);});
+</script>
+</body>
+</html>
