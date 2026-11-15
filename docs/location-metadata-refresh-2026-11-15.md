@@ -120,9 +120,10 @@ changes to the recommender/planner were made.
 
 ## PR publication
 
-Branch `feat/location-metadata-refresh` is pushed. PR creation through the
-connected GitHub tool failed with a connection argument error, so no PR or CI
-result is claimed. [Open the PR comparison](https://github.com/relax-mode/lagaw/compare/main...feat/location-metadata-refresh?expand=1).
+Branch `feat/location-metadata-refresh` is pushed and published as
+[PR #181](https://github.com/relax-mode/lagaw/pull/181) using Andrew's authenticated
+local Git account (`aranxshx`). Production execution remains pending; publishing
+the PR does not apply the production transaction. No CI result is claimed here.
 
 Suggested title: **feat(data): fill existing-location metadata with qualified supplied values**.
 
