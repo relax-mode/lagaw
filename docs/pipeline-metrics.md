@@ -16,9 +16,86 @@ Generated from the GitHub Actions API with `python scripts/pipeline_metrics.py -
 | Sprint 1 (Oct 12–18) | 4.5 | 1.9 | 96.8 | 2 | 4.2 | 0 | n/a | First CI pipeline and Cloudflare Pages deploys (Cloud Run was deployed by a separate workflow). The Android APK build made PR runs slow (median 239 s). |
 | Sprint 2 (Oct 19–25) | 1.6 | 2.2 | 96.6 | 3 | 1.9 (3 of 22 merges) | 2 (staging, [INC-1](incident-log.md#inc-1-staging-cloudflare-credential-rejected)) | 863.9 | Removed the APK build (#35); pip cache in the DB job; staging environment; production deploys made manual (#44), which is why only 3 of 22 merges reached production. |
 | Sprint 3 (Oct 26–Nov 1), **full window** (queried Nov 5) | 1.1 | 4.7 | 97.9 | 27 deployment jobs | 6.3 (16 of 30 merges) | 0 | n/a (no failed main deploy jobs) | Path-filtered PR checks (#31), production promotion, automated AI checks (#58); also see [INC-3](incident-log.md#inc-3-production-drifted-behind-main) and [INC-4](incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401). |
-| Sprint 4 | | | | | | | | pending |
+| Sprint 4 (Nov 2–8), **full window** (queried Nov 15) | 1.2 | 4.2 | 98.1 | 24 deployment jobs | 5.6 (17 of 32 merges) | 0 | n/a (no failed main deploy jobs) | Secret scanning (gitleaks), dependency audit, pinned actions and Dependabot (#125); dependency audit scoped to relevant PR changes (#146); scheduled live AI check fix merged (#100; a passing scheduled run is not recorded here); staging rollback runbook and executed drill (#126, #160). See the [Sprint 4 source](#sprint-4-source-completed-week-queried-november-15-2026). |
 
 The Sprint 3 row was regenerated on November 5 using completed GitHub Actions runs across the entire October 26–November 1 UTC window. See the [completed-week source](#sprint-3-source-completed-week-queried-november-5-2026). The Oct 30 partial reading remains below strictly as a dated historical snapshot, not the final Sprint 3 totals.
+
+### Sprint 4 source (completed week, queried November 15, 2026)
+
+Command run from the repository root via authenticated `CyGray` GitHub CLI
+on November 15, 2026:
+
+```sh
+python scripts/pipeline_metrics.py --since 2026-11-02 --until 2026-11-08
+python scripts/pipeline_metrics.py --since 2026-11-02 --until 2026-11-08 --jobs
+```
+
+Same method as Sprint 3: `Lagaw CI` (`ci.yml`), runs created November 2
+through November 8 (UTC), completed runs only, cancelled runs excluded from the
+success-rate denominator. No `test/ci-proof-*` probe runs fell in this window,
+so none were excluded. The unmodified output was:
+
+```text
+## Lagaw CI, 2026-11-02 to 2026-11-08 (UTC)
+
+| Avg PR pipeline time (min) | Main pipeline time (min) | Pipeline success rate (%) | Production deploys | Avg lead time, merge to live (min) | Failed deploys | Time to recover (min) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1.2 | 4.2 | 98.1 | 24 | 5.6 | 0 | n/a |
+
+- Runs: 109 completed (106 success, 2 failure, 1 cancelled; cancelled runs are excluded from the success rate).
+- PR wall time (successful): median 66 s, p90 129 s, mean 73 s (n=73).
+- Main push wall time (successful): median 255 s, p90 414 s, mean 250 s (n=32).
+- Merged PRs with a measured production deploy: 17 of 32.
+```
+
+**Failed and cancelled runs.** None was a `main` deploy, so the script reports
+0 failed deploys and `n/a` recovery time.
+
+- [41576327000](https://github.com/relax-mode/lagaw/actions/runs/41576327000): PR run on `fix/s4-14-ai-rate-limits` (Nov 3). The Database job failed at "Test database-backed API (pytest -m db)". The PR (#135) later merged on Nov 4.
+- [41613030891](https://github.com/relax-mode/lagaw/actions/runs/41613030891): manual `workflow_dispatch` run on `test/s4-integrated-validation` (Nov 3). `Secret scan - gitleaks` failed at "Scan for secrets". The history-scan fix landed afterwards in #152 (`fix/s4-history-gitleaks-uuid`, Nov 4). This record does not verify that #152 was the only cause.
+- [41999362335](https://github.com/relax-mode/lagaw/actions/runs/41999362335): cancelled PR run for the Dependabot `deploy-cloudrun` bump (Nov 5).
+
+**Interpretation:**
+
+- `24` counts successful individual production deployment **jobs** (API and web), not unique releases, as in Sprint 3. Lead time covers only the 17 of 32 merges with a measured production deploy.
+- Mean PR time rose from 1.1 to 1.2 min and the PR median from 60 s to 66 s. This is not an improvement. New jobs (`Secret scan - gitleaks`, `Dependency audit - pip and npm`) were added in #125, and per-job medians for PR runs moved up: Backend 30 to 43 s, Frontend 89 to 108 s. The jobs run in parallel, so the extra checks did not add their own duration to wall time, and this record does not attribute the Backend and Frontend slowdown to a cause.
+- Main pipeline time fell from 4.7 to 4.2 min (push median 272 s to 255 s). Mean lead time fell from 6.3 to 5.6 min. Both are one-week figures from different merge mixes, so treat them as a trend, not a measured effect of any one change.
+- Pipeline success rate rose from 97.9% to 98.1%, with 2 failures in 108 non-cancelled runs.
+- The dependency audit scoping change (#146) is not isolated here. It has no controlled before/after measurement, only the weekly figures above.
+- Zero failed deploys again covers the script's `main` runs only. It says nothing about the scheduled live check outside `Lagaw CI`.
+
+Per-job durations, Sprint 4 window (`--jobs` output; `n` counts job results including non-success; skipped jobs have no duration):
+
+| Event | Job | Median | p90 | Mean | n |
+| --- | --- | --- | --- | --- | --- |
+| pull_request | Backend - Python | 43 s | 51 s | 42 s | 41 |
+| pull_request | Database - PostgreSQL migrations and smoke tests | 43 s | 50 s | 43 s | 40 |
+| pull_request | Dependency audit - pip and npm | 26 s | 31 s | 24 s | 30 |
+| pull_request | Detect changed areas | 6 s | 10 s | 7 s | 75 |
+| pull_request | Frontend - Flutter | 108 s | 120 s | 103 s | 30 |
+| pull_request | Secret scan - gitleaks | 6 s | 8 s | 7 s | 67 |
+| push | Backend - Python | 40 s | 50 s | 41 s | 32 |
+| push | Database - PostgreSQL migrations and smoke tests | 44 s | 55 s | 46 s | 32 |
+| push | Decide - Staging deployment | 6 s | 14 s | 8 s | 32 |
+| push | Dependency audit - pip and npm | 25 s | 36 s | 27 s | 28 |
+| push | Detect changed areas | 6 s | 14 s | 8 s | 32 |
+| push | Frontend - Flutter | 106 s | 120 s | 112 s | 32 |
+| push | Secret scan - gitleaks | 7 s | 14 s | 9 s | 28 |
+| push | Deploy - Staging | 113 s | 135 s | 110 s | 17 |
+| push | Deploy - Production API | 60 s | 72 s | 61 s | 10 |
+| push | Deploy - Production web | 84 s | 90 s | 85 s | 12 |
+| workflow_dispatch | Backend - Python | 44 s | 49 s | 44 s | 2 |
+| workflow_dispatch | Database - PostgreSQL migrations and smoke tests | 47 s | 49 s | 47 s | 2 |
+| workflow_dispatch | Dependency audit - pip and npm | 23 s | 24 s | 23 s | 2 |
+| workflow_dispatch | Detect changed areas | 16 s | 26 s | 16 s | 2 |
+| workflow_dispatch | Frontend - Flutter | 103 s | 103 s | 103 s | 2 |
+| workflow_dispatch | Secret scan - gitleaks | 11 s | 17 s | 11 s | 2 |
+| workflow_dispatch | Decide - Staging deployment | 5 s | 5 s | 5 s | 1 |
+| workflow_dispatch | Deploy - Staging | 153 s | 153 s | 153 s | 1 |
+| workflow_dispatch | Deploy - Production API | 95 s | 95 s | 95 s | 1 |
+| workflow_dispatch | Deploy - Production web | 81 s | 81 s | 81 s | 1 |
+
+The script also printed single-result `pull_request` rows for `Decide - Staging deployment` (0 s), and for `Deploy - Staging`, `Deploy - Production API` and `Deploy - Production web` (-1 s each). A duration of -1 s is not a real deploy time and the script does not explain it, so those rows are omitted from the table above and not interpreted. Production deploy medians compare with Sprint 3 as API 56 to 60 s and web 74 to 84 s on `push` events; the sample sizes (8 to 12) are too small to call this a regression.
 
 ### Sprint 3 source (completed week, queried November 5, 2026)
 
