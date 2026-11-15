@@ -1,0 +1,19 @@
+{
+  "environment": "development",
+  "observed_at_utc": "2026-11-15T08:18:49.732446+00:00",
+  "manifest_sha256": "7b44287057bdf389e4c4f8eaadda016c41f6373675f40ff10c4afc1a0998c1be",
+  "first_run": {
+    "inserted": 20,
+    "already_present": 0,
+    "total_locations": 30,
+    "existing_ten_preserved": true,
+    "new_images_null": true
+  },
+  "rerun": {
+    "inserted": 0,
+    "already_present": 20,
+    "total_locations": 30,
+    "existing_ten_preserved": true,
+    "new_images_null": true
+  }
+}

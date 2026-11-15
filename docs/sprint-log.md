@@ -1073,3 +1073,8 @@ is a different operation and was not triggered. See the
 ### November 15, 2026 - destination description attribution cleanup
 
 - Removed personal supplied-by wording from four development destination descriptions at the data owner's request. Preserved source qualifications and every other public field. Four updates, zero changes on rerun; full public readback matched all ten records. Production SQL is prepared pending operator execution; no environment changes. Prior audit snapshots remain historical records.
+
+### November 15, 2026 - twenty new catalogue destinations in development
+
+- Applied the requested hours, coordinates and indicative prices to twenty new Bacolod records on feat/twenty-destination-expansion, using fixed UUIDs and the existing travel-tag vocabulary. Kept all new image URLs null and descriptions free of personal supplied-by wording. Ten retained researched pins remain approximate; original precision, source links/labels, mixed-price qualifications and outstanding checks are recorded in the manifest. Midnight closes use a conservative 23:59 cutoff; unspecified days are omitted. Negros Superlanes costs remain null.
+- Development inserted twenty rows (30 total); rerun inserted zero. Full public readback confirmed all intended records and preserved the original ten. Development has 30 coordinate pairs, 30 schedules and 29 bounded cost ranges. Focused tests: 88 passed; Ruff passed. Production remains at its original ten records because its dedicated write credential is absent; the explicit attempt stopped before network/writes. Prepared guarded production SQL outside automatic migrations and documented the operator handoff. No environment changes.
