@@ -1,0 +1,191 @@
+{
+  "observed_at_utc": "2026-11-15T04:45:16.114207+00:00",
+  "manifest_sha256": "35654bb70a00b6fe3d7f7e016abb937c85f1c4940db2d4068e3b38ba2c154531",
+  "verification": "Read-only public API readback after Andrew reported PR #183 merged and production SQL applied. Compares every public baseline field plus the intended patches; no database writes.",
+  "reports": [
+    {
+      "environment": "development",
+      "active_locations": 10,
+      "all_public_fields_match_expected": true,
+      "differences": [],
+      "extra_ids": [],
+      "coordinate_pairs": 10,
+      "opening_schedules": 10,
+      "cost_ranges": 10,
+      "updated_destinations": [
+        {
+          "name": "Negros Occidental Provincial Capitol",
+          "opening_hours": {
+            "friday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ],
+            "tuesday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ],
+            "thursday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ],
+            "wednesday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 0.0,
+          "estimated_cost_max": 0.0
+        },
+        {
+          "name": "Panaad Park and Sports Complex",
+          "opening_hours": {
+            "friday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "monday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "sunday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "tuesday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "saturday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "thursday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "wednesday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 0.0,
+          "estimated_cost_max": 25.0
+        }
+      ]
+    },
+    {
+      "environment": "production",
+      "active_locations": 10,
+      "all_public_fields_match_expected": true,
+      "differences": [],
+      "extra_ids": [],
+      "coordinate_pairs": 10,
+      "opening_schedules": 10,
+      "cost_ranges": 10,
+      "updated_destinations": [
+        {
+          "name": "Negros Occidental Provincial Capitol",
+          "opening_hours": {
+            "friday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ],
+            "tuesday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ],
+            "thursday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ],
+            "wednesday": [
+              {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 0.0,
+          "estimated_cost_max": 0.0
+        },
+        {
+          "name": "Panaad Park and Sports Complex",
+          "opening_hours": {
+            "friday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "monday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "sunday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "tuesday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "saturday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "thursday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ],
+            "wednesday": [
+              {
+                "open": "04:00",
+                "close": "20:00"
+              }
+            ]
+          },
+          "estimated_cost_min": 0.0,
+          "estimated_cost_max": 25.0
+        }
+      ]
+    }
+  ]
+}

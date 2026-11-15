@@ -1,0 +1,1382 @@
+{
+  "schema_version": 1,
+  "purpose": "Remove personal/editorial supplied-by attribution from public destination descriptions while preserving facts and source qualifications.",
+  "baseline": {
+    "development": [
+      {
+        "id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
+        "name": "Arima Restaurant",
+        "description": "An all-day restaurant at Park Inn by Radisson Bacolod serving regional and international dishes, including breakfast and later meals. Indicative spending estimate of PHP 500-1,000 per visitor, not an admission fee or guaranteed maximum. Map pin is approximate.",
+        "category": "restaurant",
+        "vibe_tags": [
+          "food",
+          "relaxing"
+        ],
+        "address": "Park Inn by Radisson Bacolod, Block 12 Reclamation Area, Palanca Avenue, SM City Bacolod Complex, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.673281,
+        "longitude": 122.943819,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 500.0,
+        "estimated_cost_max": 1000.0,
+        "typical_visit_duration": 75,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/f52c28a6-cf76-5efa-b0a3-d04f8b15794c/cb9d2471ed64ef7b11881b258b1c1827ef613e236a587ed9bb74bb0016d6a817.jpg",
+        "is_active": true
+      },
+      {
+        "id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+        "name": "Cafetolyo Coffee Shop",
+        "description": "A coffee and light-refreshment stop at the provincial capitol park, associated with locally sourced coffee and casual breaks. Reported hours and PHP 70-120 spending estimate were supplied by Andrew from the official Facebook page; Sunday access is unspecified. Prices are indicative, not guaranteed total spending.",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe",
+          "food",
+          "relaxing"
+        ],
+        "address": "Provincial Capitol Park and Lagoon, Bacolod City, Negros Occidental",
+        "latitude": 10.67675,
+        "longitude": 122.951725,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 70.0,
+        "estimated_cost_max": 120.0,
+        "typical_visit_duration": 35,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/a752a30a-1859-503d-8a77-8cd59097ac1d/8ba6deff410f8761efd67c524b803926649f1b6c14255e2a572ddd9da435cc7c.jpg",
+        "is_active": true
+      },
+      {
+        "id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+        "name": "Calea Pastries & Coffee",
+        "description": "A Bacolod pastry and dessert caf\u00e9 on 15th Street offering a stop for cakes and coffee. The supplied PHP 95-1,100 menu-price range includes different products such as slices and whole cakes; it is an indicative purchase allowance, not a fixed per-person meal or admission price. Hours and branch pin are user-supplied.",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe",
+          "food",
+          "relaxing"
+        ],
+        "address": "15th Street, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.679792,
+        "longitude": 122.95475,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "22:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "09:00",
+              "close": "22:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "22:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ]
+        },
+        "estimated_cost_min": 95.0,
+        "estimated_cost_max": 1100.0,
+        "typical_visit_duration": 40,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/f2ccf475-56ea-51a0-a003-70f66d9f852a/e55cb1c49c258242dc75225c614bb68edfffaa861112301abe54d5f3d8e0570d.jpg",
+        "is_active": true
+      },
+      {
+        "id": "af80a358-d1ad-529f-84b3-ff1e591e041f",
+        "name": "Capitol Park and Lagoon",
+        "description": "A public landscape surrounding the provincial capitol lagoon, offering leafy paths and opportunities to appreciate the civic setting. The travel guide reports daily 05:00-22:00 and free ordinary entry; temporary closures and event restrictions may differ.",
+        "category": "park",
+        "vibe_tags": [
+          "nature",
+          "relaxing",
+          "photography"
+        ],
+        "address": "Provincial Capitol Complex, Bacolod City, Negros Occidental",
+        "latitude": 10.676,
+        "longitude": 122.95213,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 0.0,
+        "typical_visit_duration": 35,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/af80a358-d1ad-529f-84b3-ff1e591e041f/6e358bf57700c46d0527c94da8b503b15e8f64208a9f6de836cd1eb05983e66e.jpg",
+        "is_active": true
+      },
+      {
+        "id": "b3783066-7484-5917-a09b-404974974880",
+        "name": "Negros Forest Park",
+        "description": "A conservation and wildlife education center presenting native Negros species and the work of the Talarak Foundation. Reported Tuesday-Sunday hours are 09:00-17:00; Monday is unspecified. Historical 2022 admission reports give PHP 100 for adults and PHP 50 for eligible discounted visitors; current prices are not operator-confirmed.",
+        "category": "park",
+        "vibe_tags": [
+          "nature",
+          "photography"
+        ],
+        "address": "South Capitol Road, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.67507,
+        "longitude": 122.95105,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 50.0,
+        "estimated_cost_max": 100.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/b3783066-7484-5917-a09b-404974974880/d3ce15efe26bb75082882949d99c7ff273633ed3e11bf1ef8a5b4bb2d1c95d0c.jpg",
+        "is_active": true
+      },
+      {
+        "id": "4618dfae-4a30-5917-85f1-94f216cf5b97",
+        "name": "Negros Occidental Provincial Capitol",
+        "description": "The provincial government\u2019s prominent capitol building, an architectural focal point of central Bacolod. Andrew-supplied schedule: Tuesday-Friday 08:00-19:00, citing the provincial government website; these may be office hours rather than confirmed tourist access hours. Andrew reports free entrance; visitor access and admission are not independently verified.",
+        "category": "landmark",
+        "vibe_tags": [
+          "heritage",
+          "photography"
+        ],
+        "address": "Provincial Capitol Building, Gatuslao Street, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.67647,
+        "longitude": 122.95093,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 0.0,
+        "typical_visit_duration": 20,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/4618dfae-4a30-5917-85f1-94f216cf5b97/9b0308cb0fe8428ee92f28bd5c9933cd8ed76442371433e14b0bcfd3312b8ed0.jpg",
+        "is_active": true
+      },
+      {
+        "id": "d184610e-f8c9-584a-95a3-79809cd81c49",
+        "name": "Orange Project",
+        "description": "A contemporary art gallery within Mandalagan\u2019s Art District, featuring exhibitions and work by local and visiting artists. Reported exhibition admission varies: PHP 0-50 is an indicative range, not a guaranteed future tariff. The cited PHP 50 article concerns March-June 2026 exhibitions; confirm the current exhibition before visiting.",
+        "category": "gallery",
+        "vibe_tags": [
+          "photography",
+          "relaxing"
+        ],
+        "address": "Orange Project Building, Art District, Lopue\u2019s Annex Building, Mandalagan, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.695876,
+        "longitude": 122.95983,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "13:00",
+              "close": "17:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 50.0,
+        "typical_visit_duration": 45,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/d184610e-f8c9-584a-95a3-79809cd81c49/3482c44d11808bd3b4088317b7e1b0fc381c7bba815a4ad37ee3474530e9d6e5.jpg",
+        "is_active": true
+      },
+      {
+        "id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
+        "name": "Panaad Park and Sports Complex",
+        "description": "A provincial park and sports venue in Mansilingan used for major local events and the Panaad sa Negros Festival. Andrew-supplied, unverified Reddit reports: 04:00-20:00 daily and PHP 0-25 estimated admission. Reported oval fees are PHP 25 regular and PHP 15 student; they may not apply to the whole park. Hours and fees await confirmation.",
+        "category": "park",
+        "vibe_tags": [
+          "nature",
+          "photography"
+        ],
+        "address": "Barangay Mansilingan, Bacolod City, Negros Occidental",
+        "latitude": 10.62379,
+        "longitude": 122.96481,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 25.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c/53352232b06db6f785e3fc41bf3c9b916a2e34e958b7a6f461124be8a726bc25.jpg",
+        "is_active": true
+      },
+      {
+        "id": "1a3bca09-5532-5de6-8587-2440c4e5830d",
+        "name": "San Sebastian Cathedral",
+        "description": "A historic coral-stone Catholic cathedral in downtown Bacolod, suitable for a quiet architectural visit that respects ongoing worship. The travel guide reports these opening hours and free entry. Mass schedules are separate from sightseeing access; respect worship and any visitor restrictions.",
+        "category": "heritage",
+        "vibe_tags": [
+          "heritage",
+          "photography"
+        ],
+        "address": "Jose Rizal Street, Bacolod City, Negros Occidental",
+        "latitude": 10.67035,
+        "longitude": 122.94715,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "05:00",
+              "close": "20:30"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 0.0,
+        "typical_visit_duration": 25,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/1a3bca09-5532-5de6-8587-2440c4e5830d/395784caa1812a7bc96862113ff637c60b8c8e9d9c1c17e92971fd472fe41edf.jpg",
+        "is_active": true
+      },
+      {
+        "id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+        "name": "The Negros Museum",
+        "description": "A museum of Negros history, heritage and the arts near the provincial capitol, with exhibits that introduce local culture.",
+        "category": "museum",
+        "vibe_tags": [
+          "heritage",
+          "photography"
+        ],
+        "address": "Gatuslao Street, Bacolod City, Negros Occidental",
+        "latitude": 10.67516,
+        "longitude": 122.95032,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 70.0,
+        "estimated_cost_max": 100.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": "https://vnpkyvtbupnquvirzlzp.supabase.co/storage/v1/object/public/destination-images/locations/61bf94ab-6ec0-5ec3-8451-b575ee06169e/21c8f94b13451686000bf29451190d25d38a00a92175b9677e10da0025e7c158.jpg",
+        "is_active": true
+      }
+    ],
+    "production": [
+      {
+        "id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
+        "name": "Arima Restaurant",
+        "description": "An all-day restaurant at Park Inn by Radisson Bacolod serving regional and international dishes, including breakfast and later meals. Indicative spending estimate of PHP 500-1,000 per visitor, not an admission fee or guaranteed maximum. Map pin is approximate.",
+        "category": "restaurant",
+        "vibe_tags": [
+          "food",
+          "relaxing"
+        ],
+        "address": "Park Inn by Radisson Bacolod, Block 12 Reclamation Area, Palanca Avenue, SM City Bacolod Complex, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.673281,
+        "longitude": 122.943819,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "06:00",
+              "close": "22:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 500.0,
+        "estimated_cost_max": 1000.0,
+        "typical_visit_duration": 75,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+        "name": "Cafetolyo Coffee Shop",
+        "description": "A coffee and light-refreshment stop at the provincial capitol park, associated with locally sourced coffee and casual breaks. Reported hours and PHP 70-120 spending estimate were supplied by Andrew from the official Facebook page; Sunday access is unspecified. Prices are indicative, not guaranteed total spending.",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe",
+          "food",
+          "relaxing"
+        ],
+        "address": "Provincial Capitol Park and Lagoon, Bacolod City, Negros Occidental",
+        "latitude": 10.67675,
+        "longitude": 122.951725,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 70.0,
+        "estimated_cost_max": 120.0,
+        "typical_visit_duration": 35,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+        "name": "Calea Pastries & Coffee",
+        "description": "A Bacolod pastry and dessert caf\u00e9 on 15th Street offering a stop for cakes and coffee. The supplied PHP 95-1,100 menu-price range includes different products such as slices and whole cakes; it is an indicative purchase allowance, not a fixed per-person meal or admission price. Hours and branch pin are user-supplied.",
+        "category": "cafe",
+        "vibe_tags": [
+          "cafe",
+          "food",
+          "relaxing"
+        ],
+        "address": "15th Street, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.679792,
+        "longitude": 122.95475,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "22:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "09:00",
+              "close": "22:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "22:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "21:30"
+            }
+          ]
+        },
+        "estimated_cost_min": 95.0,
+        "estimated_cost_max": 1100.0,
+        "typical_visit_duration": 40,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "af80a358-d1ad-529f-84b3-ff1e591e041f",
+        "name": "Capitol Park and Lagoon",
+        "description": "A public landscape surrounding the provincial capitol lagoon, offering leafy paths and opportunities to appreciate the civic setting. The travel guide reports daily 05:00-22:00 and free ordinary entry; temporary closures and event restrictions may differ.",
+        "category": "park",
+        "vibe_tags": [
+          "nature",
+          "relaxing",
+          "photography"
+        ],
+        "address": "Provincial Capitol Complex, Bacolod City, Negros Occidental",
+        "latitude": 10.676,
+        "longitude": 122.95213,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "05:00",
+              "close": "22:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 0.0,
+        "typical_visit_duration": 35,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "b3783066-7484-5917-a09b-404974974880",
+        "name": "Negros Forest Park",
+        "description": "A conservation and wildlife education center presenting native Negros species and the work of the Talarak Foundation. Reported Tuesday-Sunday hours are 09:00-17:00; Monday is unspecified. Historical 2022 admission reports give PHP 100 for adults and PHP 50 for eligible discounted visitors; current prices are not operator-confirmed.",
+        "category": "park",
+        "vibe_tags": [
+          "nature",
+          "photography"
+        ],
+        "address": "South Capitol Road, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.67507,
+        "longitude": 122.95105,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "17:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 50.0,
+        "estimated_cost_max": 100.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "4618dfae-4a30-5917-85f1-94f216cf5b97",
+        "name": "Negros Occidental Provincial Capitol",
+        "description": "The provincial government\u2019s prominent capitol building, an architectural focal point of central Bacolod. Andrew-supplied schedule: Tuesday-Friday 08:00-19:00, citing the provincial government website; these may be office hours rather than confirmed tourist access hours. Andrew reports free entrance; visitor access and admission are not independently verified.",
+        "category": "landmark",
+        "vibe_tags": [
+          "heritage",
+          "photography"
+        ],
+        "address": "Provincial Capitol Building, Gatuslao Street, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.67647,
+        "longitude": 122.95093,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "08:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 0.0,
+        "typical_visit_duration": 20,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "d184610e-f8c9-584a-95a3-79809cd81c49",
+        "name": "Orange Project",
+        "description": "A contemporary art gallery within Mandalagan\u2019s Art District, featuring exhibitions and work by local and visiting artists. Reported exhibition admission varies: PHP 0-50 is an indicative range, not a guaranteed future tariff. The cited PHP 50 article concerns March-June 2026 exhibitions; confirm the current exhibition before visiting.",
+        "category": "gallery",
+        "vibe_tags": [
+          "photography",
+          "relaxing"
+        ],
+        "address": "Orange Project Building, Art District, Lopue\u2019s Annex Building, Mandalagan, Bacolod City, Negros Occidental 6100",
+        "latitude": 10.695876,
+        "longitude": 122.95983,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "13:00",
+              "close": "17:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "13:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 50.0,
+        "typical_visit_duration": 45,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
+        "name": "Panaad Park and Sports Complex",
+        "description": "A provincial park and sports venue in Mansilingan used for major local events and the Panaad sa Negros Festival. Andrew-supplied, unverified Reddit reports: 04:00-20:00 daily and PHP 0-25 estimated admission. Reported oval fees are PHP 25 regular and PHP 15 student; they may not apply to the whole park. Hours and fees await confirmation.",
+        "category": "park",
+        "vibe_tags": [
+          "nature",
+          "photography"
+        ],
+        "address": "Barangay Mansilingan, Bacolod City, Negros Occidental",
+        "latitude": 10.62379,
+        "longitude": 122.96481,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "04:00",
+              "close": "20:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 25.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "1a3bca09-5532-5de6-8587-2440c4e5830d",
+        "name": "San Sebastian Cathedral",
+        "description": "A historic coral-stone Catholic cathedral in downtown Bacolod, suitable for a quiet architectural visit that respects ongoing worship. The travel guide reports these opening hours and free entry. Mass schedules are separate from sightseeing access; respect worship and any visitor restrictions.",
+        "category": "heritage",
+        "vibe_tags": [
+          "heritage",
+          "photography"
+        ],
+        "address": "Jose Rizal Street, Bacolod City, Negros Occidental",
+        "latitude": 10.67035,
+        "longitude": 122.94715,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "sunday": [
+            {
+              "open": "05:00",
+              "close": "20:30"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "06:00",
+              "close": "19:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 0.0,
+        "estimated_cost_max": 0.0,
+        "typical_visit_duration": 25,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      },
+      {
+        "id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+        "name": "The Negros Museum",
+        "description": "A museum of Negros history, heritage and the arts near the provincial capitol, with exhibits that introduce local culture.",
+        "category": "museum",
+        "vibe_tags": [
+          "heritage",
+          "photography"
+        ],
+        "address": "Gatuslao Street, Bacolod City, Negros Occidental",
+        "latitude": 10.67516,
+        "longitude": 122.95032,
+        "opening_hours": {
+          "friday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "monday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "tuesday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "saturday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "thursday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ],
+          "wednesday": [
+            {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          ]
+        },
+        "estimated_cost_min": 70.0,
+        "estimated_cost_max": 100.0,
+        "typical_visit_duration": 60,
+        "suitable_group_types": [
+          "solo",
+          "couple",
+          "family",
+          "friends",
+          "group"
+        ],
+        "image_url": null,
+        "is_active": true
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+      "name": "Cafetolyo Coffee Shop",
+      "proposal": {
+        "description": "A coffee and light-refreshment stop at the provincial capitol park, associated with locally sourced coffee and casual breaks. Reported hours and PHP 70-120 spending estimate are reported on the official Facebook page; Sunday access is unspecified. Prices are indicative, not guaranteed total spending."
+      },
+      "expected": {
+        "development": {
+          "description": "A coffee and light-refreshment stop at the provincial capitol park, associated with locally sourced coffee and casual breaks. Reported hours and PHP 70-120 spending estimate were supplied by Andrew from the official Facebook page; Sunday access is unspecified. Prices are indicative, not guaranteed total spending."
+        },
+        "production": {
+          "description": "A coffee and light-refreshment stop at the provincial capitol park, associated with locally sourced coffee and casual breaks. Reported hours and PHP 70-120 spending estimate were supplied by Andrew from the official Facebook page; Sunday access is unspecified. Prices are indicative, not guaranteed total spending."
+        }
+      }
+    },
+    {
+      "id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+      "name": "Calea Pastries & Coffee",
+      "proposal": {
+        "description": "A Bacolod pastry and dessert caf\u00e9 on 15th Street offering a stop for cakes and coffee. The reported PHP 95-1,100 menu-price range includes different products such as slices and whole cakes; it is an indicative purchase allowance, not a fixed per-person meal or admission price. Hours and branch pin await independent confirmation."
+      },
+      "expected": {
+        "development": {
+          "description": "A Bacolod pastry and dessert caf\u00e9 on 15th Street offering a stop for cakes and coffee. The supplied PHP 95-1,100 menu-price range includes different products such as slices and whole cakes; it is an indicative purchase allowance, not a fixed per-person meal or admission price. Hours and branch pin are user-supplied."
+        },
+        "production": {
+          "description": "A Bacolod pastry and dessert caf\u00e9 on 15th Street offering a stop for cakes and coffee. The supplied PHP 95-1,100 menu-price range includes different products such as slices and whole cakes; it is an indicative purchase allowance, not a fixed per-person meal or admission price. Hours and branch pin are user-supplied."
+        }
+      }
+    },
+    {
+      "id": "4618dfae-4a30-5917-85f1-94f216cf5b97",
+      "name": "Negros Occidental Provincial Capitol",
+      "proposal": {
+        "description": "The provincial government\u2019s prominent capitol building, an architectural focal point of central Bacolod. Reported schedule: Tuesday-Friday 08:00-19:00, citing the provincial government website; these may be office hours rather than confirmed tourist access hours. Entrance is reported as free; visitor access and admission are not independently verified."
+      },
+      "expected": {
+        "development": {
+          "description": "The provincial government\u2019s prominent capitol building, an architectural focal point of central Bacolod. Andrew-supplied schedule: Tuesday-Friday 08:00-19:00, citing the provincial government website; these may be office hours rather than confirmed tourist access hours. Andrew reports free entrance; visitor access and admission are not independently verified."
+        },
+        "production": {
+          "description": "The provincial government\u2019s prominent capitol building, an architectural focal point of central Bacolod. Andrew-supplied schedule: Tuesday-Friday 08:00-19:00, citing the provincial government website; these may be office hours rather than confirmed tourist access hours. Andrew reports free entrance; visitor access and admission are not independently verified."
+        }
+      }
+    },
+    {
+      "id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
+      "name": "Panaad Park and Sports Complex",
+      "proposal": {
+        "description": "A provincial park and sports venue in Mansilingan used for major local events and the Panaad sa Negros Festival. Unverified Reddit reports: 04:00-20:00 daily and PHP 0-25 estimated admission. Reported oval fees are PHP 25 regular and PHP 15 student; they may not apply to the whole park. Hours and fees await confirmation."
+      },
+      "expected": {
+        "development": {
+          "description": "A provincial park and sports venue in Mansilingan used for major local events and the Panaad sa Negros Festival. Andrew-supplied, unverified Reddit reports: 04:00-20:00 daily and PHP 0-25 estimated admission. Reported oval fees are PHP 25 regular and PHP 15 student; they may not apply to the whole park. Hours and fees await confirmation."
+        },
+        "production": {
+          "description": "A provincial park and sports venue in Mansilingan used for major local events and the Panaad sa Negros Festival. Andrew-supplied, unverified Reddit reports: 04:00-20:00 daily and PHP 0-25 estimated admission. Reported oval fees are PHP 25 regular and PHP 15 student; they may not apply to the whole park. Hours and fees await confirmation."
+        }
+      }
+    }
+  ]
+}
