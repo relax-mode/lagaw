@@ -117,3 +117,26 @@ that credential is absent. Production must be read back separately after an
 authorized operator executes the transaction; this document does not claim it
 has been applied. No synthetic locations, image uploads, schema changes or
 changes to the recommender/planner were made.
+
+## PR publication
+
+Branch `feat/location-metadata-refresh` is pushed. PR creation through the
+connected GitHub tool failed with a connection argument error, so no PR or CI
+result is claimed. [Open the PR comparison](https://github.com/relax-mode/lagaw/compare/main...feat/location-metadata-refresh?expand=1).
+
+Suggested title: **feat(data): fill existing-location metadata with qualified supplied values**.
+
+Suggested description:
+
+> Applies Andrew's qualified metadata to seven existing development records,
+> preserving IDs, images and other metadata. Four coordinate pairs and missing
+> schedules/cost estimates are filled; source caveats are recorded in descriptions
+> and the manifest. Provincial Capitol office hours and unverified Panaad oval
+> reports remain deferred. No new venues or automatic migration.
+>
+> 77 focused tests and Ruff pass. Development changed seven rows; rerun changed
+> zero; full public readback matches intended values. Production remains unchanged
+> because its credential is unavailable. Review the source qualifications and
+> `docs/location-metadata-production-2026-11-15.sql` before an authorized operator
+> applies the separate production transaction. `.env` is unchanged. This is not
+> proof of a verified three-stop itinerary; prices are qualified planning estimates.
