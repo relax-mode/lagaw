@@ -70,7 +70,7 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
 
     return TripPageScaffold(
       title: 'plan a trip',
-      subtitle: 'Set the basics — Lagaw fills in the spots later.',
+      subtitle: 'Set the basics. Lagaw fills in the spots later.',
       children: [
         if (_error != null) ...[
           StatusBanner(

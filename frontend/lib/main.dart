@@ -9,15 +9,21 @@ import 'auth/auth_gate.dart';
 import 'auth/auth_session.dart';
 import 'config.dart';
 import 'locations_screen.dart';
+import 'models/image_credits.dart';
 import 'screens/onboarding/first_run_gate.dart';
 import 'services/discovery_service.dart';
 import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ImageCredits.load();
   AuthSession? session;
-  String? configError;
-  if (AppConfig.authEnabled) {
+  String? configError = releaseConfigError(
+    isRelease: kReleaseMode,
+    apiBaseUrlProvided: AppConfig.apiBaseUrlProvided,
+    authEnabled: AppConfig.authEnabled,
+  );
+  if (configError == null && AppConfig.authEnabled) {
     if (!isPublicSupabaseKey(AppConfig.supabaseAnonKey)) {
       configError =
           'This build has a server-only Supabase key. Rebuild it with the '

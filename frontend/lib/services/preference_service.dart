@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../auth/api_credentials.dart';
+import '../auth/auth_client.dart';
 import '../auth/auth_session.dart';
 import '../config.dart';
 import '../models/preference_draft.dart';
@@ -46,11 +47,22 @@ class PreferenceService {
         demoToken: AppConfig.tripDemoToken,
       );
 
+  static const _unreachable = PreferenceApiException(
+    'Could not reach the Lagaw server. Check your connection, or fill in '
+    'the form yourself.',
+    code: 'network',
+  );
+
   /// POST /api/v1/preferences/extract. Sends only the prompt: suggestions
   /// are reviewed and merged on the client, so explicit form values are
   /// never overridden by the server. Never retried automatically.
   Future<PreferenceDraft> extract(String prompt) async {
-    var token = await _auth.token();
+    String? token;
+    try {
+      token = await _auth.token();
+    } on AuthUnreachable {
+      throw _unreachable;
+    }
     if (token == null) {
       throw PreferenceApiException(
         _auth.usesSession
@@ -87,11 +99,10 @@ class PreferenceService {
         code: 'client_timeout',
       );
     } on http.ClientException {
-      throw const PreferenceApiException(
-        'Could not reach the Lagaw server. Check your connection, or fill in '
-        'the form yourself.',
-        code: 'network',
-      );
+      throw _unreachable;
+    } on AuthUnreachable {
+      // A refresh that can't reach Supabase is not an expired session.
+      throw _unreachable;
     }
 
     if (response.statusCode == 200) {

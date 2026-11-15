@@ -79,7 +79,23 @@ class TripStatusPill extends StatelessWidget {
   }
 }
 
-/// Tappable summary card for one saved trip in the My Trips list. [S2-04]
+const _months = [
+  'JAN',
+  'FEB',
+  'MAR',
+  'APR',
+  'MAY',
+  'JUN',
+  'JUL',
+  'AUG',
+  'SEP',
+  'OCT',
+  'NOV',
+  'DEC',
+];
+
+/// Tappable summary card for one saved trip in the My Trips list: a white
+/// card with a sky date tile, matching the v3 Spots cards. [S2-04, home v3]
 class TripCard extends StatelessWidget {
   final Trip trip;
   final VoidCallback onTap;
@@ -94,52 +110,83 @@ class TripCard extends StatelessWidget {
     );
     final group = chipOptionFor(kGroupTypes, trip.groupType);
     final days = tripDayCount(trip.startDate, trip.endDate);
+    final draft = trip.status == 'draft' || trip.status.isEmpty;
+    final status = trip.status.isEmpty
+        ? 'Draft'
+        : '${trip.status[0].toUpperCase()}${trip.status.substring(1)}';
+
+    Widget fact(IconData icon, String label) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5FB),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppTheme.primaryBlue),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.slateDark,
+            ),
+          ),
+        ],
+      ),
+    );
 
     return TactilePressable(
       onTap: onTap,
-      child: GlassContainer(
-        borderRadius: 22,
-        padding: const EdgeInsets.all(14),
+      hoverLift: 2,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x4D0F285A),
+              blurRadius: 26,
+              offset: Offset(0, 14),
+              spreadRadius: -14,
+            ),
+          ],
+        ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 54,
-              height: 54,
+              width: 64,
+              height: 72,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFFFBBF24), Color(0xFFEA580C)],
+                  colors: [AppTheme.skyTop, AppTheme.skyMid],
                 ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white, width: 2),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFF9A3412),
-                    offset: Offset(0, 3),
-                    blurRadius: 0,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(18),
               ),
-              alignment: Alignment.center,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '$days',
+                    _months[trip.startDate.month - 1],
                     style: const TextStyle(
-                      fontFamily: 'Outfit',
-                      fontWeight: FontWeight.w900,
-                      fontSize: 20,
-                      height: 1,
-                      color: Colors.white,
+                      fontSize: 11,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xE6FFFFFF),
                     ),
                   ),
                   Text(
-                    days == 1 ? 'day' : 'days',
+                    '${trip.startDate.day}',
                     style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 26,
+                      height: 1.05,
                       color: Colors.white,
                     ),
                   ),
@@ -151,6 +198,7 @@ class TripCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Expanded(
@@ -159,53 +207,66 @@ class TripCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontFamily: 'Outfit',
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17,
                             color: AppTheme.slateDark,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      TripStatusPill(trip.status),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: draft
+                              ? const Color(0xFFFFF3EA)
+                              : const Color(0xFFE8F8EE),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: draft
+                                ? const Color(0xFFC2410C)
+                                : const Color(0xFF15803D),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
-                    '${formatDateRange(trip.startDate, trip.endDate)}  •  '
-                    '${formatBudgetRange(trip.budgetMin, trip.budgetMax)}',
+                    '${formatDayCount(days)} · '
+                    '${formatDateRange(trip.startDate, trip.endDate)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: AppTheme.slateMuted,
                     ),
                   ),
-                  if (transport != null || group != null) ...[
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        if (transport != null)
-                          TripPill(
-                            label: transport.label,
-                            icon: transport.icon,
-                          ),
-                        if (group != null)
-                          TripPill(
-                            label: group.label,
-                            icon: group.icon,
-                            color: const Color(0xFF7C3AED),
-                            background: const Color(0xFFF5F3FF),
-                          ),
-                      ],
-                    ),
-                  ],
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      fact(
+                        Icons.payments_outlined,
+                        formatBudgetRange(trip.budgetMin, trip.budgetMax),
+                      ),
+                      if (transport != null)
+                        fact(transport.icon, transport.label),
+                      if (group != null) fact(group.icon, group.label),
+                    ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded, color: AppTheme.slateMuted),
           ],
         ),
       ),

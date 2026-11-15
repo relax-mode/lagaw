@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,10 +7,7 @@ import '../../models/onboarding_preferences.dart';
 import '../../services/onboarding_repository.dart';
 import '../../theme.dart';
 import '../../widgets/status_banner.dart';
-import '../../widgets/trip_form/choice_chips_field.dart';
-import '../../widgets/trip_form/tactile_text_field.dart';
 import '../../widgets/trip_form/trip_form.dart';
-import '../trip_page_scaffold.dart';
 
 enum OnboardingStep { welcome, interests, budget, style, review, done }
 
@@ -37,8 +36,8 @@ const Map<String, ({String label, String blurb, IconData icon})> _styles = {
   ),
 };
 
-/// First-time travel preference onboarding: interests, budget and travel
-/// style, then a review before saving. Uses [repository] for loading and
+/// Travel preferences as one card over the blurred app: interests, budget
+/// and travel style, then a review before saving. Uses [repository] for loading and
 /// saving. Pops with the saved preferences, or replaces itself with
 /// [next] (e.g. recommendations) after saving. [S4-01, S4-04]
 class OnboardingFlow extends StatefulWidget {
@@ -221,59 +220,88 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     final questionIndex = _questionSteps.indexOf(_step);
+    final view = _view();
+    final canClose = _canLeave || _loading || _loadError != null;
+    final insets = MediaQuery.viewInsetsOf(context);
     return PopScope(
-      canPop: _canLeave || _loading || _loadError != null,
+      canPop: canClose,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && !_saving) _back();
       },
-      child: TripPageScaffold(
-        title: 'travel preferences',
-        subtitle: questionIndex >= 0
-            ? 'Step ${questionIndex + 1} of ${_questionSteps.length}'
-            : 'Tell us how you like to explore',
-        children: [
-          if (questionIndex >= 0) ...[
-            _ProgressBar(value: (questionIndex + 1) / _questionSteps.length),
-            const SizedBox(height: 16),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Stack(
+          children: [
+            // Tapping the blurred app closes the card when nothing is lost.
+            Positioned.fill(
+              child: GestureDetector(
+                key: const ValueKey('onboarding-backdrop'),
+                behavior: HitTestBehavior.opaque,
+                onTap: canClose ? () => Navigator.of(context).maybePop() : null,
+              ),
+            ),
+            SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + insets.bottom),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: _Sheet(
+                      header: questionIndex >= 0
+                          ? _StepHeader(
+                              index: questionIndex,
+                              total: _questionSteps.length,
+                            )
+                          : _ArtHeader(
+                              done: _step == OnboardingStep.done,
+                              onClose: canClose
+                                  ? () => Navigator.of(context).maybePop()
+                                  : null,
+                            ),
+                      view: view,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
-          ..._body(),
-        ],
+        ),
       ),
     );
   }
 
-  List<Widget> _body() {
+  _StepView _view() {
     if (_loading) {
-      return const [
-        GlassContainer(
-          key: ValueKey('onboarding-loading'),
-          padding: EdgeInsets.all(28),
-          child: Column(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 14),
-              Text(
-                'Loading your preferences…',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.slateMuted,
-                ),
-              ),
-            ],
+      return const _StepView(
+        id: 'loading',
+        title: 'One moment',
+        body: 'Loading your preferences…',
+        content: [
+          Center(
+            key: ValueKey('onboarding-loading'),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: CircularProgressIndicator(color: _orange),
+            ),
           ),
-        ),
-      ];
+        ],
+      );
     }
     if (_loadError != null) {
-      return [
-        StatusBanner(
-          key: const ValueKey('onboarding-load-error'),
-          tone: StatusTone.error,
-          message: _loadError!,
-          actionLabel: 'Retry',
-          onAction: _load,
-        ),
-      ];
+      return _StepView(
+        id: 'error',
+        title: 'Something went wrong',
+        body: 'Your preferences didn’t load.',
+        content: [
+          StatusBanner(
+            key: const ValueKey('onboarding-load-error'),
+            tone: StatusTone.error,
+            message: _loadError!,
+            actionLabel: 'Retry',
+            onAction: _load,
+          ),
+        ],
+      );
     }
     return switch (_step) {
       OnboardingStep.welcome => _welcome(),
@@ -285,227 +313,292 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     };
   }
 
-  List<Widget> _welcome() => [
-    _Card(
-      icon: Icons.waving_hand_rounded,
-      title: 'Welcome to Lagaw!',
-      body:
-          'Answer three quick questions so we can suggest places in Bacolod '
-          'that fit you. You can change them anytime.',
-      children: const [
-        _Bullet(Icons.interests_rounded, 'What you love to do'),
-        _Bullet(Icons.payments_rounded, 'Your usual budget'),
-        _Bullet(Icons.speed_rounded, 'How you like to pace your day'),
-      ],
-    ),
-    const SizedBox(height: 16),
-    _PrimaryButton(
-      key: const ValueKey('onboarding-start'),
-      label: 'Get started',
-      onTap: _next,
-    ),
-    if (widget.allowSkip) ...[
-      const SizedBox(height: 8),
-      Center(
-        child: TextButton(
-          key: const ValueKey('onboarding-skip'),
-          onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(foregroundColor: Colors.white),
-          child: const Text('Skip for now'),
-        ),
-      ),
+  _StepView _welcome() => _StepView(
+    id: 'welcome',
+    title: 'Welcome to Lagaw!',
+    body:
+        'Three quick questions so we can suggest places in Bacolod that fit '
+        'you. You can change them anytime.',
+    content: const [
+      _Bullet(Icons.interests_rounded, 'What you love to do'),
+      _Bullet(Icons.payments_rounded, 'Your usual budget'),
+      _Bullet(Icons.speed_rounded, 'How you like to pace your day'),
     ],
-  ];
-
-  List<Widget> _interests() => [
-    _Card(
-      icon: Icons.interests_rounded,
-      title: 'What do you love to do?',
-      body: 'Pick at least one.',
+    footer: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TactileChipsField(
-          label: 'Interests',
-          optional: false,
-          multiSelect: true,
-          options: [
-            for (final option in kPreferredTags)
-              if (kOnboardingTags.contains(option.value)) option,
-          ],
-          selected: _prefs.preferredTags,
-          errorText: _showTagError && _prefs.preferredTags.isEmpty
-              ? 'Choose at least one interest.'
-              : null,
-          onChanged: (tags) =>
-              setState(() => _prefs = _prefs.copyWith(preferredTags: tags)),
+        _PrimaryButton(
+          key: const ValueKey('onboarding-start'),
+          label: 'Get started',
+          onTap: _next,
         ),
+        if (widget.allowSkip)
+          TextButton(
+            key: const ValueKey('onboarding-skip'),
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.slateMuted,
+              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            child: const Text('Skip for now'),
+          ),
       ],
     ),
-    const SizedBox(height: 16),
-    _NavRow(onBack: _back, onNext: _next),
-  ];
+  );
+
+  _StepView _interests() => _StepView(
+    id: 'interests',
+    title: 'What do you love to do?',
+    body: 'Pick at least one.',
+    content: [
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final option in kPreferredTags)
+            if (kOnboardingTags.contains(option.value))
+              _Chip(
+                key: ValueKey('chip-${option.value}'),
+                label: option.label,
+                icon: option.icon,
+                selected: _prefs.preferredTags.contains(option.value),
+                onTap: () => setState(() {
+                  final tags = [..._prefs.preferredTags];
+                  tags.contains(option.value)
+                      ? tags.remove(option.value)
+                      : tags.add(option.value);
+                  _prefs = _prefs.copyWith(preferredTags: tags);
+                }),
+              ),
+        ],
+      ),
+      if (_showTagError && _prefs.preferredTags.isEmpty)
+        const Padding(
+          padding: EdgeInsets.only(top: 10),
+          child: Text(
+            'Choose at least one interest.',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFDC2626),
+            ),
+          ),
+        ),
+    ],
+    footer: _NavRow(onBack: _back, onNext: _next),
+  );
 
   static final _amountFormatters = [
     FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
   ];
 
-  List<Widget> _budget() => [
-    _Card(
-      icon: Icons.payments_rounded,
-      title: 'What’s your usual budget?',
-      body:
-          'Your typical spend per trip in pesos. Leave both empty if you’d '
-          'rather not say.',
+  Widget _amount({
+    required String key,
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    required String? Function() error,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Form(
-          key: _budgetForm,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TactileTextField(
-                  key: const ValueKey('onboarding-budget-min'),
-                  label: 'Min',
-                  optional: true,
-                  controller: _minController,
-                  hintText: '500',
-                  prefixText: '₱ ',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: _amountFormatters,
-                  validator: (_) => validateBudgetRange(
-                    _minController.text,
-                    _maxController.text,
-                  ).minError,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TactileTextField(
-                  key: const ValueKey('onboarding-budget-max'),
-                  label: 'Max',
-                  optional: true,
-                  controller: _maxController,
-                  hintText: '2,000',
-                  prefixText: '₱ ',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: _amountFormatters,
-                  validator: (_) => validateBudgetRange(
-                    _minController.text,
-                    _maxController.text,
-                  ).maxError,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            key: const ValueKey('onboarding-skip-budget'),
-            onPressed: _skipBudget,
-            child: const Text('Skip, no budget preference'),
-          ),
-        ),
-      ],
-    ),
-    const SizedBox(height: 16),
-    _NavRow(onBack: _back, onNext: _next),
-  ];
-
-  List<Widget> _style() => [
-    _Card(
-      icon: Icons.speed_rounded,
-      title: 'How do you like to travel?',
-      body: 'Optional. Tap again to clear.',
-      children: [
-        for (final entry in _styles.entries) ...[
-          _StyleOption(
-            key: ValueKey('style-${entry.key}'),
-            label: entry.value.label,
-            blurb: entry.value.blurb,
-            icon: entry.value.icon,
-            selected: _prefs.travelStyle == entry.key,
-            onTap: () => setState(
-              () => _prefs = _prefs.copyWith(
-                travelStyle: () =>
-                    _prefs.travelStyle == entry.key ? null : entry.key,
-              ),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.slateMuted,
             ),
           ),
-          const SizedBox(height: 10),
-        ],
+        ),
+        TextFormField(
+          key: ValueKey(key),
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: _amountFormatters,
+          validator: (_) => error(),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.slateDark,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixText: '₱ ',
+            filled: true,
+            fillColor: const Color(0xFFF1F5FB),
+            errorMaxLines: 3,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: _orange, width: 1.6),
+            ),
+          ),
+        ),
       ],
-    ),
-    const SizedBox(height: 16),
-    _NavRow(onBack: _back, onNext: _next),
-  ];
+    );
+  }
 
-  List<Widget> _review() {
+  _StepView _budget() => _StepView(
+    id: 'budget',
+    title: 'What’s your usual budget?',
+    body:
+        'Your typical spend per trip in pesos. Leave both empty if you’d '
+        'rather not say.',
+    content: [
+      Form(
+        key: _budgetForm,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _amount(
+                key: 'onboarding-budget-min',
+                label: 'Min',
+                hint: '500',
+                controller: _minController,
+                error: () => validateBudgetRange(
+                  _minController.text,
+                  _maxController.text,
+                ).minError,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _amount(
+                key: 'onboarding-budget-max',
+                label: 'Max',
+                hint: '2,000',
+                controller: _maxController,
+                error: () => validateBudgetRange(
+                  _minController.text,
+                  _maxController.text,
+                ).maxError,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 4),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          key: const ValueKey('onboarding-skip-budget'),
+          onPressed: _skipBudget,
+          style: TextButton.styleFrom(
+            foregroundColor: AppTheme.primaryBlue,
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          child: const Text('Skip, no budget preference'),
+        ),
+      ),
+    ],
+    footer: _NavRow(onBack: _back, onNext: _next),
+  );
+
+  _StepView _style() => _StepView(
+    id: 'style',
+    title: 'How do you like to travel?',
+    body: 'Optional. Tap again to clear.',
+    content: [
+      for (final entry in _styles.entries) ...[
+        _StyleOption(
+          key: ValueKey('style-${entry.key}'),
+          label: entry.value.label,
+          blurb: entry.value.blurb,
+          icon: entry.value.icon,
+          selected: _prefs.travelStyle == entry.key,
+          onTap: () => setState(
+            () => _prefs = _prefs.copyWith(
+              travelStyle: () =>
+                  _prefs.travelStyle == entry.key ? null : entry.key,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
+    ],
+    footer: _NavRow(onBack: _back, onNext: _next),
+  );
+
+  _StepView _review() {
     final tagLabels = [
       for (final option in kPreferredTags)
         if (_prefs.preferredTags.contains(option.value)) option.label,
     ];
-    return [
-      _Card(
-        icon: Icons.fact_check_rounded,
-        title: 'Look good?',
-        body: 'Check your answers before saving.',
-        children: [
-          _ReviewRow(
-            editKey: 'review-edit-interests',
-            label: 'Interests',
-            value: tagLabels.join(', '),
-            onEdit: _saving ? null : () => _edit(OnboardingStep.interests),
+    return _StepView(
+      id: 'review',
+      title: 'Look good?',
+      body: 'Check your answers before saving.',
+      content: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F8FC),
+            borderRadius: BorderRadius.circular(20),
           ),
-          _ReviewRow(
-            editKey: 'review-edit-budget',
-            label: 'Budget',
-            value: _prefs.hasBudget
-                ? '₱${_peso(_prefs.budgetMin!)} – ₱${_peso(_prefs.budgetMax!)}'
-                : 'No preference',
-            onEdit: _saving ? null : () => _edit(OnboardingStep.budget),
+          child: Column(
+            children: [
+              _ReviewRow(
+                editKey: 'review-edit-interests',
+                label: 'Interests',
+                value: tagLabels.join(', '),
+                onEdit: _saving ? null : () => _edit(OnboardingStep.interests),
+              ),
+              const Divider(height: 1, color: Color(0xFFE3E9F2)),
+              _ReviewRow(
+                editKey: 'review-edit-budget',
+                label: 'Budget',
+                value: _prefs.hasBudget
+                    ? '₱${_peso(_prefs.budgetMin!)} – ₱${_peso(_prefs.budgetMax!)}'
+                    : 'No preference',
+                onEdit: _saving ? null : () => _edit(OnboardingStep.budget),
+              ),
+              const Divider(height: 1, color: Color(0xFFE3E9F2)),
+              _ReviewRow(
+                editKey: 'review-edit-style',
+                label: 'Travel style',
+                value: _styles[_prefs.travelStyle]?.label ?? 'No preference',
+                onEdit: _saving ? null : () => _edit(OnboardingStep.style),
+              ),
+            ],
           ),
-          _ReviewRow(
-            editKey: 'review-edit-style',
-            label: 'Travel style',
-            value: _styles[_prefs.travelStyle]?.label ?? 'No preference',
-            onEdit: _saving ? null : () => _edit(OnboardingStep.style),
+        ),
+        if (_saveError != null) ...[
+          const SizedBox(height: 14),
+          StatusBanner(
+            key: const ValueKey('onboarding-save-error'),
+            tone: StatusTone.error,
+            message: _saveError!,
           ),
         ],
-      ),
-      if (_saveError != null) ...[
-        const SizedBox(height: 14),
-        StatusBanner(
-          key: const ValueKey('onboarding-save-error'),
-          tone: StatusTone.error,
-          message: _saveError!,
-        ),
       ],
-      const SizedBox(height: 16),
-      _NavRow(
+      footer: _NavRow(
         onBack: _saving ? null : _back,
         onNext: _saving ? null : _save,
         nextKey: 'onboarding-save',
         nextLabel: _saveError != null ? 'Try again' : 'Save preferences',
         busy: _saving,
       ),
-    ];
+    );
   }
 
-  List<Widget> _done() => [
-    _Card(
-      icon: Icons.check_circle_rounded,
-      title: 'You’re all set!',
-      body:
-          'Your preferences are saved. We’ll use them to suggest places '
-          'you’ll like.',
-      children: const [],
-    ),
-    const SizedBox(height: 16),
-    _PrimaryButton(
+  _StepView _done() => _StepView(
+    id: 'done',
+    title: 'You’re all set!',
+    body:
+        'Your preferences are saved. We’ll use them to suggest places '
+        'you’ll like.',
+    footer: _PrimaryButton(
       key: const ValueKey('onboarding-finish'),
       label: widget.next == null ? 'Done' : 'See places for me',
       onTap: () {
@@ -518,7 +611,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         }
       },
     ),
-  ];
+  );
 }
 
 /// "1500.00" → "1,500"; keeps centavos when present.
@@ -532,83 +625,381 @@ String _peso(String amount) {
   return cents == '00' ? whole : '$whole.$cents';
 }
 
-class _ProgressBar extends StatelessWidget {
-  final double value;
-  const _ProgressBar({required this.value});
+const _orange = Color(0xFFF2620F);
+
+/// Opens [flow] as a pop-up over the app, which blurs behind it like the
+/// swipe menu and Spots cards. [home v3]
+Future<T?> showPreferencesPopup<T>(BuildContext context, Widget flow) {
+  final reduce = MediaQuery.disableAnimationsOf(context);
+  return showGeneralDialog<T>(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.transparent,
+    transitionDuration: Duration(milliseconds: reduce ? 150 : 380),
+    pageBuilder: (context, animation, _) {
+      final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      final rise = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: FadeTransition(
+              opacity: fade,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                child: const ColoredBox(color: Color(0x590A1830)),
+              ),
+            ),
+          ),
+          FadeTransition(
+            opacity: fade,
+            child: AnimatedBuilder(
+              animation: rise,
+              builder: (context, child) => reduce
+                  ? child!
+                  : Transform.translate(
+                      offset: Offset(0, 28 * (1 - rise.value)),
+                      child: Transform.scale(
+                        scale: 0.94 + 0.06 * rise.value,
+                        child: child,
+                      ),
+                    ),
+              child: flow,
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// One step's words, controls and buttons.
+class _StepView {
+  final String id;
+  final String title;
+  final String body;
+  final List<Widget> content;
+  final Widget? footer;
+
+  const _StepView({
+    required this.id,
+    required this.title,
+    required this.body,
+    this.content = const [],
+    this.footer,
+  });
+}
+
+/// The white card: a sky header, the step (cross-fading between steps,
+/// scrolling if tall), and its buttons.
+class _Sheet extends StatelessWidget {
+  final Widget header;
+  final _StepView view;
+
+  const _Sheet({required this.header, required this.view});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(end: value),
-        duration: const Duration(milliseconds: 250),
-        builder: (context, v, _) => LinearProgressIndicator(
-          key: const ValueKey('onboarding-progress'),
-          value: v,
-          minHeight: 8,
-          backgroundColor: const Color(0x66FFFFFF),
-          color: Colors.white,
-        ),
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    final duration = Duration(milliseconds: reduce ? 0 : 260);
+    return Container(
+      key: const ValueKey('onboarding-card'),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x660A1830),
+            blurRadius: 40,
+            offset: Offset(0, 22),
+            spreadRadius: -14,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AnimatedSize(
+            duration: duration,
+            curve: Curves.easeInOutCubic,
+            child: header,
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 8),
+              child: AnimatedSize(
+                duration: duration,
+                curve: Curves.easeInOutCubic,
+                alignment: Alignment.topCenter,
+                child: AnimatedSwitcher(
+                  duration: duration,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  layoutBuilder: (current, previous) => Stack(
+                    alignment: Alignment.topCenter,
+                    children: [...previous, ?current],
+                  ),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween(
+                        begin: const Offset(0.04, 0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: KeyedSubtree(
+                    key: ValueKey(view.id),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          view.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 26,
+                            height: 1.08,
+                            letterSpacing: -0.6,
+                            color: AppTheme.slateDark,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          view.body,
+                          style: const TextStyle(
+                            fontSize: 14.5,
+                            height: 1.4,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.slateMuted,
+                          ),
+                        ),
+                        if (view.content.isNotEmpty) const SizedBox(height: 18),
+                        ...view.content,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (view.footer != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 8, 22, 18),
+              child: view.footer,
+            ),
+        ],
       ),
     );
   }
 }
 
-class _Card extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String body;
-  final List<Widget> children;
+/// The app's sky with the sun, two Bacolod elements and the Lagaw logo:
+/// the welcome and done steps. Still, so it never competes with the text.
+class _ArtHeader extends StatelessWidget {
+  final bool done;
+  final VoidCallback? onClose;
 
-  const _Card({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.children,
-  });
+  const _ArtHeader({required this.done, required this.onClose});
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    Widget element(String asset, double width) =>
+        Image.asset('assets/elements/$asset.webp', width: width);
+    return SizedBox(
+      height: 168,
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(14),
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [AppTheme.skyTop, AppTheme.skyMid],
                 ),
-                child: Icon(icon, color: AppTheme.primaryBlue),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                    color: AppTheme.slateDark,
+            ),
+          ),
+          Positioned(
+            left: -60,
+            top: -70,
+            child: Container(
+              width: 190,
+              height: 190,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0xFFFFE27A), Color(0x00FFC83D)],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: -26,
+            bottom: -14,
+            child: Transform.rotate(
+              angle: done ? 0.3 : -0.28,
+              child: element(done ? 'piaya' : 'masskara', 112),
+            ),
+          ),
+          Positioned(
+            right: -30,
+            bottom: -18,
+            child: Transform.rotate(
+              angle: done ? -0.1 : -0.32,
+              child: Transform.flip(
+                flipX: done,
+                child: element(done ? 'carabao' : 'inasal', 128),
+              ),
+            ),
+          ),
+          Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x550A2A6B),
+                        blurRadius: 24,
+                        offset: Offset(0, 12),
+                        spreadRadius: -8,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/brand/logo.png',
+                      key: const ValueKey('onboarding-logo'),
+                      width: 84,
+                      height: 84,
+                    ),
+                  ),
+                ),
+                if (done)
+                  Positioned(
+                    right: -8,
+                    bottom: -8,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF16A34A),
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (onClose != null)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Semantics(
+                button: true,
+                label: 'Close',
+                child: GestureDetector(
+                  key: const ValueKey('onboarding-close'),
+                  onTap: onClose,
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xEBFFFFFF),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 19,
+                      color: AppTheme.slateDark,
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            body,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppTheme.slateMuted,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A slim strip of sky with the step count and four segments.
+class _StepHeader extends StatelessWidget {
+  final int index;
+  final int total;
+
+  const _StepHeader({required this.index, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(22, 18, 22, 16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppTheme.skyTop, AppTheme.skyMid],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'TRAVEL PREFERENCES',
+            style: TextStyle(
+              fontSize: 11,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w700,
+              color: Color(0xD9FFFFFF),
             ),
           ),
-          if (children.isNotEmpty) const SizedBox(height: 16),
-          ...children,
+          const SizedBox(height: 2),
+          Text(
+            'Step ${index + 1} of $total',
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            key: const ValueKey('onboarding-progress'),
+            children: [
+              for (var i = 0; i < total; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 260),
+                    height: 6,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: i <= index
+                          ? Colors.white
+                          : const Color(0x59FFFFFF),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -623,19 +1014,86 @@ class _Bullet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primaryBlue),
-          const SizedBox(width: 10),
-          Text(
-            text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AppTheme.slateDark,
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEF4FC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 18, color: AppTheme.primaryBlue),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.slateDark,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// An interest: a soft pill that turns orange when picked.
+class _Chip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _Chip({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = selected ? Colors.white : AppTheme.slateDark;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? _orange : const Color(0xFFF1F5FB),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                selected ? Icons.check_rounded : icon,
+                size: 17,
+                color: selected ? Colors.white : AppTheme.primaryBlue,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: fg,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -662,48 +1120,66 @@ class _StyleOption extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      child: Vector3DButton(
+      child: GestureDetector(
         onTap: onTap,
-        backgroundColor: selected ? AppTheme.primaryBlue : Colors.white,
-        shadowColor: selected
-            ? const Color(0xFF1D4ED8)
-            : const Color(0xFFCBD5E1),
-        borderColor: selected ? Colors.white : const Color(0xFFE2E8F0),
-        borderRadius: 18,
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Icon(icon, color: selected ? Colors.white : AppTheme.primaryBlue),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15,
-                      color: selected ? Colors.white : AppTheme.slateDark,
-                    ),
-                  ),
-                  Text(
-                    blurb,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12.5,
-                      color: selected
-                          ? const Color(0xE6FFFFFF)
-                          : AppTheme.slateMuted,
-                    ),
-                  ),
-                ],
-              ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFFFF3EA) : const Color(0xFFF5F8FC),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? _orange : Colors.transparent,
+              width: 1.6,
             ),
-            if (selected)
-              const Icon(Icons.check_circle_rounded, color: Colors.white),
-          ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? _orange : Colors.white,
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: selected ? Colors.white : AppTheme.primaryBlue,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15.5,
+                        color: AppTheme.slateDark,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      blurb,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                        color: AppTheme.slateMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 180),
+                opacity: selected ? 1 : 0,
+                child: const Icon(Icons.check_circle_rounded, color: _orange),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -726,7 +1202,7 @@ class _ReviewRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Expanded(
@@ -736,15 +1212,15 @@ class _ReviewRow extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     fontSize: 12.5,
                     color: AppTheme.slateMuted,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontFamily: 'Outfit',
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
                     color: AppTheme.slateDark,
@@ -756,6 +1232,10 @@ class _ReviewRow extends StatelessWidget {
           TextButton(
             key: ValueKey(editKey),
             onPressed: onEdit,
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.primaryBlue,
+              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            ),
             child: const Text('Edit'),
           ),
         ],
@@ -783,24 +1263,22 @@ class _NavRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Vector3DButton(
+        OutlinedButton(
           key: const ValueKey('onboarding-back'),
-          onTap: onBack,
-          backgroundColor: Colors.white,
-          shadowColor: const Color(0xFFCBD5E1),
-          borderColor: const Color(0xFFE2E8F0),
-          borderRadius: 20,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          child: const Text(
-            'Back',
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontWeight: FontWeight.w900,
-              color: AppTheme.slateDark,
+          onPressed: onBack,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.slateDark,
+            shape: const StadiumBorder(),
+            minimumSize: const Size(96, 50),
+            side: const BorderSide(color: Color(0xFFD5DEEA)),
+            textStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
             ),
           ),
+          child: const Text('Back'),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
           child: _PrimaryButton(
             key: ValueKey(nextKey),
@@ -828,14 +1306,19 @@ class _PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Vector3DButton(
-      onTap: onTap,
-      backgroundColor: AppTheme.primaryBlue,
-      shadowColor: const Color(0xFF1D4ED8),
-      borderRadius: 20,
-      padding: const EdgeInsets.symmetric(vertical: 14),
+    return FilledButton(
+      onPressed: busy ? null : onTap,
+      style: FilledButton.styleFrom(
+        backgroundColor: _orange,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: const Color(0xFFF7A26F),
+        disabledForegroundColor: Colors.white,
+        shape: const StadiumBorder(),
+        minimumSize: const Size.fromHeight(50),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (busy) ...[
             const SizedBox(
@@ -849,13 +1332,11 @@ class _PrimaryButton extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
-          Text(
-            busy ? 'Saving…' : label,
-            style: const TextStyle(
-              fontFamily: 'Outfit',
-              fontWeight: FontWeight.w900,
-              fontSize: 15,
-              color: Colors.white,
+          Flexible(
+            child: Text(
+              busy ? 'Saving…' : label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
