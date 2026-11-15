@@ -12,7 +12,8 @@ class AppTheme {
     useMaterial3: true,
     colorSchemeSeed: primaryBlue,
     scaffoldBackgroundColor: skyBottom,
-    fontFamily: 'SF Pro Display',
+    // Bundled (assets/fonts); 'SF Pro Display' was never shipped. [home v3]
+    fontFamily: 'Outfit',
   );
 }
 

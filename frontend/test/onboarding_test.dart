@@ -328,4 +328,45 @@ void main() {
     expect(popped?.preferredTags, ['food']);
     expect(find.text('open'), findsOneWidget);
   });
+
+  testWidgets('opens as a card over the blurred app and closes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showPreferencesPopup<void>(
+                context,
+                OnboardingFlow(repository: _Repo(), allowSkip: true),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-card')), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-logo')), findsOneWidget);
+    expect(find.text('Welcome to Lagaw!'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Mid-flow the card stays put, so answers aren't lost by a stray tap.
+    await _tapKey(tester, 'onboarding-start');
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+    expect(find.text('Step 1 of 4'), findsOneWidget);
+    await _tapKey(tester, 'onboarding-back');
+
+    await _tapKey(tester, 'onboarding-close');
+    expect(find.byKey(const ValueKey('onboarding-card')), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+  });
 }

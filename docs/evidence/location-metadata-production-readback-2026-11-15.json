@@ -1,0 +1,35 @@
+{
+  "observed_at_utc": "2026-11-15T04:29:30.785837+00:00",
+  "manifest_sha256": "0b794dfe755032a6c8b585f4e4f47b480333421c93edde09becf3012e8bc52b0",
+  "verification": "Read-only public API readback after Andrew reported applying production SQL. Compares all baseline fields plus intended proposals; no database writes.",
+  "reports": [
+    {
+      "environment": "development",
+      "api_url": "https://lagaw-api-staging-i5kvldluga-as.a.run.app",
+      "active_location_count": 10,
+      "proposals_match": true,
+      "baseline_plus_proposals_match": true,
+      "differences": [],
+      "extra_ids": [],
+      "field_counts": {
+        "coordinate_pairs": 10,
+        "opening_hours": 8,
+        "cost_ranges": 8
+      }
+    },
+    {
+      "environment": "production",
+      "api_url": "https://lagaw-api-i5kvldluga-as.a.run.app",
+      "active_location_count": 10,
+      "proposals_match": true,
+      "baseline_plus_proposals_match": true,
+      "differences": [],
+      "extra_ids": [],
+      "field_counts": {
+        "coordinate_pairs": 10,
+        "opening_hours": 8,
+        "cost_ranges": 8
+      }
+    }
+  ]
+}

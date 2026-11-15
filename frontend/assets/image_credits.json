@@ -1,0 +1,160 @@
+{
+  "schema_version": "1",
+  "generated_from": "docs/destination-image-manifest.json",
+  "images": [
+    {
+      "location_id": "1a3bca09-5532-5de6-8587-2440c4e5830d",
+      "sha256": "395784caa1812a7bc96862113ff637c60b8c8e9d9c1c17e92971fd472fe41edf",
+      "primary": true,
+      "attribution": "Photo: Rauxilian / CC BY-SA 4.0 via Wikimedia Commons",
+      "photographer": "Rauxilian",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bacolod_Cathedral_Facade.jpg",
+      "modified": "Resized from 4745x3164 to 2048x1366 (and re-encoded without metadata) to fit the 5 MiB Storage limit."
+    },
+    {
+      "location_id": "61bf94ab-6ec0-5ec3-8451-b575ee06169e",
+      "sha256": "21c8f94b13451686000bf29451190d25d38a00a92175b9677e10da0025e7c158",
+      "primary": true,
+      "attribution": "Photo: Patrickroque01 / CC BY-SA 4.0 via Wikimedia Commons",
+      "photographer": "Patrickroque01",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Negros_Museum_front_(Gatuslao,_Bacolod,_Negros_Occidental;_10-24-2022).jpg",
+      "modified": "Resized from 3552x2664 to 2048x1536 (and re-encoded without metadata) to fit the 5 MiB Storage limit."
+    },
+    {
+      "location_id": "b3783066-7484-5917-a09b-404974974880",
+      "sha256": "d3ce15efe26bb75082882949d99c7ff273633ed3e11bf1ef8a5b4bb2d1c95d0c",
+      "primary": true,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "b3783066-7484-5917-a09b-404974974880",
+      "sha256": "9875aa1b9ee63376df12611b294e0fe727b1b2b40fe884a9ff45ca9079511ec8",
+      "primary": false,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "d184610e-f8c9-584a-95a3-79809cd81c49",
+      "sha256": "3482c44d11808bd3b4088317b7e1b0fc381c7bba815a4ad37ee3474530e9d6e5",
+      "primary": true,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "af80a358-d1ad-529f-84b3-ff1e591e041f",
+      "sha256": "6e358bf57700c46d0527c94da8b503b15e8f64208a9f6de836cd1eb05983e66e",
+      "primary": true,
+      "attribution": "Photo: Kguirnela / CC BY-SA 3.0 via Wikimedia Commons",
+      "photographer": "Kguirnela",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Capitol_Lagoon_Bacolod_City_Philippines.jpg",
+      "modified": null
+    },
+    {
+      "location_id": "4618dfae-4a30-5917-85f1-94f216cf5b97",
+      "sha256": "9b0308cb0fe8428ee92f28bd5c9933cd8ed76442371433e14b0bcfd3312b8ed0",
+      "primary": true,
+      "attribution": "Photo: Ralff Nestor Nacor / CC BY-SA 4.0 via Wikimedia Commons",
+      "photographer": "Ralff Nestor Nacor",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Negros_Occidental_Provincial_Capitol,_Sep_2026.jpg",
+      "modified": "Resized from 3575x2692 to 2048x1542 (and re-encoded without metadata) to fit the 5 MiB Storage limit."
+    },
+    {
+      "location_id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+      "sha256": "8ba6deff410f8761efd67c524b803926649f1b6c14255e2a572ddd9da435cc7c",
+      "primary": true,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "a752a30a-1859-503d-8a77-8cd59097ac1d",
+      "sha256": "18abe97ba7db37c1b6ff8ce080e290316c3636168af372ea30b19a81754eac56",
+      "primary": false,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
+      "sha256": "cb9d2471ed64ef7b11881b258b1c1827ef613e236a587ed9bb74bb0016d6a817",
+      "primary": true,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "f52c28a6-cf76-5efa-b0a3-d04f8b15794c",
+      "sha256": "a336341a1be7c672939f91b5aea65e1ea690b6f204754bc257b7262801f41a4d",
+      "primary": false,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "ee2c8f6e-7a15-5081-b8a3-b43d48d5a83c",
+      "sha256": "53352232b06db6f785e3fc41bf3c9b916a2e34e958b7a6f461124be8a726bc25",
+      "primary": true,
+      "attribution": "Photo: Dominic Alojado / CC BY 2.0 via Wikimedia Commons",
+      "photographer": "Dominic Alojado",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Panaad_Stadium.jpg",
+      "modified": null
+    },
+    {
+      "location_id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+      "sha256": "e55cb1c49c258242dc75225c614bb68edfffaa861112301abe54d5f3d8e0570d",
+      "primary": true,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    },
+    {
+      "location_id": "f2ccf475-56ea-51a0-a003-70f66d9f852a",
+      "sha256": "e5f6d9a0dad2858c564017b7409db71d928b4368274029c6b1c05c844dcfeba3",
+      "primary": false,
+      "attribution": "Photo: Roel Jr. S. Lumauag",
+      "photographer": "Roel Jr. S. Lumauag",
+      "license": "Permission",
+      "license_url": null,
+      "source_url": null,
+      "modified": null
+    }
+  ]
+}

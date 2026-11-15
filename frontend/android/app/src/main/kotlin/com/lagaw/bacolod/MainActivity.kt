@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.lagaw.bacolod
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -107,3 +107,7 @@ $RECYCLE.BIN/
 .commandcode
 node_modules/
 .wrangler/
+
+# Local release APKs (never commit)
+release-builds/
+.github/modernize/
