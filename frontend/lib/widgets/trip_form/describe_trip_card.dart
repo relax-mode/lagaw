@@ -5,6 +5,7 @@ import '../../models/preference_draft.dart';
 import '../../services/preference_service.dart';
 import '../../theme.dart';
 import '../status_banner.dart';
+import 'tactile_field_style.dart';
 
 /// "Describe your trip" box at the top of the trip form. Sends the text to
 /// the backend extraction endpoint and hands the suggestions back for
@@ -80,16 +81,15 @@ class _DescribeTripCardState extends State<DescribeTripCard> {
           children: [
             Icon(
               Icons.auto_awesome_rounded,
-              color: Color(0xFF7C3AED),
+              color: Color(0xFFF2620F),
               size: 20,
             ),
             SizedBox(width: 8),
             Text(
               'Describe your trip',
               style: TextStyle(
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
                 color: AppTheme.slateDark,
               ),
             ),
@@ -100,8 +100,9 @@ class _DescribeTripCardState extends State<DescribeTripCard> {
           'Optional. Get suggested vibes, then review them before anything '
           'changes. Or just fill in the form below.',
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12.5,
+            fontWeight: FontWeight.w500,
+            fontSize: 13.5,
+            height: 1.4,
             color: AppTheme.slateMuted,
           ),
         ),
@@ -115,19 +116,15 @@ class _DescribeTripCardState extends State<DescribeTripCard> {
           inputFormatters: [
             LengthLimitingTextInputFormatter(PreferenceService.maxPromptLength),
           ],
-          decoration: InputDecoration(
+          // Same type and field style as the rest of the form.
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.slateDark,
+          ),
+          decoration: TactileFieldStyle.decoration(
             hintText:
                 'e.g. A slow, relaxing afternoon with coffee and photography',
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
           ),
         ),
         if (_error != null) ...[
@@ -150,12 +147,11 @@ class _DescribeTripCardState extends State<DescribeTripCard> {
           key: const ValueKey('describe-trip-suggest'),
           onTap: canSuggest ? _suggest : null,
           backgroundColor: canSuggest
-              ? const Color(0xFF7C3AED)
-              : const Color(0xFFA78BFA),
-          shadowColor: const Color(0xFF5B21B6),
-          borderColor: const Color(0xFFC4B5FD),
-          borderRadius: 24,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+              ? AppTheme.primaryBlue
+              : const Color(0xFF93B4F5),
+          shadowColor: AppTheme.primaryBlue,
+          borderRadius: 999,
+          padding: const EdgeInsets.symmetric(vertical: 14),
           depth: 3.5,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -179,9 +175,8 @@ class _DescribeTripCardState extends State<DescribeTripCard> {
               Text(
                 _loading ? 'Reading your description…' : 'Suggest preferences',
                 style: const TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14.5,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
                   color: Colors.white,
                 ),
               ),

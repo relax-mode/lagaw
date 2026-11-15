@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../config.dart';
 import '../models/trip.dart';
 import '../models/trip_plan.dart';
 import '../services/api_service.dart';
+import '../services/discovery_service.dart';
 import '../services/trip_service.dart';
 import '../theme.dart';
 import '../utils/trip_format.dart';
@@ -138,7 +140,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     if (trip == null) return;
     final result = await Navigator.of(context).push<GenerationResult>(
       MaterialPageRoute(
-        builder: (_) => TripPlannerScreen(service: widget.service, trip: trip),
+        builder: (_) => TripPlannerScreen(
+          service: widget.service,
+          trip: trip,
+          savedPace: AppConfig.authEnabled
+              ? () async => (await DiscoveryService().load()).travelStyle
+              : null,
+        ),
       ),
     );
     if (!mounted) return;

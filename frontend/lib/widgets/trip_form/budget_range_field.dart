@@ -31,14 +31,14 @@ class BudgetRangeField extends StatelessWidget {
         Expanded(
           child: TactileTextField(
             key: const ValueKey('trip-budget-min'),
-            label: 'Min budget',
+            label: 'Min (optional)',
             controller: minController,
-            hintText: '500',
+            hintText: '0',
             prefixText: '₱ ',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: _formatters,
             textInputAction: TextInputAction.next,
-            validator: TripFormValidators.budget,
+            validator: TripFormValidators.budgetMin,
             serverError: minServerError,
           ),
         ),

@@ -42,10 +42,15 @@ class TripPlannerScreen extends StatefulWidget {
   final TripService service;
   final Trip trip;
 
+  /// The pace saved in travel preferences, used as the starting pace so
+  /// what the user chose there is what Plan with AI shows. [home v3]
+  final Future<String?> Function()? savedPace;
+
   const TripPlannerScreen({
     super.key,
     required this.service,
     required this.trip,
+    this.savedPace,
   });
 
   @override
@@ -68,6 +73,27 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
   );
   String _duration = 'full_day';
   String _pace = 'moderate';
+
+  /// Set once the user picks a pace here; the saved pace then stays out.
+  bool _paceTouched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedPace();
+  }
+
+  Future<void> _loadSavedPace() async {
+    final load = widget.savedPace;
+    if (load == null) return;
+    try {
+      final pace = await load();
+      if (!mounted || _paceTouched) return;
+      if (_paces.any((p) => p.value == pace)) setState(() => _pace = pace!);
+    } on Object {
+      // Keep the default; not knowing must not block planning.
+    }
+  }
 
   RecommendationsPage? _recs;
   bool _loadingRecs = false;
@@ -303,7 +329,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
     return PopScope(
       canPop: !_generating,
       child: TripPageScaffold(
-        title: 'plan with AI',
+        title: 'Plan with AI',
         subtitle: _trip.title,
         children: [
           if (genIssues.isNotEmpty) ...[
@@ -441,10 +467,13 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
             options: _paces,
             selected: [_pace],
             optional: false,
-            accent: const Color(0xFF7C3AED),
-            accentShadow: const Color(0xFF5B21B6),
             onChanged: (v) {
-              if (!locked && v.isNotEmpty) setState(() => _pace = v.first);
+              if (!locked && v.isNotEmpty) {
+                setState(() {
+                  _pace = v.first;
+                  _paceTouched = true;
+                });
+              }
             },
           ),
         ],

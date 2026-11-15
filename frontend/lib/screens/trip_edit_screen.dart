@@ -96,7 +96,7 @@ class _TripEditScreenState extends State<TripEditScreen> {
     final status = _status;
 
     return TripPageScaffold(
-      title: 'edit trip',
+      title: 'Edit trip',
       subtitle: trip?.title,
       children: [
         if (_loadError != null)

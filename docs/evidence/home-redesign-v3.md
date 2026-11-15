@@ -215,3 +215,19 @@ Follow-up (Roel): places liked by swiping right appeared in Liked and saved with
 - **Categories:** the chips in the expanded Liked and saved list use the same categories, in the same order, as Spots.
 - **Swipe deck:** the card is sized from the screen height (300–400 pt, about 4:5) and centered between the title and the buttons. The cards behind tilt and offset less (2.5°, 8 pt), so they only peek ([swipe_v5](img/home-v3-android/swipe_v5.jpg)).
 - `flutter test` passes 280 (a new test covers review → Edit → questions → places → heart). Verified on the Infinix.
+
+### Round: trip screens, collapsed headers, swipe to delete
+
+**Verified reports (all confirmed in the code, now fixed):**
+1. *Pace and people not carried into Plan with AI.* Trips have no pace column, and "Describe your trip" only applied vibes; its pace and group were shown for reference only. Plan with AI always started on "Moderate". Now Plan with AI starts from the pace saved in travel preferences (until the user picks another), and Describe your trip fills in **Who's coming** and the **budget** when those fields are still empty ("Added 1 vibe, who's coming, budget…"). People going follows Who's coming (solo 1, couple 2, friends 3, family 4) as before.
+2. *"plan with AI" lowercase:* now "Plan with AI" (and "Edit trip").
+3. *"plan a trip" lowercase, with an em dash:* now "Plan a trip", with "Set the basics, and Lagaw fills in the stops later."
+4. *Describe your trip in a different style:* it used a purple, bevelled 3D look. It now uses the same type, filled field and pill button as the rest of the form.
+
+**Changes:**
+- **Plan a trip is a pop-up** over the blurred app (shared `blurPopupRoute` / `PopupCard`). Inside, the form's sections are separated by dividers instead of being cards inside the card ([plan_trip_popup](img/home-v3-android/plan_trip_popup.jpg), [plan_trip_popup_2](img/home-v3-android/plan_trip_popup_2.jpg)).
+- **Shared v3 styling:** the app's card (`GlassContainer`) and button (`Vector3DButton`) are now flat, with soft shadows and a gentle press, instead of 3D bevels. Trip-form fields are filled with an orange focus ring; chips are soft pills that turn orange with a check. The trip pages (Plan with AI, trip details, Edit trip) get the sky with the sun, a round back button and centered titles.
+- **Min budget optional on trips:** empty saves as ₱0, matching travel preferences.
+- **Headers:** the greeting pill folds to its heart on every tab except Home (Spots, Trips, Swipe; You has its own profile header) ([spots_v6](img/home-v3-android/spots_v6.jpg), [trips_v4](img/home-v3-android/trips_v4.jpg)). The Spots chip "All spots" is now "All".
+- **My Trips:** swipe a trip left to delete it, after a confirmation pop-up. The card only leaves once the server confirms; a failure keeps it and explains why. "Trip deleted." fades away after 3 s. Date tiles fit the dates: "NOV / 10–14" within a month, "NOV 28 to DEC 2" across months, "DEC / 5" for one day.
+- `flutter test` passes 285. On the Infinix: Trips, the Plan a trip pop-up and Spots were checked. Swipe-to-delete and the Plan with AI page were covered by tests only, to avoid deleting real trips or generating plans on staging.

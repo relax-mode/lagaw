@@ -13,6 +13,7 @@ import 'screens/onboarding/first_run_gate.dart'
 import 'config.dart';
 import 'services/discovery_service.dart';
 import 'widgets/floating_elements.dart';
+import 'widgets/popup_route.dart';
 import 'screens/trips_tab.dart';
 import 'screens/you_tab.dart';
 import 'services/api_service.dart';
@@ -122,7 +123,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   /// Opens trip creation; lands on My Trips once a trip is saved. [S2-04]
   Future<void> _planTrip() async {
     final created = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => TripCreateScreen(service: _tripService)),
+      blurPopupRoute((_) => TripCreateScreen(service: _tripService)),
     );
     if (created == true && mounted) {
       setState(() {
@@ -492,8 +493,8 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                               // heart, folded to the side.
                                               child: Center(
                                                 child: _buildGreetingPill(
-                                                  collapsed: _activeTab ==
-                                                      AppTab.swipe,
+                                                  // Full only on Home.
+                                                  collapsed: true,
                                                 ),
                                               ),
                                             ),
@@ -622,6 +623,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final live = _availableLocations;
     return SpotsView(
       showElements: false,
+      collapsedPill: true,
       avatarLetter: _avatarLetter,
       likedCount: _savedIds.length,
       onSaved: _openLikedOnYou,

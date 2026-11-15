@@ -290,4 +290,46 @@ void main() {
     // Title/dates/budget are still required: validation blocks a save.
     expect(state.buildDraft(), isNull);
   });
+
+  testWidgets('who is coming and budget fill in only empty fields', (
+    tester,
+  ) async {
+    const withGroup = PreferenceDraft(
+      preferredTags: ['cafe'],
+      budgetLevel: 'low',
+      budgetMax: 1500,
+      groupType: 'couple',
+      duration: 'afternoon',
+      pace: 'slow',
+    );
+    final service = FakePreferenceService()..responses.add(withGroup);
+    await _pumpForm(tester, service);
+    await _describe(tester, 'Coffee for two, up to 1,500');
+    await _tap(tester, 'review-apply');
+    expect(
+      find.text(
+        'Added 1 vibe, who’s coming, budget. Check the form, then save.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const ValueKey('trip-budget-max')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller!
+          .text,
+      '1500',
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('chip-couple')),
+        matching: find.byIcon(Icons.check_rounded),
+      ),
+      findsOneWidget,
+    );
+  });
 }

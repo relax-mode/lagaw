@@ -63,6 +63,10 @@ class TripForm extends StatefulWidget {
   /// Backs the "Describe your trip" suggestions. [S3-06]
   final PreferenceService? preferenceService;
 
+  /// Inside a pop-up card: sections are separated by dividers instead of
+  /// being cards inside the card, so the form has room. [home v3]
+  final bool flat;
+
   const TripForm({
     super.key,
     this.initial,
@@ -71,6 +75,7 @@ class TripForm extends StatefulWidget {
     this.isSubmitting = false,
     this.fieldErrors = const {},
     this.preferenceService,
+    this.flat = false,
   });
 
   @override
@@ -103,13 +108,33 @@ class TripFormState extends State<TripForm> {
     if (add == null || !mounted) return;
     final room = TripFormValidators.maxTags - _tags.length;
     final accepted = add.take(room).toList();
+    // Who's coming and the budget from the description fill in only
+    // what is still empty, so nothing the user typed is overwritten.
+    final group = draft.groupType;
+    final takeGroup =
+        _group.isEmpty &&
+        group != null &&
+        kGroupTypes.any((o) => o.value == group);
+    final takeBudget =
+        _budgetMax.text.trim().isEmpty &&
+        _budgetMin.text.trim().isEmpty &&
+        draft.budgetMax != null;
     setState(() {
       _tags = [..._tags, ...accepted];
-      _suggestionNotice = accepted.isEmpty
+      if (takeGroup) _group = [group];
+      if (takeBudget) {
+        _budgetMin.text = _formatBudget(draft.budgetMin ?? 0);
+        _budgetMax.text = _formatBudget(draft.budgetMax!);
+      }
+      final parts = [
+        if (accepted.isNotEmpty)
+          '${accepted.length} ${accepted.length == 1 ? 'vibe' : 'vibes'}',
+        if (takeGroup) 'who’s coming',
+        if (takeBudget) 'budget',
+      ];
+      _suggestionNotice = parts.isEmpty
           ? 'No changes applied.'
-          : 'Added ${accepted.length} '
-                '${accepted.length == 1 ? 'vibe' : 'vibes'}. '
-                'Check the form, then save.';
+          : 'Added ${parts.join(', ')}. Check the form, then save.';
     });
   }
 
@@ -160,7 +185,7 @@ class TripFormState extends State<TripForm> {
       title: _title.text.trim(),
       startDate: _dates!.start,
       endDate: _dates!.end,
-      budgetMin: TripFormValidators.parseMoney(_budgetMin.text)!,
+      budgetMin: TripFormValidators.minOrZero(_budgetMin.text),
       budgetMax: TripFormValidators.parseMoney(_budgetMax.text)!,
       transportationMode: _transport.firstOrNull,
       groupType: _group.firstOrNull,
@@ -195,7 +220,7 @@ class TripFormState extends State<TripForm> {
               onSuggestions: _reviewSuggestions,
             ),
           ]),
-          _section(0, [
+          _section(0, divider: true, [
             TactileTextField(
               key: const ValueKey('trip-title'),
               label: 'Trip name',
@@ -297,7 +322,20 @@ class TripFormState extends State<TripForm> {
     );
   }
 
-  Widget _section(int index, List<Widget> children) {
+  Widget _section(int index, List<Widget> children, {bool divider = false}) {
+    if (widget.flat) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (index > 0 || divider)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Divider(height: 1, color: Color(0xFFE9EEF5)),
+            ),
+          ...children,
+        ],
+      );
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: FadeSlideIn(

@@ -81,7 +81,7 @@ void main() {
     await pump(tester);
     expect(find.text('Explore\nBacolod'), findsOneWidget);
     expect(find.text('Showing 3 places'), findsOneWidget);
-    for (final label in ['All spots', 'Parks', 'Cafés']) {
+    for (final label in ['All', 'Parks', 'Cafés']) {
       expect(find.text(label), findsOneWidget);
     }
     await tester.scrollUntilVisible(

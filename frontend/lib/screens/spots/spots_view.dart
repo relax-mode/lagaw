@@ -45,6 +45,9 @@ class SpotsView extends StatefulWidget {
   /// Off when the app draws one shared element layer for every tab.
   final bool showElements;
 
+  /// The greeting pill folded to its heart (in the app; full only on Home).
+  final bool collapsedPill;
+
   /// Notifies when saves, ratings or busy states change, so an open card
   /// stays current.
   final Listenable? changes;
@@ -71,6 +74,7 @@ class SpotsView extends StatefulWidget {
     this.placesState,
     this.changes,
     this.showElements = true,
+    this.collapsedPill = false,
   });
 
   @override
@@ -176,6 +180,7 @@ class _SpotsViewState extends State<SpotsView> {
             children: [
               Center(
                 child: GreetingPill(
+                  collapsed: widget.collapsedPill,
                   avatarLetter: widget.avatarLetter,
                   likedCount: widget.likedCount,
                   onSearch: () => _searchFocus.requestFocus(),
@@ -371,7 +376,7 @@ class _SpotsViewState extends State<SpotsView> {
                   ),
                 ),
                 child: Text(
-                  id == 'all' ? 'All spots' : HomeCategory.labelFor(id),
+                  id == 'all' ? 'All' : HomeCategory.labelFor(id),
                   style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: on ? FontWeight.w700 : FontWeight.w600,

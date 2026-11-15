@@ -36,8 +36,8 @@ class TactileChipsField extends StatelessWidget {
     this.maxSelected,
     this.optional = true,
     this.errorText,
-    this.accent = AppTheme.primaryBlue,
-    this.accentShadow = const Color(0xFF1D4ED8),
+    this.accent = const Color(0xFFF2620F),
+    this.accentShadow = const Color(0xFFC2410C),
   });
 
   void _toggle(String value) {
@@ -62,7 +62,7 @@ class TactileChipsField extends StatelessWidget {
         TactileFieldLabel(label, optional: optional),
         Wrap(
           spacing: 8,
-          runSpacing: 10,
+          runSpacing: 8,
           children: [
             for (final option in options)
               _buildChip(option, selected.contains(option.value), atLimit),
@@ -83,29 +83,26 @@ class TactileChipsField extends StatelessWidget {
         child: Vector3DButton(
           key: ValueKey('chip-${option.value}'),
           onTap: disabled ? null : () => _toggle(option.value),
-          backgroundColor: isSelected ? accent : Colors.white,
-          shadowColor: isSelected ? accentShadow : TactileFieldStyle.bevel,
-          borderColor: isSelected ? Colors.white : TactileFieldStyle.border,
-          borderRadius: 22,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          backgroundColor: isSelected ? accent : TactileFieldStyle.fill,
+          shadowColor: isSelected ? accentShadow : TactileFieldStyle.fill,
+          borderRadius: 999,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           depth: isSelected ? 3.5 : 2.5,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                option.icon,
+                isSelected ? Icons.check_rounded : option.icon,
                 size: 16,
-                color: isSelected ? Colors.white : accent,
+                color: isSelected ? Colors.white : AppTheme.primaryBlue,
               ),
               const SizedBox(width: 6),
               Text(
                 option.label,
                 style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
-                  fontFamily: 'Outfit',
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
                   color: isSelected ? Colors.white : AppTheme.slateDark,
-                  letterSpacing: 0.2,
                 ),
               ),
             ],

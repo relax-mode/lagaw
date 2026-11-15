@@ -386,6 +386,32 @@ void main() {
 
     setUp(() => service = FakePlanService());
 
+    testWidgets('starts from the pace saved in travel preferences', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TripPlannerScreen(
+            service: service,
+            trip: _trip(),
+            savedPace: () async => 'slow',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Plan with AI'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('chip-slow')),
+          matching: find.byIcon(Icons.check_rounded),
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('shows ranked places with score and reason', (tester) async {
       service.recResponses.add(
         RecommendationsPage(

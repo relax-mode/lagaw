@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,6 +7,7 @@ import '../../models/trip_plan.dart';
 import '../../services/discovery_service.dart';
 import '../../theme.dart';
 import '../../widgets/destination_photo.dart';
+import '../../widgets/popup_route.dart';
 import '../../widgets/status_banner.dart';
 import '../../widgets/trip_form/choice_chips_field.dart';
 import '../../widgets/trip_form/trip_form.dart';
@@ -52,54 +51,9 @@ Future<void> showPickedForYou(
   );
 }
 
-/// The pop-up route: the app behind blurs and dims, the card rises in.
-Route<void> pickedForYouRoute(WidgetBuilder builder) {
-  return PageRouteBuilder<void>(
-    opaque: false,
-    barrierColor: Colors.transparent,
-    transitionDuration: const Duration(milliseconds: 380),
-    reverseTransitionDuration: const Duration(milliseconds: 260),
-    pageBuilder: (context, animation, _) => builder(context),
-    transitionsBuilder: (context, animation, _, child) {
-      final reduce = MediaQuery.disableAnimationsOf(context);
-      final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
-      final rise = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: FadeTransition(
-              opacity: fade,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                child: const ColoredBox(color: Color(0x590A1830)),
-              ),
-            ),
-          ),
-          FadeTransition(
-            opacity: fade,
-            child: reduce
-                ? child
-                : AnimatedBuilder(
-                    animation: rise,
-                    builder: (context, c) => Transform.translate(
-                      offset: Offset(0, 28 * (1 - rise.value)),
-                      child: Transform.scale(
-                        scale: 0.94 + 0.06 * rise.value,
-                        child: c,
-                      ),
-                    ),
-                    child: child,
-                  ),
-          ),
-        ],
-      );
-    },
-  );
-}
+/// The pop-up route (shared with the other pop-up pages).
+Route<void> pickedForYouRoute(WidgetBuilder builder) =>
+    blurPopupRoute<void>(builder);
 
 enum _Step { review, setup, results }
 
