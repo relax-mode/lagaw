@@ -1056,3 +1056,10 @@ is a different operation and was not triggered. See the
 | 8. Final progress summary | Kyle |
 
 - **Decision:** #117 is closed after the production check recorded above.
+
+### November 15, 2026 - user-supplied existing-location metadata refresh
+
+- Andrew requested a separate task filling missing metadata from his supplied coordinates, prices and schedules: development first, production after verification. He declined collecting further links. Retained the supplied provenance/uncertainty and rounded four coordinate pairs to database precision. Did not re-add cancelled alternative venues or alter the original ten IDs/images/tags/durations.
+- On `feat/location-metadata-refresh` (from `origin/main` d933d23), prepared seven guarded patches plus qualified descriptions and separate development/production snapshots. Provincial Capitol office hours/free-access claim and explicitly unverified Panaad oval reports remain deferred. Calea menu prices, Arima spending, historical Forest Park fees and exhibition-dependent Orange prices are qualified user-supplied estimates, not guaranteed per-person totals/current operator verification.
+- Focused tests: 77 passed; Ruff passed. An initial REST equality-string quoting mismatch yielded no updated row and stopped at the write guard. After correcting filter encoding, development updated seven records; rerun changed zero. Full public readback matches the prior ten records plus only intended fields. All ten image URLs and identities survive. Development now has 10 coordinate pairs, 8 schedules and 8 bounded cost ranges; field completeness is not factual certification.
+- Production readback remains unchanged. No production credential is available in the process/configuration; execution was blocked before production network access/writes. Prepared `docs/location-metadata-production-2026-11-15.sql` for an authorized operator in the separate production project, and documented process-only credential setup without editing `.env`. Evidence and qualifications are linked in `docs/location-metadata-refresh-2026-11-15.md`. Existing local notes are preserved in a named stash and restored after committing this task.
