@@ -158,41 +158,7 @@ class TripCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 64,
-              height: 72,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppTheme.skyTop, AppTheme.skyMid],
-                ),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _months[trip.startDate.month - 1],
-                    style: const TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xE6FFFFFF),
-                    ),
-                  ),
-                  Text(
-                    '${trip.startDate.day}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 26,
-                      height: 1.05,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _DateTile(start: trip.startDate, end: trip.endDate),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -269,6 +235,79 @@ class TripCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The trip's dates on a sky tile, sized to fit them: one day ("NOV / 10"),
+/// days in one month ("NOV / 10–14"), or across months ("NOV 28 /
+/// DEC 2"). [home v3]
+class _DateTile extends StatelessWidget {
+  final DateTime start;
+  final DateTime end;
+
+  const _DateTile({required this.start, required this.end});
+
+  @override
+  Widget build(BuildContext context) {
+    final sameDay =
+        start.year == end.year &&
+        start.month == end.month &&
+        start.day == end.day;
+    final sameMonth = start.year == end.year && start.month == end.month;
+    const month = TextStyle(
+      fontSize: 11,
+      letterSpacing: 1,
+      fontWeight: FontWeight.w700,
+      color: Color(0xE6FFFFFF),
+    );
+    const day = TextStyle(
+      fontWeight: FontWeight.w900,
+      fontSize: 24,
+      height: 1.05,
+      color: Colors.white,
+    );
+    const crossMonth = TextStyle(
+      fontWeight: FontWeight.w900,
+      fontSize: 15,
+      height: 1.2,
+      color: Colors.white,
+    );
+    final List<Widget> lines;
+    if (sameDay) {
+      lines = [
+        Text(_months[start.month - 1], style: month),
+        Text('${start.day}', style: day),
+      ];
+    } else if (sameMonth) {
+      lines = [
+        Text(_months[start.month - 1], style: month),
+        Text('${start.day}–${end.day}', style: day),
+      ];
+    } else {
+      lines = [
+        Text('${_months[start.month - 1]} ${start.day}', style: crossMonth),
+        const Text('to', style: month),
+        Text('${_months[end.month - 1]} ${end.day}', style: crossMonth),
+      ];
+    }
+    return Container(
+      key: const ValueKey('trip-date-tile'),
+      constraints: const BoxConstraints(minWidth: 64, minHeight: 72),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppTheme.skyTop, AppTheme.skyMid],
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: lines,
       ),
     );
   }

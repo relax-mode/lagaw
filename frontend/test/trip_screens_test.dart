@@ -213,7 +213,10 @@ Future<void> _tapKey(WidgetTester tester, String key) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _fillNewTrip(WidgetTester tester) async {
+/// Walks Plan a trip's steps up to the last one (vibes): skip describing,
+/// fill the basics, no transport, couple. [home v3]
+Future<void> _fillNewTrip(WidgetTester tester, {String min = '800'}) async {
+  await _tapKey(tester, 'trip-skip-describe');
   await tester.enterText(
     find.byKey(const ValueKey('trip-title')).last,
     'Sunset at the Ruins',
@@ -232,14 +235,16 @@ Future<void> _fillNewTrip(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.enterText(
     find.byKey(const ValueKey('trip-budget-min')).last,
-    '800',
+    min,
   );
   await tester.enterText(
     find.byKey(const ValueKey('trip-budget-max')).last,
     '1,200',
   );
+  await _tapKey(tester, 'trip-next'); // getting around
+  await _tapKey(tester, 'trip-next'); // who is coming
   await _tapKey(tester, 'chip-couple');
-  await tester.pumpAndSettle();
+  await _tapKey(tester, 'trip-next'); // vibes
 }
 
 void main() {
@@ -298,10 +303,80 @@ void main() {
       expect(service.created.single.groupType, 'couple');
       expect(find.textContaining('Trip saved!'), findsOneWidget);
 
-      await _tapKey(tester, 'trip-back');
+      await _tapKey(tester, 'popup-close');
       await tester.pumpAndSettle();
       expect(find.text('Sunset at the Ruins'), findsOneWidget);
       expect(find.text('1 saved trip'), findsOneWidget);
+    });
+  });
+
+  group('TripsTab, v3', () {
+    testWidgets('swipe a trip left, confirm, and it is deleted', (
+      tester,
+    ) async {
+      final service = FakeTripService([
+        _trip('a', 'Food crawl'),
+        _trip('b', 'Heritage walk'),
+      ]);
+      await _pump(tester, _tab(service));
+
+      // Cancelling keeps the trip.
+      await tester.drag(find.text('Food crawl'), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('Delete this trip?'), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(service.deleted, isEmpty);
+      expect(find.text('Food crawl'), findsOneWidget);
+
+      await tester.drag(find.text('Food crawl'), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete').last);
+      await tester.pumpAndSettle();
+      expect(service.deleted, ['a']);
+      expect(find.text('Food crawl'), findsNothing);
+      expect(find.text('Trip deleted.'), findsOneWidget);
+
+      // The note fades away by itself.
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+      expect(find.text('Trip deleted.'), findsNothing);
+    });
+
+    testWidgets('date tiles fit one month or two', (tester) async {
+      Trip trip(String id, DateTime start, DateTime end) => Trip(
+        id: id,
+        userId: 'u',
+        status: 'draft',
+        title: id,
+        startDate: start,
+        endDate: end,
+        budgetMin: 0,
+        budgetMax: 100,
+      );
+      await _pump(
+        tester,
+        _tab(
+          FakeTripService([
+            trip('one', DateTime(2026, 11, 10), DateTime(2026, 11, 14)),
+            trip('two', DateTime(2026, 11, 28), DateTime(2026, 12, 2)),
+            trip('day', DateTime(2026, 12, 5), DateTime(2026, 12, 5)),
+          ]),
+        ),
+      );
+      expect(find.text('10–14'), findsOneWidget);
+      expect(find.text('NOV 28'), findsOneWidget);
+      expect(find.text('DEC 2'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
+    });
+
+    testWidgets('an empty min budget saves as zero', (tester) async {
+      final service = FakeTripService();
+      await _pump(tester, TripCreateScreen(service: service));
+      await _fillNewTrip(tester, min: '');
+      await _tapKey(tester, 'trip-submit');
+      expect(service.created.single.budgetMin, 0);
+      expect(service.created.single.budgetMax, 1200);
     });
   });
 
@@ -372,7 +447,7 @@ void main() {
       expect(find.text('Changes saved.'), findsOneWidget);
       expect(find.text('Food crawl v2'), findsWidgets);
 
-      await _tapKey(tester, 'trip-back');
+      await _tapKey(tester, 'popup-close');
       expect(find.text('Food crawl v2'), findsOneWidget);
     });
 
@@ -560,6 +635,8 @@ void main() {
         tester,
         TripDetailScreen(service: service, tripId: 'a', locations: locations),
       );
+      // The itinerary lives on its own tab in the trip pop-up.
+      await _tapKey(tester, 'trip-tab-1');
       return (service, locations);
     }
 
@@ -578,9 +655,9 @@ void main() {
     ) async {
       await openDetail(tester);
 
-      expect(find.text('Itinerary Locations'), findsOneWidget);
+      expect(find.text('Your stops'), findsOneWidget);
       expect(find.byKey(const ValueKey('itinerary-empty')), findsOneWidget);
-      expect(find.text('No destinations yet'), findsOneWidget);
+      expect(find.text('No stops yet'), findsOneWidget);
     });
 
     testWidgets('lists saved items grouped by day with location details', (
@@ -594,15 +671,12 @@ void main() {
         ],
       );
 
-      expect(find.text('Day 1'), findsOneWidget);
-      expect(find.text('Day 2'), findsOneWidget);
+      // Day headers carry the date: the trip starts Sat, Nov 7.
+      expect(find.text('Day 1 · Sat, Nov 7'), findsOneWidget);
+      expect(find.text('Day 2 · Sun, Nov 8'), findsOneWidget);
       expect(find.text('San Sebastian Cathedral'), findsOneWidget);
       expect(find.text('The Negros Museum'), findsOneWidget);
-      expect(find.text('Heritage'), findsOneWidget);
-      expect(
-        find.text('San Sebastian Cathedral Rd, Bacolod City'),
-        findsOneWidget,
-      );
+      expect(find.text('Added by you'), findsNWidgets(2));
       expect(find.byKey(const ValueKey('itinerary-empty')), findsNothing);
     });
 

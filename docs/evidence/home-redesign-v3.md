@@ -161,3 +161,102 @@ Follow-up (Roel): no more waiting on Like. Swipes are now **optimistic**: the ca
 | --- | --- | --- |
 | [swipe_elements](img/home-v3-android/swipe_elements.jpg) | Swipe page with four elements around the card | Pass |
 | [elements_glide_frames](img/home-v3-android/elements_glide_frames.jpg) | Swipe → Home at 10 fps: pages cross-fade in place, masskara leaves right and returns left, nothing crosses the page | Pass |
+
+### Round: intro and sign-in redesign
+
+Roel asked for a swipeable introduction before sign-in, with the swiping cards first and a welcome page last, and for log in and sign up in the v3 style. Email only; Lagaw has no social sign-in.
+
+- **Intro (`WelcomeFlow`, signed out):** four pages on the sky, with a white panel holding the title, words, page dots (the active one stretches, orange) and Next. Skip is at the top right.
+  1. **Swipe your vibe:** a small deck on a loop. The top card gets a LIKE stamp, flies right, and the next one settles in. Masskara and inasal float around it.
+  2. **Find spots around Bacolod:** floating category pills (Cafés, Heritage, Parks, Food, Art, Landmarks, Sweets) with piaya and carabao.
+  3. **Plan a trip in seconds:** a "Planned for you" Day 1 card whose stops tick in one by one.
+  4. **Welcome to Lagaw:** the logo with the four elements, "Maayong pag-abot!", and **Create account** (orange) and **Log in** (outlined).
+- After the welcome page is reached once (or Skip is tapped), later sign-outs open straight on the welcome page (`lagaw.intro.seen` in shared preferences).
+- **Log in / Create account (`SignInScreen`):** a sky header with the sun, masskara, inasal and the Lagaw logo, plus a white sheet with a centered title ("Welcome back", "Create your account"), soft filled fields, "Forgot password?" on the right, an orange pill button, and "Don't have an account? Sign up" / "Already have an account? Log in". Back returns to the welcome page.
+- **Unchanged:** validation, the rate-limit cooldown, password reset, the email-confirmation message, and re-sign-in after an expired session (still pushed over the app, so unsaved forms are kept).
+- Reduced motion stops the intro loops.
+- Tests: auth tests open the form directly (`AuthGate(intro: false)`); a new `welcome_flow_test.dart` covers the walkthrough (Next, a swipe, Skip), the seen flag, Create account / Log in / Back, and signing in from the intro. `flutter test` passes 275.
+- Device check (Infinix, staging build installed fresh with app data cleared): the intro opens on Swipe your vibe with the demo running; Next, swipes and Skip work; the welcome page shows both buttons; and a relaunch opens straight on the welcome page. Fixed while checking: the Art and Landmarks pills overlapped on page 2, and the white "Back" text was hard to read over the sun (now a white pill).
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [intro_1](img/home-v3-android/intro_1.jpg) | Swipe your vibe: card deck demo, dots 1 of 4, Next, Skip | Pass |
+| [intro_2](img/home-v3-android/intro_2.jpg) | Find spots around Bacolod: floating category pills, none overlapping | Pass |
+| [intro_3](img/home-v3-android/intro_3.jpg) | Plan a trip in seconds: Day 1 card with stops ticking in | Pass |
+| [intro_4](img/home-v3-android/intro_4.jpg) | Welcome to Lagaw: logo and elements, Create account and Log in | Pass |
+| [auth_login](img/home-v3-android/auth_login.jpg) | Welcome back: sky header with logo, email, password, Forgot password?, Log in, Sign up link | Pass |
+| [auth_signup](img/home-v3-android/auth_signup.jpg) | Create your account: Back pill, email, password, confirm, Create account, Log in link | Pass |
+
+Follow-up (Roel): the form sheet left a large empty white area at the bottom. It is now only as tall as the form, sitting at the bottom; the spare height goes to the sky, with a larger logo in the middle. Everything scrolls when the keyboard is up (checked on the Infinix; the Log in button stays visible above the keyboard). On the "Sign in again" screen after an expired session, the sheet leaves room for the expiry banner at the bottom, which would otherwise cover the button (caught by the existing re-sign-in test).
+
+### Round: lighter swipe card, collapsing header, Liked and saved on You, budget rule
+
+- **Budget:** an empty minimum now counts as ₱0 when a maximum is given, so "up to ₱2,000" saves as ₱0 – ₱2,000. A minimum without a maximum still asks for the maximum. The Min field is labeled "(optional)", with "0" as its hint, and the step explains it ([prefs_budget_v2](img/home-v3-android/prefs_budget_v2.jpg)).
+- **Picked for you:** the two questions are now separate numbered cards (the number turns into a check once answered), with roomier chips and the search button below them ([picked_v2](img/home-v3-android/picked_v2.jpg)).
+- **Swipe card:** the panel on the photo shows only the name, a two-line description and the price; time, area and hashtags are gone. Tapping the card opens the same details pop-up as Spots ([swipe_details](img/home-v3-android/swipe_details.jpg)). Pass (×), Rate (★) and Like (♥) are round buttons under the card ([swipe_v4](img/home-v3-android/swipe_v4.jpg)).
+- **Swipe header:** the greeting pill folds away to just its heart, docked top-right, with a 560 ms collapse as the page opens.
+- **The heart opens You** (no longer Spots' "Your picks") and scrolls to Liked and saved. **See all** expands the list right there, with a search bar and category chips; **Show less** folds it back ([you_liked_all](img/home-v3-android/you_liked_all.jpg), Cafés chip: [you_liked_cafes](img/home-v3-android/you_liked_cafes.jpg)). Removing a like or save is still not possible; the interaction history is append-only by design (#110).
+- **Category names:** staging now has 30 places in 23 finer categories (for example `local_food`, `coastal_day_resort`). Each has a friendly name (Local food, Beaches, Farms…), and any future id shows with spaces instead of underscores.
+- Device check (Infinix, staging): all of the above. Roel's travel preferences were saved again unchanged (Food, no budget, Slow) to reach Picked for you. `flutter test` passes 277.
+
+Follow-up (Roel): in the details pop-up (Spots, You and the swipe card), the description shows three lines with **See more** / **See less** (shown only when it runs longer). **Rate is on the left and Save on the right**, pinned at the bottom of the card so they are always in view, while the details above them scroll ([details_short](img/home-v3-android/details_short.jpg), [details_more](img/home-v3-android/details_more.jpg)). `flutter test` passes 278 (1 new).
+
+Follow-up (Roel): places liked by swiping right appeared in Liked and saved with hollow hearts, because the heart only checked **saved**. Hearts (Spots, You, details, and the wide layout) now fill for any place that is liked **or** saved and not passed (`DiscoveryInteractions.isPicked`); tapping a filled heart explains that removing isn't available yet ([you_hearts_filled](img/home-v3-android/you_hearts_filled.jpg)). Un-liking needs a backend change (see the sprint log). `flutter test` passes 279.
+
+### Round: See places for me on You, Picked for you as a pop-up, tidier swipe deck
+
+- **You:** the interest chips under the name are gone (they're in the preferences card). The preferences card has even 20 pt margins and a compact Edit pill. A **See places for me** button sits under it ([you_prefs_v2](img/home-v3-android/you_prefs_v2.jpg), email blurred).
+- **Picked for you is now one pop-up** over the blurred app, in three steps:
+  1. **Review:** interests, budget and pace, with **Edit** (opens travel preferences, then the review reloads) and **Looks good** ([picked_review](img/home-v3-android/picked_review.jpg)).
+  2. **Who's coming and max spend** ([picked_setup](img/home-v3-android/picked_setup.jpg)).
+  3. **Your top places:** a numbered list in rank order with a small photo, name and category · price, and a heart to like each place. There are no percentages or reasons; tapping a place opens the full details ([picked_results](img/home-v3-android/picked_results.jpg), [picked_details](img/home-v3-android/picked_details.jpg)).
+
+  Finishing travel preferences continues into the same pop-up at step 2. If a refresh fails, earlier results stay in view under the error.
+- **Categories:** the chips in the expanded Liked and saved list use the same categories, in the same order, as Spots.
+- **Swipe deck:** the card is sized from the screen height (300–400 pt, about 4:5) and centered between the title and the buttons. The cards behind tilt and offset less (2.5°, 8 pt), so they only peek ([swipe_v5](img/home-v3-android/swipe_v5.jpg)).
+- `flutter test` passes 280 (a new test covers review → Edit → questions → places → heart). Verified on the Infinix.
+
+### Round: trip screens, collapsed headers, swipe to delete
+
+**Verified reports (all confirmed in the code, now fixed):**
+1. *Pace and people not carried into Plan with AI.* Trips have no pace column, and "Describe your trip" only applied vibes; its pace and group were shown for reference only. Plan with AI always started on "Moderate". Now Plan with AI starts from the pace saved in travel preferences (until the user picks another), and Describe your trip fills in **Who's coming** and the **budget** when those fields are still empty ("Added 1 vibe, who's coming, budget…"). People going follows Who's coming (solo 1, couple 2, friends 3, family 4) as before.
+2. *"plan with AI" lowercase:* now "Plan with AI" (and "Edit trip").
+3. *"plan a trip" lowercase, with an em dash:* now "Plan a trip", with "Set the basics, and Lagaw fills in the stops later."
+4. *Describe your trip in a different style:* it used a purple, bevelled 3D look. It now uses the same type, filled field and pill button as the rest of the form.
+
+**Changes:**
+- **Plan a trip is a pop-up** over the blurred app (shared `blurPopupRoute` / `PopupCard`). Inside, the form's sections are separated by dividers instead of being cards inside the card ([plan_trip_popup](img/home-v3-android/plan_trip_popup.jpg), [plan_trip_popup_2](img/home-v3-android/plan_trip_popup_2.jpg)).
+- **Shared v3 styling:** the app's card (`GlassContainer`) and button (`Vector3DButton`) are now flat, with soft shadows and a gentle press, instead of 3D bevels. Trip-form fields are filled with an orange focus ring; chips are soft pills that turn orange with a check. The trip pages (Plan with AI, trip details, Edit trip) get the sky with the sun, a round back button and centered titles.
+- **Min budget optional on trips:** empty saves as ₱0, matching travel preferences.
+- **Headers:** the greeting pill folds to its heart on every tab except Home (Spots, Trips, Swipe; You has its own profile header) ([spots_v6](img/home-v3-android/spots_v6.jpg), [trips_v4](img/home-v3-android/trips_v4.jpg)). The Spots chip "All spots" is now "All".
+- **My Trips:** swipe a trip left to delete it, after a confirmation pop-up. The card only leaves once the server confirms; a failure keeps it and explains why. "Trip deleted." fades away after 3 s. Date tiles fit the dates: "NOV / 10–14" within a month, "NOV 28 to DEC 2" across months, "DEC / 5" for one day.
+- `flutter test` passes 285. On the Infinix: Trips, the Plan a trip pop-up and Spots were checked. Swipe-to-delete and the Plan with AI page were covered by tests only, to avoid deleting real trips or generating plans on staging.
+
+### Round: trips in steps, all in pop-ups
+
+- **Plan a trip in steps** (pop-up, progress bar):
+  1. **Describe your trip:** Suggest preferences, or **Skip**.
+  2. **Review the suggestions:** now a step in the pop-up, not a sheet. Tick the vibes to add; Who's coming, budget, pace and time of day are shown, then **Apply to form**.
+  3. **The basics:** name, dates and budget, checked before moving on.
+  4. **Getting around.**
+  5. **Who is coming.**
+  6. **Vibes you want**, then **Create trip**.
+
+  Closing (×, background or Back) with anything filled in asks "Discard this trip?"; an empty form just closes. The new trip opens in the same pop-up style ([trip_step_describe](img/home-v3-android/trip_step_describe.jpg), [trip_step_basics](img/home-v3-android/trip_step_basics.jpg)).
+- **Trip details are a pop-up** with **Overview** (dates, budget, getting around, who's coming, vibes) and **Itinerary** tabs, and Plan with AI, Edit trip and Delete trip at the bottom. Edit trip is a pop-up too ([trip_detail_overview](img/home-v3-android/trip_detail_overview.jpg), [trip_detail_itinerary](img/home-v3-android/trip_detail_itinerary.jpg)).
+- **Plan with AI in steps** (pop-up): who and how many, time and pace (it started on Roel's saved **Fast**), then **Ready to plan** with Generate itinerary or See recommendations ([plan_ai_step1](img/home-v3-android/plan_ai_step1.jpg), [plan_ai_step2](img/home-v3-android/plan_ai_step2.jpg), [plan_ai_step3](img/home-v3-android/plan_ai_step3.jpg)).
+- **Recommendation cards:** photo, name and category · price, with four even buttons: **Not for me**, **Like**, **Save** and **Rate**. There are no percentages or ranking reasons ([plan_ai_recs](img/home-v3-android/plan_ai_recs.jpg)).
+- **Itinerary:** "Your stops", with day headers that carry the date ("Day 1 · Sat, Nov 7") and a numbered timeline of stops (photo, name, time and cost, "min to get here"). The ranking reason text (such as "Content fallback (unseen user) content score…") is no longer shown; manual stops say "Added by you".
+- `flutter test` passes 287. On the Infinix: Plan a trip (describe and basics), trip details on both tabs, Plan with AI through recommendations. Creating a trip, generating an itinerary and the itinerary with stops were covered by tests only, to avoid writing to Roel's staging trips.
+
+### Round: one shared header, smoother fold
+
+Roel saw the pill replay a brief unfold-and-fold when moving between Spots, Trips and Swipe. The cause: every page built its own pill, and a collapsed pill played its fold each time it appeared, while the page cross-fade briefly showed two pills.
+
+- **One greeting pill for all phone tabs**, drawn above the pages like the floating elements: full on Home, folded to its heart on Spots, Trips and Swipe, and faded out on You. Each page keeps the same space for it. Because it is shared, it only animates when you go to or from Home; between Spots, Trips and Swipe it doesn't move.
+- **Smoother motion (620 ms):** the pill's width and position ease in and out together. When folding, the greeting, avatar and search fade out early; when unfolding, they fade in late, once there's room, so nothing is squeezed while visible. A page that opens folded starts folded, with no replay.
+- Test: a pill that starts folded stays still, and only animates when `collapsed` changes. `flutter test` passes 288.
+
+| Shot | Check | Result |
+| --- | --- | --- |
+| [pill_frames](img/home-v3-android/pill_frames.jpg) | 10 fps header strip: Home → Spots folds once; Spots → Trips → Swipe the heart stays still (dim frames are the swipe menu's blur); → Home unfolds smoothly | Pass |

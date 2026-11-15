@@ -23,6 +23,16 @@ class TripFormValidators {
     return double.parse(text);
   }
 
+  /// The min budget is optional: empty means it starts at ₱0. [home v3]
+  static String? budgetMin(String? value) {
+    if ((value ?? '').trim().isEmpty) return null;
+    return budget(value);
+  }
+
+  /// Min budget for saving: empty counts as zero.
+  static double minOrZero(String? value) =>
+      (value ?? '').trim().isEmpty ? 0 : parseMoney(value)!;
+
   static String? budget(String? value) {
     if ((value ?? '').trim().isEmpty) return 'Enter an amount.';
     if (parseMoney(value) == null) {

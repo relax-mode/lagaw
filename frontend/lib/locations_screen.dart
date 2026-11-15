@@ -8,8 +8,13 @@ import 'screens/trip_create_screen.dart';
 import 'screens/home/home_view.dart';
 import 'screens/spots/spots_view.dart';
 import 'screens/swipe/swipe_deck.dart';
-import 'screens/onboarding/first_run_gate.dart' show preferencesRepository;
+import 'screens/onboarding/discovery_screen.dart' show showPickedForYou;
+import 'screens/onboarding/first_run_gate.dart'
+    show openTravelPreferences, preferencesRepository;
+import 'config.dart';
+import 'services/discovery_service.dart';
 import 'widgets/floating_elements.dart';
+import 'widgets/popup_route.dart';
 import 'screens/trips_tab.dart';
 import 'screens/you_tab.dart';
 import 'services/api_service.dart';
@@ -119,7 +124,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   /// Opens trip creation; lands on My Trips once a trip is saved. [S2-04]
   Future<void> _planTrip() async {
     final created = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => TripCreateScreen(service: _tripService)),
+      blurPopupRoute((_) => TripCreateScreen(service: _tripService)),
     );
     if (created == true && mounted) {
       setState(() {
@@ -215,8 +220,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Saves are append-only (#52): a saved place stays saved.
   Future<void> _save(String id) async {
-    if (_interactions.isSaved(id)) {
-      _showMessage('Already saved. Removing saved places isn’t available yet.');
+    if (_interactions.isPicked(id)) {
+      _showMessage(
+        'Already in your liked and saved. Removing places isn’t available yet.',
+      );
       return;
     }
     try {
@@ -258,6 +265,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
       });
     }
   }
+
+  /// Bumped by the header's heart so You scrolls to Liked and saved.
+  int _focusPicks = 0;
+
+  /// The header's heart: liked and saved places live on You. [home v3]
+  void _openLikedOnYou() => setState(() {
+        _focusPicks++;
+        _activeTab = AppTab.you;
+      });
 
   void _viewSavedLocations() {
     setState(() {
@@ -469,15 +485,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                           // instead of the pill.
                                           if (!isWide &&
                                               _activeTab != AppTab.you)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                                bottom: 4,
-                                              ),
-                                              child: Center(
-                                                child: _buildGreetingPill(),
-                                              ),
-                                            ),
+                                            // Room for the shared header
+                                            // drawn above the pages.
+                                            const SizedBox(height: 64),
                                           Expanded(
                                             child: SingleChildScrollView(
                                               padding: EdgeInsets.fromLTRB(
@@ -504,6 +514,29 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           ),
                         ],
                       ),
+
+                      // One greeting pill for every phone tab, above the
+                      // pages: full on Home, folded to its heart elsewhere,
+                      // hidden on You. Being shared, it only animates when
+                      // you go to or from Home. [home v3]
+                      if (!isWide)
+                        Positioned(
+                          top: 8,
+                          left: 0,
+                          right: 0,
+                          child: IgnorePointer(
+                            ignoring: _activeTab == AppTab.you,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 260),
+                              opacity: _activeTab == AppTab.you ? 0 : 1,
+                              child: Center(
+                                child: _buildGreetingPill(
+                                  collapsed: _activeTab != AppTab.explore,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
                       // v3 floating nav with the swipe button (mobile only)
                       if (!isWide)
@@ -569,14 +602,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   /// The v3 header for phone tabs without their own (Trips, You, Swipe).
-  Widget _buildGreetingPill() => GreetingPill(
+  Widget _buildGreetingPill({bool collapsed = false}) => GreetingPill(
+        collapsed: collapsed,
         avatarLetter: _avatarLetter,
         likedCount: _savedIds.length,
         onSearch: () => setState(() {
           _showOnlySaved = false;
           _activeTab = AppTab.spots;
         }),
-        onSaved: _viewSavedLocations,
+        onSaved: _openLikedOnYou,
         onAccount: () => setState(() => _activeTab = AppTab.you),
       );
 
@@ -590,7 +624,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
       };
 
   PlaceActions get _placeActions => PlaceActions(
-        isSaved: _interactions.isSaved,
+        isSaved: _interactions.isPicked,
         isBusy: _interactions.isBusy,
         ratingFor: _interactions.ratingFor,
         onSave: (place) => _save(place.id),
@@ -602,9 +636,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final live = _availableLocations;
     return SpotsView(
       showElements: false,
+      showPill: false,
       avatarLetter: _avatarLetter,
       likedCount: _savedIds.length,
-      onSaved: _viewSavedLocations,
+      onSaved: _openLikedOnYou,
       onAccount: () => setState(() => _activeTab = AppTab.you),
       places: live.isEmpty ? const [] : _filteredLocations,
       categories: [
@@ -620,7 +655,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         _selectedCategory = 'all';
         _searchQuery = '';
       }),
-      isSaved: _interactions.isSaved,
+      isSaved: _interactions.isPicked,
       isBusy: _interactions.isBusy,
       ratingFor: _interactions.ratingFor,
       changes: _interactions,
@@ -635,6 +670,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
     final places = _availableLocations;
     return HomeView(
       showElements: false,
+      showPill: false,
       avatarLetter: _avatarLetter,
       spotCount: places.length,
       likedCount: _savedIds.length,
@@ -644,7 +680,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
         _showOnlySaved = false;
         _activeTab = AppTab.spots;
       }),
-      onSaved: _viewSavedLocations,
+      onSaved: _openLikedOnYou,
       onAccount: () => setState(() => _activeTab = AppTab.you),
       onSeeCategory: (id) => setState(() {
         _showOnlySaved = false;
@@ -1056,12 +1092,25 @@ class _LocationsScreenState extends State<LocationsScreen> {
         return YouTab(
           session: AuthSession.current,
           likedCount: _savedIds.length,
-          onOpenSaved: _viewSavedLocations,
+          focusPicks: _focusPicks,
           picks: _availableLocations
               .where((l) => _savedIds.contains(l.id))
               .toList(),
           actions: _placeActions,
+          categories: [
+            for (final c in HomeCategory.fromLocations(_availableLocations))
+              c.id,
+          ],
           preferences: preferencesRepository,
+          onSeePlaces: AppConfig.authEnabled
+              ? (ctx) => showPickedForYou(
+                    ctx,
+                    service: DiscoveryService(),
+                    actions: _placeActions,
+                    onEditPreferences: (c) =>
+                        openTravelPreferences(c, continueToPlaces: false),
+                  )
+              : null,
           onExplore: () => setState(() {
             _showOnlySaved = false;
             _activeTab = AppTab.spots;
@@ -1658,7 +1707,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   Widget _buildCenterFanCard(LocationItem spot) {
-    final isSaved = _interactions.isSaved(spot.id);
+    final isSaved = _interactions.isPicked(spot.id);
 
     return GlassContainer(
       borderRadius: 28,
@@ -1840,6 +1889,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
           error: _swipeError,
           onSwipe: _handleSwipe,
           onRate: () => _rate(spot),
+          actions: _placeActions,
         ),
       ),
     );
@@ -2617,7 +2667,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Mobile Compact Spot Card
   Widget _buildMobileSpotCard(LocationItem item) {
-    final isSaved = _interactions.isSaved(item.id);
+    final isSaved = _interactions.isPicked(item.id);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GlassContainer(
@@ -2717,7 +2767,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   /// Web Glassmorphic Spot Card
   Widget _buildWebSpotCard(LocationItem item) {
-    final isSaved = _interactions.isSaved(item.id);
+    final isSaved = _interactions.isPicked(item.id);
     return SizedBox(
       width: 310,
       child: GlassContainer(

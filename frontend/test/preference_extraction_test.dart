@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/widgets/popup_route.dart';
+import 'package:frontend/services/trip_service.dart';
+import 'package:frontend/screens/trip_create_screen.dart';
 import 'package:frontend/models/preference_draft.dart';
 import 'package:frontend/models/trip.dart';
 import 'package:frontend/services/preference_service.dart';
@@ -289,5 +292,136 @@ void main() {
     final state = tester.state<TripFormState>(find.byType(TripForm));
     // Title/dates/budget are still required: validation blocks a save.
     expect(state.buildDraft(), isNull);
+  });
+
+  testWidgets('who is coming and budget fill in only empty fields', (
+    tester,
+  ) async {
+    const withGroup = PreferenceDraft(
+      preferredTags: ['cafe'],
+      budgetLevel: 'low',
+      budgetMax: 1500,
+      groupType: 'couple',
+      duration: 'afternoon',
+      pace: 'slow',
+    );
+    final service = FakePreferenceService()..responses.add(withGroup);
+    await _pumpForm(tester, service);
+    await _describe(tester, 'Coffee for two, up to 1,500');
+    await _tap(tester, 'review-apply');
+    expect(
+      find.text(
+        'Added 1 vibe, who’s coming, budget. Check the form, then save.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const ValueKey('trip-budget-max')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller!
+          .text,
+      '1500',
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('chip-couple')),
+        matching: find.byIcon(Icons.check_rounded),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Plan a trip: describe, review in the pop-up, then basics', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const draft = PreferenceDraft(
+      preferredTags: ['cafe', 'photography'],
+      budgetLevel: 'low',
+      budgetMax: 900,
+      groupType: 'friends',
+      duration: 'afternoon',
+      pace: 'slow',
+    );
+    final service = FakePreferenceService()..responses.add(draft);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TripCreateScreen(
+          service: TripService(token: 'fake'),
+          preferenceService: service,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Describe your trip'), findsOneWidget);
+
+    await _describe(tester, 'Coffee and photos with friends');
+    // The review is the next step in the pop-up, not a sheet.
+    expect(find.text('Review the suggestions'), findsOneWidget);
+    expect(find.text('Friends'), findsOneWidget);
+    expect(find.text('Slow'), findsOneWidget);
+    await _tap(tester, 'review-tag-photography'); // untick
+    await _tap(tester, 'review-apply');
+
+    expect(find.text('The basics'), findsOneWidget);
+    expect(
+      find.text(
+        'Added 1 vibe, who’s coming, budget. Check the form, then save.',
+      ),
+      findsOneWidget,
+    );
+    // Next checks the basics before moving on.
+    await _tap(tester, 'trip-next');
+    expect(find.text('Give your trip a name.'), findsOneWidget);
+    expect(find.text('The basics'), findsOneWidget);
+  });
+
+  testWidgets('closing Plan a trip with input asks first', (tester) async {
+    tester.view.physicalSize = const Size(430, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              blurPopupRoute(
+                (_) => TripCreateScreen(
+                  service: TripService(token: 'fake'),
+                  preferenceService: FakePreferenceService(),
+                ),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    // Nothing filled in: closes straight away.
+    await _tap(tester, 'popup-close');
+    expect(find.text('open'), findsOneWidget);
+    expect(find.text('Describe your trip'), findsNothing);
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await _tap(tester, 'trip-skip-describe');
+    await tester.enterText(find.byKey(const ValueKey('trip-title')), 'Food');
+    await _tap(tester, 'popup-close');
+    expect(find.text('Discard this trip?'), findsOneWidget);
+    await _tap(tester, 'confirm-cancel');
+    expect(find.text('The basics'), findsOneWidget);
+    await _tap(tester, 'popup-close');
+    await _tap(tester, 'confirm-accept');
+    expect(find.text('The basics'), findsNothing);
   });
 }

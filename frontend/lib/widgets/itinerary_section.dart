@@ -8,7 +8,7 @@ import '../services/trip_service.dart';
 import '../theme.dart';
 import '../utils/trip_format.dart';
 import 'confirm_dialog.dart';
-import 'destination_tile.dart';
+import 'destination_photo.dart';
 import 'status_banner.dart';
 
 /// "Itinerary Locations" on Trip Details: the trip's saved itinerary items,
@@ -128,70 +128,67 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
   @override
   Widget build(BuildContext context) {
     final items = _items;
-    return GlassContainer(
+    return Column(
       key: const ValueKey('itinerary-section'),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _header(),
-          if (widget.trip.estimatedTotalCost != null && !_totalCleared) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Estimated total: ${formatPeso(widget.trip.estimatedTotalCost!)}',
-              key: const ValueKey('itinerary-total'),
-              style: const TextStyle(
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF16A34A),
-              ),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _header(),
+        if (widget.trip.estimatedTotalCost != null && !_totalCleared) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Estimated total: ${formatPeso(widget.trip.estimatedTotalCost!)}',
+            key: const ValueKey('itinerary-total'),
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 13.5,
+              color: Color(0xFF16A34A),
             ),
-          ],
-          if (_notice != null) ...[
-            const SizedBox(height: 12),
-            StatusBanner(
-              key: const ValueKey('itinerary-notice'),
-              tone: StatusTone.success,
-              message: _notice!,
-            ),
-          ],
-          if (_error != null) ...[
-            const SizedBox(height: 12),
-            StatusBanner(
-              key: const ValueKey('itinerary-error'),
-              tone: StatusTone.error,
-              message: _error!,
-              actionLabel: 'Retry',
-              onAction: _load,
-            ),
-          ],
-          const SizedBox(height: 12),
-          if (items == null && _loading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (items != null && items.isEmpty)
-            _emptyState()
-          else if (items != null)
-            ..._dayGroups(items),
+          ),
         ],
-      ),
+        if (_notice != null) ...[
+          const SizedBox(height: 12),
+          StatusBanner(
+            key: const ValueKey('itinerary-notice'),
+            tone: StatusTone.success,
+            message: _notice!,
+          ),
+        ],
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          StatusBanner(
+            key: const ValueKey('itinerary-error'),
+            tone: StatusTone.error,
+            message: _error!,
+            actionLabel: 'Retry',
+            onAction: _load,
+          ),
+        ],
+        const SizedBox(height: 14),
+        if (items == null && _loading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: CircularProgressIndicator(color: Color(0xFFF2620F)),
+            ),
+          )
+        else if (items != null && items.isEmpty)
+          _emptyState()
+        else if (items != null)
+          ..._dayGroups(items),
+      ],
     );
   }
 
   Widget _header() {
     return Row(
       children: [
-        const Icon(Icons.map_rounded, color: AppTheme.primaryBlue, size: 20),
-        const SizedBox(width: 8),
         const Expanded(
           child: Text(
-            'Itinerary Locations',
+            'Your stops',
             style: TextStyle(
-              fontFamily: 'Outfit',
               fontWeight: FontWeight.w900,
-              fontSize: 17,
+              fontSize: 19,
+              letterSpacing: -0.3,
               color: AppTheme.slateDark,
             ),
           ),
@@ -205,31 +202,18 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
-        Vector3DButton(
+        OutlinedButton.icon(
           key: const ValueKey('itinerary-add'),
-          onTap: _items == null ? null : _add,
-          backgroundColor: AppTheme.primaryBlue,
-          shadowColor: const Color(0xFF1D4ED8),
-          borderColor: const Color(0xFF93C5FD),
-          borderRadius: 18,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          depth: 3,
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add_rounded, color: Colors.white, size: 16),
-              SizedBox(width: 4),
-              Text(
-                'Add destination',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+          onPressed: _items == null ? null : _add,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFF2620F),
+            side: const BorderSide(color: Color(0xFFFBD5BD)),
+            shape: const StadiumBorder(),
+            visualDensity: VisualDensity.compact,
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
           ),
+          icon: const Icon(Icons.add_rounded, size: 18),
+          label: const Text('Add a stop'),
         ),
       ],
     );
@@ -238,11 +222,10 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
   Widget _emptyState() {
     return Container(
       key: const ValueKey('itinerary-empty'),
-      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: const Color(0xFFF5F8FC),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: const Column(
         children: [
@@ -253,27 +236,49 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
           ),
           SizedBox(height: 8),
           Text(
-            'No destinations yet',
+            'No stops yet',
             style: TextStyle(
-              fontFamily: 'Outfit',
-              fontWeight: FontWeight.w900,
-              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
               color: AppTheme.slateDark,
             ),
           ),
           SizedBox(height: 4),
           Text(
-            'Add Bacolod spots you want to visit on this trip.',
+            'Plan with AI, or add Bacolod spots you want to visit.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+              fontSize: 13.5,
               color: AppTheme.slateMuted,
             ),
           ),
         ],
       ),
     );
+  }
+
+  static const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  /// "Day 2 · Sun, Nov 11".
+  String _dayLabel(int day) {
+    final date = widget.trip.startDate.add(Duration(days: day - 1));
+    return 'Day $day · ${_weekdays[date.weekday - 1]}, '
+        '${_months[date.month - 1]} ${date.day}';
   }
 
   List<Widget> _dayGroups(List<TripItem> items) {
@@ -285,45 +290,147 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
     return [
       for (final day in days) ...[
         Padding(
-          padding: const EdgeInsets.only(top: 4, bottom: 8),
-          child: Text(
-            'Day $day',
-            key: ValueKey('itinerary-day-$day'),
-            style: const TextStyle(
-              fontFamily: 'Outfit',
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              color: AppTheme.primaryBlue,
-            ),
+          padding: const EdgeInsets.only(top: 4, bottom: 10),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.skyTop, AppTheme.skyMid],
+                  ),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  _dayLabel(day),
+                  key: ValueKey('itinerary-day-$day'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        for (final item
-            in byDay[day]!
-              ..sort((a, b) => a.visitOrder.compareTo(b.visitOrder))) ...[
-          DestinationTile(
-            key: ValueKey('itinerary-item-${item.id}'),
-            location: item.location,
-            badge: '${item.visitOrder}',
-            trailing: _removeButton(item),
-            footer: _schedule(item),
-          ),
-          const SizedBox(height: 8),
-        ],
+        for (final (i, item)
+            in (byDay[day]!
+                  ..sort((a, b) => a.visitOrder.compareTo(b.visitOrder)))
+                .indexed)
+          _stop(item, last: i == byDay[day]!.length - 1),
+        const SizedBox(height: 8),
       ],
     ];
   }
 
-  /// Generated stops show their saved schedule, cost and reason; manual
-  /// stops have none (null is unknown, not zero). [S3-11]
+  /// One stop on the day's timeline: number and line on the left, then the
+  /// photo, name, time and cost. Generated stops show their schedule; ones
+  /// you added show "Added by you". No ranking internals. [home v3]
+  Widget _stop(TripItem item, {required bool last}) {
+    final place = item.location;
+    return IntrinsicHeight(
+      key: ValueKey('itinerary-item-${item.id}'),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 30,
+            child: Column(
+              children: [
+                Container(
+                  width: 26,
+                  height: 26,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFF2620F),
+                  ),
+                  child: Text(
+                    '${item.visitOrder}',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                if (!last)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: const Color(0xFFE3E9F2),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F8FC),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: DestinationPhoto(
+                        location: place,
+                        width: 52,
+                        height: 52,
+                        compact: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            place.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              height: 1.15,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.slateDark,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          _schedule(item),
+                        ],
+                      ),
+                    ),
+                    _removeButton(item),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _schedule(TripItem item) {
     const muted = TextStyle(
-      fontWeight: FontWeight.w700,
-      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      fontSize: 12.5,
       color: AppTheme.slateMuted,
     );
-    if (!item.isScheduled && item.recommendationReason == null) {
+    if (!item.isScheduled && item.estimatedCost == null) {
       return Text(
-        'Added by you · not scheduled',
+        'Added by you',
         key: ValueKey('itinerary-manual-${item.id}'),
         style: muted,
       );
@@ -331,8 +438,6 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
     final parts = [
       if (item.isScheduled)
         '${formatClock(item.arrivalTime!)} – ${formatClock(item.departureTime!)}',
-      if (item.estimatedTravelTime != null)
-        '${item.estimatedTravelTime} min travel',
       if (item.estimatedCost != null) formatPeso(item.estimatedCost!),
     ];
     return Column(
@@ -343,18 +448,13 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
           Text(
             parts.join(' · '),
             style: const TextStyle(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               fontSize: 12.5,
               color: AppTheme.primaryBlue,
             ),
           ),
-        if (item.recommendationReason != null) ...[
-          const SizedBox(height: 3),
-          Text(
-            item.recommendationReason!,
-            style: muted.copyWith(fontStyle: FontStyle.italic),
-          ),
-        ],
+        if (item.estimatedTravelTime != null)
+          Text('${item.estimatedTravelTime} min to get here', style: muted),
       ],
     );
   }
@@ -362,8 +462,8 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
   Widget _removeButton(TripItem item) {
     final busy = _removing.contains(item.id);
     return SizedBox(
-      width: 36,
-      height: 36,
+      width: 34,
+      height: 34,
       child: busy
           ? const Padding(
               padding: EdgeInsets.all(9),
@@ -378,8 +478,9 @@ class _ItineraryLocationsSectionState extends State<ItineraryLocationsSection> {
               padding: EdgeInsets.zero,
               onPressed: () => _remove(item),
               icon: const Icon(
-                Icons.remove_circle_outline_rounded,
-                color: Color(0xFFE11D48),
+                Icons.close_rounded,
+                size: 19,
+                color: AppTheme.slateMuted,
               ),
             ),
     );

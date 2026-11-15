@@ -1000,6 +1000,28 @@ is a different operation and was not triggered. See the
 - `flutter test` passes 239 tests and `pytest -m "not db"` passes 1108. On Roel's Infinix (release build, staging), the mislinked cathedral photo is now refused.
 - Pending: uploads by the #108 owner, then deployed photo-and-credit screenshots. See [evidence](evidence/destination-images-ui.md).
 
+### November 14, 2026 — #109 photos uploaded to staging
+
+- **Credential handoff:** Andrew gave Roel the staging Supabase service-role key for the #109 upload. Roel holds it in his git-ignored `.env`. Andrew first sent production keys (a secret key and a service-role key). They were spotted before any use, because the service-role key names its project, and removed. Andrew was asked to rotate the production keys, since they were shared over chat.
+- Cleared staging's mislinked San Sebastian Cathedral `image_url` (the Negros Museum test image from #108).
+- Uploaded all 14 approved photos to staging and linked the 10 main ones. The script verified every public copy by SHA-256, and every link matches the app's approved credits.
+- Checked on Roel's Infinix: real photos with credits on Home, Spots, the open card and the credit sheet. The credit chip had been hidden under card titles on Spots and swipe cards, so it moved to a top corner, and the credit sheet is now full width. `flutter test` passes 273 tests. See [evidence](evidence/destination-images-ui.md).
+- #109 can close. A production upload is left for the production release.
+
+### November 15, 2026 — #109 photos uploaded to production
+
+- **Approval and credential:** the team approved uploading the #109 photos to production. Roel received the production service-role key and holds it in his git-ignored `.env` (`PROD_SUPABASE_SERVICE_ROLE_KEY`).
+- Added an explicit `--production` mode to `scripts/destination_images.py` that only accepts that key and refuses a development key or one for another project (tests added).
+- Uploaded all 14 approved photos to production and linked the 10 main ones (they were all empty). Each upload was verified by SHA-256, and every link matches the app's approved credits.
+- Pending: confirm on production that the destination-images storage policy migration is applied (the client-write denial test was not run).
+
+### November 15, 2026 — #117 production check
+
+- **Credential handoff:** CyGray gave Roel the production Supabase **publishable** key (the public client key) for the #117 production check. Roel holds it in his git-ignored `.env`.
+- Roel built the release APK against production. It shows `com.lagaw.bacolod`, version 1.0.0, internet permission and the label "Lagaw". It was installed fresh on the Infinix, and Roel signed in with his own production account.
+- Production loaded 10 places, the user's preferences and the swipe history, with "Price unknown" for unknown prices and no match score. This meets the last #117 acceptance criterion, so #117 can close. See [evidence](evidence/release-build-honest-ui.md).
+- The real release keystore stays with the v1.0.0 release (#121, CyGray).
+
 ### November 14, 2026 — Home redesign v3
 
 - Roel asked for a cleaner, less cramped home screen that keeps Lagaw's vibe. Using the Impeccable design skill (a design review only, since the screen is native), Claude critiqued the current home and produced three mockups from Roel's references. Roel chose v3 and directed each change:
@@ -1025,6 +1047,14 @@ is a different operation and was not triggered. See the
 - **Feedback round (Roel):** swipe cards were resized to the area Roel marked on a screenshot, and rating moved from the "Been here? Rate it" link to a star button between Pass and Like that shows the stars once rated. `flutter test` passes 270 tests; verified on the Infinix.
 - **Feedback round (Roel):** swipes no longer show a loading state. They are optimistic: the card flies off and the next place shows at once while the swipe saves in the background; a failed save undoes the swipe and shows why. Still sent once, never retried automatically. `flutter test` passes 271 tests (1 new); verified on the Infinix, where the check recorded a like on Capitol Park for account B.
 - **Feedback round (Roel):** Swipe your vibe now has floating elements around its card. Moving between tabs is smoother: elements glide one after another in a slight arc, elements changing sides drift out and back in from the edges, and pages cross-fade instead of snapping. `flutter test` passes 272 tests; verified on the Infinix with screen recordings.
+- **Feedback round (Roel):** signed-out users now see a four-page swipeable intro (Swipe your vibe first, then Spots, trip planning, and a welcome page with Create account and Log in). Log in and sign up were redesigned in the v3 style: a sky header with the logo and a white form sheet, email only. All sign-in behavior is unchanged. `flutter test` passes 275 tests; verified on the Infinix, where two layout fixes were made (overlapping pills on page 2, and a hard-to-read Back over the sun). The form sheet was then tightened to the form's height (no empty white space below), with the spare space going to the sky and logo.
+- **Feedback round (Roel):** an empty budget minimum now means ₱0; Picked for you uses two roomy step cards; the swipe card shows only the name, description and price, opens details on tap, and has Pass / Rate / Like buttons under it; the swipe page's greeting pill collapses to its heart; the heart opens You, where See all expands the liked list with search and category chips. Friendly names for the 23 categories now on staging. `flutter test` passes 277 tests; verified on the Infinix.
+- **Feedback round (Roel):** place details show three lines of description with See more, and Rate (left) and Save (right) are pinned at the bottom of the pop-up so they never need scrolling. `flutter test` passes 278 tests; verified on the Infinix.
+- **Feedback round (Roel):** hearts now fill for liked (right-swiped) places as well as saved ones. Roel also asked for un-liking. That is not possible today: `user_location_interactions` only accepts `left_swipe`, `right_swipe`, `save` and `rating`, and history is append-only (#110), so it needs a database and backend change first (proposed separately).
+- **Feedback round (Roel):** You got a See places for me button and tidier preferences card; Picked for you became a three-step pop-up (review with Edit, the two questions, then a ranked list with hearts and tap-for-details, no percentages); Liked and saved chips follow Spots' categories; the swipe card is smaller, centered and the stack behind it is gentler. `flutter test` passes 280 tests; verified on the Infinix.
+- **Feedback round (Roel):** verified four tester reports on the trip screens (pace and group not carried into Plan with AI, two lowercase titles with an em dash, Describe your trip styled differently) and fixed them. Plan a trip became a pop-up; cards, buttons, chips and fields moved to the flat v3 style; the trip min budget is optional; the header pill collapses everywhere except Home; trips can be swiped away with a confirmation; "Trip deleted." fades; date tiles fit their range. `flutter test` passes 285 tests; verified on the Infinix (delete and Plan with AI by tests only).
+- **Feedback round (Roel):** Plan a trip became a step-by-step pop-up (describe or skip, review in the pop-up, basics, getting around, who's coming, vibes) that asks before discarding input; trip details, Edit trip and Plan with AI are pop-ups too (details in Overview and Itinerary tabs; Plan with AI in steps). Recommendation cards and the itinerary were redesigned, without percentages or ranking reasons. `flutter test` passes 287 tests; verified on the Infinix (creating and generating by tests only).
+- **Feedback round (Roel):** the greeting pill is now one shared header above the phone tabs, so it folds only when leaving Home and unfolds only when returning; between Spots, Trips and Swipe it no longer replays. The fold and unfold were smoothed (staged fades, eased width). `flutter test` passes 288 tests; verified on the Infinix with a frame recording.
 
 ### November 14–15, 2026 — Team meeting: system QA, v3 UI, and demo video roles
 

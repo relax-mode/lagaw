@@ -17,7 +17,8 @@ class AppTheme {
   );
 }
 
-/// Reusable 3D Vector Card Widget (Clean, solid, tactile 3D style)
+/// The app's card: white, rounded, with a soft shadow (the v3 style; it
+/// used to be a bevelled 3D card). [home v3]
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double borderRadius;
@@ -33,7 +34,7 @@ class GlassContainer extends StatelessWidget {
     this.borderRadius = 24,
     this.padding = const EdgeInsets.all(16),
     this.tintColor = Colors.white,
-    this.borderColor = const Color(0xFFE2E8F0),
+    this.borderColor = Colors.transparent,
     this.blur = 0,
     this.boxShadow,
   });
@@ -44,34 +45,31 @@ class GlassContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: tintColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor, width: 2.0),
-        boxShadow: boxShadow ??
+        border: borderColor == Colors.transparent
+            ? null
+            : Border.all(color: borderColor, width: 1.5),
+        boxShadow:
+            boxShadow ??
             const [
               BoxShadow(
-                color: Color(0xFFCBD5E1),
-                offset: Offset(0, 4),
-                blurRadius: 0, // Sharp 3D tactile bottom bevel
-              ),
-              BoxShadow(
-                color: Color(0x180F172A),
-                offset: Offset(0, 8),
-                blurRadius: 16,
+                color: Color(0x4D0F285A),
+                offset: Offset(0, 16),
+                blurRadius: 30,
+                spreadRadius: -16,
               ),
             ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius - 2),
-        child: Padding(
-          padding: padding,
-          child: child,
-        ),
+        child: Padding(padding: padding, child: child),
       ),
     );
   }
 }
 
-/// Tactile 3D Vector Button with Solid Colorful Depth.
-/// Lifts slightly on hover and sinks into its bevel when pressed.
+/// The app's button: a flat, rounded surface with a soft shadow that
+/// presses in slightly (the v3 style; it used to be a bevelled 3D button).
+/// [home v3]
 class Vector3DButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -109,11 +107,8 @@ class _Vector3DButtonState extends State<Vector3DButton> {
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onTap != null;
-    // Pressed: the face travels down into its bevel. Hovered: it rises a touch.
-    final travel = _pressed
-        ? widget.depth * 0.75
-        : (_hovered && enabled ? -1.5 : 0.0);
-    final edge = widget.depth - travel;
+    final white = widget.backgroundColor.computeLuminance() > 0.9;
+    final lift = _hovered && enabled && !_pressed;
 
     return MouseRegion(
       cursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
@@ -127,32 +122,34 @@ class _Vector3DButtonState extends State<Vector3DButton> {
         onTapDown: enabled ? (_) => _setPressed(true) : null,
         onTapUp: enabled ? (_) => _setPressed(false) : null,
         onTapCancel: enabled ? () => _setPressed(false) : null,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _pressed ? 0.97 : 1,
           duration: Duration(milliseconds: _pressed ? 70 : 160),
           curve: Curves.easeOutCubic,
-          transform: Matrix4.translationValues(0, travel, 0),
-          padding: widget.padding,
-          decoration: BoxDecoration(
-            color: widget.backgroundColor,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            border: Border.all(
-              color: widget.borderColor ?? widget.shadowColor,
-              width: 2.0,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOutCubic,
+            padding: widget.padding,
+            decoration: BoxDecoration(
+              color: widget.backgroundColor,
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              // White buttons get a hairline so they read on white cards.
+              border: white
+                  ? Border.all(color: const Color(0xFFE3E9F2), width: 1.2)
+                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: white
+                      ? const Color(0x1A0F285A)
+                      : widget.backgroundColor.withValues(alpha: 0.28),
+                  offset: Offset(0, lift ? 8 : 6),
+                  blurRadius: lift ? 18 : 14,
+                  spreadRadius: -6,
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: widget.shadowColor,
-                offset: Offset(0, edge),
-                blurRadius: 0, // Solid 3D vector bottom edge
-              ),
-              BoxShadow(
-                color: const Color(0x220F172A),
-                offset: Offset(0, edge + 3),
-                blurRadius: _hovered && !_pressed ? 10 : 6,
-              ),
-            ],
+            child: widget.child,
           ),
-          child: widget.child,
         ),
       ),
     );

@@ -8,6 +8,7 @@ import '../../services/onboarding_repository.dart';
 import '../../theme.dart';
 import '../../widgets/status_banner.dart';
 import '../../widgets/trip_form/trip_form.dart';
+import 'discovery_screen.dart' show pickedForYouRoute;
 
 enum OnboardingStep { welcome, interests, budget, style, review, done }
 
@@ -452,8 +453,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     id: 'budget',
     title: 'What’s your usual budget?',
     body:
-        'Your typical spend per trip in pesos. Leave both empty if you’d '
-        'rather not say.',
+        'Your typical spend per trip in pesos. No minimum? Leave Min empty '
+        'and it starts at ₱0. Leave both empty if you’d rather not say.',
     content: [
       Form(
         key: _budgetForm,
@@ -463,8 +464,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             Expanded(
               child: _amount(
                 key: 'onboarding-budget-min',
-                label: 'Min',
-                hint: '500',
+                label: 'Min (optional)',
+                hint: '0',
                 controller: _minController,
                 error: () => validateBudgetRange(
                   _minController.text,
@@ -606,8 +607,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         if (next == null) {
           Navigator.of(context).pop(_prefs);
         } else {
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute<void>(builder: next));
+          // The places pop-up takes this card's place.
+          Navigator.of(context).pushReplacement(pickedForYouRoute(next));
         }
       },
     ),

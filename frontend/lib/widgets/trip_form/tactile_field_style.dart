@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../theme.dart';
 
-/// Shared look for trip form inputs: white tactile surface, 2px slate
-/// border, blue focus ring, rose error ring. [S2-04]
+/// Shared look for trip form inputs: a soft filled field, an orange focus
+/// ring and a red error ring, as on the v3 forms. [S2-04, home v3]
 class TactileFieldStyle {
   static const Color border = Color(0xFFE2E8F0);
   static const Color bevel = Color(0xFFCBD5E1);
   static const Color error = Color(0xFFE11D48);
-  static const double radius = 18;
+  static const double radius = 16;
+  static const Color fill = Color(0xFFF1F5FB);
 
   static const TextStyle label = TextStyle(
     fontFamily: 'Outfit',
@@ -26,7 +27,9 @@ class TactileFieldStyle {
   static OutlineInputBorder _outline(Color color, [double width = 2]) =>
       OutlineInputBorder(
         borderRadius: BorderRadius.circular(radius),
-        borderSide: BorderSide(color: color, width: width),
+        borderSide: width == 0
+            ? BorderSide.none
+            : BorderSide(color: color, width: width),
       );
 
   static InputDecoration decoration({
@@ -44,12 +47,14 @@ class TactileFieldStyle {
       prefixText: prefixText,
       prefixStyle: label,
       filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      enabledBorder: _outline(border),
-      focusedBorder: _outline(AppTheme.primaryBlue, 2.4),
-      errorBorder: _outline(error),
-      focusedErrorBorder: _outline(error, 2.4),
+      fillColor: fill,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+      border: _outline(Colors.transparent, 0),
+      enabledBorder: _outline(Colors.transparent, 0),
+      disabledBorder: _outline(Colors.transparent, 0),
+      focusedBorder: _outline(const Color(0xFFF2620F), 1.6),
+      errorBorder: _outline(error, 1.2),
+      focusedErrorBorder: _outline(error, 1.6),
       errorStyle: const TextStyle(
         color: error,
         fontWeight: FontWeight.w600,
@@ -59,9 +64,7 @@ class TactileFieldStyle {
   }
 
   /// Sharp bottom bevel matching `GlassContainer`, drawn behind an input.
-  static const List<BoxShadow> bevelShadow = [
-    BoxShadow(color: bevel, offset: Offset(0, 3), blurRadius: 0),
-  ];
+  static const List<BoxShadow> bevelShadow = [];
 }
 
 /// Bold label above a form field, with an optional "Optional" tag.
@@ -77,7 +80,15 @@ class TactileFieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Row(
         children: [
-          Text(text, style: TactileFieldStyle.label),
+          // Narrow pop-ups: long labels ellipsize instead of overflowing.
+          Flexible(
+            child: Text(
+              text,
+              style: TactileFieldStyle.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           if (optional) ...[
             const SizedBox(width: 6),
             const Text(

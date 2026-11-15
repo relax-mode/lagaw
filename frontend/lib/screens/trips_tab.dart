@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/trip.dart';
 import '../services/trip_service.dart';
 import '../theme.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/status_banner.dart';
 import '../widgets/tactile_motion.dart';
 import '../widgets/trip_card.dart';
+import '../widgets/popup_route.dart';
 import 'trip_create_screen.dart';
 import 'trip_detail_screen.dart';
 
@@ -92,8 +96,9 @@ class _TripsTabState extends State<TripsTab> {
 
   /// Opens [page]; whatever happened there, the list is re-fetched after.
   Future<Object?> _open(Widget page) async {
+    // Trips open as pop-ups, like Plan a trip. [home v3]
     final result = await Navigator.of(context)
-        .push<Object?>(MaterialPageRoute(builder: (_) => page));
+        .push<Object?>(blurPopupRoute((_) => page));
     if (mounted) {
       setState(() => _notice = null);
       _load();
@@ -101,7 +106,16 @@ class _TripsTabState extends State<TripsTab> {
     return result;
   }
 
-  void _create() => _open(TripCreateScreen(service: widget.service));
+  /// Plan a trip opens as a pop-up; the list reloads after either way.
+  Future<void> _create() async {
+    await Navigator.of(context).push<Object?>(
+      blurPopupRoute((_) => TripCreateScreen(service: widget.service)),
+    );
+    if (mounted) {
+      setState(() => _notice = null);
+      _load();
+    }
+  }
 
   Future<void> _openTrip(Trip trip) async {
     final result = await _open(
@@ -111,8 +125,45 @@ class _TripsTabState extends State<TripsTab> {
       // Drop it right away; the reload started by _open confirms it.
       setState(() {
         _trips = _trips.where((t) => t.id != trip.id).toList();
-        _notice = 'Trip deleted.';
       });
+      _showNotice('Trip deleted.');
+    }
+  }
+
+  Timer? _noticeTimer;
+
+  /// A short success note that fades away by itself after a few seconds.
+  void _showNotice(String message) {
+    _noticeTimer?.cancel();
+    setState(() => _notice = message);
+    _noticeTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _notice = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _noticeTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Swipe left on a trip: confirm, then delete it on the server. The card
+  /// only leaves once the server agrees; a failure keeps it and says why.
+  Future<bool> _confirmSwipeDelete(Trip trip) async {
+    final confirmed = await showTactileConfirmDialog(
+      context,
+      title: 'Delete this trip?',
+      message:
+          '"${trip.title}" will be removed for good. This can\'t be undone.',
+      confirmLabel: 'Delete',
+    );
+    if (!confirmed || !mounted) return false;
+    try {
+      await widget.service.deleteTrip(trip.id);
+      return true;
+    } on TripApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+      return false;
     }
   }
 
@@ -178,14 +229,25 @@ class _TripsTabState extends State<TripsTab> {
           ],
         ),
         const SizedBox(height: 22),
-        if (_notice != null) ...[
-          StatusBanner(
-            key: const ValueKey('trips-notice'),
-            tone: StatusTone.success,
-            message: _notice!,
+        // Fades in and out instead of staying until the next action.
+        AnimatedSize(
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeInOutCubic,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            child: _notice == null
+                ? const SizedBox(width: double.infinity)
+                : Padding(
+                    key: ValueKey(_notice),
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: StatusBanner(
+                      key: const ValueKey('trips-notice'),
+                      tone: StatusTone.success,
+                      message: _notice!,
+                    ),
+                  ),
           ),
-          const SizedBox(height: 14),
-        ],
+        ),
         if (_error != null)
           StatusBanner(
             key: const ValueKey('trips-error'),
@@ -234,7 +296,41 @@ class _TripsTabState extends State<TripsTab> {
         FadeSlideIn(
           key: ValueKey(trip.id),
           index: i,
-          child: TripCard(trip: trip, onTap: () => _openTrip(trip)),
+          child: Dismissible(
+            key: ValueKey('trip-dismiss-${trip.id}'),
+            direction: DismissDirection.endToStart,
+            confirmDismiss: (_) => _confirmSwipeDelete(trip),
+            onDismissed: (_) {
+              setState(() {
+                _trips = _trips.where((t) => t.id != trip.id).toList();
+              });
+              _showNotice('Trip deleted.');
+            },
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE11D48),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.delete_rounded, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Delete',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            child: TripCard(trip: trip, onTap: () => _openTrip(trip)),
+          ),
         ),
     ];
 

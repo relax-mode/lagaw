@@ -109,6 +109,10 @@ class HomeView extends StatefulWidget {
 
   /// Off when the app draws one shared element layer for every tab.
   final bool showElements;
+
+  /// Off when the app draws one shared greeting pill above every tab; the
+  /// page keeps the same space for it.
+  final bool showPill;
   final VoidCallback onSearch;
   final VoidCallback onSaved;
   final VoidCallback onAccount;
@@ -129,6 +133,7 @@ class HomeView extends StatefulWidget {
     required this.onSeeCategory,
     this.placesState,
     this.showElements = true,
+    this.showPill = true,
     this.clock = DateTime.now,
   });
 
@@ -179,14 +184,17 @@ class _HomeViewState extends State<HomeView> {
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 120),
           child: Column(
             children: [
-              GreetingPill(
-                avatarLetter: widget.avatarLetter,
-                likedCount: widget.likedCount,
-                onSearch: widget.onSearch,
-                onSaved: widget.onSaved,
-                onAccount: widget.onAccount,
-                clock: widget.clock,
-              ),
+              if (widget.showPill)
+                GreetingPill(
+                  avatarLetter: widget.avatarLetter,
+                  likedCount: widget.likedCount,
+                  onSearch: widget.onSearch,
+                  onSaved: widget.onSaved,
+                  onAccount: widget.onAccount,
+                  clock: widget.clock,
+                )
+              else
+                const SizedBox(height: 52),
               const SizedBox(height: 34),
               Text(
                 widget.spotCount == 1

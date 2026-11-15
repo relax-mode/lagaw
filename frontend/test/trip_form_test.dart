@@ -98,7 +98,8 @@ void main() {
       expect(submitted, isEmpty);
       expect(find.text('Give your trip a name.'), findsOneWidget);
       expect(find.text('Pick your travel dates.'), findsOneWidget);
-      expect(find.text('Enter an amount.'), findsNWidgets(2));
+      // Only the max is required; an empty min means ₱0.
+      expect(find.text('Enter an amount.'), findsOneWidget);
     });
 
     testWidgets('edit mode pre-fills every field', (tester) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/widgets/greeting_pill.dart';
 import 'package:frontend/models/image_credits.dart';
 import 'package:frontend/models/location.dart';
 import 'package:frontend/screens/home/home_view.dart';
@@ -300,16 +301,75 @@ void main() {
 
   testWidgets('You tab without a session shows no sign out', (tester) async {
     await _size(tester);
-    var opened = false;
-    await tester.pumpWidget(
-      _app(
-        YouTab(session: null, likedCount: 2, onOpenSaved: () => opened = true),
-      ),
-    );
+    await tester.pumpWidget(_app(const YouTab(session: null, likedCount: 2)));
     expect(find.text('Not signed in'), findsOneWidget);
     expect(find.text('2 places liked and saved'), findsOneWidget);
     expect(find.byKey(const ValueKey('you-sign-out')), findsNothing);
+    // See all expands on You itself.
     await tester.tap(find.byKey(const ValueKey('you-saved')));
-    expect(opened, isTrue);
+    await tester.pump();
+    expect(find.text('Show less'), findsOneWidget);
+  });
+
+  test('every category reads as words, including new ones', () {
+    // Finer catalogue categories group into broad ones (#186).
+    expect(HomeCategory.labelFor('local_food'), 'Dining');
+    expect(HomeCategory.labelFor('coastal_day_resort'), 'Resorts');
+    expect(HomeCategory.labelFor('brand_new_kind'), 'Brand New Kind');
+    final cover = LocationItem.fromJson({'id': 'x', 'name': 'X'});
+    expect(
+      HomeCategory(id: 'garden_farm_tourism', count: 2, cover: cover).seeLabel,
+      'See 2 parks',
+    );
+    expect(
+      HomeCategory(id: 'new_thing', count: 1, cover: cover).word,
+      'new thing',
+    );
+  });
+
+  testWidgets('the pill only animates when it folds or unfolds', (
+    tester,
+  ) async {
+    await _size(tester);
+    Widget pill(bool collapsed) => MaterialApp(
+      home: Scaffold(
+        body: GreetingPill(
+          avatarLetter: 'R',
+          likedCount: 0,
+          onSearch: () {},
+          onSaved: () {},
+          onAccount: () {},
+          collapsed: collapsed,
+        ),
+      ),
+    );
+    double width() => tester
+        .getSize(
+          find
+              .descendant(
+                of: find.byType(GreetingPill),
+                matching: find.byType(Container),
+              )
+              .first,
+        )
+        .width;
+
+    // A page that opens collapsed shows just the heart at once.
+    await tester.pumpWidget(pill(true));
+    final folded = width();
+    expect(folded, lessThan(80));
+
+    // Staying collapsed (Spots to Trips) never moves.
+    await tester.pumpWidget(pill(true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(width(), folded);
+
+    // Going Home unfolds smoothly, then settles full width.
+    await tester.pumpWidget(pill(false));
+    await tester.pump(const Duration(milliseconds: 300));
+    final midway = width();
+    expect(midway, greaterThan(folded));
+    await tester.pumpAndSettle();
+    expect(width(), greaterThan(midway));
   });
 }
