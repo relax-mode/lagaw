@@ -1069,3 +1069,7 @@ is a different operation and was not triggered. See the
 ### November 15, 2026 - supplied Capitol and Panaad metadata follow-up
 
 - Andrew explicitly requested using his previously supplied Capitol and Panaad hours and costs, superseding the prior deferral. Applied two existing development records, retaining office-hour and unverified oval-report caveats in descriptions. Guarded rerun changed zero; full public readback preserved all ten expected records and unrelated fields. Development now has 10 schedules and 10 cost ranges. Production remains at 8 of each pending the prepared operator SQL; no environment changes. Evidence: docs/evidence/location-metadata-supplied-followup-2026-11-15.json.
+
+### November 15, 2026 - destination description attribution cleanup
+
+- Removed personal supplied-by wording from four development destination descriptions at the data owner's request. Preserved source qualifications and every other public field. Four updates, zero changes on rerun; full public readback matched all ten records. Production SQL is prepared pending operator execution; no environment changes. Prior audit snapshots remain historical records.
