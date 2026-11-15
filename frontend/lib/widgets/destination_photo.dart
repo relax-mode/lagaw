@@ -176,7 +176,9 @@ class _CreditChip extends StatelessWidget {
                   color: Colors.white,
                 )
               : Text(
-                  'Photo: ${credit.photographer} · ${credit.license}',
+                  credit.photographer.isEmpty
+                      ? credit.attribution
+                      : 'Photo: ${credit.photographer} · ${credit.license}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
