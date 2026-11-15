@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lagaw sky blue, matching the top and bottom of the app icon art. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:startColor="#2B7DE5"
+        android:endColor="#6AB7F8" />
+</shape>

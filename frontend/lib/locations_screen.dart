@@ -826,7 +826,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                   ),
                   Text(
                     isWide
-                        ? 'Bacolod City — City of Smiles'
+                        ? 'Bacolod City: City of Smiles'
                         : hiligaynonGreeting(DateTime.now()).replaceAll(',', '!'),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
