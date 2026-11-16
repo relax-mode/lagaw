@@ -659,7 +659,7 @@ jobs:
 
       - name: Set up Node.js
         if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.frontend == 'true'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
@@ -892,7 +892,7 @@ jobs:
           flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL" --dart-define=TRIP_DEMO_TOKEN="$TRIP_DEMO_TOKEN" --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
