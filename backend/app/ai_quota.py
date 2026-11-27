@@ -1,8 +1,8 @@
 """Shared Supabase/PostgREST quota reservation for billable DeepSeek extraction.
 
 No in-process counters: all Cloud Run instances reserve against the same database.
-The SQL RPC enforces both windows atomically; attempts remain charged on provider failure
-so retries cannot bypass an exhausted budget.
+The SQL RPC enforces the aggregate ceiling and per-profile windows atomically.
+Attempts remain charged on provider failure so retries cannot bypass an exhausted budget.
 """
 
 import os

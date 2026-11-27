@@ -170,10 +170,10 @@ A trigger makes manual item writes take the same parent lock and clears
 items keep their IDs, times and explanations; remove does not reroute/renumber
 them. Manual additions keep null scheduling fields. Regenerate with confirmation
 to obtain another complete validated plan. Trip CRUD edits also change the revision;
-this endpoint does not automatically regenerate existing items after a later trip
-edit. Saved schedules describe the facts at generation time, not ongoing venue
-availability. A rejection committed after the final database check is a later
-event, not a retroactive rewrite of an already saved itinerary.
+the [trip update rules](trip-mutations-api.md#api-contract) protect saved visits
+and clear the estimate if the new maximum is below it. Saved schedules reflect
+venue availability at generation time. A later swipe leaves the saved itinerary
+intact until an explicit edit or confirmed regeneration.
 
 | Status | Meaning |
 | --- | --- |
