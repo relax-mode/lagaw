@@ -195,7 +195,7 @@ Where each item of the course checklist lives. "Not in repo" means the item is o
 | Changelog | [CHANGELOG.md](CHANGELOG.md) | v1.0.0 candidate, with [draft release notes](docs/release-notes/v1.0.0-draft.md) |
 | **Process evidence** | | |
 | Project board | GitHub Projects board (link to be added) | Issues and PRs are in the [repository](https://github.com/relax-mode/lagaw). |
-| Sprint log | [docs/sprint-log.md](docs/sprint-log.md) | Plans, standup notes and retrospectives. Some retrospectives are marked pending in the log. |
+| Sprint log | [docs/sprint-log.md](docs/sprint-log.md) | Sprint plans, activity notes, and the Sprint 3 and Sprint 4 retrospectives. Formal async standups were not recorded, and Sprint 1 and 2 retrospectives are pending. |
 | Scope change log | [docs/scope-changes.md](docs/scope-changes.md) | |
 | **DevOps** | | |
 | Pipeline configuration | [`.github/workflows/ci.yml`](.github/workflows/ci.yml), [`scheduled-live-checks.yml`](.github/workflows/scheduled-live-checks.yml) | |
@@ -203,7 +203,7 @@ Where each item of the course checklist lives. "Not in repo" means the item is o
 | Pipeline metrics log | [docs/pipeline-metrics.md](docs/pipeline-metrics.md) | |
 | Optimization log | [docs/pipeline-metrics.md](docs/pipeline-metrics.md) | Before and after numbers are in the same file |
 | Deploy and rollback runbook | [docs/rollback-runbook.md](docs/rollback-runbook.md) | Deploy flow in [PIPELINE.md](PIPELINE.md#continuous-deployment) |
-| Incident log | [docs/incident-log.md](docs/incident-log.md) | INC-1 to INC-4 with postmortems |
+| Incident log | [docs/incident-log.md](docs/incident-log.md) | INC-1 to INC-6 with postmortems |
 | **Presentation** | | |
 | Slide deck | Not in repo | Presented separately |
 | AI provider failure simulation | [PIPELINE.md, AI failure drill](PIPELINE.md#ai-failure-drill) | Commands only. The doc says the drill has not been run as a recorded exercise. |
