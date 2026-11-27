@@ -55,6 +55,9 @@ def verify_identity(token: str) -> tuple[UUID, str]:
             "verify_iat": True, "verify_iss": True, "verify_aud": True,
             "require": ["sub", "iss", "aud", "exp", "iat", "role"],
         }, issuer=f"{url}/auth/v1", audience="authenticated")
+        # A non-string subject (number, list, object) must be a 401, not a crash.
+        if not isinstance(claims["sub"], str) or not isinstance(claims["role"], str):
+            raise TypeError
         subject = UUID(claims["sub"])
         if subject.int == 0 or claims["role"] != "authenticated":
             raise ValueError
@@ -83,7 +86,7 @@ def verify_identity(token: str) -> tuple[UUID, str]:
         jwt.decode(token, options={"verify_signature": False, "verify_exp": True,
                                    "require": ["exp"]})
         return subject, email
-    except (jwt.PyJWTError, ValueError, TypeError, KeyError, OverflowError):
+    except (jwt.PyJWTError, ValueError, TypeError, KeyError, OverflowError, AttributeError):
         raise unauthorized() from None
     except (httpx.HTTPError, httpx.InvalidURL):
         raise HTTPException(503, "Authentication is temporarily unavailable.") from None
@@ -123,6 +126,11 @@ def profile_owner(subject: UUID, email: str) -> UUID:
                                    json={"auth_user_id": str(subject), "email": email,
                                          "name": "Traveler"})
             if response.status_code == 409:
+                # A concurrent first request for this same identity can win the
+                # email unique index before the auth_user_id arbiter; reuse its link.
+                owner = linked_owner()
+                if owner is not None:
+                    return owner
                 raise HTTPException(409, detail={
                     "code": "profile_link_required",
                     "message": "An existing profile needs review before this account can continue.",
