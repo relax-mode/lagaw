@@ -4,9 +4,9 @@ All notable changes to Lagaw are recorded here. The format follows [Keep a Chang
 
 Entries are factual: each one is taken from a merged pull request (`#<number>`) or a recorded repository document. Nothing here is a release until it is tagged and approved under [docs/release-process.md](docs/release-process.md).
 
-## [Unreleased] - v1.0.0 candidate
+## [1.0.0] - 2026-11-27
 
-Sprint assignment follows the sprint log and issue numbering: Sprint 1 covers PRs #1-#20, Sprint 2 covers the Trip API, Trip UI and CI issues (#22-#31), and Sprint 3 covers the recommendation, AI and authentication work (#26, #32-#34, #50-#58, #79, #80, #94). Documentation-only evidence PRs that only record a verification are not listed individually.
+Sprint assignment follows the sprint log and issue numbering: Sprint 1 covers PRs #1-#20, Sprint 2 covers the Trip API, Trip UI and CI issues (#22-#31), Sprint 3 covers the recommendation, AI and authentication work (#26, #32-#34, #50-#58, #79, #80, #94), and Sprint 4 covers PRs #100-#191 (onboarding, destination data and images, safeguards, Android release build, CI/CD security, rollback and release preparation). The final panel hardening of November 27 covers PRs #205-#212. Documentation-only evidence PRs that only record a verification, and the deployment rehearsal PRs (#179, #180, #191), are not listed individually. Dependabot pull requests are listed together under Sprint 4 Security.
 
 ### Sprint 1 - Foundation and walking skeleton
 
@@ -79,7 +79,7 @@ Sprint assignment follows the sprint log and issue numbering: Sprint 1 covers PR
 - Natural-language preference extraction in the Flutter trip form (#91).
 - Trip planning with AI recommendations and generated itineraries in Flutter (#99).
 - Supabase sign-in and authenticated Flutter sessions (#96).
-- Collaborative model served from the deployed recommendation API (#95; issue #94 remains open).
+- Collaborative model served from the deployed recommendation API (#95).
 - AI evaluation gate and automatic staging-to-production promotion (#73, landed on `main` through #77).
 
 #### Changed
@@ -98,31 +98,88 @@ Sprint assignment follows the sprint log and issue numbering: Sprint 1 covers PR
 - Backend ownership enforcement for Trip data under Supabase sessions (#92).
 - Flutter sessions use Supabase sign-in and access tokens (#96).
 
-## Not yet included (open Sprint 4 work)
+### Sprint 4 - Hardening, polish and release
 
-These items are **not shipped** and are **not part of the v1.0.0 candidate** until their issues are closed with verification evidence. They are listed so readers can see what is still open.
+#### Added
 
-- #59 - Record Sprint 3 progress and prepare AI consultation evidence
-- #94 - Serve the trained collaborative model from the deployed recommendation API (PR #95 merged; issue still open)
-- #101 - Implement first-time travel preference onboarding UI
-- #102 - Implement onboarding preferences API and persistence
-- #103 - Integrate content-based recommendations for cold-start users
-- #104 - Connect onboarding to personalized destination discovery
-- #105 - Research and validate Bacolod destination data sources
-- #106 - Enrich destination catalogue for feasible itineraries
-- #107 - Research and curate destination image sources
-- #108 - Configure Supabase Storage for destination images
-- #109 - Integrate real destination images into Flutter
-- #110 - Persist discovery swipes, saves and ratings
-- #111 - Evaluate content-based recommendations and cold-start quality
-- #112 - Evaluate Brevo and Resend for Supabase authentication emails
-- #113 - Configure and verify production authentication email delivery
-- #114 - Add AI endpoint rate limiting and cost safeguards
-- #115 - Finalize AI failure handling and evaluation documentation
-- #116 - Improve backend health checks and API documentation
-- #117 - Fix Android release build and misleading UI states
-- #118 - Restore scheduled AI smoke checks and production verification
-- #119 - Improve CI/CD security and pipeline efficiency
-- #120 - Document and execute a staging rollback drill
-- #122 - Maintain Sprint 4 records and consultation evidence
-- #121 - Prepare and publish the verified v1.0.0 release (this release process)
+- First-time travel preference onboarding UI (#161), the onboarding preferences API with persistence (#129), and onboarding connected to saved preferences and cold-start "Picked for you" discovery in Flutter (#162).
+- Authenticated cold-start recommendations from saved onboarding tags, before a trip exists (#131).
+- Discovery swipes, saves and ratings persisted from the Flutter app (#164).
+- Destination data source validation (#128), a source-reviewed catalogue enrichment workflow (#130), and metadata for existing destinations from supplied values (#181, #183).
+- Twenty additional Bacolod destinations with qualified opening hours and price ranges (#185).
+- Destination photo pipeline: Supabase Storage workflow for approved photos (#136), image license manifest (#163, #173), licensed photos shown with credits in Flutter (#175), and photos for the twenty new destinations (#189).
+- Backend `GET /health` liveness, `GET /ready` database readiness, and safe API documentation (#134).
+- Shared per-account rate limits and cost safeguards for AI preference extraction (#135).
+- Forgot-password request and password reset form in Flutter (#150).
+- Android release build with the intended application identity and honest loading, empty and error states (#174).
+- Phone app redesign v3 and v4 across Home, Spots, swipe, Trips and You (#176, #188).
+- Content-first cold-start evaluation (#132) and AI failure coverage tests (#133).
+- Secret scanning (gitleaks), dependency audit, pinned GitHub Actions and Dependabot configuration (#125).
+- Rollback runbook and a dry-run-by-default rollback helper (#126), with the staged rollback verified (#160).
+- Release process, release readiness check, changelog and draft release notes (#124).
+- Resend SMTP preparation for Supabase Auth email (#123) and the Brevo versus Resend decision evidence (#145).
+- Sprint 3 consultation record (#154), Sprint 4 DevOps records and CI/CD diagram (#127), and Sprint 4 pipeline metrics (#187).
+- Production collaborative-model rollout verification (#157).
+
+#### Changed
+
+- The scheduled live AI check signs in as a dedicated smoke account instead of sending the retired demo token (#100).
+- The dependency audit runs only for relevant pull request changes, and still runs on every push to `main` (#146).
+- Auth email documentation reflects Brevo SMTP and the required live verification (#156).
+- Page title, web manifest and app icons say Lagaw, and em dashes are removed from UI text (#182).
+- The unused `cupertino_icons` dependency is removed from Flutter (#155).
+- Local release APKs are git-ignored (#178).
+
+#### Fixed
+
+- Scheduled live AI check failing with HTTP 401 (#100).
+- Password recovery email now opens the password reset form, and password-update errors from Supabase are reported accurately (#150, #159).
+- Destination categories are merged and shown with readable labels (#186), and personal attribution is removed from destination descriptions (#184).
+- A historical gitleaks false positive on a public destination UUID is scoped out without weakening other rules (#152).
+
+#### Security
+
+- Gitleaks secret scanning on every pull request and push, a dependency-audit gate, explicit least-privilege job permissions and SHA-pinned third-party actions (#125).
+- Atomic per-account AI quota reservations before paid provider calls, with a safe 429 and a fail-closed 503 (#135).
+- Dependency and action updates from Dependabot (#137, #138, #139, #140, #141, #142, #143, #165, #166, #167, #168, #169, #170, #171).
+
+### Final panel hardening (November 27)
+
+#### Added
+
+- Real photos and credits on the intro swipe cards, bundled with the app (#209).
+- Incident log entries INC-5 and INC-6, a corrected rollback runbook, a refreshed PIPELINE.md, and the Sprint 4 plan and retrospective (#211).
+- README live links, architecture diagram, local setup and final deliverables index (#212).
+
+#### Changed
+
+- The home headline wording was changed and then restored (#206, #208).
+
+#### Fixed
+
+- A trip date edit that would strand a saved visit is rejected with a conflict, and the trip and its visits are preserved (#205).
+- The generated cost estimate is cleared when it exceeds a new budget, and the saved visits are kept (#205).
+- Itinerary edits and generation use one lock order for competing writes (#205).
+- The first screen after the API has been idle no longer fails with "Could not reach the Lagaw server", because client requests allow time for the server to start (#210).
+- The AI suggestion limit shows a readable try-later message instead of a raw HTTP status, and manual entry still works (#210).
+- Signing out or switching accounts closes open pop-ups and starts fresh, so nothing from the previous account is shown or sent (#210).
+- After a timed-out or unexpected trip save, the form offers "Open My Trips" instead of Retry, so the same trip is not saved twice (#210).
+- The largest allowed budget stays on one line in the trip summary (#210).
+
+#### Security
+
+- Shared, configurable AI extraction budget with controlled 429 and 503 responses (#205).
+- Request bodies over 64 KiB are rejected with 413 (#205).
+- A JWT with a non-string subject or role claim returns 401 instead of an error, and a concurrent first request for the same identity reuses its profile link (#205).
+
+## Known limitations at release
+
+These are open at the time of release and verified against `main` and the issue tracker on November 27, 2026.
+
+- **Cloud Run traffic is not forced to the latest revision.** CI does not yet route traffic to the new revision after a deploy, and the staging smoke check does not compare the served revision. A rollback or manual tagged deploy can pin a service (see INC-5 in [docs/incident-log.md](docs/incident-log.md)). Production deploys with `--min-instances=0`. Tracked in [#204](https://github.com/relax-mode/lagaw/issues/204), open.
+- **Final-panel staging evidence is pending.** [#202](https://github.com/relax-mode/lagaw/issues/202) and [#203](https://github.com/relax-mode/lagaw/issues/203) are still open, although their pull requests (#205, #210) are merged.
+- **The trip demo token is still compiled into the public web bundles.** The hosted API does not accept it, but the bundle exposes the value. See "Open risks" in [PIPELINE.md](PIPELINE.md).
+- **One Cloudflare token serves both environments.** An expired token blocks staging and production web deploys together (INC-1, INC-6), and a failed scheduled check notifies no one. See "Open risks" in [PIPELINE.md](PIPELINE.md).
+- **Rollback is only partly rehearsed.** A staging Cloud Run rollback was executed on November 5; no production rollback and no Cloudflare Pages rollback has been rehearsed.
+- **Trip archive is not implemented.** Trips can be created, edited and deleted. The trip update API has no status field and Flutter has no archive action.
+- **Android release signing.** Without a private `key.properties`, release builds are signed with the debug key.

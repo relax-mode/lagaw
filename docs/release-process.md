@@ -2,9 +2,9 @@
 
 This document describes how Lagaw prepares, verifies and publishes a tagged release, using `v1.0.0` as the first target. It is the release procedure for [issue #121](https://github.com/relax-mode/lagaw/issues/121).
 
-**Status: prepared, not performed.** As of this document, no release tag exists and no GitHub Release has been created. The tag and release steps in [section 6](#6-publishing-human-run-not-performed) are human-run commands. They are not run by this repository's tooling or by CI.
+**Status: v1.0.0 prepared for tagging on November 27, 2026; see the [release notes](release-notes/v1.0.0.md).** The tag and release steps in [section 6](#6-publishing-human-run-not-performed) are human-run commands. They are not run by this repository's tooling or by CI.
 
-Related documents: [CHANGELOG.md](../CHANGELOG.md), [draft release notes](release-notes/v1.0.0-draft.md), [PIPELINE.md](../PIPELINE.md), [staging environment](staging.md), [incident log](incident-log.md), [rollback runbook](rollback-runbook.md) (being added in a sibling pull request on `chore/s4-rollback-readiness`; this link resolves once that PR is merged).
+Related documents: [CHANGELOG.md](../CHANGELOG.md), [release notes](release-notes/v1.0.0.md), [PIPELINE.md](../PIPELINE.md), [staging environment](staging.md), [incident log](incident-log.md), [rollback runbook](rollback-runbook.md).
 
 ## 1. Release gates
 
@@ -59,7 +59,7 @@ Use the commit SHA as the source of truth. Each deployed component can be matche
 | Backend (Cloud Run `lagaw-api`) | The running image. Read-only check: `gcloud run services describe lagaw-api --project relax-mode-lagaw --region asia-southeast1 --format='value(spec.template.spec.containers[0].image)'`. It should end in `api:<sha>` (the image tag, not a digest). | Revisions deployed by `google-github-actions/deploy-cloudrun` also carry a `commit-sha` label (and `managed-by: github-actions`), observed on live revisions on 2026-10-30. Check it with `gcloud run revisions list --service lagaw-api --project relax-mode-lagaw --region asia-southeast1 --format='table(metadata.name,metadata.labels.commit-sha)'`. A config-only redeploy keeps the same commit and image, so match the image digest as well. |
 | Web (Cloudflare Pages `lagaw`, branch `main`) | The Pages deployment's commit hash | The web deploy runs `wrangler pages deploy ... --commit-hash "$GITHUB_SHA"`, so the deployment records the commit. |
 | Flutter app | `frontend/pubspec.yaml` `version: 1.0.0+1` (build name `1.0.0`, build number `1`) | Matches `X.Y.Z+N` as checked by `scripts/release_check.py`. |
-| Health or version endpoint | **None exists yet.** `backend/app` exposes no health or version route. Issue [#116](https://github.com/relax-mode/lagaw/issues/116) may add readiness behaviour. | Until a version endpoint is merged and verified, do not cite one in evidence. |
+| Health endpoints | `GET /health` returns `{"status": "ok"}` (process liveness), and `GET /ready` returns `{"status": "ready"}` or a 503 (bounded database check). Added in [#116](https://github.com/relax-mode/lagaw/issues/116) (`backend/app/health.py`). | Neither returns a commit SHA or version, so they do not identify the deployed version. Use the image tag and revision label above. |
 
 ## 4. Artifact provenance
 
@@ -99,7 +99,7 @@ Tick a box only with linked evidence. Nothing below is ticked by this document.
 
 ## 6. Publishing (human-run, NOT performed)
 
-The following commands are a procedure for a human release owner. They are **not performed** and must not be run by an agent or by CI. Run them only after `scripts/release_check.py` reports all PASS, every gate in section 1 is closed, and the release-notes draft has been promoted to `docs/release-notes/v1.0.0.md` in its own reviewed pull request.
+The following commands are a procedure for a human release owner. They are **not performed** and must not be run by an agent or by CI. Run them only after `scripts/release_check.py` reports all PASS, every gate in section 1 is closed, and the release notes are final in `docs/release-notes/v1.0.0.md` (promoted from the draft in the release pull request).
 
 ```sh
 # NOT PERFORMED - human release owner only

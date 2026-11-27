@@ -1196,6 +1196,11 @@ is a different operation and was not triggered. See the
 - Kyle enabled GitHub secret scanning and push protection on the repository. Both had been disabled. A full-history gitleaks scan of all branches the same day reported no leaks.
 - The rollback runbook now ends every rollback with `--to-latest` and a traffic read-back. It also adds a production rollback procedure for the panel drill. PIPELINE.md now shows the gitleaks and dependency-audit jobs and current open risks.
 
+### November 27, 2026 — v1.0.0 changelog and release notes (#121)
+
+- The changelog heading changed from the Unreleased candidate to `[1.0.0] - 2026-11-27`. A Sprint 4 section and a final panel hardening section were added from merged PRs #100 to #212, and the open Sprint 4 list was replaced with the limitations that are still open.
+- The draft release notes were promoted to [v1.0.0.md](release-notes/v1.0.0.md) with the deployed revision, the CI and scheduled-check runs and the gate status. The tag was not created. Kyle, as release owner, records the tag commit in the notes when tagging.
+
 ### Sprint 4 retrospective
 
 Written on November 27, 2026 by Kyle from repository and GitHub evidence, because there was no Sprint 4 consultation (the team recorded and submitted the demo video on November 20 instead); team confirmation is pending, so this is not yet the team's agreed retrospective.
