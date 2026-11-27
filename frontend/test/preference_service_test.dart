@@ -78,6 +78,7 @@ void main() {
     (502, 'invalid_extraction_output', 'could not understand'),
     (502, 'extraction_failed', 'could not understand'),
     (429, 'extraction_rate_limited', 'busy'),
+    (429, 'extraction_quota_exceeded', 'Try again later'),
     (422, 'invalid_request', '1 to 2000'),
   ]) {
     test('maps $status $code to a readable fallback message', () async {

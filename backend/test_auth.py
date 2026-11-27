@@ -302,6 +302,22 @@ def test_concurrent_profile_insert_is_idempotent_and_preserves_winning_profile(a
     assert state.profiles == [winner]
 
 
+def test_concurrent_insert_losing_on_the_email_index_reuses_the_winning_link(api):
+    """Postgres can report the race on the email unique index (409), not the arbiter."""
+    _client, state = api
+    winner = {"id": OTHER, "auth_user_id": SUBJECT,
+              "email": f"{SUBJECT}@example.invalid", "name": "Traveler"}
+
+    def email_conflict_after_concurrent_winner(request):
+        if request.method == "POST" and request.url.path.endswith("/users"):
+            state.profiles.append(deepcopy(winner))
+            return httpx.Response(409, json={"code": "23505"})
+        return None
+    state.db_override = email_conflict_after_concurrent_winner
+    assert profile_owner(UUID(SUBJECT), f"{SUBJECT}@example.invalid") == UUID(OTHER)
+    assert state.profiles == [winner]
+
+
 @pytest.mark.parametrize("rows", [None, {}, [{"id": OTHER, "auth_user_id": OTHER}],
                                   [{"id": OTHER, "auth_user_id": SUBJECT}] * 2])
 def test_malformed_or_wrong_identity_profile_response_is_not_authorized(api, rows):

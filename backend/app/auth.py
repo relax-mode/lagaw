@@ -126,6 +126,11 @@ def profile_owner(subject: UUID, email: str) -> UUID:
                                    json={"auth_user_id": str(subject), "email": email,
                                          "name": "Traveler"})
             if response.status_code == 409:
+                # A concurrent first request for this same identity can win the
+                # email unique index before the auth_user_id arbiter; reuse its link.
+                owner = linked_owner()
+                if owner is not None:
+                    return owner
                 raise HTTPException(409, detail={
                     "code": "profile_link_required",
                     "message": "An existing profile needs review before this account can continue.",
