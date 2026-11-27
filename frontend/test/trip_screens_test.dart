@@ -418,6 +418,50 @@ void main() {
       expect(service.created, hasLength(1));
       expect(find.textContaining('Trip saved!'), findsOneWidget);
     });
+
+    testWidgets(
+      'an uncertain save unlocks the form and points to My Trips (#203)',
+      (tester) async {
+        final service = FakeTripService()
+          ..errors.add(
+            const TripApiException(
+              TripService.uncertainSaveMessage,
+              uncertain: true,
+            ),
+          );
+        Object? result;
+        await _pump(
+          tester,
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () async => result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => TripCreateScreen(service: service),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        );
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        await _fillNewTrip(tester);
+        await _tapKey(tester, 'trip-submit');
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('couldn’t confirm'), findsOneWidget);
+        // No retry that could save the same trip twice.
+        expect(find.text('Retry'), findsNothing);
+        // The form is usable again.
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+
+        await tester.tap(find.text('Open My Trips'));
+        await tester.pumpAndSettle();
+        expect(result, isTrue);
+        expect(service.created, isEmpty);
+      },
+    );
   });
 
   group('TripEditScreen', () {

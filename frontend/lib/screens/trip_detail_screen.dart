@@ -500,13 +500,20 @@ class _FactTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'Outfit',
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
-              color: AppTheme.slateDark,
+          // The largest allowed budget (₱9,999,999,999.99) otherwise wraps
+          // mid-number on phones; shrink it onto one line instead.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: const TextStyle(
+                fontFamily: 'Outfit',
+                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                color: AppTheme.slateDark,
+              ),
             ),
           ),
           Text(

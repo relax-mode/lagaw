@@ -50,6 +50,9 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
   }
 
   String? _error;
+
+  /// The last save may have gone through; point to My Trips, not Retry.
+  bool _uncertain = false;
   Map<String, String> _fieldErrors = const {};
   TripDraft? _lastDraft;
 
@@ -57,6 +60,7 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
     setState(() {
       _submitting = true;
       _error = null;
+      _uncertain = false;
       _fieldErrors = const {};
       _lastDraft = draft;
     });
@@ -82,14 +86,30 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
         _submitting = false;
         _fieldErrors = e.fieldErrors;
         _error = e.message;
+        _uncertain = e.uncertain;
+      });
+    } catch (_) {
+      // Never leave the form stuck on its spinner.
+      if (!mounted) return;
+      setState(() {
+        _submitting = false;
+        _error = TripService.uncertainSaveMessage;
+        _uncertain = true;
       });
     }
+  }
+
+  /// Closes Plan a trip and shows My Trips (reloaded), where the trip is if
+  /// the uncertain save went through.
+  void _openMyTrips() {
+    setState(() => _done = true);
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
     // Field-level 422 problems are shown on the fields; keep retry for the rest.
-    final canRetry = _fieldErrors.isEmpty && _lastDraft != null;
+    final canRetry = _fieldErrors.isEmpty && _lastDraft != null && !_uncertain;
 
     // A pop-up over the app, like travel preferences. [home v3]
     return PopScope(
@@ -119,8 +139,16 @@ class _TripCreateScreenState extends State<TripCreateScreen> {
                   key: const ValueKey('create-error'),
                   tone: StatusTone.error,
                   message: _error!,
-                  actionLabel: canRetry ? 'Retry' : null,
-                  onAction: canRetry && !_submitting
+                  actionLabel: _uncertain
+                      ? 'Open My Trips'
+                      : canRetry
+                      ? 'Retry'
+                      : null,
+                  onAction: _submitting
+                      ? null
+                      : _uncertain
+                      ? _openMyTrips
+                      : canRetry
                       ? () => _create(_lastDraft!)
                       : null,
                 ),

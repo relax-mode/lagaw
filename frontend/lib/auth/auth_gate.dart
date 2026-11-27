@@ -9,8 +9,11 @@ import 'welcome_flow.dart';
 
 /// Shows sign-in until there is a session, then [signedIn]. An expired
 /// session keeps the app mounted (forms intact) and shows a banner instead;
-/// signing in as a different account rebuilds the app. [S3-16]
-class AuthGate extends StatelessWidget {
+/// signing in as a different account rebuilds the app. Signing out, or
+/// switching to another account, also closes every pop-up and page opened
+/// over the app, so nothing from the previous account stays on screen.
+/// [S3-16, #203]
+class AuthGate extends StatefulWidget {
   final AuthSession session;
   final Widget Function() signedIn;
 
@@ -26,7 +29,58 @@ class AuthGate extends StatelessWidget {
   });
 
   @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  String? _account;
+
+  @override
+  void initState() {
+    super.initState();
+    _account = _signedInAccount;
+    widget.session.addListener(_onSession);
+  }
+
+  @override
+  void didUpdateWidget(AuthGate old) {
+    super.didUpdateWidget(old);
+    if (old.session != widget.session) {
+      old.session.removeListener(_onSession);
+      widget.session.addListener(_onSession);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.session.removeListener(_onSession);
+    super.dispose();
+  }
+
+  /// The account the app is showing; null when signed out. An expired
+  /// session still shows its account (the app stays mounted).
+  String? get _signedInAccount {
+    final session = widget.session;
+    if (!session.isSignedIn && !session.expired) return null;
+    return session.accountEmail;
+  }
+
+  void _onSession() {
+    final now = _signedInAccount;
+    final previous = _account;
+    _account = now;
+    // Same account (refresh, or signing in again after expiry): keep
+    // everything open. Signed out or another account: close it all.
+    if (previous == null || previous == now) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.maybeOf(context)?.popUntil((route) => route.isFirst);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final session = widget.session;
     return ListenableBuilder(
       listenable: session,
       builder: (context, _) {
@@ -34,13 +88,13 @@ class AuthGate extends StatelessWidget {
           return PasswordResetScreen(session: session);
         }
         if (!session.isSignedIn && !session.expired) {
-          return intro
+          return widget.intro
               ? WelcomeFlow(session: session)
               : SignInScreen(session: session);
         }
         return KeyedSubtree(
           key: ValueKey('account-${session.accountEmail}'),
-          child: signedIn(),
+          child: widget.signedIn(),
         );
       },
     );
