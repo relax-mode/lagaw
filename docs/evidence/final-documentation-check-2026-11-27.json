@@ -1,0 +1,135 @@
+{
+  "project": "Lagaw",
+  "repository": "https://github.com/relax-mode/lagaw",
+  "review_date": "2026-11-27",
+  "review_precision": "Date only; no exact review timestamp is asserted.",
+  "provenance": "Fresh observations made by the supervising agent through Agent Hub and recorded here without additional execution.",
+  "repository_state": {
+    "main_commit": "f4076c61c81885ef94cb55051634a43189bb6bc2",
+    "main_commit_date": "2026-11-15",
+    "releases_present": false,
+    "tags_present": false,
+    "frontend_manifest_version": "1.0.0+1",
+    "api_info_version": "0.1.0",
+    "version_note": "Manifest and API info versions are not release tags."
+  },
+  "latest_ci": {
+    "run_id": "43727841016",
+    "url": "https://github.com/relax-mode/lagaw/actions/runs/43727841016",
+    "run_date": "2026-11-15",
+    "conclusion": "success",
+    "test_results": {
+      "backend": {
+        "passed": 1136,
+        "failed": 0
+      },
+      "database": {
+        "passed": 108,
+        "failed": 0
+      },
+      "flutter": {
+        "passed": 289,
+        "failed": 0
+      }
+    },
+    "production_web_deployment": "passed",
+    "production_api_job": "skipped",
+    "scope_note": "These are results from the cited CI run, not tests rerun on the review date."
+  },
+  "production_api": {
+    "revision": "lagaw-api-00040-bpl",
+    "traffic_percent": 100,
+    "source_commit": "26cde8536b829e46f304fe031fd5e7c63860f63b",
+    "revision_created_at_utc": "2026-11-15T06:03:39Z",
+    "comparison_with_main": {
+      "runtime_application_code_changed": false,
+      "migrations_changed": false,
+      "reported_differences": [
+        "tests",
+        "catalogue data"
+      ],
+      "scope_note": "Source comparison does not establish that main and the deployed revision are identical commits."
+    }
+  },
+  "public_checks": {
+    "check_date": "2026-11-27",
+    "api": [
+      {
+        "path": "/health",
+        "http_status": 200,
+        "reported_status": "ok"
+      },
+      {
+        "path": "/ready",
+        "http_status": 200,
+        "reported_status": "ready"
+      },
+      {
+        "path": "/openapi.json",
+        "http_status": 200,
+        "endpoint_paths_inspected": true
+      }
+    ],
+    "web": [
+      {
+        "environment": "production",
+        "host": "Cloudflare Pages",
+        "http_status": 200,
+        "request_user_agent": "normal browser user agent"
+      },
+      {
+        "environment": "staging",
+        "host": "Cloudflare Pages",
+        "http_status": 200,
+        "request_user_agent": "normal browser user agent"
+      }
+    ],
+    "scope_note": "Public endpoint responses and page availability do not prove authenticated user workflows."
+  },
+  "production_catalogue": {
+    "query": "/locations?limit=100&offset=0",
+    "record_count": 30,
+    "records_with_coordinates": 30,
+    "records_with_nonempty_opening_hours": 30,
+    "records_with_known_cost_max": 29,
+    "pagination_note": "The default /locations response contains 10 records because of pagination; it is not the total catalogue size.",
+    "scope_note": "Field population was observed; factual accuracy, freshness and itinerary feasibility were not established by this count.",
+    "records_with_image_urls": 30
+  },
+  "scheduled_check": {
+    "run_id": "45790667724",
+    "url": "https://github.com/relax-mode/lagaw/actions/runs/45790667724",
+    "run_date": "2026-11-26",
+    "staging_ai_check": "passed",
+    "cloudflare_credential_preflight": "failed",
+    "failure_cause": "not established"
+  },
+  "branch_protection": {
+    "required_approvals": 1,
+    "enforce_admins": true,
+    "required_checks": [
+      "Backend - Python",
+      "Database - PostgreSQL migrations and smoke tests",
+      "Frontend - Flutter"
+    ],
+    "additional_checks_present": [
+      "gitleaks",
+      "dependency audit"
+    ],
+    "additional_checks_are_in_required_check_list": false
+  },
+  "review_pull_request": {
+    "number": 199,
+    "url": "https://github.com/relax-mode/lagaw/pull/199",
+    "state": "OPEN",
+    "head_commit": "7d736795550eb1d7ad99e561f0aeaed95d0e924d",
+    "fixes_deployed": false
+  },
+  "limitations": [
+    "Main-branch documentation still contains stale status claims; fresh code, deployment and run evidence take precedence for this review.",
+    "No paid provider calls or verification mutations were made during this review.",
+    "No authenticated full user workflow was tested on 2026-11-27.",
+    "No release tag exists; the document must identify the main and production API commits separately.",
+    "Changes in open PR 199 are not evidence of deployed behavior."
+  ]
+}
