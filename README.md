@@ -2,23 +2,28 @@
 
 **Swipe through Bacolod. Get a trip that fits you.**
 
+> **Final technical documentation — 27 November 2026**
+>
+> [Three-page Google Doc](https://docs.google.com/document/d/1Gt111rJOuAyD71V0g4stY_aYvAIWGpyVKfVhEG4Pt3w/edit) · [Current scope, architecture and evidence](docs/final-project-evidence.md) · [Dated verification record](docs/evidence/final-documentation-check-2026-11-27.json).
+> The brief records the implemented system, source/deployment revisions, dated test results and remaining submission items. Confirm panel access and complete its release-evidence items before submission.
+
 **Roel and coding assistants working on #56: [START HERE — agreed backend APIs and complete frontend flow](ROEL_START_HERE.md).**
 
-Lagaw (Hiligaynon for roaming around) is a swipe-based travel planner for Bacolod City, built as an Android app with a companion web build. It learns what you like, then turns it into a day-by-day itinerary that respects your budget, opening hours, and travel time. No more scrolling through generic "top 10" lists.
+Lagaw (Hiligaynon for roaming around) is a destination discovery and trip-planning app for Bacolod City, built for Android with a companion web build. It uses saved preferences and supported recommendation models to suggest places, then builds an editable itinerary using catalogue hours, estimated travel time and budget constraints.
 
 ## How it works
 
 1. **Swipe.** Right on places you like, left on ones you don't. Save favorites and rate the places you've visited.
 2. **Say what you want.** Set a budget and pick tags, or just type it: *"a cheap, relaxing afternoon with coffee and photography spots."*
-3. **Get a plan.** Lagaw ranks destinations for you and arranges them into an itinerary you can edit, save, or archive.
+3. **Get a plan.** Review ranked suggestions and generate an itinerary you can edit, reopen or delete. Trip archive is not implemented.
 
 ## Under the hood
 
-**Hybrid recommender.** Matrix factorization finds taste patterns across users. Content-based filtering matches your preferences to each place's category, tags, cost, group fit, setting, visit length, and accessibility. The two scores are blended, and new users lean on tags and budget until their swipes give the model more to work with.
+**Hybrid recommender.** Onboarding discovery uses content scoring. Saved-trip recommendations can blend 60% content scoring with 40% rank-3 SVD for users and places supported by the fitted artifact; otherwise they fall back to content. The artifact was fitted on seeded demo-account interactions and does not retrain on each swipe. The swipe deck itself follows catalogue order. Working accessibility and indoor/outdoor filtering are outside the implemented scope.
 
-**Structured extraction.** DeepSeek-V4.1-Flash, accessed through the official DeepSeek API platform, turns free-text requests into structured preferences (budget level, tags, duration, pace). It only extracts. It never generates recommendations, and it is called from the backend only, never from the app.
+**Structured extraction.** The official DeepSeek API, configured with the `deepseek-flash` alias, turns free-text requests into a preference draft. Its immutable provider model revision is not pinned. The backend validates the draft and requires confirmation; extraction itself writes nothing. Numeric budget and group size remain explicit form inputs. Recommendation ranking is separate from extraction.
 
-**Validated output.** Nothing from the models reaches the frontend raw. The backend checks extracted values against a schema and approved tags, then filters recommendations for inactive, duplicate, or incompatible places and applies budget, group, accessibility, and distance limits. The itinerary planner then checks operating hours, travel time, and cost for conflicts.
+**Validated output.** The backend checks extraction output against a strict schema and approved tags. Recommendation and itinerary code apply their supported eligibility, budget and group constraints. A separate greedy planner checks operating hours, visit duration, estimated travel and cumulative cost before an atomic save; catalogue estimates do not guarantee optimal routes or venue availability.
 
 The recommender is our own Python model and runs on our backend. If DeepSeek is unavailable, users fall back to the standard trip form.
 
@@ -29,7 +34,7 @@ The recommender is our own Python model and runs on our backend. If DeepSeek is 
 | Frontend | Flutter (Dart): Android app, plus a Flutter Web build from the same codebase |
 | Backend | FastAPI, Python |
 | Recommender | NumPy: content-based scoring plus a rank-3 SVD matrix-factorization model (`signed-svd-v1`) as the approved equivalent to LightFM; see [`docs/hybrid-recommender.md`](docs/hybrid-recommender.md) |
-| Extraction | DeepSeek-V4.1-Flash via the official DeepSeek API (`httpx`) |
+| Extraction | Official DeepSeek API via `httpx`, configurable `deepseek-flash` alias; immutable provider revision unpinned |
 | Database | PostgreSQL on Supabase |
 | Hosting | Android APK for testing, web build on Cloudflare Pages, backend on Google Cloud Run, Supabase for database and storage |
 | DevOps | GitHub Actions CI/CD; Wrangler CLI for managing and deploying Cloudflare Pages, run locally and from CI/CD |
