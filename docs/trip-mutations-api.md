@@ -2,20 +2,16 @@
 
 > **Authentication update (#79):** [Verified Supabase ownership and the #80 handoff](authentication.md) supersede the demo authentication setup in this guide. Demo fixtures now require explicit non-production `TRIP_AUTH_MODE=demo`; normal access uses Supabase access tokens. API payloads are unchanged.
 
-Scope: `PATCH /api/v1/trips/{trip_id}` and `DELETE /api/v1/trips/{trip_id}`.
-Both reuse the [existing controlled demo context](trips-api.md), database client,
-and schema. No migration is needed. Authentication integration, itinerary
-generation/editing, Flutter work, and the broader database integration suite
-remain separate issues.
+This guide covers `PATCH /api/v1/trips/{trip_id}` and `DELETE /api/v1/trips/{trip_id}`.
+The #202 saved-itinerary rules require the `20261127090000` database migration.
 
 ## API contract
 
 PATCH changes only supplied fields and returns **200** with the saved trip in
 the same format as POST/GET. Supported fields are `title`, `start_date`,
 `end_date`, `budget_min`, `budget_max`, `transportation_mode`, `group_type`,
-and `preferred_tags`. Omitted fields, owner, status, estimated cost, and existing
-itinerary items remain unchanged. PATCH does not regenerate/reschedule an
-itinerary; that behavior belongs to the itinerary planner.
+and `preferred_tags`. A successful PATCH preserves ownership, status and saved
+visits. Regeneration is a separate, confirmed action.
 
 Example partial body:
 
@@ -30,6 +26,16 @@ Example partial body:
 - Supplied dates/budgets are merged with their saved counterparts for validation.
   For example, changing only `budget_min` above the saved maximum returns 422.
   Submit both bounds together when moving an entire range.
+- If the new date range would put a saved visit's `day_number` outside the
+  trip, PATCH returns **409** with `detail.code` set to `trip_dates_conflict`
+  and preserves the original trip and every visit. Extend the range or remove
+  the affected visits before retrying. Compatible date edits preserve saved day
+  numbers, which are relative to `start_date`.
+- If `budget_max` falls below the saved generated estimate, PATCH returns **200**
+  and clears `estimated_total_cost` to `null`. All visits and their saved metadata
+  remain available. `null` means the plan has no verified total for the current
+  budget. Confirm regeneration to obtain a newly validated plan. A maximum equal
+  to or above the saved estimate preserves it.
 - `null` clears `transportation_mode` or `group_type`. `[]` clears preferred
   tags. Null is rejected for title, dates, budgets, and preferred tags.
 - Unknown/server-owned fields, including `user_id`, `id`, `status`, and
@@ -52,6 +58,7 @@ For both methods:
 | --- | --- |
 | 401 | Missing/incorrect demo bearer token |
 | 404 | Missing trip or trip owned by another user; identical `Trip not found.` response |
+| 409 | A date edit would strand saved visits, or a concurrent update causes a constraint conflict |
 | 422 | Malformed UUID/body or invalid update; sanitized `detail` array |
 | 503 | Demo configuration or database unavailable; no provider/credential details |
 

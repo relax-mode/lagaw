@@ -12,8 +12,14 @@ from pydantic import ValidationError
 
 from app.auth import authenticate, unauthorized
 from app.database import DatabaseUnavailable, get_database
-from app.trip_database import TripDatabase, TripUpdateConflict
-from app.trip_schemas import TripCreate, TripResponse, TripsPage, TripUpdate
+from app.trip_database import TripDatabase, TripDatesConflict, TripUpdateConflict
+from app.trip_schemas import (
+    TripCreate,
+    TripResponse,
+    TripsPage,
+    TripUpdate,
+    trip_date_problem,
+)
 
 access_bearer = HTTPBearer(auto_error=False, scheme_name="SupabaseAccessToken")
 router = APIRouter(prefix="/api/v1/trips", tags=["trips"], responses={
@@ -47,11 +53,22 @@ def get_trip_database(
 
 TripOwner = Annotated[UUID, Depends(get_trip_user)]
 TripStore = Annotated[TripDatabase, Depends(get_trip_database)]
+MAX_OFFSET = 100_000
+Offset = Annotated[int, Query(ge=0, le=MAX_OFFSET)]
+
+
+def require_sane_dates(trip: TripCreate) -> None:
+    problem = trip_date_problem(trip.start_date, trip.end_date)
+    if problem:
+        raise RequestValidationError([{
+            "loc": ("body", "end_date"), "msg": problem, "type": "value_error",
+        }])
 
 
 @router.post("", response_model=TripResponse, status_code=201)
 def create_trip(payload: TripCreate, user_id: TripOwner, database: TripStore):
     """Save a draft trip for the verified owner. No itinerary is generated."""
+    require_sane_dates(payload)
     return database.create_trip(user_id, payload)
 
 
@@ -60,7 +77,7 @@ def list_trips(
     user_id: TripOwner,
     database: TripStore,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Offset = 0,
 ):
     return TripsPage(items=database.list_trips(user_id, limit, offset), limit=limit, offset=offset)
 
@@ -77,7 +94,7 @@ def retrieve_trip(trip_id: UUID, user_id: TripOwner, database: TripStore):
 
 @router.patch("/{trip_id}", response_model=TripResponse, responses={
     404: {"description": "Trip not found or belongs to another user"},
-    409: {"description": "Database constraint conflict; reload the trip before retrying"},
+    409: {"description": "Dates conflict with saved visits or a trip constraint changed"},
 })
 def update_trip(trip_id: UUID, payload: TripUpdate, user_id: TripOwner, database: TripStore):
     """Update supplied fields only. Null clears optional labels; [] clears tags."""
@@ -86,7 +103,7 @@ def update_trip(trip_id: UUID, payload: TripUpdate, user_id: TripOwner, database
         raise HTTPException(404, "Trip not found.")
     try:
         # Validate one-sided date/budget edits against their saved counterpart.
-        TripCreate.model_validate({
+        merged = TripCreate.model_validate({
             **current.model_dump(include=set(TripCreate.model_fields)),
             **payload.model_dump(exclude_unset=True),
         })
@@ -94,8 +111,18 @@ def update_trip(trip_id: UUID, payload: TripUpdate, user_id: TripOwner, database
         raise RequestValidationError([
             {**error, "loc": ("body", *error["loc"])} for error in exc.errors()
         ]) from None
+    if {"start_date", "end_date"} & payload.model_fields_set:
+        require_sane_dates(merged)
     try:
         trip = database.update_trip(user_id, trip_id, payload)
+    except TripDatesConflict:
+        raise HTTPException(
+            409, detail={
+                "code": "trip_dates_conflict",
+                "message": "The new dates would leave saved visits outside the trip. "
+                           "Remove those visits or choose dates that include them.",
+            },
+        ) from None
     except TripUpdateConflict:
         raise HTTPException(
             409, "Trip constraints changed or conflict. Reload the trip before retrying.",

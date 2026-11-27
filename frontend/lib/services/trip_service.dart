@@ -23,10 +23,17 @@ class TripApiException implements Exception {
 
   static const String formErrorKey = '_form';
 
+  /// The request may have been carried out even though it failed here (a
+  /// timeout, or a response the app could not make sense of). Saving again
+  /// could create a duplicate, so the screen points to My Trips instead of
+  /// offering a retry. [#203]
+  final bool uncertain;
+
   const TripApiException(
     this.message, {
     this.statusCode,
     this.fieldErrors = const {},
+    this.uncertain = false,
   });
 
   @override
@@ -73,7 +80,9 @@ class TripService {
   /// Bearer token for the request being sent; set by [_send].
   String _activeToken = '';
 
-  static const Duration _timeout = Duration(seconds: 6);
+  /// Allows a Cloud Run cold start (about 6 s) plus token verification;
+  /// 6 s timed out the first request after the API had been idle.
+  static const Duration _timeout = Duration(seconds: 12);
 
   /// Ranking and scheduling take longer than CRUD.
   static const Duration _planTimeout = Duration(seconds: 45);
@@ -95,19 +104,54 @@ class TripService {
   };
 
   /// POST /api/v1/trips
+  ///
+  /// When the outcome is unknown (timeout, server error, or a reply that
+  /// can't be read) it throws an [TripApiException.uncertain] error: the
+  /// trip may already exist, so the user is sent to My Trips to check.
   Future<Trip> createTrip(TripDraft draft) async {
-    final response = await _send(
-      () => _client.post(
-        Uri.parse(AppConfig.tripsEndpoint),
-        headers: _headers,
-        body: jsonEncode(draft.toJson()),
-      ),
-    );
-    if (response.statusCode == 201) {
-      return Trip.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    final http.Response response;
+    try {
+      response = await _send(
+        () => _client.post(
+          Uri.parse(AppConfig.tripsEndpoint),
+          headers: _headers,
+          body: jsonEncode(draft.toJson()),
+        ),
+      );
+    } on TripApiException catch (e) {
+      if (e.uncertain) {
+        throw const TripApiException(uncertainSaveMessage, uncertain: true);
+      }
+      rethrow;
+    }
+    final status = response.statusCode;
+    if (status == 201) {
+      try {
+        return Trip.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+      } on Object {
+        throw TripApiException(
+          uncertainSaveMessage,
+          statusCode: status,
+          uncertain: true,
+        );
+      }
+    }
+    // A 4xx means the trip was not saved; anything else might have been.
+    if (status < 400 || status >= 500) {
+      final auth = _authErrorFor(response);
+      if (auth != null) throw auth;
+      throw TripApiException(
+        uncertainSaveMessage,
+        statusCode: status,
+        uncertain: true,
+      );
     }
     throw _errorFor(response);
   }
+
+  static const String uncertainSaveMessage =
+      'We couldn’t confirm your trip was saved. It may already be in My '
+      'Trips, so check there before creating it again.';
 
   /// GET /api/v1/trips
   Future<TripsPage> listTrips({int limit = 10, int offset = 0}) async {
@@ -452,6 +496,7 @@ class TripService {
     } on TimeoutException {
       throw const TripApiException(
         'The server took too long to respond. Please try again.',
+        uncertain: true,
       );
     } on http.ClientException {
       throw const TripApiException(

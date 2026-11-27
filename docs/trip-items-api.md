@@ -58,20 +58,19 @@ including simultaneous insertions.
 
 A missing/inactive location returns 404. Missing, removed, other-trip and
 other-owner items cannot be deleted through the requested parent and return 404.
-A parent FK changing between validation and insert returns a safe 409; reload
-before retrying. Provider/configuration/network/invalid-response failures return
+A change to the parent reference or date window during insert can return 409.
+Reload the trip before retrying. Provider/configuration/network/invalid-response failures return
 the existing generic Trip 503. Missing credentials return 401; an unconfigured
 demo context returns 503. Provider details and submitted secrets are not exposed.
 
 ## Implementation
 
-The existing `trips`, `itinerary_items` and `locations` tables and SQLAlchemy
-relationship mappings from #22 are reused; they are not recreated or altered.
-Like #23/#24, runtime API access uses the existing backend-only Supabase
-Data API connection. `TripDatabase` performs the owner check, and the new
-`TripItemDatabase` reads/writes the same mapped itinerary/location records.
-The unique position, non-null FKs and delete restrictions already exist.
-No new database driver, migration or environment setting is required.
+Runtime API access uses the backend-only Supabase Data API. `TripDatabase`
+checks ownership, and `TripItemDatabase` reads and writes the saved itinerary.
+Deletion uses the server-only `remove_itinerary_item` RPC from migration
+`20261127090000`. It checks ownership and locks the parent trip before deleting
+the item, in the same order as generation. The delete and estimate invalidation
+commit together.
 
 ## 1. Offline checks
 

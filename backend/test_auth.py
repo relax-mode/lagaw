@@ -134,6 +134,9 @@ def test_verified_subject_maps_idempotently_without_overwriting_profile(api):
     {"sub": str(UUID(int=0))}, {"nbf": 9999999999}, {"iat": 9999999999},
     {"iat": None}, {"aud": None}, {"iss": ""}, {"sub": None},
     {"exp": float("inf")}, {"iat": float("inf")},
+    # Non-string subjects/roles once escaped as an unauthenticated 500.
+    {"sub": 123}, {"sub": ["x"]}, {"sub": {"a": 1}}, {"sub": True}, {"sub": 1.5},
+    {"role": ["authenticated"]},
 ])
 def test_invalid_claims_never_reach_auth_or_database(api, change):
     client, state = api
@@ -295,6 +298,22 @@ def test_concurrent_profile_insert_is_idempotent_and_preserves_winning_profile(a
         if request.method == "POST" and request.url.path.endswith("/users"):
             state.profiles.append(deepcopy(winner))
     state.db_override = insert_before_post
+    assert profile_owner(UUID(SUBJECT), f"{SUBJECT}@example.invalid") == UUID(OTHER)
+    assert state.profiles == [winner]
+
+
+def test_concurrent_insert_losing_on_the_email_index_reuses_the_winning_link(api):
+    """Postgres can report the race on the email unique index (409), not the arbiter."""
+    _client, state = api
+    winner = {"id": OTHER, "auth_user_id": SUBJECT,
+              "email": f"{SUBJECT}@example.invalid", "name": "Traveler"}
+
+    def email_conflict_after_concurrent_winner(request):
+        if request.method == "POST" and request.url.path.endswith("/users"):
+            state.profiles.append(deepcopy(winner))
+            return httpx.Response(409, json={"code": "23505"})
+        return None
+    state.db_override = email_conflict_after_concurrent_winner
     assert profile_owner(UUID(SUBJECT), f"{SUBJECT}@example.invalid") == UUID(OTHER)
     assert state.profiles == [winner]
 

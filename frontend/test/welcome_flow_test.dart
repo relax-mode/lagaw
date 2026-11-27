@@ -29,6 +29,23 @@ void main() {
     await _step(tester);
   }
 
+  testWidgets('the swipe demo shows real photos with their credits', (
+    tester,
+  ) async {
+    await pump(tester);
+    bool shows(String name) => tester
+        .widgetList<Image>(find.byType(Image))
+        .any(
+          (i) =>
+              i.image is AssetImage &&
+              (i.image as AssetImage).assetName == 'assets/intro/$name.webp',
+        );
+    expect(shows('san-sebastian'), isTrue);
+    expect(shows('calea'), isTrue);
+    expect(shows('capitol-park'), isTrue);
+    expect(find.text('Rauxilian · CC BY-SA 4.0'), findsOneWidget);
+  });
+
   testWidgets('first run walks through the intro to the welcome page', (
     tester,
   ) async {
