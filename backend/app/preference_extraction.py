@@ -17,6 +17,7 @@ from app.deepseek import DeepSeekFailure, extract_preferences
 from app.deepseek import Preferences as ProviderPreferences
 from app.preference_vocabulary import BudgetLevel, Duration, Pace, TravelTag
 from app.recommendations.contracts import Group, Money
+from app.trip_schemas import StorableText
 from app.trips import TripOwner
 
 
@@ -46,7 +47,7 @@ class ExplicitPreferences(ExtractionContract):
 
 class ExtractionRequest(ExtractionContract):
     prompt: Annotated[
-        str, StringConstraints(strict=True, min_length=1, max_length=2000)
+        str, StringConstraints(strict=True, min_length=1, max_length=2000), StorableText
     ]
     explicit_preferences: ExplicitPreferences = Field(
         default_factory=ExplicitPreferences

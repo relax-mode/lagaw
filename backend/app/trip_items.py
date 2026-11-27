@@ -9,7 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from app.trip_database import TripDatabase
 from app.trip_item_database import TripItemConflict, TripItemDatabase
 from app.trip_item_schemas import TripItemCreate, TripItemResponse, TripItemsPage
-from app.trips import TripOwner, TripStore
+from app.trips import MAX_OFFSET, TripOwner, TripStore
 
 router = APIRouter(prefix="/api/v1/trips", tags=["trip items"], responses={
     401: {"description": "Missing, invalid or expired Supabase access token"},
@@ -53,7 +53,7 @@ def add_trip_item(
 def list_trip_items(
     trip_id: UUID, user_id: TripOwner, database: TripStore,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Annotated[int, Query(ge=0, le=MAX_OFFSET)] = 0,
 ):
     require_owned_trip(database, user_id, trip_id)
     items = TripItemDatabase(database.client).list_items(trip_id, limit, offset)
@@ -63,6 +63,6 @@ def list_trip_items(
 @router.delete("/{trip_id}/items/{item_id}", status_code=204, response_class=Response)
 def remove_trip_item(trip_id: UUID, item_id: UUID, user_id: TripOwner, database: TripStore):
     require_owned_trip(database, user_id, trip_id)
-    if not TripItemDatabase(database.client).delete_item(trip_id, item_id):
+    if not TripItemDatabase(database.client).delete_item(user_id, trip_id, item_id):
         raise HTTPException(404, "Itinerary item not found.")
     return Response(status_code=204)

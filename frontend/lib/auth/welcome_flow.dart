@@ -480,10 +480,22 @@ class _SwipeDemo extends StatelessWidget {
 
   const _SwipeDemo({required this.loop});
 
+  // Real, approved photos of these places (#107 manifest), bundled so the
+  // intro works before sign-in and offline. Credits as the license asks.
   static const _cards = [
-    ('San Sebastian Cathedral', 'heritage', Icons.account_balance_rounded),
-    ('Calea Pastries & Coffee', 'cafe', Icons.local_cafe_rounded),
-    ('Capitol Park and Lagoon', 'park', Icons.park_rounded),
+    (
+      'San Sebastian Cathedral',
+      'heritage',
+      'san-sebastian',
+      'Rauxilian · CC BY-SA 4.0',
+    ),
+    ('Calea Pastries & Coffee', 'cafe', 'calea', 'Roel Jr. S. Lumauag'),
+    (
+      'Capitol Park and Lagoon',
+      'park',
+      'capitol-park',
+      'Kguirnela · CC BY-SA 3.0',
+    ),
   ];
 
   @override
@@ -558,7 +570,7 @@ class _SwipeDemo extends StatelessWidget {
     double scale = 1,
     double stamp = 0,
   }) {
-    final (name, category, icon) = _cards[i];
+    final (name, category, photo, credit) = _cards[i];
     final colors = _gradient(category);
     return Transform.translate(
       offset: Offset(0, -lift),
@@ -587,9 +599,50 @@ class _SwipeDemo extends StatelessWidget {
               ],
             ),
             child: Stack(
+              fit: StackFit.expand,
               children: [
-                Center(
-                  child: Icon(icon, size: 54, color: const Color(0x66FFFFFF)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: Image.asset(
+                    'assets/intro/$photo.webp',
+                    fit: BoxFit.cover,
+                    // The gradient behind stays if the photo can't load.
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+                // Darkens the bottom so the name stays readable on any photo.
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.45, 1],
+                      colors: [Color(0x00000000), Color(0x99000000)],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0x73000000),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      credit,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
                 Positioned(
                   left: 12,

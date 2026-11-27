@@ -140,6 +140,11 @@ class PreferenceService {
       (_, 'extraction_rate_limited') =>
         'AI suggestions are busy right now. Try again in a moment, or fill '
             'in the form yourself.',
+      // The backend's per-user allowance (5 a minute, 40 a day) is used up.
+      // Any other 429 (no code) is a cooldown too; never show the raw status.
+      (_, 'extraction_quota_exceeded') || (429, _) =>
+        'You have used AI suggestions a lot just now. Try again later, or '
+            'fill in the form yourself.',
       (_, 'invalid_extraction_output' || 'extraction_failed') =>
         'AI could not understand that description. Try rephrasing it, or '
             'fill in the form yourself.',
@@ -147,7 +152,7 @@ class PreferenceService {
         'AI suggestions are unavailable right now. You can still fill in the '
             'form yourself.',
       _ =>
-        'AI suggestions failed (HTTP $status). You can still fill in the '
+        'AI suggestions didn’t work this time. You can still fill in the '
             'form yourself.',
     };
     return PreferenceApiException(message, code: code, statusCode: status);

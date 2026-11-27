@@ -16,6 +16,10 @@ class TripUpdateConflict(Exception):
     """A database check rejected an update, including a concurrent range change."""
 
 
+class TripDatesConflict(TripUpdateConflict):
+    """The proposed dates would strand saved visits."""
+
+
 class TripDatabase:
     def __init__(self, client: httpx.Client):
         self.client = client
@@ -94,9 +98,12 @@ class TripDatabase:
             )
             # PostgreSQL checks protect the final row even if another caller edits
             # its dates/budgets between our read and write. A failed statement is atomic.
-            if response.status_code == 400:
+            if response.status_code in (400, 409):
                 error = response.json()
-                if isinstance(error, dict) and error.get("code") == "23514":
+                code = error.get("code") if isinstance(error, dict) else None
+                if response.status_code == 409 and code == "PT409":
+                    raise TripDatesConflict
+                if response.status_code == 400 and code == "23514":
                     raise TripUpdateConflict
             rows = self.read_rows(response, user_id, 1, trip_id)
             if response.status_code != 200:

@@ -51,6 +51,7 @@ gcloud run revisions list --service lagaw-api --project "$GCP_PROJECT_ID" --regi
 Read the output this way:
 
 - `status.traffic` entries with `percent: 100` identify the serving revision. More than one revision with traffic means a split; resolve it before any rollback.
+- An entry with `latestRevision: true` means the service follows the newest ready revision. An entry that names a revision means the service is **pinned** to it, and later deploys get 0% traffic until the pin is removed (see [INC-5](incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision)).
 - Compare `status.imageDigest` values, not commit labels. Identical digests mean identical images.
 
 ### Cloudflare Pages
@@ -58,7 +59,7 @@ Read the output this way:
 Pages deployments are built by CI with `--branch` and `--commit-hash` (see the `Deploy staging Flutter Web` step and the `Deploy - Production web` job in `.github/workflows/ci.yml`). Staging uses branch `staging`; production uses branch `main`.
 
 - Dashboard: Workers & Pages → project `lagaw` → Deployments. Each row shows its branch, commit hash, status, and URL. The production row is the one serving `https://lagaw.pages.dev`.
-- CLI (unverified here, see below): `npx wrangler pages deployment list --project-name lagaw`, run with an account-scoped token from the operator's secret store.
+- CLI: `npx wrangler pages deployment list --project-name lagaw`, run from the repository root after `npm ci`, with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` loaded into the environment from the operator's secret store. Wrangler is a root dev dependency (`package.json`), and the scheduled `deploy-credentials` job runs this same command.
 
 ## Identify a known-good deployment
 
@@ -128,9 +129,42 @@ Staging uses `lagaw-api-staging` in the same form.
 
 After the change, verify health (see [Health verification](#health-verification)) and record the times (see [Timestamp record](#timestamp-record)).
 
+A rollback leaves the service **pinned** to the revision you named. Always finish it with [Restoring the latest approved version](#restoring-the-latest-approved-version).
+
+### Production rollback (panel drill)
+
+Use this only with the separate production authorization described above. It follows the same steps as the staging drill, with `--env production`. The revision names below were read on Nov 27, 2026 and will go stale; re-run `status` first.
+
+| Role | Revision | Commit |
+| --- | --- | --- |
+| Current (serving) | `lagaw-api-00041-465` | `6819f0b` |
+| Previous (example rollback target) | `lagaw-api-00040-bpl` | `26cde85` |
+
+1. Dry run. `plan` refuses a target that runs the same image digest as the serving revision. If it refuses `00040-bpl`, choose another revision (see [Identify a known-good deployment](#identify-a-known-good-deployment)).
+
+   ```sh
+   python scripts/rollback_helper.py plan --env production --to-revision lagaw-api-00040-bpl \
+     --project relax-mode-lagaw --region asia-southeast1
+   ```
+
+2. Execute with the guards and a named approver:
+
+   ```sh
+   ROLLBACK_AUTHORIZED=production python scripts/rollback_helper.py execute --env production \
+     --to-revision lagaw-api-00040-bpl --project relax-mode-lagaw --region asia-southeast1 \
+     --execute --confirm "production:lagaw-api-00040-bpl" --production-authorized-by "<approver name>"
+   ```
+
+   The raw equivalent is `gcloud run services update-traffic lagaw-api --project relax-mode-lagaw --region asia-southeast1 --to-revisions lagaw-api-00040-bpl=100`.
+
+3. Check health: `GET /health` and `GET /ready` on the production API URL (see [`docs/backend-health-api.md`](backend-health-api.md)), then `python scripts/smoke_deployed.py production`.
+4. Restore with `--to-latest` and confirm the traffic, as in [Restoring the latest approved version](#restoring-the-latest-approved-version).
+
+**Warning.** Until [#204](https://github.com/relax-mode/lagaw/issues/204) lands, a deploy made while production is pinned gets 0% traffic. Restore `--to-latest` and confirm `latestRevision: True, percent: 100` **before** the live deploy challenge.
+
 ## Cloudflare Pages restoration
 
-**Not verified read-only from this machine.** The `wrangler` CLI is not installed here, and the commands below were not run. Confirm the dashboard labels and the API shape on your own account before relying on them.
+**Not rehearsed.** No Pages rollback has been performed, and the rollback steps below were not run. Wrangler is a root dev dependency (`package.json`), so `npx wrangler pages deployment list --project-name lagaw` works from the repository root with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the environment. That command only lists deployments. Confirm the dashboard labels and the API shape on your own account before relying on the rollback itself.
 
 Dashboard path (the one the pipeline documentation names):
 
@@ -139,7 +173,7 @@ Dashboard path (the one the pipeline documentation names):
 3. Open its menu and choose **Rollback to this deployment** (or promote it, if that label appears instead). Confirm the URL serves the expected build.
 4. Keep the failed deployment and its commit hash in the incident notes.
 
-Optional CLI and API (placeholders only; load tokens from the secret store and do not echo them):
+CLI and API (placeholders only; load tokens from the secret store and do not echo them). The dashboard path above is the documented rollback path; the `curl` call is unverified:
 
 ```sh
 npx wrangler pages deployment list --project-name lagaw
@@ -170,21 +204,33 @@ It checks locations, Trip authentication and ownership, the extraction route (42
 
 ## Restoring the latest approved version
 
-**Prefer restoring the exact revision captured before the rollback.** A newer, zero-traffic canary may be the latest ready revision while the original service was deliberately pinned to an older one. The November 5 staging drill discovered this exact situation (original `00035-xp9`, newer `00038`–`00043` at 0%). Use `execute --to-revision <ORIGINAL>` with the same staging authorization and exact confirmation guards used for rollback. Confirm `100%` on the original revision and rerun smoke checks.
+**End every drill or rollback with `--to-latest`, not with a named revision.** Naming a revision, even the one that served before the rollback, leaves the service pinned to it. Every later CI deploy then creates a revision that gets 0% traffic, and the smoke check still passes because it only calls the service URL. The November 5 staging drill restored the "exact original" `00035-xp9`, which kept a pin that was already there, and staging served old code until Nov 27. See [INC-5](incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision).
 
-`restore` routes traffic to `--to-latest`, which means the **newest ready revision** — **not necessarily the pre-rollback serving revision**. Only use it when that specific latest revision is the approved fix and has passed health checks:
+- When the pre-rollback revision is the newest ready revision, restore with `--to-latest`. That is the normal case, and it puts the service back on automatic routing.
+- If the newest ready revision is not the approved one, do not restore yet. Check why first (a failed or unverified deploy, or a zero-traffic canary).
+- If you must hold a rollback, record that the service is **intentionally pinned**, with the revision, who authorized it and when, in the sprint log and the incident log. Undo it with `--to-latest` after the fix deploys.
+
+`restore` routes traffic to `--to-latest`, which means the **newest ready revision**. Use it only when that revision is the approved one and has passed health checks. The dry run prints the latest ready revision and the exact command:
 
 ```sh
 python scripts/rollback_helper.py restore --env staging --project "$GCP_PROJECT_ID" --region "$GCP_REGION"
 ```
 
-The dry run prints the latest ready revision. Confirm it, then add `--execute --confirm "<env>:latest"`, `ROLLBACK_AUTHORIZED`, and (production) `--production-authorized-by`. Raw equivalent:
+Confirm the printed revision, then apply it with the same guards as a rollback: `--execute --confirm "<env>:latest"`, `ROLLBACK_AUTHORIZED=<env>`, and for production `--production-authorized-by "<approver name>"`. Raw equivalent:
 
 ```sh
 gcloud run services update-traffic lagaw-api --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --to-latest
 ```
 
-Afterwards, run the health verification again. For Pages, promote the approved deployment in the dashboard.
+Staging uses `lagaw-api-staging` in the same form.
+
+**Always confirm the result.** Read the traffic back and check that it shows `latestRevision: True, percent: 100`:
+
+```sh
+gcloud run services describe <svc> --project relax-mode-lagaw --region asia-southeast1 --format='value(status.traffic)'
+```
+
+If the output names a revision instead, the service is still pinned. Then run the health verification again. For Pages, promote the approved deployment in the dashboard.
 
 ## Timestamp record
 
@@ -215,6 +261,7 @@ Escalate to the project owner before any production rollback that changes schema
 | `UNKNOWN` migration compatibility | Commit label missing or not in the clone | `git fetch`, then rerun `plan`; if still unknown, escalate |
 | Smoke check fails after rollback | Target revision unhealthy, CORS or web bundle mismatch | Check the revision's logs; compare the Pages build with the API URL and token; escalate if the API is down |
 | Rollback reverted by a deploy | Automatic promotion on the next `main` push | Land the fix through PR or pause before merging |
+| A deploy succeeds but the service keeps serving the old revision | The service is pinned to a named revision, so new revisions get 0% traffic ([INC-5](incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision)) | Read `status.traffic`; run `--to-latest` and confirm `latestRevision: True, percent: 100` |
 | Pages and API disagree | Web build from a different commit than the API revision | Roll Pages to a build matching the chosen API revision |
 
 ## Staging rollback drill record
@@ -225,3 +272,5 @@ Escalate to the project owner before any production rollback that changes schema
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Cloud Run staging traffic drill | 2026-11-05 | `00035-xp9` | `00033-hvh` | 08:55:12 | HTTP 200 locations; HTTP 401 unauthorized Trips and extraction POST; staging Pages HTTP 200 (before/during/after) | 08:55:36 (`00035-xp9`) | Authenticated Lagaw operator, user-authorized request | [S4-20 evidence](evidence/s4-20-staging-rollback-2026-11-05.md) |
 | Cloudflare Pages staging deployment drill | not performed | — | — | — | Staging Pages returned HTTP 200, but its deployment was not rolled back | — | — | Pages rollback path still unverified |
+
+The "exact original restored" step of this drill returned traffic to `00035-xp9`, which was already a named-revision pin from Nov 3. The restore kept that pin, so every later staging deploy until Nov 27 got 0% traffic. The runbook has since changed to end with `--to-latest`. See [INC-5](incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision).

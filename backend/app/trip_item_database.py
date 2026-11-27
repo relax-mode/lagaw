@@ -63,7 +63,7 @@ class TripItemDatabase:
             # FK conflicts can occur if a validated parent is deleted before this write.
             if response.status_code == 409:
                 error = response.json()
-                if isinstance(error, dict) and error.get("code") in ("23505", "23503"):
+                if isinstance(error, dict) and error.get("code") in ("23505", "23503", "PT409"):
                     raise TripItemConflict
             rows = self.read_rows(response, trip_id, 1)
             if response.status_code != 201 or len(rows) != 1:
@@ -88,19 +88,16 @@ class TripItemDatabase:
         except (httpx.HTTPError, ValueError):
             raise DatabaseUnavailable from None
 
-    def delete_item(self, trip_id: UUID, item_id: UUID) -> bool:
+    def delete_item(self, owner_id: UUID, trip_id: UUID, item_id: UUID) -> bool:
         try:
-            response = self.client.delete(
-                "itinerary_items",
-                params={"select": "id,trip_id", "trip_id": f"eq.{trip_id}", "id": f"eq.{item_id}"},
-                headers={"Prefer": "return=representation", "Content-Profile": "public"},
+            response = self.client.post(
+                "rpc/remove_itinerary_item",
+                json={"p_owner": str(owner_id), "p_trip": str(trip_id), "p_item": str(item_id)},
             )
             response.raise_for_status()
-            rows = response.json()
-            if response.status_code != 200 or not isinstance(rows, list) or (
-                rows and rows != [{"id": str(item_id), "trip_id": str(trip_id)}]
-            ):
+            deleted = response.json()
+            if response.status_code != 200 or not isinstance(deleted, bool):
                 raise ValueError
-            return bool(rows)
+            return deleted
         except (httpx.HTTPError, ValueError):
             raise DatabaseUnavailable from None

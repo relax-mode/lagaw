@@ -7,6 +7,7 @@ from typing import Annotated, Self
 from uuid import UUID
 
 from pydantic import (
+    AfterValidator,
     BaseModel,
     BeforeValidator,
     ConfigDict,
@@ -16,7 +17,23 @@ from pydantic import (
 )
 
 Money = Annotated[Decimal, Field(ge=0, max_digits=12, decimal_places=2)]
-Label = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+_UNSTORABLE = re.compile("[\x00\ud800-\udfff]")
+
+
+def reject_unstorable_text(value: str) -> str:
+    """PostgreSQL text cannot hold NUL, and lone surrogates cannot be UTF-8 encoded.
+
+    Without this check they reach the database and surface as a misleading 503.
+    """
+    if _UNSTORABLE.search(value):
+        raise ValueError("Text contains unsupported characters.")
+    return value
+
+
+StorableText = AfterValidator(reject_unstorable_text)
+Label = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50), StorableText,
+]
 
 
 def trim_title(value):
@@ -31,8 +48,29 @@ def require_calendar_date(value):
     return value
 
 
-Title = Annotated[str, BeforeValidator(trim_title), Field(min_length=1, max_length=200)]
+Title = Annotated[
+    str, BeforeValidator(trim_title), Field(min_length=1, max_length=200), StorableText,
+]
 CalendarDate = Annotated[date, BeforeValidator(require_calendar_date)]
+
+
+# Sanity bounds for saved trips; the app's date picker stays well inside them.
+EARLIEST_TRIP_YEAR = 2000
+LATEST_TRIP_YEAR = 2100
+MAX_TRIP_DAYS = 366
+
+
+def trip_date_problem(start_date: date, end_date: date) -> str | None:
+    """Reject absurd ranges (e.g. year 1 to 9999) on writes only.
+
+    Kept out of the model validators so rows saved before this check still load.
+    """
+    for value in (start_date, end_date):
+        if not EARLIEST_TRIP_YEAR <= value.year <= LATEST_TRIP_YEAR:
+            return f"Trip dates must be between {EARLIEST_TRIP_YEAR} and {LATEST_TRIP_YEAR}."
+    if (end_date - start_date).days + 1 > MAX_TRIP_DAYS:
+        return f"A trip can last at most {MAX_TRIP_DAYS} days."
+    return None
 
 
 class TripCreate(BaseModel):

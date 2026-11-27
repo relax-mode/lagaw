@@ -66,7 +66,7 @@ The [Nov 26 scheduled checks](https://github.com/relax-mode/lagaw/actions/runs/4
 
 1. Verify the production Pages configuration and confirm that the deployment preflight passes before depending on a new web release.
 2. Record the production Pages commit and the Cloud Run revision receiving traffic independently. A web deployment alone does not establish the API version.
-   - **Nov 27 finding:** staging API traffic had stayed pinned to a November 3 revision since before the November 5 rollback drill. Later staging deploys received no traffic, while their smoke tests still passed. Traffic was returned to the latest revision on November 27. Production was already serving its latest revision.
+   - **Nov 27 finding:** staging API traffic had stayed pinned to a November 3 revision since a manual QA deploy that day, and the November 5 rollback drill's exact restore kept the pin ([INC-5](incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision)). Later staging deploys received no traffic, while their smoke tests still passed. Traffic was returned to the latest revision on November 27. Production was already serving its latest revision.
    - **Prepared:** a deploy step that routes traffic to the new revision and fails unless it serves 100%.
 3. Preserve a known-good demo revision. Verify the manual trip path and budget fallback before enabling optional AI suggestions in the rehearsal.
 4. Rehearse sign-in, trip creation and safe retry, itinerary editing, reopening a saved trip, and basic offline recovery with pre-verified, separate demo accounts.
@@ -77,4 +77,14 @@ The [Nov 26 scheduled checks](https://github.com/relax-mode/lagaw/actions/runs/4
 - The November 26 reviews were source-only.
 - The November 27 tests ran against staging, with read-only, unauthenticated checks on production. No production writes or production load tests were performed.
 - The only deployment change was the staging traffic routing above.
-- The prepared changes are not deployed. Production still runs the reviewed baseline until owners merge their fixes.
+- The prepared changes were not deployed when this audit was written.
+
+## Status update (November 27, later the same day)
+
+The status column above records the audit itself. Since then, owners have merged and deployed their fixes:
+
+- **Backend:** [#202](https://github.com/relax-mode/lagaw/issues/202) via [PR #205](https://github.com/relax-mode/lagaw/pull/205), deployed to production (`lagaw-api-00041-465`). It covers the trip and itinerary consistency checks, the malformed-input and authentication changes reused from the prepared handoff, and the aggregate extraction budget. See #202 for the acceptance record.
+- **Frontend:** [#203](https://github.com/relax-mode/lagaw/issues/203) via [PR #210](https://github.com/relax-mode/lagaw/pull/210), deployed to production web. It covers the idle cold start, readable quota cooldowns, account switching and uncertain trip saves.
+- **DevOps:** the Pages preflight passed after the token rotation ([run 45989252146](https://github.com/relax-mode/lagaw/actions/runs/45989252146), [INC-6](incident-log.md#inc-6-cloudflare-pages-token-rejected-again)). Routing traffic to the latest revision after every deploy, and the warm-instance policy, remain open in [#204](https://github.com/relax-mode/lagaw/issues/204).
+
+Items not named in those issues, such as incremental destination browsing, retry-safe writes and recommendation work bounds, remain open after the panel.
