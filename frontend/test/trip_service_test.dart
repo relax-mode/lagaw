@@ -465,7 +465,7 @@ void main() {
       );
 
       await expectLater(
-        service.listTripItems('trip-1').timeout(const Duration(seconds: 10)),
+        service.listTripItems('trip-1').timeout(const Duration(seconds: 16)),
         throwsA(
           isA<TripApiException>().having(
             (e) => e.message,

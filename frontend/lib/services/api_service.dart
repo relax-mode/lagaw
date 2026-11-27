@@ -20,10 +20,11 @@ class ApiService {
       },
     );
 
+    // Room for a Cloud Run cold start; see TripService._timeout.
     final response = await _client.get(
       uri,
       headers: {'Accept': 'application/json'},
-    ).timeout(const Duration(seconds: 6));
+    ).timeout(const Duration(seconds: 12));
 
     if (response.statusCode == 200) {
       final dynamic decoded = jsonDecode(response.body);

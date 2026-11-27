@@ -73,7 +73,9 @@ class TripService {
   /// Bearer token for the request being sent; set by [_send].
   String _activeToken = '';
 
-  static const Duration _timeout = Duration(seconds: 6);
+  /// Allows a Cloud Run cold start (about 6 s) plus token verification;
+  /// 6 s timed out the first request after the API had been idle.
+  static const Duration _timeout = Duration(seconds: 12);
 
   /// Ranking and scheduling take longer than CRUD.
   static const Duration _planTimeout = Duration(seconds: 45);
