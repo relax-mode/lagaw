@@ -1216,6 +1216,10 @@ is a different operation and was not triggered. See the
 - The changelog heading changed from the Unreleased candidate to `[1.0.0] - 2026-11-27`. A Sprint 4 section and a final panel hardening section were added from merged PRs #100 to #212, and the open Sprint 4 list was replaced with the limitations that are still open.
 - The draft release notes were promoted to [v1.0.0.md](release-notes/v1.0.0.md) with the deployed revision, the CI and scheduled-check runs and the gate status. The tag was not created. Kyle, as release owner, records the tag commit in the notes when tagging.
 
+### November 27, 2026 — CI traffic routing and panel-day Cloud Run capacity (#204)
+
+- Prepared the #204 workflow PR on `chore/204-cloudrun-traffic-capacity`: added `scripts/verify_cloudrun_traffic.py` and `backend/test_verify_cloudrun_traffic.py`, updated `.github/workflows/ci.yml` so both `deploy-staging` and `deploy-backend` run `gcloud run services update-traffic ... --to-latest` and fail unless the latest ready revision and deployed image receive 100% of traffic before smoke testing, and updated Cloud Run capacity flags to `--min-instances=1 --max-instances=4` on production and `--min-instances=0 --max-instances=4` on staging (`--concurrency=20` unchanged). Updated `PIPELINE.md` to match. Post-merge staging concurrency check and `#202`/`#203` staging evidence remain pending on `#204`.
+
 ### Sprint 4 retrospective
 
 Written on November 27, 2026 by Kyle from repository and GitHub evidence, because there was no Sprint 4 consultation (the team recorded and submitted the demo video on November 20 instead); team confirmation is pending, so this is not yet the team's agreed retrospective.
