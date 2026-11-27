@@ -78,6 +78,7 @@ void main() {
     (502, 'invalid_extraction_output', 'could not understand'),
     (502, 'extraction_failed', 'could not understand'),
     (429, 'extraction_rate_limited', 'busy'),
+    (429, 'extraction_quota_exceeded', 'Try again later'),
     (422, 'invalid_request', '1 to 2000'),
   ]) {
     test('maps $status $code to a readable fallback message', () async {
@@ -92,6 +93,24 @@ void main() {
       );
     });
   }
+
+  test('never shows a raw HTTP status (#203)', () async {
+    for (final (status, expected) in [
+      (429, 'Try again later'),
+      (500, 'didn’t work this time'),
+    ]) {
+      await expectLater(
+        _returning(status, {'detail': 'x'}).extract('trip'),
+        throwsA(
+          isA<PreferenceApiException>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains(expected), isNot(contains('HTTP'))),
+          ),
+        ),
+      );
+    }
+  });
 
   test('handles inherited string details (401 and 503)', () async {
     await expectLater(

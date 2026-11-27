@@ -74,7 +74,7 @@ class DiscoveryService implements OnboardingRepository {
   final ApiCredentials _auth;
   String _activeToken = '';
 
-  static const Duration _timeout = Duration(seconds: 10);
+  static const Duration _timeout = Duration(seconds: 12);
   static const Duration _rankTimeout = Duration(seconds: 45);
 
   DiscoveryService({http.Client? client, String? token, AuthSession? session})

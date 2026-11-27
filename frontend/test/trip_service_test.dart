@@ -171,6 +171,49 @@ void main() {
       });
     }
 
+    group('createTrip with an unknown outcome (#203)', () {
+      for (final (label, client) in [
+        ('a timeout', MockClient((_) async => throw TimeoutException('slow'))),
+        (
+          'a server error',
+          MockClient((_) async => http.Response('{"detail":"x"}', 500)),
+        ),
+        (
+          'an unreadable 201',
+          MockClient((_) async => http.Response('{}', 201)),
+        ),
+        (
+          'an unexpected 200',
+          MockClient((_) async => http.Response('{}', 200)),
+        ),
+      ]) {
+        test('is uncertain after $label', () async {
+          final service = TripService(token: _token, client: client);
+          await expectLater(
+            service.createTrip(_draft),
+            throwsA(
+              isA<TripApiException>()
+                  .having((e) => e.uncertain, 'uncertain', isTrue)
+                  .having((e) => e.message, 'message', contains('My Trips')),
+            ),
+          );
+        });
+      }
+
+      test('a 4xx is a definite failure', () async {
+        await expectLater(
+          _serviceReturning(422, {'detail': []}).createTrip(_draft),
+          throwsA(
+            isA<TripApiException>().having(
+              (e) => e.uncertain,
+              'uncertain',
+              isFalse,
+            ),
+          ),
+        );
+      });
+    });
+
     test('maps timeouts to a retry message', () async {
       final service = TripService(
         token: _token,
@@ -465,7 +508,7 @@ void main() {
       );
 
       await expectLater(
-        service.listTripItems('trip-1').timeout(const Duration(seconds: 10)),
+        service.listTripItems('trip-1').timeout(const Duration(seconds: 16)),
         throwsA(
           isA<TripApiException>().having(
             (e) => e.message,

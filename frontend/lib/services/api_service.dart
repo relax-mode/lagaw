@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import '../config.dart';
 import '../models/location.dart';
 
@@ -14,16 +16,13 @@ class ApiService {
     int offset = 0,
   }) async {
     final uri = Uri.parse(AppConfig.locationsEndpoint).replace(
-      queryParameters: {
-        'limit': limit.toString(),
-        'offset': offset.toString(),
-      },
+      queryParameters: {'limit': limit.toString(), 'offset': offset.toString()},
     );
 
-    final response = await _client.get(
-      uri,
-      headers: {'Accept': 'application/json'},
-    ).timeout(const Duration(seconds: 6));
+    // Room for a Cloud Run cold start; see TripService._timeout.
+    final response = await _client
+        .get(uri, headers: {'Accept': 'application/json'})
+        .timeout(const Duration(seconds: 12));
 
     if (response.statusCode == 200) {
       final dynamic decoded = jsonDecode(response.body);
