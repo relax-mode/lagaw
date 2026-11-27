@@ -12,7 +12,8 @@ from app.recommendations.contracts import Contract, Interaction, InteractionType
 class InteractionCreate(Contract):
     location_id: UUID
     interaction_type: InteractionType
-    rating_value: Decimal | None = Field(default=None, ge=1, le=5)
+    # Two decimal places keep the stored value equal to the echoed response value.
+    rating_value: Decimal | None = Field(default=None, ge=1, le=5, decimal_places=2)
 
     @model_validator(mode="after")
     def check_rating(self) -> Self:

@@ -134,6 +134,9 @@ def test_verified_subject_maps_idempotently_without_overwriting_profile(api):
     {"sub": str(UUID(int=0))}, {"nbf": 9999999999}, {"iat": 9999999999},
     {"iat": None}, {"aud": None}, {"iss": ""}, {"sub": None},
     {"exp": float("inf")}, {"iat": float("inf")},
+    # Non-string subjects/roles once escaped as an unauthenticated 500.
+    {"sub": 123}, {"sub": ["x"]}, {"sub": {"a": 1}}, {"sub": True}, {"sub": 1.5},
+    {"role": ["authenticated"]},
 ])
 def test_invalid_claims_never_reach_auth_or_database(api, change):
     client, state = api

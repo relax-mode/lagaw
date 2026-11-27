@@ -610,6 +610,22 @@ jobs:
             --port=8080
             ${{ steps.model.outputs.flags }}
 
+      - name: Route lagaw-api-staging traffic to the new revision
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend == 'true'
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+        run: |
+          set -eo pipefail
+          # A rollback pins traffic to one revision. Later deploys then receive 0%
+          # and the smoke test silently checks old code (staging served a Nov 3
+          # revision until Nov 27). Always serve what this run just deployed.
+          gcloud run services update-traffic lagaw-api-staging --project "$PROJECT" --region "$REGION" --to-latest --quiet
+          latest=$(gcloud run services describe lagaw-api-staging --project "$PROJECT" --region "$REGION" --format='value(status.latestReadyRevisionName)')
+          serving=$(gcloud run services describe lagaw-api-staging --project "$PROJECT" --region "$REGION" --format='value(status.traffic[0].revisionName,status.traffic[0].percent)')
+          [ "$serving" = "$(printf '%s\t100' "$latest")" ] || { echo "::error::lagaw-api-staging serves '$serving', expected '$latest' at 100%."; exit 1; }
+          echo "lagaw-api-staging serving $latest at 100%" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Read existing staging API URL
         id: existing-staging-api
         if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend != 'true'
@@ -817,6 +833,21 @@ jobs:
             --timeout=60
             --port=8080
             ${{ steps.model.outputs.flags }}
+
+      - name: Route lagaw-api traffic to the new revision
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+        run: |
+          set -eo pipefail
+          # A rollback pins traffic to one revision. Later deploys then receive 0%
+          # and the smoke test silently checks old code (staging served a Nov 3
+          # revision until Nov 27). Always serve what this run just deployed.
+          gcloud run services update-traffic lagaw-api --project "$PROJECT" --region "$REGION" --to-latest --quiet
+          latest=$(gcloud run services describe lagaw-api --project "$PROJECT" --region "$REGION" --format='value(status.latestReadyRevisionName)')
+          serving=$(gcloud run services describe lagaw-api --project "$PROJECT" --region "$REGION" --format='value(status.traffic[0].revisionName,status.traffic[0].percent)')
+          [ "$serving" = "$(printf '%s\t100' "$latest")" ] || { echo "::error::lagaw-api serves '$serving', expected '$latest' at 100%."; exit 1; }
+          echo "lagaw-api serving $latest at 100%" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Smoke test production API
         env:

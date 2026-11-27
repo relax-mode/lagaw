@@ -14,6 +14,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.body_limit import BodySizeLimit
 from app.database import DatabaseUnavailable, LocationDatabase, get_database
 from app.health import liveness, readiness
 from app.interactions import router as interactions_router
@@ -25,6 +26,7 @@ from app.schemas import LocationsPage
 from app.trip_items import router as trip_items_router
 from app.trip_recommendations import get_recommendation_engine
 from app.trip_recommendations import router as trip_recommendations_router
+from app.trips import MAX_OFFSET
 from app.trips import router as trips_router
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -61,7 +63,7 @@ async def validation_error(request: Request, exc: RequestValidationError):
 def list_locations(
     database: Annotated[LocationDatabase, Depends(get_database)],
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Annotated[int, Query(ge=0, le=MAX_OFFSET)] = 0,
 ) -> LocationsPage:
     """List active destinations, ordered by name and UUID, from PostgreSQL."""
     return LocationsPage(
@@ -107,6 +109,8 @@ def create_app() -> FastAPI:
     """Configure each backend environment at startup, before serving requests."""
     load_dotenv(ROOT / ".env", override=False)
     application = FastAPI(title="Lagaw API", version="0.1.0", lifespan=lifespan)
+    # Added before CORS so CORS stays outermost and a 413 is still readable by browsers.
+    application.add_middleware(BodySizeLimit)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=get_cors_origins(),

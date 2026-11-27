@@ -55,6 +55,9 @@ def verify_identity(token: str) -> tuple[UUID, str]:
             "verify_iat": True, "verify_iss": True, "verify_aud": True,
             "require": ["sub", "iss", "aud", "exp", "iat", "role"],
         }, issuer=f"{url}/auth/v1", audience="authenticated")
+        # A non-string subject (number, list, object) must be a 401, not a crash.
+        if not isinstance(claims["sub"], str) or not isinstance(claims["role"], str):
+            raise TypeError
         subject = UUID(claims["sub"])
         if subject.int == 0 or claims["role"] != "authenticated":
             raise ValueError
@@ -83,7 +86,7 @@ def verify_identity(token: str) -> tuple[UUID, str]:
         jwt.decode(token, options={"verify_signature": False, "verify_exp": True,
                                    "require": ["exp"]})
         return subject, email
-    except (jwt.PyJWTError, ValueError, TypeError, KeyError, OverflowError):
+    except (jwt.PyJWTError, ValueError, TypeError, KeyError, OverflowError, AttributeError):
         raise unauthorized() from None
     except (httpx.HTTPError, httpx.InvalidURL):
         raise HTTPException(503, "Authentication is temporarily unavailable.") from None
