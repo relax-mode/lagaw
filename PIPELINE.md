@@ -3,7 +3,7 @@
 Lagaw uses two GitHub Actions workflows:
 
 - `Lagaw CI` (`.github/workflows/ci.yml`) checks every pull request and carries every qualifying merge to `main` through staging into production with no manual steps.
-- `Scheduled live checks` (`.github/workflows/scheduled-live-checks.yml`) runs the checks that must not run on every pull request. Its live AI check is currently failing; see [Open risks](#open-risks).
+- `Scheduled live checks` (`.github/workflows/scheduled-live-checks.yml`) runs the checks that must not run on every pull request: one live AI extraction and the Cloudflare deploy credential. Neither blocks a merge or a deploy.
 
 ## Architecture
 
@@ -15,6 +15,8 @@ flowchart TD
 
   subgraph ci["Lagaw CI (ci.yml)"]
     changes["changes: Detect changed areas<br/>(pull requests classify paths)"]
+    secret_scan["secret-scan: Secret scan - gitleaks<br/>(every PR and push; no path filter)"]
+    dependency_audit["dependency-audit: Dependency audit - pip and npm<br/>(PRs: dependency paths changed; pushes and manual runs: always)"]
     backend["backend: Backend - Python"]
     database["database: Database - PostgreSQL migrations and smoke tests"]
     frontend["frontend: Frontend - Flutter"]
@@ -37,6 +39,8 @@ flowchart TD
   supa_prod[("Supabase production project")]
 
   trigger --> changes
+  trigger --> secret_scan
+  changes -->|"dependency or audit paths changed, or not a PR"| dependency_audit
   changes -->|"backend paths changed, or not a PR"| backend
   changes -->|"database paths changed, or not a PR"| database
   changes -->|"frontend paths changed, or not a PR"| frontend
@@ -55,11 +59,11 @@ flowchart TD
   prod_api --> supa_prod
   cron --> ai_extraction
   cron --> deploy_credentials
-  ai_extraction -->|"HTTPS call with the staging demo token (fails 401, see Open risks)"| staging_api
+  ai_extraction -->|"HTTPS call, signed in as the smoke account (Supabase session)"| staging_api
   deploy_credentials -->|"Wrangler list with CLOUDFLARE_API_TOKEN"| cf
 ```
 
-The scheduled workflow has no `needs:` link to `Lagaw CI`, so a failure there cannot block a merge or a deploy.
+The scheduled workflow has no `needs:` link to `Lagaw CI`, so a failure there cannot block a merge or a deploy. In `ci.yml`, no job lists `secret-scan` or `dependency-audit` under `needs:`, so neither gates `staging-changes` or the deploy jobs. A failure still marks the run and the pull request red.
 
 ## Pull request checks
 
@@ -68,12 +72,15 @@ The `Lagaw CI` workflow runs on every pull request, every push to `main`, and ev
 - On pull requests, each check runs only when its area changed. A check skipped this way still satisfies its required status check, and if classification itself fails, every check runs.
 - Pushes and manual runs always run every check.
 - Any change to `.github/workflows/ci.yml` runs all checks.
+- `Secret scan - gitleaks` is never path-filtered: it runs on every pull request and push.
 
 | Check | Runs on a PR when these change | What it does | Why it exists |
 |---|---|---|---|
 | `Backend - Python` | `backend/**`, `scripts/smoke_deployed.py`, `scripts/ai_live_smoke.py`, the committed AI evaluation baseline | Ruff (pinned, with inline PR annotations), `compileall`, `pytest -m "not db"`, then the offline AI evaluation (`evaluate_week3.py`) compared with the committed baseline (`compare_evaluation.py`). The comparison table goes to the job summary and the report is uploaded as the `ai-evaluation` artifact. | Fast correctness feedback, and a quality gate on every prompt or AI-logic change. Any extraction case, field check or recommendation metric that falls below the baseline fails the check. |
 | `Database - PostgreSQL migrations and smoke tests` | `backend/**`, `supabase/**`, `scripts/check_database.py` | Disposable PostgreSQL 17: migrations and schema smoke, SQLAlchemy relationship checks, the itinerary association API against a disposable PostgREST, and `pytest -m db` database-backed API tests | Proves schema and persistence behavior against a database no other environment shares. Credentials are test-only. |
 | `Frontend - Flutter` | `frontend/**`, `package.json`, `package-lock.json` | `flutter analyze` (cheap, first), `flutter test`, compile-only release web build | Catches Dart errors and UI regressions and proves the bundle builds. The job has no secrets; deploy jobs build their own bundles. |
+| `Secret scan - gitleaks` | Every pull request and push (no path filter) | Installs a gitleaks binary pinned by version and SHA-256, then scans the commits a PR adds (or the pushed range, or the full history when the previous SHA is missing) with `.gitleaks.toml`. Output is redacted and nothing is uploaded. | A credential cannot reach `main` because of which files changed. |
+| `Dependency audit - pip and npm` | `backend/requirements*`, `backend/pyproject.toml`, `backend/uv.lock`, `package.json`, `package-lock.json`, `.github/dependabot.yml`, `.github/security/**`, `scripts/audit_gate.py`; always on pushes and manual runs | `pip-audit` on `backend/requirements.txt` and `npm audit` (high threshold) on the root lockfile. `scripts/audit_gate.py` decides the result: it blocks any finding that is not in `.github/security/audit-allowlist.json` and fails closed on unreadable reports. | Known-vulnerable dependencies are caught on the pull request. If path classification fails, the audit runs. |
 
 ### AI checks without the paid provider
 
@@ -94,9 +101,10 @@ The `Lagaw CI` workflow runs on every pull request, every push to `main`, and ev
 
 Every push to `main` that changes the application deploys automatically, when the repository variable `STAGING_DEPLOY_ENABLED` is `true`. `Decide - Staging deployment` diffs the push and flags backend and frontend changes; changes to `ci.yml` flag both. Docs-only and test-only merges deploy nothing: the gate ignores `backend/test_*.py`, `backend/smoke_test.*` and `frontend/test/*`.
 
-1. **`Deploy - Staging`** (`deploy-staging`, GitHub `staging` environment) runs after the three checks and the decision job pass.
+1. **`Deploy - Staging`** (`deploy-staging`, GitHub `staging` environment) runs after the three checks and the decision job pass. It does not wait for `Secret scan - gitleaks` or `Dependency audit - pip and npm`, which run in parallel with the checks.
    - Builds and pushes the image `api:staging-<sha>` and deploys Cloud Run `lagaw-api-staging`, when backend changed.
    - Runs `scripts/smoke_deployed.py staging`: locations, Trip 401/200 and ownership, the extraction route (a blank prompt must return 422 before any provider call), and exact staging CORS. The check signs in with the smoke account; it creates no trips or interaction events, but the first sign-in can create the smoke profile.
+   - The smoke check calls the service URL and does not compare the served revision or commit with the one just deployed. If the service is pinned to an old revision, the check still passes and the new revision gets 0% traffic (see [INC-5](docs/incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision) and [Open risks](#open-risks)).
    - Builds Flutter against the staging API and deploys the Pages `staging` branch, when frontend changed, then runs an HTTP check.
 2. **`Deploy - Production API`** (`deploy-backend`, GitHub `production` environment) runs after a push when backend changed and `Deploy - Staging` succeeded.
    - Tags the image staging just tested as `api:<sha>`, so production runs exactly what staging verified.
@@ -113,15 +121,16 @@ A **manual run** of the workflow on `main` (`gh workflow run ci.yml --ref main`)
 - The comment above `deploy-backend` in `ci.yml` says a manual run redeploys production only. The job conditions show that staging also deploys. Workflow changes are out of scope for this document; the comment should be corrected in a workflow PR.
 - Pull requests never deploy.
 
-Main branch protection requires one approving review and the three CI checks above (`Backend - Python`, `Database - PostgreSQL migrations and smoke tests`, `Frontend - Flutter`), with stale approvals dismissed and strict up-to-date checks enabled. The rules also apply to administrators. Force pushes and branch deletion are disabled. Deployment jobs are not required checks. These settings were read from the GitHub API on Oct 30, 2026.
+Main branch protection requires one approving review and the three CI checks above (`Backend - Python`, `Database - PostgreSQL migrations and smoke tests`, `Frontend - Flutter`), with stale approvals dismissed and strict up-to-date checks enabled. The rules also apply to administrators. Force pushes and branch deletion are disabled. Deployment jobs are not required checks, and neither are `Secret scan - gitleaks` and `Dependency audit - pip and npm`; the required-check list was re-read from the GitHub API on Nov 27, 2026. The other settings were read from the GitHub API on Oct 30, 2026.
 
 ## Scheduled live checks
 
 `Scheduled live checks` runs on Mondays and Thursdays at 09:00 Asia/Manila (cron `0 1 * * 1,4` UTC), and on demand with `gh workflow run scheduled-live-checks.yml`.
 
 - **Live AI extraction** (`ai-extraction`, `staging` environment). `scripts/ai_live_smoke.py` sends one real extraction to deployed staging and requires a schema-valid draft. This exercises the Secret Manager key, the provider and the backend validation end to end, for one extraction call per run. The provider key never enters GitHub.
-  - **Current status: failing.** Run [40831834404](https://github.com/relax-mode/lagaw/actions/runs/40831834404) (Oct 29) failed with HTTP 401 because the script still sends the retired staging demo token. See [INC-4](docs/incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401). The fix is in review (PR #100). No passing run is recorded yet.
-- **Cloudflare deploy credential** (`deploy-credentials`, `production` environment). Wrangler lists the `lagaw` deployments with the CI token, so an expired or revoked token fails here before a deploy needs it. It passed in run 40831834404 on Oct 29 (see [INC-1](docs/incident-log.md#inc-1-staging-cloudflare-credential-rejected)).
+  - The script signs in as the dedicated smoke account (`SMOKE_AUTH_EMAIL`, `SMOKE_AUTH_PASSWORD` and `SMOKE_SUPABASE_KEY`) and sends the Supabase session as the bearer token; the staging API no longer accepts the retired demo token.
+  - **Current status: passing.** It failed with HTTP 401 in runs 40831834404 (Oct 29) and 41406705381 (Nov 2) while the script still sent the demo token ([INC-4](docs/incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401)). PR #100 fixed it; it passed in the manual run [41586194489](https://github.com/relax-mode/lagaw/actions/runs/41586194489) (Nov 3) and in every scheduled run from Nov 5 to Nov 26.
+- **Cloudflare deploy credential** (`deploy-credentials`, `production` environment). Wrangler lists the `lagaw` deployments with the CI token, so an expired or revoked token fails here before a deploy needs it. It passed in run 40831834404 on Oct 29 (see [INC-1](docs/incident-log.md#inc-1-staging-cloudflare-credential-rejected)). In run [45790667724](https://github.com/relax-mode/lagaw/actions/runs/45790667724) (Nov 26) it failed with Cloudflare error code 10000, about 23 h before the next staging web deploy failed for the same reason ([INC-6](docs/incident-log.md#inc-6-cloudflare-pages-token-rejected-again)). A failed scheduled run does not notify anyone by itself; see [Open risks](#open-risks).
 
 A failure never blocks merges or deploys, because no deploy job depends on this workflow.
 
@@ -152,13 +161,13 @@ This section lists names only. No values are recorded here. The names were check
 | Name | Kind | Used by | Notes |
 |---|---|---|---|
 | `STAGING_DEPLOY_ENABLED` | repository variable | `deploy-staging` gate | Must be `true` for any staging deploy |
-| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | repository secrets | `deploy-staging`, `deploy-web`, `deploy-credentials` | Still repository-level, shared by staging and production; no environment copy exists |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | repository secrets | `deploy-staging`, `deploy-web`, `deploy-credentials` | Still repository-level, shared by staging and production; no environment copy exists. `CLOUDFLARE_API_TOKEN` was replaced on Nov 27 after [INC-6](docs/incident-log.md#inc-6-cloudflare-pages-token-rejected-again). Holder: Kyle. Expiry date: to be recorded by Kyle. |
 | `TRIP_DEMO_TOKEN` | production environment secret, plus a repository secret of the same name | `deploy-web` web build | The repository copy is unused by any job that runs in an environment. Open risk. |
-| `STAGING_TRIP_DEMO_TOKEN` | staging environment secret | `deploy-staging` gate and web build; `ai-extraction` | Open risk. Not passed to the backend. |
+| `STAGING_TRIP_DEMO_TOKEN` | staging environment secret | `deploy-staging` gate and web build | Open risk. Not passed to the backend. |
 | `STAGING_TRIP_DEMO_USER_ID` | staging environment variable | `deploy-staging` gate only | Not read by the backend |
 | `TRIP_DEMO_USER_ID` | production environment variable | not referenced by any workflow | Unused by the workflow |
-| `SMOKE_AUTH_EMAIL`, `SMOKE_AUTH_PASSWORD` | staging and production environment secrets | smoke tests (sign-in) | |
-| `SMOKE_PROFILE_ID`, `SMOKE_SUPABASE_KEY` | staging and production environment variables | smoke tests; `SMOKE_SUPABASE_KEY` is also the public anon key passed to the web builds | The name is historical |
+| `SMOKE_AUTH_EMAIL`, `SMOKE_AUTH_PASSWORD` | staging and production environment secrets | smoke tests (sign-in); `ai-extraction` (staging) | |
+| `SMOKE_PROFILE_ID`, `SMOKE_SUPABASE_KEY` | staging and production environment variables | smoke tests; `SMOKE_SUPABASE_KEY` is also the public anon key passed to the web builds and is used by `ai-extraction` (staging) | The name is historical |
 | `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_DEPLOYER_SERVICE_ACCOUNT`, `GCP_RUNTIME_SERVICE_ACCOUNT`, `CORS_ALLOWED_ORIGINS`, `API_BASE_URL` | repository variables | production jobs | |
 | `STAGING_GCP_WORKLOAD_IDENTITY_PROVIDER`, `STAGING_GCP_DEPLOYER_SERVICE_ACCOUNT`, `STAGING_GCP_RUNTIME_SERVICE_ACCOUNT`, `STAGING_CORS_ALLOWED_ORIGINS` | repository variables | staging jobs | |
 | `MODEL_ARTIFACT_SECRET`, `MODEL_FILE_SHA256` | staging environment variables | model delivery in `deploy-staging` and `deploy-backend` | Not set in the production environment or the repository. Production therefore resolves to model delivery disabled (`scripts/resolve_model_delivery.py`). |
@@ -179,22 +188,35 @@ This section lists names only. No values are recorded here. The names were check
 
 ### Trip demo token is still compiled into the public web bundles
 
-- **Still true.** `ci.yml` passes `secrets.STAGING_TRIP_DEMO_TOKEN` into the staging web build (`--dart-define=TRIP_DEMO_TOKEN`, line 515) and `secrets.TRIP_DEMO_TOKEN` into the production web build (line 745). Anyone who loads the site can read the value from the bundle.
+- **Still true.** `ci.yml` passes `secrets.STAGING_TRIP_DEMO_TOKEN` into the staging web build (`--dart-define=TRIP_DEMO_TOKEN`, `deploy-staging`, step "Build staging Flutter Web") and `secrets.TRIP_DEMO_TOKEN` into the production web build (`deploy-web`, step "Build production Flutter Web"). Anyone who loads the site can read the value from the bundle.
 - **No longer true.** The backend does not receive the token. `deploy-staging` and `deploy-backend` pass no `TRIP_DEMO_TOKEN` to Cloud Run (`ci.yml`, the `secrets:` blocks) and set `TRIP_AUTH_MODE=supabase`. In that mode `backend/app/auth.py` never checks the demo token; the demo path is only taken with `TRIP_AUTH_MODE=demo` on the development project or loopback, and `backend/test_auth.py` checks that demo values do not enable access by default. So the token does not authenticate against the hosted API.
 - **Frontend use.** The app uses the compiled token only when `AuthSession.current` is null (`frontend/lib/auth/api_credentials.dart`), which happens when Supabase is not configured or fails to start (`frontend/lib/main.dart`). Deployed builds configure Supabase.
-- **Still in use.** The scheduled live AI check sends `STAGING_TRIP_DEMO_TOKEN` as a bearer token (`scheduled-live-checks.yml`, line 34) and fails with HTTP 401 (see [INC-4](docs/incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401)).
-- **Still required by the gates.** `deploy-staging` fails if `STAGING_TRIP_DEMO_TOKEN` or `STAGING_TRIP_DEMO_USER_ID` is missing (`ci.yml`, configuration check). `deploy-web` fails if `TRIP_DEMO_TOKEN` is missing.
+- **No longer in use by the scheduled check.** The scheduled live AI check signs in as the smoke account and does not send the demo token (fixed by PR #100, see [INC-4](docs/incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401)).
+- **Still required by the gates.** `deploy-staging` fails if `STAGING_TRIP_DEMO_TOKEN` or `STAGING_TRIP_DEMO_USER_ID` is missing (step "Check staging deployment configuration"). `deploy-web` fails if `TRIP_DEMO_TOKEN` is missing (step "Check production web configuration").
 - **Recorded legacy settings.** The Oct 29 sprint-log entry records that the deployed Cloud Run services still carried legacy `TRIP_DEMO_USER_ID` and `TRIP_DEMO_TOKEN` settings from before #79, unused in `supabase` mode. The workflow's `overwrite` secrets strategy is meant to remove them on the next deploy. No live check of the current Cloud Run configuration is recorded here.
 - **Remediation (not done).** Remove the `--dart-define` of the token and its gates from `ci.yml`, retire the GitHub secrets, and delete the Secret Manager entries. The Flutter code still reads the token, so the app-side change must come first. This is a workflow and app change, not part of this documentation update.
 - **Owner:** CyGray (DevOps). Status: open.
 
-### Scheduled AI extraction check failing
+### Scheduled AI extraction check failing (resolved)
 
-Run 40831834404 failed with HTTP 401 on Oct 29. The fix is in review (PR #100); a manual run on that branch was rejected by environment protection and did not test the fix. Status: open until a passing run is recorded. See [INC-4](docs/incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401).
+Failed with HTTP 401 in the scheduled runs of Oct 29 and Nov 2. PR #100 merged on Nov 3 and the check has passed since: manual run 41586194489 (Nov 3) and every scheduled run from Nov 5 to Nov 26. Status: resolved. See [INC-4](docs/incident-log.md#inc-4-scheduled-live-ai-check-returns-http-401).
 
 ### One Cloudflare token for both environments
 
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets used by both staging and production. A single expiry blocks both (see [INC-1](docs/incident-log.md#inc-1-staging-cloudflare-credential-rejected)). Separating them is tracked in [CI/CD best practices](docs/cicd-best-practices.md). Status: open.
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets used by both staging and production. A single expiry blocks both (see [INC-1](docs/incident-log.md#inc-1-staging-cloudflare-credential-rejected)). It recurred on Nov 26-27 as [INC-6](docs/incident-log.md#inc-6-cloudflare-pages-token-rejected-again): the token was rejected with code 10000, the staging web deploy failed and production web was skipped. Kyle replaced the secret on Nov 27. Separating the tokens per environment is tracked in [CI/CD best practices](docs/cicd-best-practices.md). Status: open. Holder of the current token: Kyle. Expiry date: to be recorded by Kyle.
+
+### Failed scheduled checks notify no one
+
+The scheduled credential check caught the rejected Cloudflare token about 23 h before the deploy failed, but nobody acted on the failed run ([INC-6](docs/incident-log.md#inc-6-cloudflare-pages-token-rejected-again)). Follow-up: make a failed scheduled run notify the team, for example by opening an issue automatically. After any token rotation, run `scheduled-live-checks.yml` with `workflow_dispatch` and record the run in the incident log. Status: open.
+
+### Staging and production traffic can be pinned to an old revision
+
+From Nov 3 to Nov 27, `lagaw-api-staging` served an old revision (`00035-xp9`) because a manual tagged deploy wrote explicit traffic. Every CI deploy afterwards created a revision with 0% traffic, and the staging smoke check passed anyway because it does not compare the served revision with the deployed one ([INC-5](docs/incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision)). Kyle reset staging with `--to-latest` on Nov 27. Production was not pinned.
+
+- **Not yet prevented.** [Issue #204](https://github.com/relax-mode/lagaw/issues/204) will make CI route traffic to the latest revision after every deploy and fail unless the latest ready revision serves 100%, for staging and production. Until it lands, a rollback, drill or manual tagged deploy can pin a service again.
+- **Follow-up.** The smoke check should verify that the served revision or commit matches what was just deployed.
+- **Check by hand.** `gcloud run services describe <svc> --project relax-mode-lagaw --region asia-southeast1 --format='value(status.traffic)'` must show `latestRevision: True, percent: 100`.
+- **Owner:** CyGray (DevOps). Status: open.
 
 ## AI failure drill
 
@@ -214,9 +236,9 @@ The last two commands restore the service template and route traffic back to the
 
 ## Rollback
 
-The full staging and production rollback runbook and its helper script are in review in a separate pull request and are not on `main` yet. The commands below are the rollback path documented on `main`.
+The full rollback runbook is [`docs/rollback-runbook.md`](docs/rollback-runbook.md), with the guarded helper `scripts/rollback_helper.py` (dry run by default). A rollback needs separate, explicit authorization and a manually named revision.
 
-**Staging rollback drill: not performed.** No rollback drill has been executed on staging or production. It is pending explicit authorization to run it on staging (tracked in issue #120).
+**Staging Cloud Run rollback drill: executed on Nov 5, 2026** (#120; [evidence](docs/evidence/s4-20-staging-rollback-2026-11-05.md)). Its restore step named the original revision and kept a pin that was already in place, which is the cause of [INC-5](docs/incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision). No production rollback has been rehearsed, and the Cloudflare Pages rollback has not been rehearsed.
 
 For Cloud Run, identify a known-good revision and route all traffic to it:
 
@@ -225,11 +247,11 @@ gcloud run revisions list --service lagaw-api --project relax-mode-lagaw --regio
 gcloud run services update-traffic lagaw-api --project relax-mode-lagaw --region asia-southeast1 --to-revisions <known-good-revision>=100
 ```
 
-Pinned traffic stays on that revision until it is moved back. After the fix merges, its promotion deploys a new revision; run `gcloud run services update-traffic lagaw-api ... --to-latest` to return to automatic routing.
+Naming a revision pins the service to it, and later deploys get 0% traffic until the pin is moved. End every rollback or drill with `gcloud run services update-traffic lagaw-api ... --to-latest`, then confirm that `gcloud run services describe lagaw-api ... --format='value(status.traffic)'` shows `latestRevision: True, percent: 100`. If a rollback must be held, record that the service is intentionally pinned and undo it after the fix deploys.
 
 The staging API uses the same pattern with `lagaw-api-staging` (see [`docs/staging.md`](docs/staging.md#rollback)).
 
-For Cloudflare Pages, use the Cloudflare dashboard to promote a known-good deployment. Keep the failed deployment and commit IDs with the incident notes; do not delete deployment history.
+For Cloudflare Pages, use the Cloudflare dashboard to promote a known-good deployment (Workers & Pages, project `lagaw`, Deployments). Keep the failed deployment and commit IDs with the incident notes; do not delete deployment history.
 
 ## Metrics and incidents
 
