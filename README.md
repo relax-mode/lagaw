@@ -197,7 +197,7 @@ Where each item of the course checklist lives. "Not in repo" means the item is o
 | Database schema | [docs/database.md](docs/database.md#tables-and-relationships) | ER diagram and field notes |
 | API reference | [`/docs`](https://lagaw-api-663710289405.asia-southeast1.run.app/docs), [`/openapi.json`](https://lagaw-api-663710289405.asia-southeast1.run.app/openapi.json) | Endpoint guides are linked under [Configuration](#configuration), for example [trips](docs/trips-api.md) and [locations](docs/locations-api.md). No OpenAPI snapshot is committed. |
 | AI feature write-up | [Extraction contract](docs/preference-extraction-api.md), [hybrid recommender](docs/hybrid-recommender.md), [content-based recommender](docs/content-based-recommender.md), [Week 3 evaluation](docs/week3-evaluation.md), [content-first evaluation](docs/content-first-evaluation.md), [failure coverage](docs/ai-failure-coverage.md) | Approach, prompts and tools, output processing, evaluation results and known limitations are spread across these documents. |
-| Changelog | [CHANGELOG.md](CHANGELOG.md) | v1.0.0 candidate, with [draft release notes](docs/release-notes/v1.0.0-draft.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) | v1.0.0 (2026-11-27), with [release notes](docs/release-notes/v1.0.0.md) |
 | **Process evidence** | | |
 | Project board | GitHub Projects board (link to be added) | Issues and PRs are in the [repository](https://github.com/relax-mode/lagaw). |
 | Sprint log | [docs/sprint-log.md](docs/sprint-log.md) | Sprint plans, activity notes, and the Sprint 3 and Sprint 4 retrospectives. Formal async standups were not recorded, and Sprint 1 and 2 retrospectives are pending. |
