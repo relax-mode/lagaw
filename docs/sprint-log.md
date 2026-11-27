@@ -663,9 +663,51 @@ Sprint 1, Sprint 2, and staged Sprint 3 plans are recorded above with GitHub iss
 
 ### Retrospective
 
-Pending: no consultation or retrospective notes were found in the reviewed GitHub issues, PRs, or commit history. Record the team's actual retrospective and consultation outcomes when available.
+The team representative confirmed the Sprint 3 retrospective on November 5, 2026; it is recorded in [November 5, 2026 — Sprint 3 post-consultation retrospective (#59)](#november-5-2026--sprint-3-post-consultation-retrospective-59) below.
 
 ## Sprint 4 — Hardening, polish and release
+
+### Sprint 4 plan
+
+Recorded on November 27, 2026 by Kyle from GitHub, after the fact; it is not a planning-meeting record. The log and the issues show no Sprint 4 planning meeting, so none is claimed. The plan is the GitHub milestone [Sprint 4: Hardening, polish, and release](https://github.com/relax-mode/lagaw/milestone/4), due November 8. Its goal is the course's Sprint 4 goal, "a product you'd be comfortable handing to a real user" ([official instructions](official-instructions.md)): error handling, UI polish, a security review, measured pipeline optimization, finished documentation, and a tagged release with a changelog.
+
+Dates: the Sprint 4 window in [pipeline-metrics.md](pipeline-metrics.md) is November 2–8. Milestone work continued to November 15 (the last closures were #106 on November 13, and #109 and #117 on November 14). The final-panel issues [#202](https://github.com/relax-mode/lagaw/issues/202), [#203](https://github.com/relax-mode/lagaw/issues/203) and [#204](https://github.com/relax-mode/lagaw/issues/204) were opened on November 27; only #202 is in the milestone. Status below was read from GitHub on November 27, 2026.
+
+| Issue | Title | Owner | Status |
+| --- | --- | --- | --- |
+| [#101](https://github.com/relax-mode/lagaw/issues/101) | Implement First-Time Travel Preference Onboarding UI | Roel | Closed Nov 5 |
+| [#102](https://github.com/relax-mode/lagaw/issues/102) | Implement Onboarding Preferences API and Persistence | Andrew | Closed Oct 31 |
+| [#103](https://github.com/relax-mode/lagaw/issues/103) | Integrate Content-Based Recommendations for Cold-Start Users | Jayperson | Closed Nov 1 |
+| [#104](https://github.com/relax-mode/lagaw/issues/104) | Connect Onboarding to Personalized Destination Discovery | Roel | Closed Nov 5 |
+| [#105](https://github.com/relax-mode/lagaw/issues/105) | Research and Validate Bacolod Destination Data Sources | Andrew | Closed Oct 31 |
+| [#106](https://github.com/relax-mode/lagaw/issues/106) | Enrich Destination Catalogue for Feasible Itineraries | Andrew | Closed Nov 13 |
+| [#107](https://github.com/relax-mode/lagaw/issues/107) | Research and Curate Destination Image Sources | Roel | Closed Nov 5 |
+| [#108](https://github.com/relax-mode/lagaw/issues/108) | Configure Supabase Storage for Destination Images | Andrew | Closed Nov 3 |
+| [#109](https://github.com/relax-mode/lagaw/issues/109) | Integrate Real Destination Images into Flutter | Roel | Closed Nov 14 |
+| [#110](https://github.com/relax-mode/lagaw/issues/110) | Persist Discovery Swipes, Saves, and Ratings | Roel | Closed Nov 6 |
+| [#111](https://github.com/relax-mode/lagaw/issues/111) | Evaluate Content-Based Recommendations and Cold-Start Quality | Jayperson | Closed Nov 1 |
+| [#112](https://github.com/relax-mode/lagaw/issues/112) | Evaluate Brevo and Resend for Supabase Authentication Emails | Kyle | Closed Nov 3 |
+| [#113](https://github.com/relax-mode/lagaw/issues/113) | Configure and Verify Production Authentication Email Delivery | Kyle | Closed Nov 5 |
+| [#114](https://github.com/relax-mode/lagaw/issues/114) | Add AI Endpoint Rate Limiting and Cost Safeguards | Andrew | Closed Nov 3 |
+| [#115](https://github.com/relax-mode/lagaw/issues/115) | Finalize AI Failure Handling and Evaluation Documentation | Jayperson | Closed Nov 1 |
+| [#116](https://github.com/relax-mode/lagaw/issues/116) | Improve Backend Health Checks and API Documentation | Andrew | Closed Nov 3 |
+| [#117](https://github.com/relax-mode/lagaw/issues/117) | Fix Android Release Build and Misleading UI States | Roel | Closed Nov 14 |
+| [#118](https://github.com/relax-mode/lagaw/issues/118) | Restore Scheduled AI Smoke Checks and Production Verification | Kyle | Closed Nov 3 |
+| [#119](https://github.com/relax-mode/lagaw/issues/119) | Improve CI/CD Security and Pipeline Efficiency | Kyle | Closed Nov 3 |
+| [#120](https://github.com/relax-mode/lagaw/issues/120) | Document and Execute a Staging Rollback Drill | Kyle | Closed Nov 5 |
+| [#121](https://github.com/relax-mode/lagaw/issues/121) | Prepare and Publish the Verified v1.0.0 Release | Kyle | Open |
+| [#122](https://github.com/relax-mode/lagaw/issues/122) | Maintain Sprint 4 Records and Consultation Evidence | Kyle | Open |
+| [#149](https://github.com/relax-mode/lagaw/issues/149) | Complete Flutter password recovery and reset flow | Roel | Closed Nov 5 |
+| [#202](https://github.com/relax-mode/lagaw/issues/202) | [Final panel] Resolve backend audit findings and verify saved itinerary integrity | Andrew | Open; fix [PR #205](https://github.com/relax-mode/lagaw/pull/205) merged Nov 27 |
+
+Not in the milestone, opened November 27:
+
+| Issue | Title | Owner | Status |
+| --- | --- | --- | --- |
+| [#203](https://github.com/relax-mode/lagaw/issues/203) | [Final panel] Make the first screen and AI cooldown resilient, and verify account switching | Roel | Open; fix [PR #210](https://github.com/relax-mode/lagaw/pull/210) merged Nov 27, staging evidence pending |
+| [#204](https://github.com/relax-mode/lagaw/issues/204) | [Final panel] Route deploys to the new revision and set panel-day capacity | Kyle | Open |
+
+Of the 24 milestone issues, 21 are closed and 3 are open (#121, #122, #202).
 
 ### DevOps activity
 
@@ -1145,3 +1187,32 @@ is a different operation and was not triggered. See the
 - Roel received Kyle's offline frontend handoff for #203 and applied it unchanged to current `main` on `fix/frontend-panel-hardening`: longer client timeouts so the first screen survives an idle API starting up, a readable try-later message for the per-account AI suggestion limit, and the largest budget kept on one line in the trip summary. The discovery timeout was aligned with the other services.
 - Built the two items the handoff left open. Account switching: API credentials stay bound to the account that made them, so a leftover screen can't send or retry a request as a different account, and signing out or signing in as someone else closes every open pop-up. Signing in again as the same account after an expiry still keeps open forms. Uncertain trip saves: a timeout, server error, or unreadable reply on Create trip unlocks the form and shows "Open My Trips" instead of Retry, so a trip that may already exist isn't saved twice. AI errors never show a raw HTTP status.
 - `flutter analyze` is clean and `flutter test` passes (302), including new tests for account switching, uncertain saves, and AI error messages. Roel passed the two-account check on an Infinix X6525 (docs/evidence/203-account-switch.md). DevOps staging evidence is pending; the URL-hash console error (nice to have) is not addressed.
+
+### Sprint 4 retrospective
+
+Written on November 27, 2026 by Kyle from repository and GitHub evidence, because there was no Sprint 4 consultation (the team recorded and submitted the demo video on November 20 instead); team confirmation is pending, so this is not yet the team's agreed retrospective.
+
+**What went well**
+
+- 21 of the 24 milestone issues are closed (see the [Sprint 4 plan](#sprint-4-plan)), including the onboarding, cold-start recommendation, catalogue and image work: [#101](https://github.com/relax-mode/lagaw/issues/101), [#102](https://github.com/relax-mode/lagaw/issues/102), [#103](https://github.com/relax-mode/lagaw/issues/103), [#104](https://github.com/relax-mode/lagaw/issues/104), [#106](https://github.com/relax-mode/lagaw/issues/106), [#109](https://github.com/relax-mode/lagaw/issues/109), and [#110](https://github.com/relax-mode/lagaw/issues/110) (swipes, saves and ratings are now persisted).
+- Hardening items shipped: AI rate limits and cost guards ([#114](https://github.com/relax-mode/lagaw/issues/114)), backend liveness and readiness ([#116](https://github.com/relax-mode/lagaw/issues/116)), and the Android release build with honest UI states ([#117](https://github.com/relax-mode/lagaw/issues/117)).
+- Authentication email moved to Brevo SMTP and password recovery was completed ([#112](https://github.com/relax-mode/lagaw/issues/112), [#113](https://github.com/relax-mode/lagaw/issues/113), [#149](https://github.com/relax-mode/lagaw/issues/149); see [the Brevo follow-up entry](#november-5-2026--s4-13-brevo-smtp-and-live-password-recovery-follow-up)).
+- Security checks were added to CI: gitleaks secret scanning, a dependency audit, pinned actions and Dependabot ([PR #125](https://github.com/relax-mode/lagaw/pull/125), [#119](https://github.com/relax-mode/lagaw/issues/119)), and the audit was scoped to relevant PR changes ([PR #146](https://github.com/relax-mode/lagaw/pull/146)).
+- The Sprint 4 row in [pipeline-metrics.md](pipeline-metrics.md) records a PR pipeline of 1.2 min, a main pipeline of 4.2 min, a 98.1% success rate and 0 failed deploys (staging included).
+- The scheduled live AI check ([#118](https://github.com/relax-mode/lagaw/issues/118)) is restored: `gh run list --event schedule` shows it succeeding on November 5, 9, 12, 16, 19 and 23, for example [run 41989922558](https://github.com/relax-mode/lagaw/actions/runs/41989922558) and [run 45141477792](https://github.com/relax-mode/lagaw/actions/runs/45141477792). It had failed on October 29 and November 2.
+- The staging rollback drill was executed on November 5 and repeated after a test-method error, with restoration verified ([#120](https://github.com/relax-mode/lagaw/issues/120), [entry](#november-5-2026--s4-20-executed-staging-cloud-run-rollback-drill), [evidence](evidence/s4-20-staging-rollback-2026-11-05.md)).
+- The November 26–27 panel audit produced three concrete issues on November 27: [#202](https://github.com/relax-mode/lagaw/issues/202) (backend; [PR #205](https://github.com/relax-mode/lagaw/pull/205) merged, 1,280 backend tests passing per the entry above), [#203](https://github.com/relax-mode/lagaw/issues/203) (frontend; [PR #210](https://github.com/relax-mode/lagaw/pull/210) merged, 302 Flutter tests passing) and [#204](https://github.com/relax-mode/lagaw/issues/204) (DevOps traffic and capacity, open).
+
+**What didn't go well**
+
+- The release is not done. [#121](https://github.com/relax-mode/lagaw/issues/121) is open, and `git tag` and `gh release list` show no `v1.0.0` tag or release, although a tagged release with a changelog is the course's Sprint 4 deliverable and the [Sprint 3 retrospective](#november-5-2026--sprint-3-post-consultation-retrospective-59) named release readiness (#121) for Sprint 4.
+- Sprint 4 records are incomplete. [#122](https://github.com/relax-mode/lagaw/issues/122) is open, and the log has no Sprint 4 standups; the standup gap named in the Sprint 3 retrospective was not closed. No Sprint 4 consultation or planning meeting is recorded.
+- Merge activity was uneven. `gh pr list --state merged` shows 32 merged PRs in the week of November 2 (7 of them Dependabot) and 26 in the week of November 9 (7 Dependabot, all merged November 13–15). It shows none from November 16 to November 26, then 5 on November 27.
+- By author, the AI engineer (Jayperson, `s2302663-del`) has 9 merged PRs in total, the last on November 1, and none since; the latest commit by that author on `main` is also November 1. Merged PRs are not all of anyone's work, so this is a count, not an assessment.
+- The scheduled live check failed on November 26 ([run 45790667724](https://github.com/relax-mode/lagaw/actions/runs/45790667724)) and was not noticed until November 27. As reported by Kyle, the cause was a rejected Cloudflare Pages token, a staging deploy failed on November 27, and merge-to-live took 47 minutes; this is INC-6, being added to [incident-log.md](incident-log.md) in a separate change.
+- Staging traffic was pinned to an old Cloud Run revision from November 3 to November 27, so staging smoke tests checked old code (INC-5, also being added to [incident-log.md](incident-log.md); as reported by Kyle, detected and fixed on November 27). The November 5 rollback drill verified traffic switching, but nothing in the pipeline checked which revision was serving after a normal deploy; that is [#204](https://github.com/relax-mode/lagaw/issues/204).
+- The panel audit found saved-itinerary integrity and account-switching gaps late: #202 and #203 were opened on November 27, the day before the final panel, and #203 is still open pending staging evidence.
+
+**One thing we'll change (for the final panel and release)**
+
+- After every staging and production deploy, verify which Cloud Run revision is serving traffic and fail the deploy if it is not the new one ([#204](https://github.com/relax-mode/lagaw/issues/204)). Evidence: INC-5, where staging smoke tests ran for 24 days against an old revision because nothing checked what was being served. Kyle proposes this; the team has not yet agreed it.
