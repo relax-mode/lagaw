@@ -15,7 +15,7 @@ from app.interaction_schemas import (
     InteractionInput,
 )
 from app.recommendations.contracts import Interaction
-from app.trips import TripOwner, get_trip_user
+from app.trips import MAX_OFFSET, TripOwner, get_trip_user
 
 router = APIRouter(prefix="/api/v1/interactions", tags=["interactions"], responses={
     401: {"description": "Missing, invalid or expired Supabase access token"},
@@ -52,7 +52,7 @@ def create_interaction(payload: InteractionCreate, user_id: TripOwner, database:
 def list_interactions(
     user_id: TripOwner, database: InteractionStore,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Annotated[int, Query(ge=0, le=MAX_OFFSET)] = 0,
 ):
     return InteractionHistory(
         items=database.list_interactions(user_id, limit, offset), limit=limit, offset=offset,

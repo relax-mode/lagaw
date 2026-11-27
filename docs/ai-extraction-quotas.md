@@ -12,8 +12,10 @@ response or write trip preferences.
 - Defaults: **5 attempts per UTC minute** and **40 attempts per UTC day** per profile.
 - Optional, nonsecret backend settings: `AI_EXTRACT_PER_MINUTE` (1–10) and
   `AI_EXTRACT_PER_DAY` (1–200). Invalid settings return safe HTTP 503, not unlimited access.
-- The PostgreSQL RPC obtains a transaction-scoped per-profile advisory lock and
-  checks both counters before incrementing both. It applies to all Cloud Run instances.
+- The PostgreSQL RPC locks the shared budget row, checks the project-wide daily
+  ceiling and both per-profile ceilings, and increments all three counters in one
+  transaction. All profiles and Cloud Run instances using that project share the
+  same daily ceiling. Rejected requests consume no additional attempts.
 - Windows follow the database clock, not client clocks: e.g., daily reset at
   **00:00 UTC** (08:00 in the Philippines). A minute window resets on the next UTC minute.
 - A reservation counts even on DeepSeek failure, timeout or malformed output.
@@ -22,7 +24,7 @@ response or write trip preferences.
 - Excess requests return HTTP **429**, `Retry-After` (seconds), and:
   `{"detail":{"code":"extraction_quota_exceeded","message":"Preference extraction limit reached. Try later.","manual_fallback":true}}`.
   This is separate from a provider-originated 429 (`extraction_rate_limited`).
-- Database/RPC failure or invalid configuration returns HTTP **503** with a
+- A missing aggregate budget, database/RPC failure or invalid configuration returns HTTP **503** with a
   generic `extraction_unavailable` and manual fallback, **before a provider call**.
 - These count-based quotas bound the number of attempts, **not exact monetary spend**.
   Provider token costs can vary; monitor provider billing separately.
@@ -37,6 +39,21 @@ to a feature flag. Run this migration **in development first**, check PostgREST
 schema reload and real session-based requests, then obtain explicit approval
 before a production schema change or merge. The backend deliberately fails closed
 when the RPC is missing, preventing an unbounded paid call during a staggered rollout.
+
+Issue #202 adds `20261127091000_aggregate_extraction_budget.sql`. It keeps the
+same reservation RPC. The database administrator must provision the AI owner's
+approved UTC-day ceiling in `public.ai_extraction_budget.attempt_limit` in each
+project. Extraction is unavailable while that row is missing. On first use the
+RPC counts existing reservations recorded for the current UTC day. To change a
+ceiling, update only `attempt_limit` and preserve the current counters.
+
+Apply and verify in development first. If staging and production use one paid
+provider allowance, have the AI owner approve allocations whose sum fits that
+allowance, including any provider calls made outside the app. Keep `.env` as-is.
+For staging acceptance, record the candidate commit and verify that a controlled
+exhausted reservation returns 429 and that an unavailable reservation returns
+503. Use a mocked provider for regression checks and record only sanitized status
+and fallback results. Restore the approved staging budget after verification.
 
 Back up the migration state before production promotion. Roll back the backend to
 the previous reviewed Cloud Run revision if necessary **only with a conscious

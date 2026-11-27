@@ -193,18 +193,17 @@ class TripItemApiTests(unittest.TestCase):
             self.assertNotIn("private provider details", response.text)
 
     def test_remove_scopes_trip_and_item_and_never_deletes_location(self):
-        self.responses([TRIP_ROW], [{"id": ITEM, "trip_id": TRIP}])
+        self.responses([TRIP_ROW], True)
         response = self.client.delete(URL + f"/{ITEM}")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(response.content, b"")
         request = self.requests[-1]
-        self.assertEqual(request.method, "DELETE")
-        self.assertEqual(request.url.path, "/rest/v1/itinerary_items")
-        self.assertEqual(request.url.params["id"], f"eq.{ITEM}")
-        self.assertEqual(request.url.params["trip_id"], f"eq.{TRIP}")
+        self.assertEqual(request.method, "POST")
+        self.assertEqual(request.url.path, "/rest/v1/rpc/remove_itinerary_item")
+        self.assertEqual(json.loads(request.content), {"p_owner": OWNER, "p_trip": TRIP, "p_item": ITEM})
 
     def test_missing_or_wrong_trip_item_returns_404(self):
-        self.responses([TRIP_ROW], [])
+        self.responses([TRIP_ROW], False)
         self.assertEqual(self.client.delete(URL + f"/{ITEM}").status_code, 404)
 
     def test_invalid_provider_items_are_not_exposed(self):
@@ -253,9 +252,9 @@ class TripItemApiTests(unittest.TestCase):
         ]
         self.unavailable(self.client.get(URL))
 
-    def test_delete_rejects_unexpected_returned_rows(self):
-        for rows in ([{"id": OTHER, "trip_id": TRIP}], {"id": ITEM}, [ITEM_ROW]):
-            self.responses([TRIP_ROW], rows)
+    def test_delete_rejects_nonboolean_results(self):
+        for result in (None, 1, "true", [ITEM_ROW]):
+            self.responses([TRIP_ROW], result)
             self.unavailable(self.client.delete(URL + f"/{ITEM}"))
 
     def test_retired_location_can_be_read_in_existing_itinerary(self):
