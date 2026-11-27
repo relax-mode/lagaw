@@ -825,7 +825,7 @@ jobs:
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
-            --min-instances=0
+            --min-instances=1
             --max-instances=2
             --cpu=1
             --memory=512Mi
