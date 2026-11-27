@@ -102,13 +102,13 @@ The `Lagaw CI` workflow runs on every pull request, every push to `main`, and ev
 Every push to `main` that changes the application deploys automatically, when the repository variable `STAGING_DEPLOY_ENABLED` is `true`. `Decide - Staging deployment` diffs the push and flags backend and frontend changes; changes to `ci.yml` flag both. Docs-only and test-only merges deploy nothing: the gate ignores `backend/test_*.py`, `backend/smoke_test.*` and `frontend/test/*`.
 
 1. **`Deploy - Staging`** (`deploy-staging`, GitHub `staging` environment) runs after the three checks and the decision job pass. It does not wait for `Secret scan - gitleaks` or `Dependency audit - pip and npm`, which run in parallel with the checks.
-   - Builds and pushes the image `api:staging-<sha>` and deploys Cloud Run `lagaw-api-staging`, when backend changed.
+   - Builds and pushes the image `api:staging-<sha>` and deploys Cloud Run `lagaw-api-staging` (`--min-instances=0 --max-instances=4 --concurrency=20`), when backend changed.
+   - Routes 100% of staging traffic with `gcloud run services update-traffic lagaw-api-staging --to-latest` and verifies through `scripts/verify_cloudrun_traffic.py` that the latest ready revision and deployed image receive 100% of traffic before running the smoke check.
    - Runs `scripts/smoke_deployed.py staging`: locations, Trip 401/200 and ownership, the extraction route (a blank prompt must return 422 before any provider call), and exact staging CORS. The check signs in with the smoke account; it creates no trips or interaction events, but the first sign-in can create the smoke profile.
-   - The smoke check calls the service URL and does not compare the served revision or commit with the one just deployed. If the service is pinned to an old revision, the check still passes and the new revision gets 0% traffic (see [INC-5](docs/incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision) and [Open risks](#open-risks)).
    - Builds Flutter against the staging API and deploys the Pages `staging` branch, when frontend changed, then runs an HTTP check.
 2. **`Deploy - Production API`** (`deploy-backend`, GitHub `production` environment) runs after a push when backend changed and `Deploy - Staging` succeeded.
    - Tags the image staging just tested as `api:<sha>`, so production runs exactly what staging verified.
-   - Deploys Cloud Run `lagaw-api` and runs `scripts/smoke_deployed.py production`.
+   - Deploys Cloud Run `lagaw-api` (`--min-instances=1 --max-instances=4 --concurrency=20` for panel-day capacity), routes 100% traffic `--to-latest`, verifies via `scripts/verify_cloudrun_traffic.py` that the latest ready revision and promoted image receive 100% of traffic, and runs `scripts/smoke_deployed.py production`.
 3. **`Deploy - Production web`** (`deploy-web`, `production` environment) runs after a push when frontend changed and `Deploy - Staging` succeeded. It does not wait for the production API job to succeed; it only skips if that job failed or was cancelled.
    - Builds Flutter with the production API URL and the production demo token (see [Open risks](#open-risks)).
    - Deploys Pages `main` and checks both the deployment URL and `https://lagaw.pages.dev`.
@@ -118,7 +118,6 @@ If a check, the staging deploy or a staging smoke test fails on a push, the late
 A **manual run** of the workflow on `main` (`gh workflow run ci.yml --ref main`) is for recovery and redeploys. It runs every check, then `deploy-staging`, `deploy-backend` (builds and pushes the image from the current commit) and `deploy-web`. Verified against run [40816925527](https://github.com/relax-mode/lagaw/actions/runs/40816925527) (Oct 29), where all three deploy jobs succeeded.
 
 - The production jobs of a manual run do not require `deploy-staging` to succeed (`ci.yml`, the `if:` conditions of `deploy-backend` and `deploy-web`). A manual run can therefore redeploy production even if its staging job failed or was skipped.
-- The comment above `deploy-backend` in `ci.yml` says a manual run redeploys production only. The job conditions show that staging also deploys. Workflow changes are out of scope for this document; the comment should be corrected in a workflow PR.
 - Pull requests never deploy.
 
 Main branch protection requires one approving review and the three CI checks above (`Backend - Python`, `Database - PostgreSQL migrations and smoke tests`, `Frontend - Flutter`), with stale approvals dismissed and strict up-to-date checks enabled. The rules also apply to administrators. Force pushes and branch deletion are disabled. Deployment jobs are not required checks, and neither are `Secret scan - gitleaks` and `Dependency audit - pip and npm`; the required-check list was re-read from the GitHub API on Nov 27, 2026. The other settings were read from the GitHub API on Oct 30, 2026.
@@ -209,14 +208,13 @@ Failed with HTTP 401 in the scheduled runs of Oct 29 and Nov 2. PR #100 merged o
 
 The scheduled credential check caught the rejected Cloudflare token about 23 h before the deploy failed, but nobody acted on the failed run ([INC-6](docs/incident-log.md#inc-6-cloudflare-pages-token-rejected-again)). Follow-up: make a failed scheduled run notify the team, for example by opening an issue automatically. After any token rotation, run `scheduled-live-checks.yml` with `workflow_dispatch` and record the run in the incident log. Status: open.
 
-### Staging and production traffic can be pinned to an old revision
+### Staging and production traffic can be pinned to an old revision (mitigated in CI)
 
-From Nov 3 to Nov 27, `lagaw-api-staging` served an old revision (`00035-xp9`) because a manual tagged deploy wrote explicit traffic. Every CI deploy afterwards created a revision with 0% traffic, and the staging smoke check passed anyway because it does not compare the served revision with the deployed one ([INC-5](docs/incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision)). Kyle reset staging with `--to-latest` on Nov 27. Production was not pinned.
+From Nov 3 to Nov 27, `lagaw-api-staging` served an old revision (`00035-xp9`) because a manual tagged deploy wrote explicit traffic. Every CI deploy afterwards created a revision with 0% traffic, and the staging smoke check passed anyway because it did not compare the served revision with the deployed one ([INC-5](docs/incident-log.md#inc-5-staging-api-traffic-pinned-to-an-old-revision)). Kyle reset staging with `--to-latest` on Nov 27. Production was not pinned.
 
-- **Not yet prevented.** [Issue #204](https://github.com/relax-mode/lagaw/issues/204) will make CI route traffic to the latest revision after every deploy and fail unless the latest ready revision serves 100%, for staging and production. Until it lands, a rollback, drill or manual tagged deploy can pin a service again.
-- **Follow-up.** The smoke check should verify that the served revision or commit matches what was just deployed.
-- **Check by hand.** `gcloud run services describe <svc> --project relax-mode-lagaw --region asia-southeast1 --format='value(status.traffic)'` must show `latestRevision: True, percent: 100`.
-- **Owner:** CyGray (DevOps). Status: open.
+- **Prevented in CI (#204):** `deploy-staging` and `deploy-backend` now run `gcloud run services update-traffic ... --to-latest` and fail via `scripts/verify_cloudrun_traffic.py` unless the latest ready revision and deployed image receive 100% of traffic, before the smoke check runs.
+- **Check by hand:** `gcloud run services describe <svc> --project relax-mode-lagaw --region asia-southeast1 --format='value(status.traffic)'` must show `latestRevision: True, percent: 100`.
+- **Owner:** CyGray (DevOps). Status: CI guard implemented for [#204](https://github.com/relax-mode/lagaw/issues/204); post-merge staging concurrency and candidate verification remain tracked on #204.
 
 ## AI failure drill
 

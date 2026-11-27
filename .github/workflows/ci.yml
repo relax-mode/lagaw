@@ -479,7 +479,7 @@ jobs:
             while IFS= read -r path; do
               case "$path" in
                 backend/test_*.py|backend/smoke_test.*|frontend/test/*) ;;
-                backend/*|scripts/smoke_deployed.py) backend=true ;;
+                backend/*|scripts/smoke_deployed.py|scripts/verify_cloudrun_traffic.py) backend=true ;;
                 frontend/*|package.json|package-lock.json) frontend=true ;;
                 .github/workflows/ci.yml)
                   backend=true
@@ -602,13 +602,33 @@ jobs:
             --allow-unauthenticated
             --service-account=${{ vars.STAGING_GCP_RUNTIME_SERVICE_ACCOUNT }}
             --min-instances=0
-            --max-instances=2
+            --max-instances=4
             --cpu=1
             --memory=512Mi
             --concurrency=20
             --timeout=60
             --port=8080
             ${{ steps.model.outputs.flags }}
+
+      - name: Route staging traffic to latest revision and verify
+        if: steps.gate.outputs.deploy == 'true' && needs.staging-changes.outputs.backend == 'true'
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          EXPECTED_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/lagaw/api:staging-${{ github.sha }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic lagaw-api-staging \
+            --project "$PROJECT" \
+            --region "$REGION" \
+            --to-latest
+          gcloud run services describe lagaw-api-staging \
+            --project "$PROJECT" \
+            --region "$REGION" \
+            --format='json(metadata.name,status.latestReadyRevisionName,status.traffic,spec.template.spec.containers[0].image)' \
+            | python3 scripts/verify_cloudrun_traffic.py \
+                --service lagaw-api-staging \
+                --expected-image "$EXPECTED_IMAGE"
 
       - name: Read existing staging API URL
         id: existing-staging-api
@@ -702,7 +722,8 @@ jobs:
   # Production follows staging automatically. After a main push passes the
   # checks and the staging deploy and its smoke tests, the same commit is promoted:
   # the API reuses the image staging tested, and the web app is rebuilt with
-  # production configuration. A manual run on main redeploys production for recovery.
+  # production configuration. A manual run on main redeploys staging and production
+  # for recovery.
   deploy-backend:
     name: Deploy - Production API
     needs: [backend, database, frontend, staging-changes, deploy-staging]
@@ -809,14 +830,33 @@ jobs:
           flags: >-
             --allow-unauthenticated
             --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
-            --min-instances=0
-            --max-instances=2
+            --min-instances=1
+            --max-instances=4
             --cpu=1
             --memory=512Mi
             --concurrency=20
             --timeout=60
             --port=8080
             ${{ steps.model.outputs.flags }}
+
+      - name: Route production traffic to latest revision and verify
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          EXPECTED_IMAGE: ${{ env.IMAGE }}:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic lagaw-api \
+            --project "$PROJECT" \
+            --region "$REGION" \
+            --to-latest
+          gcloud run services describe lagaw-api \
+            --project "$PROJECT" \
+            --region "$REGION" \
+            --format='json(metadata.name,status.latestReadyRevisionName,status.traffic,spec.template.spec.containers[0].image)' \
+            | python3 scripts/verify_cloudrun_traffic.py \
+                --service lagaw-api \
+                --expected-image "$EXPECTED_IMAGE"
 
       - name: Smoke test production API
         env:
