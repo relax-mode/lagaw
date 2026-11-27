@@ -2,54 +2,87 @@
   "project": "Lagaw",
   "repository": "https://github.com/relax-mode/lagaw",
   "review_date": "2026-11-27",
-  "review_precision": "Date only; no exact review timestamp is asserted.",
-  "provenance": "Fresh observations made by the supervising agent through Agent Hub and recorded here without additional execution.",
+  "review_precision": "Afternoon refresh on 2026-11-27, after the 13:54 UTC final issue closures; exact independent query timestamps are not asserted.",
+  "provenance": "Read-only GitHub API, CI log and selected Cloud Run metadata inspection through Agent Hub Ken; earlier same-day public catalogue observations retained with their scope. Deployed authenticated behavior comes from linked owner-recorded final verification, not repeated tests in this documentation refresh.",
   "repository_state": {
-    "main_commit": "f4076c61c81885ef94cb55051634a43189bb6bc2",
-    "main_commit_date": "2026-11-15",
-    "releases_present": false,
-    "tags_present": false,
+    "main_commit": "b95ab17697474a58d6f5b7c7e26db0994fe35434",
+    "main_commit_date": "2026-11-27",
+    "releases_present": true,
+    "tags_present": true,
     "frontend_manifest_version": "1.0.0+1",
     "api_info_version": "0.1.0",
-    "version_note": "Manifest and API info versions are not release tags."
+    "version_note": "Published release tag, deployed image commit, frontend manifest and API metadata are distinct version identifiers.",
+    "release": {
+      "tag": "v1.0.0",
+      "published_at_utc": "2026-11-27T12:16:28Z",
+      "tag_object_sha": "b1ed5f68e294d0e3c57dddfa2cc69e003360e6a6",
+      "commit_sha": "bf44877e2857fa99f12fa7b7c065311ad939c5e7",
+      "url": "https://github.com/relax-mode/lagaw/releases/tag/v1.0.0"
+    },
+    "issues": {
+      "closed": 60,
+      "open": 0,
+      "open_issues_per_sprint_milestone": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "source": "GitHub GraphQL repository issues and milestone issues queries; administrative milestone state is not a statement of remaining scoped work."
+    }
   },
   "latest_ci": {
-    "run_id": "43727841016",
-    "url": "https://github.com/relax-mode/lagaw/actions/runs/43727841016",
-    "run_date": "2026-11-15",
+    "run_id": "46002972952",
+    "url": "https://github.com/relax-mode/lagaw/actions/runs/46002972952",
+    "run_date": "2026-11-27",
+    "head_sha": "b95ab17697474a58d6f5b7c7e26db0994fe35434",
     "conclusion": "success",
     "test_results": {
       "backend": {
-        "passed": 1136,
+        "passed": 1178,
         "failed": 0
       },
       "database": {
-        "passed": 108,
+        "passed": 116,
         "failed": 0
       },
       "flutter": {
-        "passed": 289,
+        "passed": 303,
         "failed": 0
-      }
+      },
+      "total_passed": 1597
     },
+    "flutter_analysis": "No issues found",
     "production_web_deployment": "passed",
-    "production_api_job": "skipped",
-    "scope_note": "These are results from the cited CI run, not tests rerun on the review date."
+    "production_api_job": "passed",
+    "staging_deployment": "passed",
+    "security_and_dependency_checks": "passed",
+    "scope_note": "Counts were read from cited CI logs; tests were not rerun during the documentation refresh. Latest log count of 303 Flutter tests supersedes the older 302 reported in issue comments."
   },
   "production_api": {
-    "revision": "lagaw-api-00040-bpl",
+    "canonical_url": "https://lagaw-api-663710289405.asia-southeast1.run.app",
+    "revision": "lagaw-api-00042-xkl",
     "traffic_percent": 100,
-    "source_commit": "26cde8536b829e46f304fe031fd5e7c63860f63b",
-    "revision_created_at_utc": "2026-11-15T06:03:39Z",
-    "comparison_with_main": {
-      "runtime_application_code_changed": false,
-      "migrations_changed": false,
-      "reported_differences": [
-        "tests",
-        "catalogue data"
-      ],
-      "scope_note": "Source comparison does not establish that main and the deployed revision are identical commits."
-    }
+    "latest_revision": true,
+    "source_commit": "b95ab17697474a58d6f5b7c7e26db0994fe35434",
+    "image": {
+      "repository": "asia-southeast1-docker.pkg.dev/relax-mode-lagaw/lagaw/api",
+      "commit_tag": "b95ab17697474a58d6f5b7c7e26db0994fe35434"
+    },
+    "commit_sha_label": "b95ab17697474a58d6f5b7c7e26db0994fe35434",
+    "verification": "Independent read-only Cloud Run service metadata query, restricted to revision, traffic, image and labels; no environment values queried.",
+    "minimum_instances": 1,
+    "maximum_instances": 4,
+    "concurrency": 20,
+    "capacity_source": "https://github.com/relax-mode/lagaw/issues/204#issuecomment-7220099399",
+    "capacity_note": "Warm minimum retained through panel day; documented follow-up is to return minimum to zero.",
+    "comparison_with_release": {
+      "same_commit": false,
+      "application_code_equivalent": true,
+      "later_changes": "PR214 changes CI routing/capacity, deployment verifier and tests, and documentation.",
+      "source": "https://github.com/relax-mode/lagaw/pull/214"
+    },
+    "health_version_note": "GET /health intentionally returns status only; deployed version provenance is established by image tag and commit label."
   },
   "public_checks": {
     "check_date": "2026-11-27",
@@ -84,7 +117,7 @@
         "request_user_agent": "normal browser user agent"
       }
     ],
-    "scope_note": "Public endpoint responses and page availability do not prove authenticated user workflows."
+    "scope_note": "Earlier same-day public endpoint observations retained; public availability does not prove authenticated user workflows. New final authenticated evidence is recorded separately below."
   },
   "production_catalogue": {
     "query": "/locations?limit=100&offset=0",
@@ -94,15 +127,25 @@
     "records_with_known_cost_max": 29,
     "pagination_note": "The default /locations response contains 10 records because of pagination; it is not the total catalogue size.",
     "scope_note": "Field population was observed; factual accuracy, freshness and itinerary feasibility were not established by this count.",
-    "records_with_image_urls": 30
+    "records_with_image_urls": 30,
+    "observed_date": "2026-11-27"
   },
   "scheduled_check": {
-    "run_id": "45790667724",
-    "url": "https://github.com/relax-mode/lagaw/actions/runs/45790667724",
-    "run_date": "2026-11-26",
-    "staging_ai_check": "passed",
-    "cloudflare_credential_preflight": "failed",
-    "failure_cause": "not established"
+    "run_id": "46010653151",
+    "url": "https://github.com/relax-mode/lagaw/actions/runs/46010653151",
+    "run_date": "2026-11-27",
+    "conclusion": "failure",
+    "staging_ai_check": "controlled HTTP 429; job marked failure",
+    "cloudflare_credential_preflight": "passed",
+    "explanation": "New staging aggregate allowance was 10 attempts/day; 24 prior daily reservations carried forward. Controlled exhaustion rejected the request before DeepSeek was called.",
+    "explanation_source": "https://github.com/relax-mode/lagaw/issues/202#issuecomment-7220097235",
+    "previous_all_successful_run": {
+      "run_id": "46005596144",
+      "url": "https://github.com/relax-mode/lagaw/actions/runs/46005596144",
+      "run_date": "2026-11-27",
+      "staging_ai_check": "passed",
+      "cloudflare_credential_preflight": "passed"
+    }
   },
   "branch_protection": {
     "required_approvals": 1,
@@ -116,20 +159,178 @@
       "gitleaks",
       "dependency audit"
     ],
-    "additional_checks_are_in_required_check_list": false
+    "additional_checks_are_in_required_check_list": false,
+    "verification_note": "Retained earlier same-day read-only observation; not queried again during afternoon documentation refresh."
   },
   "review_pull_request": {
     "number": 199,
     "url": "https://github.com/relax-mode/lagaw/pull/199",
-    "state": "OPEN",
-    "head_commit": "7d736795550eb1d7ad99e561f0aeaed95d0e924d",
-    "fixes_deployed": false
+    "state": "MERGED",
+    "merge_commit": "86a64a94c0a1e5835fee0febd57ffd1af1ca0fc3",
+    "fixes_deployed": true,
+    "fix_scope_note": "PR199 contains audit documentation. Implementations and deployed verification are PR205/210/214 and final issue202/203/204 evidence; closure alone is not runtime proof."
   },
   "limitations": [
-    "Main-branch documentation still contains stale status claims; fresh code, deployment and run evidence take precedence for this review.",
-    "No paid provider calls or verification mutations were made during this review.",
-    "No authenticated full user workflow was tested on 2026-11-27.",
-    "No release tag exists; the document must identify the main and production API commits separately.",
-    "Changes in open PR 199 are not evidence of deployed behavior."
-  ]
+    "No paid provider calls, authenticated workflow reruns or app mutations were made for this documentation refresh.",
+    "Current implementation/CI and final deployed verification supersede stale morning documentation and earlier pending issue comments.",
+    "Linked final issue evidence is owner-recorded runtime verification, distinct from independent metadata/log inspection.",
+    "Catalogue population does not establish current venue accuracy or feasible schedules for every request.",
+    "Synthetic recommender evaluation does not establish organic traveler satisfaction; model artifacts do not retrain on every swipe.",
+    "Trip archive, working accessibility/indoor-outdoor filtering, live route optimization and booking/payment are outside demonstrated scope.",
+    "The latest scheduled AI job is marked failed for controlled quota exhaustion; it is not claimed to be green.",
+    "Recording access and metadata were checked; uninterrupted contents were not independently verified."
+  ],
+  "final_google_doc": "https://docs.google.com/document/d/1BXstHsSUHi6EQG0qMVQRvVTjW1bX91M3P--fmwL290w/edit",
+  "deployments": {
+    "source_run": "https://github.com/relax-mode/lagaw/actions/runs/46002972952",
+    "staging_api_revision": "lagaw-api-staging-00053-wx2",
+    "staging_minimum_instances": 0,
+    "staging_maximum_instances": 4,
+    "staging_concurrency": 20,
+    "production_web": {
+      "canonical_url": "https://lagaw.pages.dev",
+      "deployment_url": "https://65bf18ed.lagaw.pages.dev"
+    },
+    "staging_web": {
+      "canonical_url": "https://staging.lagaw.pages.dev",
+      "deployment_url": "https://7ed08233.lagaw.pages.dev"
+    },
+    "verification_note": "Web deployment identifiers were read from successful CI logs."
+  },
+  "initial_documentation_pull_request": {
+    "number": 200,
+    "url": "https://github.com/relax-mode/lagaw/pull/200",
+    "state": "MERGED",
+    "merged_at_utc": "2026-11-27T12:11:55Z",
+    "merge_commit": "485e97421a996a0f966bafb2c45e268e7ac227b2"
+  },
+  "database": {
+    "committed_sql_migrations": 8,
+    "public_application_tables": 7,
+    "domain_tables": [
+      "users",
+      "locations",
+      "user_location_interactions",
+      "trips",
+      "itinerary_items"
+    ],
+    "operational_tables": [
+      "ai_extraction_quotas",
+      "ai_extraction_budget"
+    ],
+    "scope_note": "Supabase Auth and Storage schemas are separate from the seven public app tables.",
+    "final_migrations": [
+      "20261127090000_preserve_saved_itinerary.sql",
+      "20261127091000_aggregate_extraction_budget.sql"
+    ],
+    "applied_staging_then_production": true,
+    "deployment_evidence": "https://github.com/relax-mode/lagaw/issues/202#issuecomment-7220097235"
+  },
+  "controls": {
+    "request_body_max_bytes": 65536,
+    "oversized_body_status": 413,
+    "body_limit_source": "https://github.com/relax-mode/lagaw/blob/b95ab17697474a58d6f5b7c7e26db0994fe35434/backend/app/body_limit.py",
+    "extraction_quota": {
+      "per_profile_default_per_minute": 5,
+      "per_profile_default_per_utc_day": 40,
+      "staging_aggregate_per_utc_day": 10,
+      "production_aggregate_per_utc_day": 100,
+      "daily_reset_utc": "00:00",
+      "exhaustion_status": 429,
+      "unavailable_quota_status": 503,
+      "automatic_provider_retries": false,
+      "failed_provider_requests_consume_reservations": true,
+      "scope_note": "Atomic shared database counters bound attempts, not exact monetary spend.",
+      "source": "https://github.com/relax-mode/lagaw/blob/b95ab17697474a58d6f5b7c7e26db0994fe35434/docs/ai-extraction-quotas.md"
+    }
+  },
+  "deployed_hardening": [
+    {
+      "area": "backend",
+      "implementation_pr": 205,
+      "evidence_url": "https://github.com/relax-mode/lagaw/issues/202#issuecomment-7220097235",
+      "evidence_date": "2026-11-27",
+      "outcomes": [
+        "Stranding date edit returns 409 and preserves trip/visits",
+        "Compatible date edit returns 200",
+        "Saved item deletion returns 204",
+        "Budget lowering invalidates stale estimate and preserves visits",
+        "Cross-account GET/PATCH/DELETE returns 404",
+        "Shared extraction budget and both final migrations verified"
+      ]
+    },
+    {
+      "area": "frontend",
+      "implementation_pr": 210,
+      "evidence_url": "https://github.com/relax-mode/lagaw/issues/203#issuecomment-7219461587",
+      "android_evidence": "https://github.com/relax-mode/lagaw/blob/b95ab17697474a58d6f5b7c7e26db0994fe35434/docs/evidence/203-account-switch.md",
+      "outcomes": [
+        "Signed-in first load and 30 destinations succeed",
+        "Two-account switching isolates trips and state on staging web and Android",
+        "Deployed bundle contains readable AI cooldown and Open My Trips uncertain-save recovery"
+      ]
+    },
+    {
+      "area": "deployment",
+      "implementation_pr": 214,
+      "evidence_url": "https://github.com/relax-mode/lagaw/issues/204#issuecomment-7220099399",
+      "outcomes": [
+        "Latest-ready revision receives 100 percent traffic and image tag is verified by CI",
+        "Production panel capacity min1/max4",
+        "Staging concurrency check returned 150 of 150 HTTP 200 responses"
+      ],
+      "concurrency_observation": {
+        "requests": 150,
+        "errors": 0,
+        "p50_seconds": 4.051,
+        "p95_seconds": 6.732,
+        "maximum_seconds": 7.22,
+        "scope": "Dated bounded staging read-only burst; not a general throughput guarantee"
+      }
+    }
+  ],
+  "recording": {
+    "name": "Deployment_Challenge_lagaw_Relax_mode.mp4",
+    "url": "https://drive.google.com/file/d/1KFLflyaDlxE3RbTF7qSiaj7HCFn0bq1n/view",
+    "file_id": "1KFLflyaDlxE3RbTF7qSiaj7HCFn0bq1n",
+    "size_bytes": 294047974,
+    "created_at_utc": "2026-11-27T10:47Z",
+    "created_at_precision": "Minute only",
+    "shared": true,
+    "panel_readable": true,
+    "permission_observation": "Supervising agent verified anyone-with-link writer permission; no permission change made for this record.",
+    "content_verification": "File metadata and sharing inspected; full recording was not watched and uninterrupted execution was not independently established."
+  },
+  "team": [
+    {
+      "name": "Kyle Yuan Uy",
+      "github": "CyGray",
+      "role": "DevOps Engineer"
+    },
+    {
+      "name": "Andrew Eroyla",
+      "github": "aranxshx",
+      "role": "Backend/API Engineer"
+    },
+    {
+      "name": "Roel Jr. Lumauag",
+      "github": "roellumauagjr",
+      "role": "Frontend Engineer"
+    },
+    {
+      "name": "Jefferson Magoliman",
+      "github": "s2302663-del",
+      "role": "AI/ML Engineer"
+    }
+  ],
+  "team_name_source": "Current user-maintained Google Doc, as read by supervising agent; supersedes README aliases.",
+  "disclosure_boundaries": {
+    "cloudflare": "Free-tier selection historically documented; current purchased subscriptions and actual spend not independently verified.",
+    "supabase": "Purchased tier not verified.",
+    "deepseek": "Paid hosted API; immutable revision behind configurable alias not pinned; attempt limits are not exact monetary caps.",
+    "google_cloud": "Historical USD3/month budget alert is not a spending cap or measured bill; production currently retains one warm instance.",
+    "email": "Brevo SMTP; active subscription tier unverified; Supabase signup email limit 30/hour confirmed in issue204.",
+    "sprint_board": "Exact board URL not verified; available GitHub token lacks read:project scope.",
+    "assistants": "Recorded Claude, GPT6.2 Astra High, Gemini4 Neon Extra High and ChatGPT/Codex contributions do not constitute complete purchased-tier or contribution inventory."
+  }
 }

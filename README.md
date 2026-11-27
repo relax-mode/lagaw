@@ -4,8 +4,8 @@
 
 > **Final technical documentation — 27 November 2026**
 >
-> [Three-page Google Doc](https://docs.google.com/document/d/1Gt111rJOuAyD71V0g4stY_aYvAIWGpyVKfVhEG4Pt3w/edit) · [Current scope, architecture and evidence](docs/final-project-evidence.md) · [Dated verification record](docs/evidence/final-documentation-check-2026-11-27.json).
-> The brief records the implemented system, source/deployment revisions, dated test results and remaining submission items. Confirm panel access and complete its release-evidence items before submission.
+> [Three-page Google Doc](https://docs.google.com/document/d/1BXstHsSUHi6EQG0qMVQRvVTjW1bX91M3P--fmwL290w/edit) · [Current scope, architecture and evidence](docs/final-project-evidence.md) · [Dated verification record](docs/evidence/final-documentation-check-2026-11-27.json).
+> The brief and supporting evidence record the published v1.0.0 release, deployed hardening, architecture, AI evaluation, 1,597 passing CI tests and final scope. [Deployment challenge recording](https://drive.google.com/file/d/1KFLflyaDlxE3RbTF7qSiaj7HCFn0bq1n/view).
 
 **Roel and coding assistants working on #56: [START HERE — agreed backend APIs and complete frontend flow](ROEL_START_HERE.md).**
 
@@ -185,7 +185,7 @@ Where each item of the course checklist lives. "Not in repo" means the item is o
 | Item | Location | Note |
 | --- | --- | --- |
 | **Product** | | |
-| Production URL | [Live app](#live-app) | v1.0.0 is a release candidate. No tag is published yet ([release process](docs/release-process.md)). |
+| Production URL | [Live app](#live-app) | [v1.0.0 published](https://github.com/relax-mode/lagaw/releases/tag/v1.0.0); current deployment and release commit identifiers are recorded in [final evidence](docs/final-project-evidence.md). |
 | Source: frontend | [`frontend/`](frontend) | Flutter (Android and Web) |
 | Source: backend | [`backend/`](backend) | FastAPI |
 | Source: database migrations | [`supabase/migrations/`](supabase/migrations) | Tests in [`supabase/tests/`](supabase/tests) |
